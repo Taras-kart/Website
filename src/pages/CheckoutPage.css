@@ -1,0 +1,333 @@
+.bhuvi-checkout-page {
+  display: flex;
+  flex-direction: column;
+  min-height: auto;
+}
+
+.bhuvi-checkout-main {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.bhuvi-checkout-section1 {
+  display: flex;
+  width: 90%;
+  gap: 30px;
+}
+
+.bhuvi-checkout-section1-left {
+  position: relative;
+  flex: 1;
+}
+
+.bhuvi-checkout-section1-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-family: sans-serif;
+  color: #000;
+  gap: 3px;
+  padding: 10px;
+}
+
+.bhuvi-brand-name {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #000;
+  text-align: left;
+  width: 100%;
+}
+
+.bhuvi-product-name {
+  font-size: 1.2rem;
+  font-weight: 200;
+  color: #000;
+  text-align: left;
+  width: 100%;
+}
+
+.bhuvi-price-row {
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.bhuvi-price {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #000;
+}
+
+.bhuvi-discount {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #068743;
+}
+
+.bhuvi-mrp-info {
+  font-size: 1rem;
+  color: #000;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bhuvi-tax-note {
+  color: #5c6874;
+}
+
+.bhuvi-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bhuvi-section h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 5px;
+  text-align: left;
+}
+
+.bhuvi-color-circles {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.bhuvi-color-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid #000;
+  cursor: pointer;
+}
+
+.bhuvi-selected-color {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #000;
+  margin-top: -8px;
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+.bhuvi-size-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bhuvi-size-button {
+  padding: 0px 12px;
+  font-size: 1rem;
+  border: 1.2px solid #000;
+  background: transparent;
+  cursor: pointer;
+  transition: 0.3s;
+  border-radius: 12px;
+  height: 20px;
+}
+
+.bhuvi-size-button.selected {
+  background: #000;
+  color: #fff;
+}
+
+.bhuvi-action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.bhuvi-wishlist,
+.bhuvi-bag {
+  background: gold;
+  color: black;
+  padding: 10px 20px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bhuvi-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px 30px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #000;
+  z-index: 1000;
+}
+
+.bhuvi-subtext {
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.bhuvi-pincode-form {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.bhuvi-pincode-form input {
+  padding: 8px;
+  width: 120px;
+  font-size: 1rem;
+  border: 1px solid #000;
+  border-radius: 4px;
+}
+
+.bhuvi-apply-btn {
+  padding: 8px 14px;
+  font-size: 1rem;
+  background: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.bhuvi-checkout-section1-image-container {
+  position: relative;
+  display: inline-block;
+}
+
+.bhuvi-checkout-section1-image {
+  width: 100%;
+  height: 450px;
+  cursor: zoom-in;
+}
+
+.bhuvi-mrp-strike {
+  text-decoration: line-through;
+  color: #5c6874;
+}
+
+.bhuvi-mrp-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+hr {
+  width: 100%;
+  border: none;
+  border-top: 1.5px solid #dcdcdc;
+  margin: 20px 0;
+}
+
+.bhuvi-checkout-section1-zoomed {
+  position: absolute;
+  top: 0;
+  width: 400px;
+  height: 400px;
+  overflow: hidden;
+  border: 2px solid #ccc;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  background: #fff;
+  z-index: 10;
+}
+
+.bhuvi-checkout-section1-zoomed-image {
+  position: absolute;
+}
+
+.bhuvi-checkout-section1-lens {
+  position: absolute;
+  border: 2px solid #fff;
+  background: rgba(255, 255, 255, 0.3);
+  pointer-events: none;
+}
+
+@media (max-width: 1024px) {
+  .bhuvi-checkout-section1 {
+    flex-direction: column;
+  }
+  .bhuvi-checkout-section1-left,
+  .bhuvi-checkout-section1-right {
+    width: 100%;
+  }
+  .bhuvi-checkout-section1-zoomed {
+    width: 100%;
+    height: 300px;
+    top: 0;
+    left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .bhuvi-checkout-section1-zoomed {
+    width: 80%;
+    height: 200px;
+  }
+  .bhuvi-brand-name {
+    font-size: 1.7rem;
+  }
+  .bhuvi-product-name {
+    font-size: 1.3rem;
+  }
+  .bhuvi-price {
+    font-size: 1.6rem;
+  }
+  .bhuvi-discount {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 500px) {
+  .bhuvi-checkout-section1-zoomed {
+    width: 70%;
+    height: 180px;
+  }
+  .bhuvi-color-circle {
+    width: 24px;
+    height: 24px;
+  }
+  .bhuvi-wishlist,
+  .bhuvi-bag {
+    font-size: 0.9rem;
+    padding: 8px 14px;
+  }
+}
+
+@media (max-width: 400px) {
+  .bhuvi-checkout-section1-zoomed {
+    width: 60%;
+    height: 150px;
+  }
+  .bhuvi-brand-name {
+    font-size: 1.5rem;
+  }
+  .bhuvi-product-name {
+    font-size: 1.1rem;
+  }
+  .bhuvi-price {
+    font-size: 1.4rem;
+  }
+  .bhuvi-discount {
+    font-size: 1.2rem;
+  }
+  .bhuvi-size-button {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+}

@@ -1,0 +1,33 @@
+.tandc-container {
+  max-width: 900px;
+  margin: 0px auto;
+  padding: 30px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', sans-serif;
+  color: #222;
+}
+
+.tandc-container h1 {
+  font-size: 2.2rem;
+  color: #000;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.tandc-container section {
+  margin-bottom: 24px;
+}
+
+.tandc-container h2 {
+  font-size: 1.4rem;
+  color: #111;
+  margin-bottom: 10px;
+}
+
+.tandc-container p {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #444;
+}

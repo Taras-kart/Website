@@ -1,0 +1,422 @@
+/* D:\shopping\src\pages\Brands.css */
+.brands-page {
+  background-color: black;
+  color: white;
+}
+
+.brands-section {
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.brands-title {
+  font-size: 3rem;
+  margin-bottom: 40px;
+  color: white;
+  font-family: 'Times New Roman', serif;
+  position: relative;
+  display: inline-block;
+}
+
+.brands-title::after {
+  content: '';
+  width: 120px;
+  height: 3px;
+  background-color: gold;
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.brands-container {
+  height: 650px;
+  overflow: hidden;
+  position: relative;
+}
+
+.brands-box {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;  
+  justify-items: center;
+  grid-template-rows: repeat(5, 1fr);
+  height: 100%;
+}
+
+.brand-item {
+  position: relative;
+  overflow: hidden;
+  background-color: #333;
+  border-radius: 15px;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+  height: 100%;
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.brand-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 15px;
+}
+
+.brand-item:hover {
+  transform: scale(1.05);
+}
+
+.item-1 {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.item-2 {
+  grid-column: span 2;
+  grid-row: span 1;
+}
+
+.item-3 {
+  grid-column: span 3;
+  grid-row: span 2;
+}
+
+.item-4 {
+  grid-column: span 1;
+  grid-row: span 2;
+}
+
+.item-5 {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.item-6 {
+  grid-column: span 1;
+  grid-row: span 1;
+}
+
+.item-7 {
+  grid-column: span 2;
+  grid-row: span 1;
+}
+
+.item-8 {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.item-9 {
+  grid-column: span 1;
+  grid-row: span 1;
+}
+
+.item-10 {
+  grid-column: span 1;
+  grid-row: span 2;
+}
+
+.item-11 {
+  grid-column: span 2;
+  grid-row: span 1;
+}
+
+.item-12 {
+  grid-column: span 3;
+  grid-row: span 1;
+}
+
+.item-13 {
+  grid-column: span 1;
+  grid-row: span 2;
+}
+
+.item-14 {
+  grid-column: span 1;
+  grid-row: span 1;
+}
+
+.item-15 {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.item-16 {
+  grid-column: span 2;
+  grid-row: span 1;
+}
+
+.item-17 {
+  grid-column: span 1;
+  grid-row: span 1;
+}
+
+.item-18 {
+  grid-column: span 1;
+  grid-row: span 1;
+}
+
+.item-19 {
+  grid-column: span 1;
+  grid-row: span 1;
+}
+
+.item-20 {
+  grid-column: span 3;
+  grid-row: span 1;
+}
+
+@media (max-width: 1024px) {
+  .brands-title {
+    font-size: 2.2rem;
+  }
+  .brands-box {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .brands-title {
+    font-size: 1.8rem;
+  }
+  .brands-box {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .brands-title {
+    font-size: 1.5rem;
+  }
+  .brands-box {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* D:\shopping\src\pages\Brands.css */
+/* D:\shopping\src\pages\Brands.css */
+.womens-brands-section {
+  padding: 80px 20px;
+  text-align: center;
+  background-color: black;
+}
+
+.womens-brands-title {
+  font-size: 3rem;
+  margin-bottom: 40px;
+  color: white;
+  font-family: 'Times New Roman', serif;
+  position: relative;
+  display: inline-block;
+}
+
+.womens-brands-title::after {
+  content: '';
+  width: 120px;
+  height: 3px;
+  background-color: gold;
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.womens-brands-container {
+  height: 650px;
+  overflow: hidden;
+  position: relative;
+}
+
+.womens-brands-box {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  grid-template-rows: repeat(5, 1fr);
+  height: 100px;
+  position: relative;
+}
+
+.womens-brand-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 15px;
+  height: 100px;
+  transition: transform 0.3s ease, filter 0.3s ease;
+  overflow: hidden;
+}
+
+.womens-brand-item img {
+  width: auto;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 15px;
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.womens-brand-item:hover {
+  transform: scale(1.05);
+}
+
+.womens-item-1 {
+  grid-column: span 2;
+  grid-row: span 2;
+  transform: rotate(-10deg) translateY(-10px);
+}
+
+.womens-item-2 {
+  grid-column: span 2;
+  grid-row: span 1;
+  transform: rotate(5deg) translateY(10px);
+}
+
+.womens-item-3 {
+  grid-column: span 3;
+  grid-row: span 2;
+  transform: rotate(-7deg) translateY(-15px);
+}
+
+.womens-item-4 {
+  grid-column: span 1;
+  grid-row: span 2;
+  transform: rotate(10deg) translateY(5px);
+}
+
+.womens-item-5 {
+  grid-column: span 2;
+  grid-row: span 2;
+  transform: rotate(-5deg) translateY(-10px);
+}
+
+.womens-item-6 {
+  grid-column: span 1;
+  grid-row: span 1;
+  transform: rotate(7deg) translateY(10px);
+}
+
+.womens-item-7 {
+  grid-column: span 2;
+  grid-row: span 1;
+  transform: rotate(-8deg) translateY(-10px);
+}
+
+.womens-item-8 {
+  grid-column: span 2;
+  grid-row: span 2;
+  transform: rotate(5deg) translateY(5px);
+}
+
+.womens-item-9 {
+  grid-column: span 1;
+  grid-row: span 1;
+  transform: rotate(-12deg) translateY(-5px);
+}
+
+.womens-item-10 {
+  grid-column: span 1;
+  grid-row: span 2;
+  transform: rotate(6deg) translateY(15px);
+}
+
+.womens-item-11 {
+  grid-column: span 2;
+  grid-row: span 1;
+  transform: rotate(-3deg) translateY(-20px);
+}
+
+.womens-item-12 {
+  grid-column: span 3;
+  grid-row: span 1;
+  transform: rotate(8deg) translateY(5px);
+}
+
+.womens-item-13 {
+  grid-column: span 1;
+  grid-row: span 2;
+  transform: rotate(-9deg) translateY(-20px);
+}
+
+.womens-item-14 {
+  grid-column: span 1;
+  grid-row: span 1;
+  transform: rotate(4deg) translateY(10px);
+}
+
+.womens-item-15 {
+  grid-column: span 2;
+  grid-row: span 2;
+  transform: rotate(-10deg) translateY(15px);
+}
+
+.womens-item-16 {
+  grid-column: span 2;
+  grid-row: span 1;
+  transform: rotate(7deg) translateY(-5px);
+}
+
+.womens-item-17 {
+  grid-column: span 1;
+  grid-row: span 1;
+  transform: rotate(-8deg) translateY(5px);
+}
+
+.womens-item-18 {
+  grid-column: span 1;
+  grid-row: span 1;
+  transform: rotate(5deg) translateY(-15px);
+}
+
+.womens-item-19 {
+  grid-column: span 1;
+  grid-row: span 1;
+  transform: rotate(-6deg) translateY(10px);
+}
+
+.womens-item-20 {
+  grid-column: span 3;
+  grid-row: span 1;
+  transform: rotate(10deg) translateY(-10px);
+}
+
+@media (max-width: 1024px) {
+  .womens-brands-title {
+    font-size: 2.2rem;
+  }
+  .womens-brands-box {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .womens-brands-title {
+    font-size: 1.8rem;
+  }
+  .womens-brands-box {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .womens-brands-title {
+    font-size: 1.5rem;
+  }
+  .womens-brands-box {
+    grid-template-columns: 1fr;
+  }
+}
