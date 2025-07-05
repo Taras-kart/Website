@@ -98,8 +98,9 @@ body {
 
 .icon-buttons-final a {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   text-decoration: none;
   font-weight: 600;
   color: white;

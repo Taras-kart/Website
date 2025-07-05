@@ -71,9 +71,9 @@ const MenPage = () => {
                 <img src="/images/up1.jpg" alt="Mens Fashion Background" />
                 <div className="mens-section1-overlay">
                   <div className="mens-section1-text">
-                    <h1>Tars</h1>
-                    <h1>Kart</h1>
-                    <h1>Mens</h1>
+                    {/*<h1>Tars</h1>
+                    <h1>Kart</h1> */}
+                    <h1>Mens </h1>
                     <h1>Fashion</h1>
                   </div>
                 </div>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Navbar from './Navbar';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectCoverflow, Autoplay } from 'swiper';
@@ -8,9 +8,44 @@ import './HomePage.css';
 import Footer from './Footer';
 import FilterSidebar from './FilterSidebar';
 
+
+const items = [
+    { img: 'women-anarkali.jpg', title: 'Anarkali' },
+    { img: 'women-chudidar.jpg', title: 'Chudidar' },
+    { img: 'women-gowns.jpg', title: 'Gowns' },
+    { img: 'women-kurta.jpg', title: 'Kurta' },
+    { img: 'women-lehanga.jpeg', title: 'Lehanga' },
+    { img: 'women-palazzo.jpg', title: 'Palazzo' },
+    { img: 'women-salwar.jpg', title: 'Salwar' },
+    { img: 'women-sarees.jpg', title: 'Sarees' }
+];
+
 const HomePage = () => {
     const slides = Array.from({ length: 11 }, (_, i) => `/images/slide${i + 1}.jpg`);
     const section3Images = Array.from({ length: 12 }, (_, i) => `/images/random${i + 1}.jpg`);
+
+    const scrollRef = useRef(null);
+
+    useEffect(() => {
+        const scrollContainer = scrollRef.current;
+        let scrollAmount = 0;
+
+        const scrollStep = () => {
+            if (scrollContainer) {
+                scrollAmount += 1;
+                if (scrollAmount >= scrollContainer.scrollWidth / 2) {
+                    scrollAmount = 0;
+                }
+                scrollContainer.scrollLeft = scrollAmount;
+            }
+        };
+
+        const interval = setInterval(scrollStep, 20);
+
+        return () => clearInterval(interval);
+    }, []);
+
+
 
     return (
         <div className="home-section1-wrapper">
@@ -20,20 +55,33 @@ const HomePage = () => {
                 <div className="home-section1-overlay">
                     <div className="home-section1-content">
                         <div className="home-section1-left">
-                            <img src="/images/big-side1.jpg" alt="Big Side" />
-                            <div className="home-section1-text">
-                                <h1>Tars Kart</h1>
-                                <p>Your one-stop shop for everything trendy and timeless.</p>
+                            <video className="home-section1-video" autoPlay muted loop>
+                                <source src="/images/logo-video.mp4" type="video/mp4" />
+                            </video>
+                            <div className="home-section1-full-text">
+                                <h1>Taras Kart</h1>
+                                {/*<p>Style for Every Story: Men, Women & Kids.</p>
+                                <button className="home-section1-button">Shop Now</button> */}
                             </div>
                         </div>
                         <div className="home-section1-right">
-                            <img src="/images/small-side1.jpg" alt="Small Side 1" />
-                            <img src="/images/small-side2.jpg" alt="Small Side 2" />
-                            <img src="/images/small-side3.jpg" alt="Small Side 3" />
+                            <div className="category-block">
+                                <img src="/images/home4.jpg" alt="Men" />
+                                <span>Men</span>
+                            </div>
+                            <div className="category-block">
+                                <img src="/images/home5.jpg" alt="Women" />
+                                <span>Women</span>
+                            </div>
+                            <div className="category-block">
+                                <img src="/images/kids-bg.jpg" alt="Kids" />
+                                <span>Kids</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
 
             <section className="home-section2">
                 <h2 className="home-section2-title">
@@ -102,25 +150,19 @@ const HomePage = () => {
                         <div className="line small"></div>
                     </div>
                 </div>
-                <div className="home-section5-grid">
-                    {[
-                        { img: 'women-anarkali.jpg', title: 'Anarkali' },
-                        { img: 'women-chudidar.jpg', title: 'Chudidar' },
-                        { img: 'women-gowns.jpg', title: 'Gowns' },
-                        { img: 'women-kurta.jpg', title: 'Kurta' },
-                        { img: 'women-lehanga.jpeg', title: 'Lehanga' },
-                        { img: 'women-palazzo.jpg', title: 'Palazzo' },
-                        { img: 'women-salwar.jpg', title: 'Salwar' },
-                        { img: 'women-sarees.jpg', title: 'Sarees' }
-                    ].map((item, index) => (
-                        <div className="home-section5-card" key={index}>
-                            <img src={`/images/women/${item.img}`} alt={item.title} />
-                            <h3>{item.title}</h3>
-                            <button>Buy Now</button>
-                        </div>
-                    ))}
+                <div className="home-section5-slider">
+                    <div className="home-section5-slider-track">
+                        {[...items, ...items].map((item, index) => (
+                            <div className="home-section5-card" key={index}>
+                                <img src={`/images/women/${item.img}`} alt={item.title} />
+                                <h3>{item.title}</h3>
+                                <button>Buy Now</button>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </section>
+
 
             <section className="mens-section2">
                 <div className="mens-section2-bg">
@@ -135,20 +177,20 @@ const HomePage = () => {
                 </div>
             </section>
 
-            <section className="mens-section3">
-                <div className="mens-section3-left">
+            <section className="mens-sectionh">
+                <div className="mens-sectionh-left">
                     <img src="/images/mens-part1.jpg" alt="Left Fashion" />
                 </div>
-                <div className="mens-section3-center">
+                <div className="mens-sectionh-center">
                     <h2>Exclusive offers</h2>
-                    <div className="mens-section3-discount">
+                    <div className="mens-sectionh-discount">
                         <span className="line"></span>
                         <h1>50% OFF</h1>
                         <span className="line"></span>
                     </div>
                     <h3>Just for you</h3>
                 </div>
-                <div className="mens-section3-right">
+                <div className="mens-sectionh-right">
                     <img src="/images/mens-part2.jpg" alt="Right Fashion" />
                 </div>
             </section>
@@ -252,6 +294,11 @@ const HomePage = () => {
 
             <section className="home-section4">
                 <h2 className="home-section4-title">Our Premium Collections</h2>
+                <div className="home-section4-underline">
+                    <div className="line large"></div>
+                    <div className="line medium"></div>
+                    <div className="line small"></div>
+                </div>
                 <div className="home-section4-grid">
                     <div className="home-section4-card">
                         <div className="home-section4-text">
@@ -292,11 +339,11 @@ const HomePage = () => {
                     {Array.from({ length: 9 }, (_, i) => (
                         <div key={i} className={`home-section7-item item-${i + 1}`}>
                             <img src={`/images/wave${i + 1}.jpeg`} alt={`Wave ${i + 1}`} />
-                            <div className="home-section7-text">
+                            {/*<div className="home-section-text">
                                 <h3>Brand Name {i + 1}</h3>
                                 <p>Product Name {i + 1}</p>
                                 <p><strong>50% OFF</strong></p>
-                            </div>
+                            </div> */}
                         </div>
                     ))}
                 </div>

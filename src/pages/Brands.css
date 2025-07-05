@@ -1,4 +1,3 @@
-/* D:\shopping\src\pages\Brands.css */
 .brands-page {
   background-color: black;
   color: white;
@@ -11,184 +10,108 @@
 
 .brands-title {
   font-size: 3rem;
-  margin-bottom: 40px;
+  margin-bottom: 50px;
   color: white;
-  font-family: 'Times New Roman', serif;
   position: relative;
   display: inline-block;
+  letter-spacing: 1px;
 }
 
 .brands-title::after {
   content: '';
-  width: 120px;
-  height: 3px;
+  width: 150px;
+  height: 4px;
   background-color: gold;
   position: absolute;
-  bottom: -10px;
+  bottom: -15px;
   left: 50%;
   transform: translateX(-50%);
+  border-radius: 2px;
 }
 
 .brands-container {
-  height: 650px;
-  overflow: hidden;
-  position: relative;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .brands-box {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 5px;  
-  justify-items: center;
-  grid-template-rows: repeat(5, 1fr);
-  height: 100%;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
 }
 
 .brand-item {
-  position: relative;
-  overflow: hidden;
-  background-color: #333;
+  background-color: #1e1e1e;
   border-radius: 15px;
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-  height: 100%;
-  transition: transform 0.3s ease, filter 0.3s ease;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(255, 215, 0, 0.1);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  position: relative;
 }
 
-.brand-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.brand-image-wrapper {
+  overflow: hidden;
   border-radius: 15px;
+}
+
+.brand-image-wrapper img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.brand-item:hover .brand-image-wrapper img {
+  transform: scale(1.1);
 }
 
 .brand-item:hover {
-  transform: scale(1.05);
+  transform: translateY(-10px);
+  box-shadow: 0 12px 30px rgba(255, 215, 0, 0.3);
 }
 
-.item-1 {
-  grid-column: span 2;
-  grid-row: span 2;
-}
-
-.item-2 {
-  grid-column: span 2;
-  grid-row: span 1;
-}
-
-.item-3 {
-  grid-column: span 3;
-  grid-row: span 2;
-}
-
-.item-4 {
-  grid-column: span 1;
-  grid-row: span 2;
-}
-
-.item-5 {
-  grid-column: span 2;
-  grid-row: span 2;
-}
-
-.item-6 {
-  grid-column: span 1;
-  grid-row: span 1;
-}
-
-.item-7 {
-  grid-column: span 2;
-  grid-row: span 1;
-}
-
-.item-8 {
-  grid-column: span 2;
-  grid-row: span 2;
-}
-
-.item-9 {
-  grid-column: span 1;
-  grid-row: span 1;
-}
-
-.item-10 {
-  grid-column: span 1;
-  grid-row: span 2;
-}
-
-.item-11 {
-  grid-column: span 2;
-  grid-row: span 1;
-}
-
-.item-12 {
-  grid-column: span 3;
-  grid-row: span 1;
-}
-
-.item-13 {
-  grid-column: span 1;
-  grid-row: span 2;
-}
-
-.item-14 {
-  grid-column: span 1;
-  grid-row: span 1;
-}
-
-.item-15 {
-  grid-column: span 2;
-  grid-row: span 2;
-}
-
-.item-16 {
-  grid-column: span 2;
-  grid-row: span 1;
-}
-
-.item-17 {
-  grid-column: span 1;
-  grid-row: span 1;
-}
-
-.item-18 {
-  grid-column: span 1;
-  grid-row: span 1;
-}
-
-.item-19 {
-  grid-column: span 1;
-  grid-row: span 1;
-}
-
-.item-20 {
-  grid-column: span 3;
-  grid-row: span 1;
+.brand-label {
+  padding: 15px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: gold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background-color: rgba(0, 0, 0, 0.85);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 @media (max-width: 1024px) {
   .brands-title {
-    font-size: 2.2rem;
+    font-size: 2.5rem;
   }
-  .brands-box {
-    grid-template-columns: repeat(3, 1fr);
+
+  .brand-image-wrapper img {
+    height: 180px;
   }
 }
 
 @media (max-width: 768px) {
   .brands-title {
-    font-size: 1.8rem;
+    font-size: 2rem;
   }
-  .brands-box {
-    grid-template-columns: repeat(2, 1fr);
+
+  .brand-image-wrapper img {
+    height: 160px;
   }
 }
 
 @media (max-width: 500px) {
   .brands-title {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
   }
-  .brands-box {
-    grid-template-columns: 1fr;
+
+  .brand-image-wrapper img {
+    height: 140px;
+  }
+
+  .brand-label {
+    font-size: 1rem;
   }
 }
 
@@ -209,214 +132,131 @@
 
 
 
-
-/* D:\shopping\src\pages\Brands.css */
-/* D:\shopping\src\pages\Brands.css */
 .womens-brands-section {
-  padding: 80px 20px;
+  padding: 100px 20px;
   text-align: center;
-  background-color: black;
+  background-color: #0b0b0b;
+  color: white;
 }
 
 .womens-brands-title {
-  font-size: 3rem;
-  margin-bottom: 40px;
-  color: white;
-  font-family: 'Times New Roman', serif;
+  font-size: 3.2rem;
+  margin-bottom: 60px;
   position: relative;
   display: inline-block;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #fff;
 }
 
 .womens-brands-title::after {
   content: '';
-  width: 120px;
-  height: 3px;
+  width: 180px;
+  height: 5px;
   background-color: gold;
   position: absolute;
-  bottom: -10px;
+  bottom: -20px;
   left: 50%;
   transform: translateX(-50%);
+  border-radius: 3px;
 }
 
 .womens-brands-container {
-  height: 650px;
-  overflow: hidden;
-  position: relative;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .womens-brands-box {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  grid-template-rows: repeat(5, 1fr);
-  height: 100px;
-  position: relative;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
 }
 
 .womens-brand-item {
-  position: relative;
+  background-color: #1a1a1a;
+  border-radius: 20px;
   overflow: hidden;
-  border-radius: 15px;
-  height: 100px;
-  transition: transform 0.3s ease, filter 0.3s ease;
-  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(255, 215, 0, 0.1);
+  transition: transform 0.5s ease, box-shadow 0.5s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-.womens-brand-item img {
-  width: auto;
-  height: 100px;
+.womens-brand-image-wrapper {
+  overflow: hidden;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+
+.womens-brand-image-wrapper img {
+  width: 100%;
+  height: fit-content;
   object-fit: cover;
-  border-radius: 15px;
-  transition: transform 0.3s ease, filter 0.3s ease;
+  transition: transform 0.5s ease;
+}
+
+.womens-brand-item:hover .womens-brand-image-wrapper img {
+  transform: scale(1.15) rotate(3deg);
 }
 
 .womens-brand-item:hover {
-  transform: scale(1.05);
+  transform: translateY(-15px);
+  box-shadow: 0 15px 40px rgba(255, 215, 0, 0.3);
 }
 
-.womens-item-1 {
-  grid-column: span 2;
-  grid-row: span 2;
-  transform: rotate(-10deg) translateY(-10px);
+.womens-brand-label {
+  padding: 18px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: gold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background-color: #111;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.womens-item-2 {
-  grid-column: span 2;
-  grid-row: span 1;
-  transform: rotate(5deg) translateY(10px);
-}
-
-.womens-item-3 {
-  grid-column: span 3;
-  grid-row: span 2;
-  transform: rotate(-7deg) translateY(-15px);
-}
-
-.womens-item-4 {
-  grid-column: span 1;
-  grid-row: span 2;
-  transform: rotate(10deg) translateY(5px);
-}
-
-.womens-item-5 {
-  grid-column: span 2;
-  grid-row: span 2;
-  transform: rotate(-5deg) translateY(-10px);
-}
-
-.womens-item-6 {
-  grid-column: span 1;
-  grid-row: span 1;
-  transform: rotate(7deg) translateY(10px);
-}
-
-.womens-item-7 {
-  grid-column: span 2;
-  grid-row: span 1;
-  transform: rotate(-8deg) translateY(-10px);
-}
-
-.womens-item-8 {
-  grid-column: span 2;
-  grid-row: span 2;
-  transform: rotate(5deg) translateY(5px);
-}
-
-.womens-item-9 {
-  grid-column: span 1;
-  grid-row: span 1;
-  transform: rotate(-12deg) translateY(-5px);
-}
-
-.womens-item-10 {
-  grid-column: span 1;
-  grid-row: span 2;
-  transform: rotate(6deg) translateY(15px);
-}
-
-.womens-item-11 {
-  grid-column: span 2;
-  grid-row: span 1;
-  transform: rotate(-3deg) translateY(-20px);
-}
-
-.womens-item-12 {
-  grid-column: span 3;
-  grid-row: span 1;
-  transform: rotate(8deg) translateY(5px);
-}
-
-.womens-item-13 {
-  grid-column: span 1;
-  grid-row: span 2;
-  transform: rotate(-9deg) translateY(-20px);
-}
-
-.womens-item-14 {
-  grid-column: span 1;
-  grid-row: span 1;
-  transform: rotate(4deg) translateY(10px);
-}
-
-.womens-item-15 {
-  grid-column: span 2;
-  grid-row: span 2;
-  transform: rotate(-10deg) translateY(15px);
-}
-
-.womens-item-16 {
-  grid-column: span 2;
-  grid-row: span 1;
-  transform: rotate(7deg) translateY(-5px);
-}
-
-.womens-item-17 {
-  grid-column: span 1;
-  grid-row: span 1;
-  transform: rotate(-8deg) translateY(5px);
-}
-
-.womens-item-18 {
-  grid-column: span 1;
-  grid-row: span 1;
-  transform: rotate(5deg) translateY(-15px);
-}
-
-.womens-item-19 {
-  grid-column: span 1;
-  grid-row: span 1;
-  transform: rotate(-6deg) translateY(10px);
-}
-
-.womens-item-20 {
-  grid-column: span 3;
-  grid-row: span 1;
-  transform: rotate(10deg) translateY(-10px);
-}
-
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
   .womens-brands-title {
-    font-size: 2.2rem;
+    font-size: 2.8rem;
   }
-  .womens-brands-box {
-    grid-template-columns: repeat(3, 1fr);
+
+  .womens-brand-image-wrapper img {
+    height: 220px;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .womens-brands-title {
-    font-size: 1.8rem;
+    font-size: 2.4rem;
   }
-  .womens-brands-box {
-    grid-template-columns: repeat(2, 1fr);
+
+  .womens-brand-image-wrapper img {
+    height: 200px;
   }
 }
 
-@media (max-width: 500px) {
+@media (max-width: 600px) {
   .womens-brands-title {
-    font-size: 1.5rem;
+    font-size: 2rem;
   }
-  .womens-brands-box {
-    grid-template-columns: 1fr;
+
+  .womens-brand-image-wrapper img {
+    height: 180px;
+  }
+
+  .womens-brand-label {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .womens-brands-title {
+    font-size: 1.6rem;
+  }
+
+  .womens-brand-image-wrapper img {
+    height: 160px;
   }
 }

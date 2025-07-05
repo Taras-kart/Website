@@ -1,7 +1,5 @@
 /* section 1 */
-.kids-page {
-    font-family: "Times New Roman", serif;
-}
+
 
 .kids-page-main {
     display: flex;
@@ -50,7 +48,7 @@
     height: 100%;
     background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4));
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: flex-start;
     padding-left: 60px;
 }
@@ -157,7 +155,6 @@
 }
 
 .kids-section2-text h1 {
-    font-family: "Times New Roman", serif;
     color: #253494;
     font-size: 60px;
     margin: 0;
@@ -439,7 +436,7 @@
 }
 
 .offer-price {
-  color: #253494;
+  color: black;
   font-weight: bold;
 }
 
@@ -459,7 +456,7 @@
   margin-top: 5px;
   font-weight: bold;
   font-size: 20px;
-  color: #253494;
+  color: black;
 }
 
 .product-name {

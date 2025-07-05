@@ -60,7 +60,7 @@ const WomenPage = () => {
   return (
     <div className="women-page">
       <Navbar />
-      <div className="wpmen-page-main">
+      <div className="women-page-main">
         <FilterSidebar onFilterChange={(filters) => console.log(filters)} />
         <div className="women-page-content">
           <section className="mens-section1">
@@ -68,8 +68,8 @@ const WomenPage = () => {
               <img src="/images/womens-bg.jpg" alt="Womens Fashion Background" />
               <div className="mens-section1-overlay">
                 <div className="mens-section1-text">
-                  <h1>Tars</h1>
-                  <h1>Kart</h1>
+                  {/*<h1>Tars</h1>
+                  <h1>Kart</h1>  */}
                   <h1>Womens</h1>
                   <h1>Fashion</h1>
                 </div>

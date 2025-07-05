@@ -11,17 +11,20 @@ const Brands = () => {
     <div className="brands-page">
       <Navbar />
       <section className="brands-section">
-        <h2 className="brands-title">Men's Top Brands..</h2>
-        <div className="brands-container">
-          <div className="brands-box">
-            {brands.map((src, index) => (
-              <div key={index} className={`brand-item item-${index + 1}`}>
-                <img src={src} alt={`Brand ${index + 1}`} />
-              </div>
-            ))}
+  <h2 className="brands-title">Men's Top Brands</h2>
+  <div className="brands-container">
+    <div className="brands-box">
+      {brands.map((src, index) => (
+        <div key={index} className={`brand-item`}>
+          <div className="brand-image-wrapper">
+            <img src={src} alt={`Brand ${index + 1}`} />
           </div>
         </div>
-      </section>
+      ))}
+    </div>
+  </div>
+</section>
+
 
 
       {/* Women's Top Brands Section */}

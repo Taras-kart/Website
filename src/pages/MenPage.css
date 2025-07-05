@@ -1,6 +1,5 @@
 .men-page {
     /*background-color: #0a1435; */
-    font-family: "Times New Roman", serif;
 }
 .men-page-main {
   display: flex;
@@ -48,16 +47,16 @@
     height: 100%;
     background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4));
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: flex-start;
     padding-left: 60px;
 }
 
 .mens-section1-text h1 {
+  margin: 0;
     font-family: "inter", sans-serif;
     color: gold;
     font-size: 90px;
-    margin: 0;
     line-height: 1.2;
     text-align: left;
 }
@@ -163,7 +162,6 @@
 }
 
 .mens-section2-text h1 {
-    font-family: "Times New Roman", serif;
     color: #253494;
     font-size: 60px;
     margin: 0;
@@ -449,7 +447,7 @@
 }
 
 .offer-price {
-  color: #253494;
+  color: black;
   font-weight: bold;
 }
 
@@ -469,7 +467,7 @@
   margin-top: 5px;
   font-weight: bold;
   font-size: 20px;
-  color: #253494;
+  color: black;
 }
 
 .product-name {

@@ -71,8 +71,8 @@ const KidsPage = () => {
                 <img src="/images/kids-bg.jpg" alt="Kids Fashion Background" />
                 <div className="kids-section1-overlay">
                   <div className="kids-section1-text">
-                    <h1>Tars</h1>
-                    <h1>Kart</h1>
+                    {/*<h1>Tars</h1>
+                    <h1>Kart</h1> */}
                     <h1>Kids</h1>
                     <h1>Fashion</h1>
                   </div>

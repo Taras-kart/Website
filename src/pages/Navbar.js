@@ -38,6 +38,7 @@ const NavbarFinal = () => {
     { name: 'Women', path: '/women' },
     { name: 'Men', path: '/men' },
     { name: 'Kids', path: '/kids' },
+    { name: 'GenZ', path: '/genz' },
     { name: 'All Brands', path: '/brands' }
   ];
 
@@ -78,16 +79,19 @@ const NavbarFinal = () => {
           <div className="icon-buttons-final">
             <Link to="/profile" className="icon-btn profile-icon">
               <FaUser className={location.pathname === '/profile' ? 'icon-active' : 'icon-default'} />
+              <span>Profile</span>
             </Link>
 
             <Link to="/wishlist" className="icon-btn wishlist-icon">
               <FaHeart className={location.pathname === '/wishlist' ? 'icon-active' : 'icon-default'} />
               {wishlistItems.length > 0 && <span className="red-dot" />}
+              <span>Wishlist</span>
             </Link>
 
             <Link to="/cart" className="icon-btn cart-icon">
               <FaShoppingBag className={location.pathname === '/cart' ? 'icon-active' : 'icon-default'} />
               {cartItems.length > 0 && <span className="red-dot" />}
+              <span>Cart</span>
             </Link>
           </div>
         </div>
