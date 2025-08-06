@@ -84,13 +84,13 @@ const NavbarFinal = () => {
 
             <Link to="/wishlist" className="icon-btn wishlist-icon">
               <FaHeart className={location.pathname === '/wishlist' ? 'icon-active' : 'icon-default'} />
-              {wishlistItems.length > 0 && <span className="red-dot" />}
+              {wishlistItems.length > 0 && <span className="red-dot1" />}
               <span>Wishlist</span>
             </Link>
 
             <Link to="/cart" className="icon-btn cart-icon">
               <FaShoppingBag className={location.pathname === '/cart' ? 'icon-active' : 'icon-default'} />
-              {cartItems.length > 0 && <span className="red-dot" />}
+              {cartItems.length > 0 && <span className="red-dot1" />}
               <span>Cart</span>
             </Link>
           </div>
@@ -128,12 +128,12 @@ const NavbarFinal = () => {
             </Link>
             <Link to="/wishlist" className="icon-btn wishlist-icon">
               <FaHeart className={location.pathname === '/wishlist' ? 'icon-active' : 'icon-default'} />
-              {wishlistItems.length > 0 && <span className="red-dot" />}
+              {wishlistItems.length > 0 && <span className="red-dot1" />}
               <span>Wishlist</span>
             </Link>
             <Link to="/cart" className="icon-btn cart-icon">
               <FaShoppingBag className={location.pathname === '/cart' ? 'icon-active' : 'icon-default'} />
-              {cartItems.length > 0 && <span className="red-dot" />}
+              {cartItems.length > 0 && <span className="red-dot1" />}
               <span>Cart</span>
             </Link>
           </div>

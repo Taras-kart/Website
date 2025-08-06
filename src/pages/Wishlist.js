@@ -8,24 +8,49 @@ import { useWishlist } from '../WishlistContext';
 import { FaTimes } from 'react-icons/fa';
 
 const Wishlist = () => {
-  const product = JSON.parse(window.name || '{}');
-  const { wishlistItems, removeFromWishlist } = useWishlist();
+  const { wishlistItems, setWishlistItems, removeFromWishlist } = useWishlist();
   const [showPopup, setShowPopup] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const navigate = useNavigate();
+  const userId = sessionStorage.getItem('userId');
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  useEffect(() => {
+    if (userId) {
+      fetch(`http://localhost:5000/api/wishlist/${userId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setWishlistItems(data);
+        })
+        .catch((err) => console.error('Error fetching wishlist:', err));
+    }
+  }, [userId, setWishlistItems]);
 
   const handleRemove = (item) => {
     setSelectedItem(item);
     setShowPopup(true);
   };
 
-  const confirmRemove = () => {
-    removeFromWishlist(selectedItem.name);
-    setShowPopup(false);
+  const confirmRemove = async () => {
+    try {
+      await fetch('http://localhost:5000/api/wishlist', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, product_id: selectedItem.id }),
+      });
+
+      const updatedWishlist = wishlistItems.filter(
+        (item) => item.id !== selectedItem.id
+      );
+      setWishlistItems(updatedWishlist);
+    } catch (error) {
+      console.error('Failed to remove from wishlist:', error);
+    } finally {
+      setShowPopup(false);
+    }
   };
 
   return (
@@ -47,40 +72,39 @@ const Wishlist = () => {
                 <div key={index} className="wishlist-card">
                   <div className="wishlist-image-container">
                     <div
-  className="wishlist-image-click"
-  onClick={() => {
-    window.name = JSON.stringify({
-      image: item.image,
-      brand: item.brand,
-      name: item.name,
-      offerPrice: item.offerPrice,
-      originalPrice: item.originalPrice,
-      selectedColor: item.selectedColor || null,
-      selectedSize: item.selectedSize || null,
-    });
-    window.open('/checkout', '_blank');
-  }}
->
-  <img src={item.image} alt={item.name} />
-</div>
-
+                      className="wishlist-image-click"
+                      onClick={() => {
+                        sessionStorage.setItem('selectedProduct', JSON.stringify(item));
+                        window.open('/checkout', '_blank');
+                      }}
+                    >
+                      <img src={item.image_url} alt={item.product_name} />
+                    </div>
                     <span className="remove-icon" onClick={() => handleRemove(item)}>
                       <FaTimes />
                     </span>
-
                   </div>
                   <h4 className="wishlist-brand">{item.brand}</h4>
-                  <p className="wishlist-name">{item.name}</p>
+                  <p className="wishlist-name">{item.product_name}</p>
+                  <div className="wishlist-price">
+                    <span className="wishlist-offer">₹{item.final_price_b2c}</span>
+                    <span className="wishlist-original">₹{item.original_price_b2c}</span>
+                    <span className="wishlist-discount">
+                      ({Math.round(
+                        ((item.original_price_b2c - item.final_price_b2c) /
+                          item.original_price_b2c) *
+                          100
+                      )}
+                      % OFF)
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         )}
         {showPopup && (
-          <WishlistPopup
-            onConfirm={confirmRemove}
-            onCancel={() => setShowPopup(false)}
-          />
+          <WishlistPopup onConfirm={confirmRemove} onCancel={() => setShowPopup(false)} />
         )}
       </div>
       <Footer />

@@ -70,7 +70,7 @@
 
 .wishlist-image-container img {
   width: 100%;
-  height: 250px;
+  height: 280px;
   object-fit: cover;
   border-radius: 8px;
 }
@@ -102,6 +102,31 @@
 .wishlist-name {
   font-size: 14px;
   color: #333;
+  margin-bottom: 5px;
+}
+
+.wishlist-price {
+  font-size: 14px;
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.wishlist-offer {
+  font-weight: bold;
+  color: green;
+}
+
+.wishlist-original {
+  text-decoration: line-through;
+  color: grey;
+}
+
+.wishlist-discount {
+  color: red;
+  font-size: 13px;
 }
 
 @media (max-width: 1024px) {

@@ -526,10 +526,10 @@ body {
 
 
 
-.red-dot {
+.red-dot1 {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 0px !important;
+  right: 14px !important;
   width: 9px;
   height: 9px;
   background-color: red;
@@ -564,7 +564,7 @@ body {
   color: gold;
 }
 
-.red-dot {
+.red-dot1 {
   position: absolute;
   top:-5%;
   right: -10%;
