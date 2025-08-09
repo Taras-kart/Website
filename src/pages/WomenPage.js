@@ -37,7 +37,7 @@ const WomenPage = () => {
 
   const [products, setProducts] = useState([]);
   useEffect(() => {
-    fetch('http://localhost:5000/api/products/Women')  
+    fetch('http://localhost:5000/api/products/Women')
       .then(response => response.json())
       .then(data => setProducts(data))
       .catch(error => console.error('Error fetching products:', error));
@@ -45,12 +45,12 @@ const WomenPage = () => {
 
   const [product, setProduct] = useState(null);
 
-useEffect(() => {
-  const storedProduct = localStorage.getItem('selectedProduct');
-  if (storedProduct) {
-    setProduct(JSON.parse(storedProduct));
-  }
-}, []);
+  useEffect(() => {
+    const storedProduct = localStorage.getItem('selectedProduct');
+    if (storedProduct) {
+      setProduct(JSON.parse(storedProduct));
+    }
+  }, []);
 
 
 
@@ -67,41 +67,41 @@ useEffect(() => {
       [productId]: !prev[productId],
     }));
   }; */
-  
+
   const { addToWishlist, wishlistItems } = useWishlist();
 
-const userId = sessionStorage.getItem('userId');
+  const userId = sessionStorage.getItem('userId');
 
-const toggleLike = async (product) => {
-  const alreadyInWishlist = wishlistItems.some(
-    (item) => item.product_name === product.product_name
-  );
+  const toggleLike = async (product) => {
+    const alreadyInWishlist = wishlistItems.some(
+      (item) => item.product_name === product.product_name
+    );
 
-  if (alreadyInWishlist) {
-    await fetch('http://localhost:5000/api/wishlist', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId, product_id: product.id }),
-    });
-  } else {
-    await fetch('http://localhost:5000/api/wishlist', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId, product_id: product.id }),
-    });
+    if (alreadyInWishlist) {
+      await fetch('http://localhost:5000/api/wishlist', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, product_id: product.id }),
+      });
+    } else {
+      await fetch('http://localhost:5000/api/wishlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, product_id: product.id }),
+      });
 
-    addToWishlist(product);
-  }
-};
+      addToWishlist(product);
+    }
+  };
 
 
   /*const handleProductClick = (product) => {
     navigate('/checkout', { state: { product } });
   }; */
   const handleProductClick = (product) => {
-  localStorage.setItem('selectedProduct', JSON.stringify(product));
-  window.open('/checkout', '_blank');
-};
+    localStorage.setItem('selectedProduct', JSON.stringify(product));
+    window.open('/checkout', '_blank');
+  };
 
 
 
@@ -161,64 +161,64 @@ const toggleLike = async (product) => {
           </section> */}
 
           <section className="womens-section4">
-  <div className="womens-section4-grid">
-    {products.map((product, index) => (
-      <div
-        key={index}
-        className="womens-section4-card"
-        onClick={() => handleProductClick(product)}
-      >
-        <div className="womens-section4-img">
-          <img src={product.image_url} alt={product.product_name} />
-          <div
-            className="love-icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleLike(product);
-            }}
-          >
-            {wishlistItems.find(
-              (item) => item.product_name === product.product_name
-            ) ? (
-              <FaHeart style={{ color: 'yellow', fontSize: '20px' }} />
-            ) : (
-              <FaRegHeart style={{ color: 'yellow', fontSize: '20px' }} />
-            )}
-          </div>
-        </div>
-        <h4 className="brand-name">{product.brand}</h4>
-        <h5 className="product-name">{product.product_name}</h5>
-        <div className="womens-section4-price">
-          <span className="offer-price">
-            ₹
-            {userType === 'B2B'
-              ? product.final_price_b2b
-              : product.final_price_b2c}
-          </span>
-          <span className="original-price">
-            ₹
-            {userType === 'B2B'
-              ? product.original_price_b2b
-              : product.original_price_b2c}
-          </span>
-          <span className="discount">
-            (
-            {Math.round(
-              ((userType === 'B2B'
-                ? product.original_price_b2b - product.final_price_b2b
-                : product.original_price_b2c - product.final_price_b2c) /
-                (userType === 'B2B'
-                  ? product.original_price_b2b
-                  : product.original_price_b2c)) *
-                100
-            )}
-            % OFF)
-          </span>
-        </div>
-      </div>
-    ))}
-  </div>
-</section>
+            <div className="womens-section4-grid">
+              {products.map((product, index) => (
+                <div
+                  key={index}
+                  className="womens-section4-card"
+                  onClick={() => handleProductClick(product)}
+                >
+                  <div className="womens-section4-img">
+                    <img src={product.image_url} alt={product.product_name} />
+                    <div
+                      className="love-icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleLike(product);
+                      }}
+                    >
+                      {wishlistItems.find(
+                        (item) => item.product_name === product.product_name
+                      ) ? (
+                        <FaHeart style={{ color: 'yellow', fontSize: '20px' }} />
+                      ) : (
+                        <FaRegHeart style={{ color: 'yellow', fontSize: '20px' }} />
+                      )}
+                    </div>
+                  </div>
+                  <h4 className="brand-name">{product.brand}</h4>
+                  <h5 className="product-name">{product.product_name}</h5>
+                  <div className="womens-section4-price">
+                    <span className="offer-price">
+                      ₹
+                      {userType === 'B2B'
+                        ? product.final_price_b2b
+                        : product.final_price_b2c}
+                    </span>
+                    <span className="original-price">
+                      ₹
+                      {userType === 'B2B'
+                        ? product.original_price_b2b
+                        : product.original_price_b2c}
+                    </span>
+                    <span className="discount">
+                      (
+                      {Math.round(
+                        ((userType === 'B2B'
+                          ? product.original_price_b2b - product.final_price_b2b
+                          : product.original_price_b2c - product.final_price_b2c) /
+                          (userType === 'B2B'
+                            ? product.original_price_b2b
+                            : product.original_price_b2c)) *
+                        100
+                      )}
+                      % OFF)
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
 
 
 

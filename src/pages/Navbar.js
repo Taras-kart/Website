@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaUser, FaHeart, FaShoppingBag, FaSearch, FaTimes } from 'react-icons/fa';
 import './Navbar.css';
 import { useWishlist } from '../WishlistContext';
@@ -9,8 +9,10 @@ const NavbarFinal = () => {
   const { wishlistItems } = useWishlist();
   const { cartItems } = useCart();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const location = useLocation();
   const mobileNavRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -31,6 +33,13 @@ const NavbarFinal = () => {
   const handleNavClick = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setIsMobileNavOpen(false);
+  };
+
+  const handleSearch = () => {
+    if (searchTerm.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
+      setIsMobileNavOpen(false);
+    }
   };
 
   const navLinks = [
@@ -72,8 +81,19 @@ const NavbarFinal = () => {
           </div>
 
           <div className="search-bar-final Btn">
-            <FaSearch className="search-icon-final" />
-            <input type="text" placeholder="search a product" />
+            <FaSearch
+              className="search-icon-final"
+              onClick={handleSearch}
+            />
+            <input
+              type="text"
+              placeholder="search a product"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleSearch();
+              }}
+            />
           </div>
 
           <div className="icon-buttons-final">
@@ -99,8 +119,19 @@ const NavbarFinal = () => {
 
       <div className="bottom-row-final mobile-only-final">
         <div className="search-bar-final Btn">
-          <FaSearch className="search-icon-final" />
-          <input type="text" placeholder="search a product" />
+          <FaSearch
+            className="search-icon-final"
+            onClick={handleSearch}
+          />
+          <input
+            type="text"
+            placeholder="search a product"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleSearch();
+            }}
+          />
         </div>
       </div>
 

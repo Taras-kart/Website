@@ -153,17 +153,24 @@
   width: 100%;
 }
 
-.men-page-content, .women-page-content, .kids-page-content {
+.men-page-content,
+.women-page-content,
+.kids-page-content,
+.sr-content {
   margin-left: 0;
   width: 100%;
 }
 
 @media (min-width: 768px) {
-  .men-page-content, .women-page-content, .kids-page-content {
+  .men-page-content,
+  .women-page-content,
+  .kids-page-content,
+  .sr-content {
     margin-left: 16%;
     width: 84%;
   }
 }
+
 
 
 

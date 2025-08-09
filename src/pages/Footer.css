@@ -2,6 +2,8 @@
   background-color: #111;
   color: white;
   padding: 50px 20px;
+  position: relative;
+  z-index: 2000;
 }
 
 .footer-title {

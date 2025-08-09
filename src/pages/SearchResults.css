@@ -1,0 +1,135 @@
+.sr-page {
+  position: relative;
+  font-family: "inter", serif;
+}
+
+.sr-page-main {
+  display: flex;
+  width: 100%;
+}
+
+
+.sr-header-wrap {
+  padding: 20px 20px 0 20px;
+}
+
+.sr-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.sr-highlight {
+  color: gold;
+}
+
+.sr-status {
+  padding: 40px 20px;
+  color: #555;
+}
+
+.sr-section4 {
+  margin-left: 18px;
+  padding: 50px 20px;
+  background-color: #f9f9f9;
+  padding-bottom: 80px;
+}
+
+.sr-section4-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.sr-section4-card {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  padding: 0;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+.sr-section4-card:hover {
+  transform: scale(1.05);
+}
+
+.sr-section4-img {
+  position: relative;
+}
+
+.sr-section4-img img {
+  width: 100%;
+  height: 330px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.sr-love-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(27, 25, 25, 0.79);
+  padding: 4px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 15px;
+  color: gold;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.sr-section4-price {
+  margin-top: -20px;
+  margin-bottom: 10px;
+}
+
+.sr-offer-price {
+  color: black;
+  font-weight: bold;
+}
+
+.sr-original-price {
+  margin-left: 10px;
+  text-decoration: line-through;
+  color: #888;
+  margin-right: 10px;
+}
+
+.sr-discount {
+  color: #35a742;
+  font-size: 16px;
+}
+
+.sr-brand-name {
+  margin-top: 5px;
+  font-weight: bold;
+  font-size: 20px;
+  color: black;
+}
+
+.sr-product-name {
+  margin-top: -20px;
+  font-size: 16px;
+}
+
+@media (max-width: 1200px) {
+  .sr-section4-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .sr-section4-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .sr-section4-grid {
+    grid-template-columns: 1fr;
+  }
+}

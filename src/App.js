@@ -12,6 +12,7 @@ import Wishlist from './pages/Wishlist';
 import Cart from './pages/Cart';
 import Brands from './pages/Brands';
 import { WishlistProvider } from './WishlistContext'; 
+import SearchResults from './pages/SearchResults';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/brands" element={<Brands />} />
+            <Route path="/search" element={<SearchResults />} />
           </Routes>
         </div>
       </Router>

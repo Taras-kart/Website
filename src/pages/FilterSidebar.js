@@ -209,7 +209,7 @@ const FilterSidebar = ({ onFilterChange }) => {
    useEffect(() => {
     const handleOutsideClick = (event) => {
       if (sidebarRef.current && !sidebarRef.current.contains(event.target) && !event.target.closest('.filter-icon')) {
-        setIsMobileOpen(false); // Close the sidebar if clicking outside
+        setIsMobileOpen(false); 
       }
     };
 
