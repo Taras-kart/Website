@@ -13,10 +13,17 @@ const KidsPage = () => {
   const { addToWishlist, wishlistItems } = useWishlist();
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/products/Kids - Boys')  // You can also use 'Kids - Girls' or combine both
-      .then(response => response.json())
-      .then(data => setProducts(data))
-      .catch(error => console.error('Error fetching products:', error));
+    const fetchKids = async () => {
+      try {
+        const boys = await fetch(`http://localhost:5000/api/products/${encodeURIComponent('Kids - Boys')}`).then(r => r.json());
+        const girls = await fetch(`http://localhost:5000/api/products/${encodeURIComponent('Kids - Girls')}`).then(r => r.json());
+        const merged = [...(Array.isArray(boys) ? boys : []), ...(Array.isArray(girls) ? girls : [])];
+        setProducts(merged);
+      } catch {
+        setProducts([]);
+      }
+    };
+    fetchKids();
   }, []);
 
   const toggleLike = (product) => {
@@ -35,7 +42,7 @@ const KidsPage = () => {
       <Navbar />
       <div className="kids-test">
         <div className="kids-page-main">
-          <FilterSidebar onFilterChange={(filters) => console.log(filters)} />
+          <FilterSidebar onFilterChange={() => {}} />
           <div className="kids-page-content">
             <section className="kids-section1">
               <div className="kids-section1-bg">
@@ -48,6 +55,59 @@ const KidsPage = () => {
                 </div>
               </div>
             </section>
+
+
+
+
+            <section className="kids-section4">
+              <div className="kids-section4-grid">
+                {products.map((product) => (
+                  <div
+                    key={product.id}
+                    className="kids-section4-card"
+                    onClick={() => handleProductClick(product)}
+                  >
+                    <div className="kids-section4-img">
+                      <img src={product.image_url} alt={product.product_name} />
+                      <div
+                        className="love-icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLike(product);
+                        }}
+                      >
+                        {wishlistItems.find(
+                          (item) => item.product_name === product.product_name
+                        ) ? (
+                          <FaHeart style={{ color: 'yellow', fontSize: 18 }} />
+                        ) : (
+                          <FaRegHeart style={{ color: 'yellow', fontSize: 24 }} />
+                        )}
+                      </div>
+                    </div>
+                    <h4 className="brand-name">{product.brand}</h4>
+                    <h5 className="product-name">{product.product_name}</h5>
+                    <div className="kids-section4-price">
+                      <span className="offer-price">₹{product.final_price_b2c}</span>
+                      <span className="original-price">₹{product.original_price_b2c}</span>
+                      <span className="discount">
+                        (
+                        {Math.round(
+                          ((Number(product.original_price_b2c) - Number(product.final_price_b2c)) /
+                            Number(product.original_price_b2c)) *
+                            100
+                        )}
+                        % OFF)
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+
+
+
 
             <section className="kids-section2">
               <div className="kids-section2-bg">
@@ -80,39 +140,12 @@ const KidsPage = () => {
               </div>
             </section>
 
-            <section className="kids-section4">
-              <div className="kids-section4-grid">
-                {products.map((product, index) => (
-                  <div key={index} className="kids-section4-card" onClick={() => handleProductClick(product)}>
-                    <div className="kids-section4-img">
-                      <img src={product.imageUrl} alt={product.productName} />
-                      <div
-                        className="love-icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleLike(product);
-                        }}
-                      >
-                        {wishlistItems.find(item => item.productName === product.productName) ? (
-                          <FaHeart style={{ color: 'yellow', fontSize: '18px' }} />
-                        ) : (
-                          <FaRegHeart style={{ color: 'yellow', fontSize: '24px' }} />
-                        )}
-                      </div>
-                    </div>
-                    <h4 className="brand-name">{product.brand}</h4>
-                    <h5 className="product-name">{product.productName}</h5>
-                    <div className="kids-section4-price">
-                      <span className="offer-price">₹{product.finalPrice}</span>
-                      <span className="original-price">₹{product.originalPrice}</span>
-                      <span className="discount">
-                        ({Math.round(((product.originalPrice - product.finalPrice) / product.originalPrice) * 100)}% OFF)
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
+
+
+
+            
+
+
           </div>
         </div>
       </div>
