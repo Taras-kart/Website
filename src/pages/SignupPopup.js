@@ -6,8 +6,8 @@ import { jwtDecode } from 'jwt-decode';
 import './SignupPopup.css';
 
 const SignupPopup = ({ onClose, onSuccess }) => {
-  const popupRef = useRef();
-  const firstInputRef = useRef();
+  const popupRef = useRef(null);
+  const firstInputRef = useRef(null);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [mobile, setMobile] = useState('');
@@ -42,17 +42,12 @@ const SignupPopup = ({ onClose, onSuccess }) => {
     !submitting;
 
   useEffect(() => {
-    const handleOutsideClick = (e) => {
-      if (popupRef.current && !popupRef.current.contains(e.target)) onClose();
-    };
     const handleEsc = (e) => {
       if (e.key === 'Escape') onClose();
     };
-    document.addEventListener('mousedown', handleOutsideClick);
     document.addEventListener('keydown', handleEsc);
     document.body.style.overflow = 'hidden';
     return () => {
-      document.removeEventListener('mousedown', handleOutsideClick);
       document.removeEventListener('keydown', handleEsc);
       document.body.style.overflow = '';
     };
@@ -61,6 +56,10 @@ const SignupPopup = ({ onClose, onSuccess }) => {
   useEffect(() => {
     firstInputRef.current?.focus();
   }, []);
+
+  const handleOverlayMouseDown = (e) => {
+    if (e.target === e.currentTarget) onClose();
+  };
 
   const handleSubmit = async () => {
     setError('');
@@ -125,7 +124,7 @@ const SignupPopup = ({ onClose, onSuccess }) => {
   const strengthColor = ['#cc3333', '#e67e22', '#ffd277', '#ffd277', '#ffd277'][strength];
 
   return (
-    <div className="signup-overlay">
+    <div className="signup-overlay" onMouseDown={handleOverlayMouseDown}>
       <div className="signup-card" ref={popupRef} role="dialog" aria-modal="true">
         <button className="close-btn" onClick={onClose} aria-label="Close"><FiX /></button>
 
