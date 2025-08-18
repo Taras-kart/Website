@@ -1,16 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FaGoogle, FaTwitter, FaGithub } from 'react-icons/fa';
+import { FiX, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import './LoginPopup.css';
 
 const LoginPopup = ({ onClose, onSuccess }) => {
+  const popupRef = useRef(null);
+  const emailRef = useRef(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [popupMessage, setPopupMessage] = useState('');
-  const popupRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+  const [showPwd, setShowPwd] = useState(false);
+
+  const validEmail = (v) => /^\S+@\S+\.\S+$/.test(v);
+  const canSubmit = validEmail(email) && password.length >= 6 && !loading;
 
   const handleLogin = async () => {
+    if (!canSubmit) return;
     try {
-      const response = await fetch('http://localhost:5000/api/login', {
+      setLoading(true);
+      const response = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -27,11 +36,11 @@ const LoginPopup = ({ onClose, onSuccess }) => {
             id: data.id,
             name: data.name,
             email: data.email,
-            profilePic: '/images/profile-picture.webp',
+            profilePic: '/images/profile-pic.png',
             userType: data.type
           });
           setPopupMessage('');
-        }, 1500);
+        }, 1200);
       } else {
         setPopupMessage(data.message || 'Invalid credentials');
         setTimeout(() => setPopupMessage(''), 2000);
@@ -39,63 +48,96 @@ const LoginPopup = ({ onClose, onSuccess }) => {
     } catch {
       setPopupMessage('Server error');
       setTimeout(() => setPopupMessage(''), 2000);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleClickOutside = (e) => {
-    if (popupRef.current && !popupRef.current.contains(e.target)) {
-      onClose();
-    }
+    if (popupRef.current && !popupRef.current.contains(e.target)) onClose();
   };
 
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'Enter') handleLogin();
+    };
+    document.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    emailRef.current?.focus();
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
   }, []);
 
   return (
     <div className="popup-overlay-login">
-      <div className="form-container-login" ref={popupRef}>
-        <p className="title-login">Login</p>
+      <div className="form-container-login" ref={popupRef} role="dialog" aria-modal="true">
+        <button className="close-login" onClick={onClose} aria-label="Close"><FiX /></button>
+        <div className="head-login">
+          <p className="title-login">Welcome back</p>
+          <p className="sub-login">Sign in to continue to Tars Kart</p>
+        </div>
         <form className="form-login" onSubmit={(e) => e.preventDefault()}>
-          <div className="input-group-login">
-            <label>Email</label>
+          <div className={`input-wrap-login ${email && !validEmail(email) ? 'has-error' : ''}`}>
+            <span className="i-login"><FiMail /></span>
             <input
+              ref={emailRef}
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
+              placeholder="Email"
             />
           </div>
-          <div className="input-group-login">
-            <label>Password</label>
+
+          <div className={`input-wrap-login ${password && password.length < 6 ? 'has-error' : ''}`}>
+            <span className="i-login"><FiLock /></span>
             <input
-              type="password"
+              type={showPwd ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
+              placeholder="Password"
             />
-            <div className="forgot-login">
-              <a href="#">Forgot Password?</a>
-            </div>
+            <button type="button" className="eye-login" onClick={() => setShowPwd((v) => !v)}>
+              {showPwd ? <FiEyeOff /> : <FiEye />}
+            </button>
           </div>
-          <button className="sign-login" onClick={handleLogin}>Sign In</button>
-          {popupMessage && <div className="popup-success-login">{popupMessage}</div>}
+
+          <div className="row-login">
+            <a className="forgot-login" href="#">Forgot Password?</a>
+          </div>
+
+          <button
+            className={`sign-login ${canSubmit ? '' : 'disabled'}`}
+            onClick={handleLogin}
+            disabled={!canSubmit}
+          >
+            {loading ? <span className="spinner-login" /> : 'Sign In'}
+          </button>
+
+          {popupMessage && (
+            <div className={`popup-msg-login ${popupMessage.toLowerCase().includes('success') ? 'ok' : 'err'}`}>
+              {popupMessage}
+            </div>
+          )}
         </form>
 
         <div className="social-message-login">
           <div className="line-login"></div>
-          <p className="message-login">Login with social accounts</p>
+          <p className="message-login">Or continue with</p>
           <div className="line-login"></div>
         </div>
 
-        <div className="social-icons-login">
-          <button className="icon-login" aria-label="Login with Google"><FaGoogle /></button>
-          <button className="icon-login" aria-label="Login with Twitter"><FaTwitter /></button>
-          <button className="icon-login" aria-label="Login with GitHub"><FaGithub /></button>
+        <div className="social-grid-login">
+          <button className="btn-google-login"><FaGoogle /> Google</button>
+          <button className="icon-login" aria-label="Twitter"><FaTwitter /></button>
+          <button className="icon-login" aria-label="GitHub"><FaGithub /></button>
         </div>
 
-        <p className="signup-login">Don't have an account? <a href="#">Sign up</a></p>
+        <p className="signup-login">Don’t have an account? <a href="#">Sign up</a></p>
       </div>
     </div>
   );

@@ -17,8 +17,10 @@ const Cart = () => {
   const userId = sessionStorage.getItem('userId');
 
   useEffect(() => {
-    const fetchCartItems = async () => {
-      const response = await fetch(`http://localhost:5000/api/cart/${userId}`);
+    window.scrollTo(0, 0);
+  const fetchCartItems = async () => {
+    const response = await fetch(`http://localhost:5000/api/cart/${userId}`);
+    if (response.ok) {
       const data = await response.json();
       setCartItems(data);
       const initialQuantities = data.reduce((acc, item) => {
@@ -26,14 +28,20 @@ const Cart = () => {
         return acc;
       }, {});
       setQuantities(initialQuantities);
-    };
-    if (userId) fetchCartItems();
-  }, [userId]);
-
-  const handleRemoveClick = (item) => {
-    setSelectedItem(item);
-    setShowPopup(true);
+    } else {
+      console.error('Error fetching cart items:', response.statusText);
+    }
   };
+
+  if (userId) fetchCartItems();
+}, [userId]);
+
+
+const handleRemoveClick = (item) => {
+  setSelectedItem(item);
+  setShowPopup(true);
+};
+
 
   const handleConfirmRemove = async () => {
     if (selectedItem && userId) {

@@ -52,7 +52,7 @@ const CheckoutPage = () => {
     };
 
     if (type === 'bag') {
-      await fetch('http://localhost:5000/api/tarascart', {
+      await fetch('http://localhost:5000/api/cart/tarascart', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

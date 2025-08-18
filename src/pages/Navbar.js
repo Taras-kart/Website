@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaUser, FaHeart, FaShoppingBag, FaSearch, FaTimes } from 'react-icons/fa';
+import { FaUser, FaHeart, FaShoppingBag, FaSearch, FaTimes, FaRegUser, FaRegHeart } from 'react-icons/fa';
+import { FiShoppingBag } from 'react-icons/fi';
 import './Navbar.css';
 import { useWishlist } from '../WishlistContext';
 import { useCart } from '../CartContext';
@@ -51,6 +52,8 @@ const NavbarFinal = () => {
     { name: 'All Brands', path: '/brands' }
   ];
 
+  const isActive = (p) => location.pathname === p;
+
   return (
     <nav className="navbar-final">
       <div className="top-row-final">
@@ -59,7 +62,7 @@ const NavbarFinal = () => {
         </div>
 
         <div className="nav-toggle-final" onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}>
-          <div className="dot-grid-final">
+          <div className={`dot-grid-final ${isMobileNavOpen ? 'dots-open' : ''}`}>
             {[...Array(9)].map((_, i) => (
               <span key={i}></span>
             ))}
@@ -73,7 +76,7 @@ const NavbarFinal = () => {
                 key={name}
                 to={path}
                 onClick={handleNavClick}
-                className={`nav-link-final Btn ${location.pathname === path ? 'active-final' : ''}`}
+                className={`nav-link-final Btn ${isActive(path) ? 'active-final' : ''}`}
               >
                 <span>{name}</span>
               </Link>
@@ -81,10 +84,7 @@ const NavbarFinal = () => {
           </div>
 
           <div className="search-bar-final Btn">
-            <FaSearch
-              className="search-icon-final"
-              onClick={handleSearch}
-            />
+            <FaSearch className="search-icon-final" onClick={handleSearch} />
             <input
               type="text"
               placeholder="search a product"
@@ -97,21 +97,42 @@ const NavbarFinal = () => {
           </div>
 
           <div className="icon-buttons-final">
-            <Link to="/profile" className="icon-btn profile-icon">
-              <FaUser className={location.pathname === '/profile' ? 'icon-active' : 'icon-default'} />
-              <span>Profile</span>
+            <Link to="/profile" className={`icon-btn ${isActive('/profile') ? 'icon-active-btn' : ''}`}>
+              <div className="icon-circle">
+                {isActive('/profile') ? (
+                  <FaUser className="icon icon-filled" />
+                ) : (
+                  <FaRegUser className="icon icon-outline" />
+                )}
+                <span className="inner-ring" />
+              </div>
+              <span className={`icon-label ${isActive('/profile') ? 'label-active' : ''}`}>Profile</span>
             </Link>
 
-            <Link to="/wishlist" className="icon-btn wishlist-icon">
-              <FaHeart className={location.pathname === '/wishlist' ? 'icon-active' : 'icon-default'} />
-              {wishlistItems.length > 0 && <span className="red-dot1" />}
-              <span>Wishlist</span>
+            <Link to="/wishlist" className={`icon-btn ${isActive('/wishlist') ? 'icon-active-btn' : ''}`}>
+              <div className="icon-circle">
+                {isActive('/wishlist') ? (
+                  <FaHeart className="icon icon-filled" />
+                ) : (
+                  <FaRegHeart className="icon icon-outline" />
+                )}
+                {wishlistItems.length > 0 && <span className="red-dot1" />}
+                <span className="inner-ring" />
+              </div>
+              <span className={`icon-label ${isActive('/wishlist') ? 'label-active' : ''}`}>Wishlist</span>
             </Link>
 
-            <Link to="/cart" className="icon-btn cart-icon">
-              <FaShoppingBag className={location.pathname === '/cart' ? 'icon-active' : 'icon-default'} />
-              {cartItems.length > 0 && <span className="red-dot1" />}
-              <span>Cart</span>
+            <Link to="/cart" className={`icon-btn ${isActive('/cart') ? 'icon-active-btn' : ''}`}>
+              <div className="icon-circle">
+                {isActive('/cart') ? (
+                  <FaShoppingBag className="icon icon-filled" />
+                ) : (
+                  <FiShoppingBag className="icon icon-outline-stroke" />
+                )}
+                {cartItems.length > 0 && <span className="red-dot1" />}
+                <span className="inner-ring" />
+              </div>
+              <span className={`icon-label ${isActive('/cart') ? 'label-active' : ''}`}>Cart</span>
             </Link>
           </div>
         </div>
@@ -119,10 +140,7 @@ const NavbarFinal = () => {
 
       <div className="bottom-row-final mobile-only-final">
         <div className="search-bar-final Btn">
-          <FaSearch
-            className="search-icon-final"
-            onClick={handleSearch}
-          />
+          <FaSearch className="search-icon-final" onClick={handleSearch} />
           <input
             type="text"
             placeholder="search a product"
@@ -136,7 +154,7 @@ const NavbarFinal = () => {
       </div>
 
       {isMobileNavOpen && (
-        <div className="mobile-drawer-final" ref={mobileNavRef}>
+        <div className="mobile-drawer-final slide-in" ref={mobileNavRef}>
           <div className="close-btn-final" onClick={() => setIsMobileNavOpen(false)}>
             <FaTimes />
           </div>
@@ -146,26 +164,47 @@ const NavbarFinal = () => {
                 key={name}
                 to={path}
                 onClick={handleNavClick}
-                className={`nav-link-final Btn ${location.pathname === path ? 'active-final' : ''}`}
+                className={`nav-link-final Btn ${isActive(path) ? 'active-final' : ''}`}
               >
                 {name}
               </Link>
             ))}
           </div>
-          <div className="icon-buttons-final">
-            <Link to="/profile" className="icon-btn profile-icon">
-              <FaUser className={location.pathname === '/profile' ? 'icon-active' : 'icon-default'} />
-              <span>Profile</span>
+          <div className="icon-buttons-final mobile-icons">
+            <Link to="/profile" className={`icon-btn ${isActive('/profile') ? 'icon-active-btn' : ''}`}>
+              <div className="icon-circle">
+                {isActive('/profile') ? (
+                  <FaUser className="icon icon-filled" />
+                ) : (
+                  <FaRegUser className="icon icon-outline" />
+                )}
+                <span className="inner-ring" />
+              </div>
+              <span className={`icon-label ${isActive('/profile') ? 'label-active' : ''}`}>Profile</span>
             </Link>
-            <Link to="/wishlist" className="icon-btn wishlist-icon">
-              <FaHeart className={location.pathname === '/wishlist' ? 'icon-active' : 'icon-default'} />
-              {wishlistItems.length > 0 && <span className="red-dot1" />}
-              <span>Wishlist</span>
+            <Link to="/wishlist" className={`icon-btn ${isActive('/wishlist') ? 'icon-active-btn' : ''}`}>
+              <div className="icon-circle">
+                {isActive('/wishlist') ? (
+                  <FaHeart className="icon icon-filled" />
+                ) : (
+                  <FaRegHeart className="icon icon-outline" />
+                )}
+                {wishlistItems.length > 0 && <span className="red-dot1" />}
+                <span className="inner-ring" />
+              </div>
+              <span className={`icon-label ${isActive('/wishlist') ? 'label-active' : ''}`}>Wishlist</span>
             </Link>
-            <Link to="/cart" className="icon-btn cart-icon">
-              <FaShoppingBag className={location.pathname === '/cart' ? 'icon-active' : 'icon-default'} />
-              {cartItems.length > 0 && <span className="red-dot1" />}
-              <span>Cart</span>
+            <Link to="/cart" className={`icon-btn ${isActive('/cart') ? 'icon-active-btn' : ''}`}>
+              <div className="icon-circle">
+                {isActive('/cart') ? (
+                  <FaShoppingBag className="icon icon-filled" />
+                ) : (
+                  <FiShoppingBag className="icon icon-outline-stroke" />
+                )}
+                {cartItems.length > 0 && <span className="red-dot1" />}
+                <span className="inner-ring" />
+              </div>
+              <span className={`icon-label ${isActive('/cart') ? 'label-active' : ''}`}>Cart</span>
             </Link>
           </div>
         </div>

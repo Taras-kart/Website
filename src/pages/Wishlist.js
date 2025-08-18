@@ -8,7 +8,7 @@ import { useWishlist } from '../WishlistContext';
 import { FaTimes } from 'react-icons/fa';
 
 const Wishlist = () => {
-  const { wishlistItems, setWishlistItems, removeFromWishlist } = useWishlist();
+  const { wishlistItems, setWishlistItems } = useWishlist();
   const [showPopup, setShowPopup] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const navigate = useNavigate();

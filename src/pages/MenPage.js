@@ -19,15 +19,36 @@ const MenPage = () => {
       .catch(() => setProducts([]));
   }, []);
 
-  const toggleLike = (product) => {
-    addToWishlist(product);
+  const userId = sessionStorage.getItem('userId');
+
+  const toggleLike = async (product) => {
+    const alreadyInWishlist = wishlistItems.some(
+      (item) => item.product_name === product.product_name
+    );
+
+    if (alreadyInWishlist) {
+      await fetch('http://localhost:5000/api/wishlist', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, product_id: product.id }),
+      });
+    } else {
+      await fetch('http://localhost:5000/api/wishlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, product_id: product.id }),
+      });
+
+      addToWishlist(product);
+    }
   };
 
   const handleProductClick = (product) => {
-    const newTab = window.open('', '_blank');
-    const stateString = JSON.stringify(product);
-    newTab.name = stateString;
-    newTab.location.href = `/checkout`;
+    sessionStorage.setItem('selectedProduct', JSON.stringify(product)); // Save the selected product in sessionStorage
+     const newTab = window.open('/checkout', '_blank');
+  newTab.onload = () => {
+    newTab.sessionStorage.setItem('selectedProduct', JSON.stringify(product));
+  };
   };
 
   return (
@@ -49,10 +70,6 @@ const MenPage = () => {
               </div>
             </section>
 
-
-
-
-
             <section className="mens-section4">
               <div className="mens-section4-grid">
                 {products.map((product) => (
@@ -70,8 +87,8 @@ const MenPage = () => {
                           toggleLike(product);
                         }}
                       >
-                        {wishlistItems.find(
-                          (item) => item.product_name === product.product_name
+                        {wishlistItems.some(
+                          (item) => item.product_id === product.product_id
                         ) ? (
                           <FaHeart style={{ color: 'yellow', fontSize: 20 }} />
                         ) : (
@@ -98,12 +115,6 @@ const MenPage = () => {
                 ))}
               </div>
             </section>
-
-
-
-
-
-
 
             <section className="mens-section2">
               <div className="mens-section2-bg">
@@ -135,23 +146,6 @@ const MenPage = () => {
                 <img src="/images/mens-part2.jpg" alt="Right Fashion" />
               </div>
             </section>
-
-
-
-
-
-
-
-            
-
-
-
-
-
-
-
-
-
           </div>
         </div>
       </div>

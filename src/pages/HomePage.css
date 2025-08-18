@@ -554,9 +554,9 @@
   background-color: gold;
 }
 
-.home-section5-underline .large { width: 200px; }
-.home-section5-underline .medium { width: 110px; }
-.home-section5-underline .small { width: 50px; }
+.home-section5-underline .large1 { width: 100px; }
+.home-section5-underline .medium1 { width: 110px; }
+.home-section5-underline .small1 { width: 50px; }
 
 .home-section5-slider {
   overflow: hidden;

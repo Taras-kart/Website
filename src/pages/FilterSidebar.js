@@ -149,7 +149,7 @@ export default FilterSidebar;
 
 import React, { useState, useEffect, useRef } from 'react';
 import './FilterSidebar.css';
-import { FaFilter, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaFilter, FaChevronDown, FaChevronUp, FaTimes } from 'react-icons/fa';
 
 const filterData = {
   gender: ['Men', 'Women', 'Kids'],
@@ -170,7 +170,7 @@ const FilterSidebar = ({ onFilterChange }) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isSidebarFixed, setIsSidebarFixed] = useState(true);
   const observerRef = useRef(null);
-  const sidebarRef=useRef(null);
+  const sidebarRef = useRef(null);
 
   const toggleSection = (key) => {
     setOpenSection(openSection === key ? null : key);
@@ -178,24 +178,38 @@ const FilterSidebar = ({ onFilterChange }) => {
 
   const handleCheckbox = (category, value) => {
     const current = selectedFilters[category] || [];
-    const updated = current.includes(value)
-      ? current.filter((v) => v !== value)
-      : [...current, value];
+    const updated = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
     const newFilters = { ...selectedFilters, [category]: updated };
     setSelectedFilters(newFilters);
-    onFilterChange(newFilters);
+    sendFiltersToBackend(newFilters);
   };
 
   const handleReset = () => {
     setSelectedFilters({});
-    onFilterChange({});
+    sendFiltersToBackend({});
+  };
+
+  const sendFiltersToBackend = (filters) => {
+    if (filters.category && filters.category.length === 1) {
+      fetch(`/api/products/${filters.category[0]}`)
+        .then((res) => res.json())
+        .then((data) => onFilterChange(data));
+    } else {
+      const query = new URLSearchParams();
+      Object.entries(filters).forEach(([key, values]) => {
+        if (values.length) {
+          query.append(key, values.join(','));
+        }
+      });
+      fetch(`/api/products/search?q=${query.toString()}`)
+        .then((res) => res.json())
+        .then((data) => onFilterChange(data));
+    }
   };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsSidebarFixed(!entry.isIntersecting);
-      },
+      ([entry]) => setIsSidebarFixed(!entry.isIntersecting),
       { root: null, threshold: 0, rootMargin: '0px' }
     );
     const footer = document.querySelector('.footer');
@@ -206,60 +220,76 @@ const FilterSidebar = ({ onFilterChange }) => {
     };
   }, []);
 
-   useEffect(() => {
+  useEffect(() => {
     const handleOutsideClick = (event) => {
-      if (sidebarRef.current && !sidebarRef.current.contains(event.target) && !event.target.closest('.filter-icon')) {
-        setIsMobileOpen(false); 
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target) && !event.target.closest('.filter-fab')) {
+        setIsMobileOpen(false);
       }
     };
-
-    if (isMobileOpen) {
-      document.addEventListener('click', handleOutsideClick);
-    }
-
-    return () => {
-      document.removeEventListener('click', handleOutsideClick);
-    };
+    if (isMobileOpen) document.addEventListener('click', handleOutsideClick);
+    return () => document.removeEventListener('click', handleOutsideClick);
   }, [isMobileOpen]);
+
+  const sectionCount = (k) => (selectedFilters[k]?.length ? selectedFilters[k].length : 0);
 
   return (
     <>
-      <div
-        className={`filter-sidebar ${isSidebarFixed ? 'fixed' : 'absolute'} ${isMobileOpen ? 'open' : ''}`}
-      >
+      <div className={`filter-sidebar ${isSidebarFixed ? 'fixed' : 'absolute'} ${isMobileOpen ? 'open' : ''}`} ref={sidebarRef}>
         <div className="filter-top">
-          <h4 className="filter-title">Filters</h4>
-          <button className="reset-btn" onClick={handleReset}>Reset</button>
-        </div>
-        {Object.entries(filterData).map(([key, values]) => (
-          <div key={key} className="filter-section">
-            <div className="filter-header" onClick={() => toggleSection(key)}>
-              <h4>{key}</h4>
-              <span>{openSection === key ? <FaChevronUp /> : <FaChevronDown />}</span>
-            </div>
-            {openSection === key && (
-              <ul className="filter-options">
-                {values.map((item) => (
-                  <li key={item}>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={selectedFilters[key]?.includes(item) || false}
-                        onChange={() => handleCheckbox(key, item)}
-                      />
-                      {item}
-                    </label>
-                  </li>
-                ))}
-              </ul>
-            )}
+          <div className="filter-title-wrap">
+            <h4 className="filter-title">Filters</h4>
+            <div className="title-glow"></div>
           </div>
-        ))}
+          <div className="filter-actions">
+            <button className="reset-btn" onClick={handleReset}>Reset</button>
+            {/*<button className="close-btn" onClick={() => setIsMobileOpen(false)}><FaTimes /></button> */}
+          </div>
+        </div>
+
+        <div className="filter-body">
+          {Object.entries(filterData).map(([key, values]) => (
+            <div key={key} className={`filter-section ${openSection === key ? 'expanded' : ''}`}>
+              <button className="filter-header" onClick={() => toggleSection(key)}>
+                <div className="header-left">
+                  <h4>{key}</h4>
+                  {sectionCount(key) > 0 && <span className="count-badge">{sectionCount(key)}</span>}
+                </div>
+                <span className={`chev ${openSection === key ? 'up' : 'down'}`}>
+                  {openSection === key ? <FaChevronUp /> : <FaChevronDown />}
+                </span>
+              </button>
+
+              <div className="filter-collapse" style={{ maxHeight: openSection === key ? '420px' : '0px' }}>
+                <ul className="filter-options">
+                  {values.map((item) => {
+                    const checked = selectedFilters[key]?.includes(item) || false;
+                    return (
+                      <li key={item}>
+                        <label className="chk">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => handleCheckbox(key, item)}
+                          />
+                          <span className="box" />
+                          <span className="txt">{item}</span>
+                        </label>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="filter-icon" onClick={() => setIsMobileOpen(!isMobileOpen)}>
+      <div className={`filter-overlay ${isMobileOpen ? 'show' : ''}`} onClick={() => setIsMobileOpen(false)} />
+
+      <button className="filter-fab" onClick={() => setIsMobileOpen(!isMobileOpen)}>
+        <span className="fab-ring"></span>
         <FaFilter />
-      </div>
+      </button>
     </>
   );
 };

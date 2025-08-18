@@ -144,11 +144,11 @@ const HomePage = () => {
             <section className="home-section5">
                 <div className="home-section5-heading">
                     <h2>Women's Collection</h2>
-                    <div className="home-section5-underline">
-                        <div className="line large"></div>
-                        <div className="line medium"></div>
-                        <div className="line small"></div>
-                    </div>
+                    {/*<div className="home-section5-underline">
+                        <div className="line large1"></div>
+                        <div className="line medium1"></div>
+                        <div className="line small1"></div>
+                    </div> */}
                 </div>
                 <div className="home-section5-slider">
                     <div className="home-section5-slider-track">

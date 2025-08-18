@@ -26,15 +26,36 @@ const KidsPage = () => {
     fetchKids();
   }, []);
 
-  const toggleLike = (product) => {
-    addToWishlist(product);
+  const userId = sessionStorage.getItem('userId');
+
+  const toggleLike = async (product) => {
+    const alreadyInWishlist = wishlistItems.some(
+      (item) => item.product_name === product.product_name
+    );
+
+    if (alreadyInWishlist) {
+      await fetch('http://localhost:5000/api/wishlist', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, product_id: product.id }),
+      });
+    } else {
+      await fetch('http://localhost:5000/api/wishlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, product_id: product.id }),
+      });
+
+      addToWishlist(product);
+    }
   };
 
   const handleProductClick = (product) => {
-    const newTab = window.open('', '_blank');
-    const stateString = JSON.stringify(product);
-    newTab.name = stateString;
-    newTab.location.href = `/checkout`;
+    sessionStorage.setItem('selectedProduct', JSON.stringify(product)); // Save the selected product in sessionStorage
+     const newTab = window.open('/checkout', '_blank');
+  newTab.onload = () => {
+    newTab.sessionStorage.setItem('selectedProduct', JSON.stringify(product));
+  };
   };
 
   return (
@@ -55,9 +76,6 @@ const KidsPage = () => {
                 </div>
               </div>
             </section>
-
-
-
 
             <section className="kids-section4">
               <div className="kids-section4-grid">
@@ -93,7 +111,7 @@ const KidsPage = () => {
                       <span className="discount">
                         (
                         {Math.round(
-                          ((Number(product.original_price_b2c) - Number(product.final_price_b2c)) /
+                          ((Number(product.original_price_b2c) - Number(product.final_price_b2c)) / 
                             Number(product.original_price_b2c)) *
                             100
                         )}
@@ -104,10 +122,6 @@ const KidsPage = () => {
                 ))}
               </div>
             </section>
-
-
-
-
 
             <section className="kids-section2">
               <div className="kids-section2-bg">
@@ -139,13 +153,6 @@ const KidsPage = () => {
                 <img src="/images/mens-part2.jpg" alt="Right Fashion" />
               </div>
             </section>
-
-
-
-
-            
-
-
           </div>
         </div>
       </div>
