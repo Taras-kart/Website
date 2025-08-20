@@ -10,6 +10,7 @@
   padding: 0px 5px;
   color: white;
   overflow: hidden;
+  margin-top: 30px;
 }
 
 .home-section1-overlay {
@@ -417,14 +418,14 @@
   margin-bottom: 40px;
 }
 
-.home-section4-underline .line {
+.home-section4-underline .line2 {
   height: 3px;
   background-color: gold;
 }
 
-.home-section4-underline .large { width: 250px; }
-.home-section4-underline .medium { width: 140px; }
-.home-section4-underline .small { width: 60px; }
+.home-section4-underline .large2 { width: 250px; }
+.home-section4-underline .medium2 { width: 140px; }
+.home-section4-underline .small2 { width: 60px; }
 
 .home-section4-slider {
   overflow: hidden;
@@ -549,12 +550,12 @@
   margin-bottom: 40px;
 }
 
-.home-section5-underline .line {
+.home-section5-underline .line1 {
   height: 3px;
   background-color: gold;
 }
 
-.home-section5-underline .large1 { width: 100px; }
+.home-section5-underline .large1 { width: 200px; }
 .home-section5-underline .medium1 { width: 110px; }
 .home-section5-underline .small1 { width: 50px; }
 

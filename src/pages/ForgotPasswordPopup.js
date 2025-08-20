@@ -1,4 +1,3 @@
-// src/components/ForgotPasswordPopup.js
 import React, { useEffect, useRef, useState } from 'react';
 import './ForgotPasswordPopup.css';
 import { FiX, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './Footer.css';
-import { FaFacebookF, FaInstagram, FaTwitter, FaEnvelope, FaPhone } from 'react-icons/fa';
+import { FaFacebookF, FaInstagram, FaTwitter, FaEnvelope, FaPhone, FaPhoneAlt } from 'react-icons/fa';
 
 const Footer = () => {
     const [openIndex, setOpenIndex] = useState(null);
@@ -14,14 +14,20 @@ const Footer = () => {
             <div className="footer-desktop">
                 <div className="footer-column">
                     <h2 className="footer-title">Tars Kart</h2>
+                    <div className="logo-final1">
+                        <video autoPlay loop muted playsInline>
+                            <source src="/images/logo.mp4" type="video/mp4" />
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
                 </div>
                 <div className="footer-column">
                     <div className="footer-heading-underline">
                         <h3>Categories</h3>
                         <div className="footer-underline">
-                            <div className="line large"></div>
-                            <div className="line medium"></div>
-                            <div className="line small"></div>
+                            <div className="line3 large3"></div>
+                            <div className="line3 medium3"></div>
+                            <div className="line3 small3"></div>
                         </div>
                     </div>
                     <ul>
@@ -34,9 +40,9 @@ const Footer = () => {
                     <div className="footer-heading-underline">
                         <h3>Customer Service</h3>
                         <div className="footer-underline">
-                            <div className="line large"></div>
-                            <div className="line medium"></div>
-                            <div className="line small"></div>
+                            <div className="line3 large3"></div>
+                            <div className="line3 medium3"></div>
+                            <div className="line3 small3"></div>
                         </div>
                     </div>
                     <ul>
@@ -51,9 +57,9 @@ const Footer = () => {
                     <div className="footer-heading-underline">
                         <h3>Follow Us</h3>
                         <div className="footer-underline">
-                            <div className="line large"></div>
-                            <div className="line medium"></div>
-                            <div className="line small"></div>
+                            <div className="line3 large3"></div>
+                            <div className="line3 medium3"></div>
+                            <div className="line3 small3"></div>
                         </div>
                     </div>
                     <ul className="social-icons">
@@ -61,7 +67,7 @@ const Footer = () => {
                         <li><FaInstagram /> Instagram</li>
                         <li><FaTwitter /> Twitter</li>
                         <li><FaEnvelope /> support@tarskart.com</li>
-                        <li><FaPhone /> +91-XXXXXXXXXX</li>
+                        <li><FaPhoneAlt /> +91-XXXXXXXXXX</li>
                     </ul>
                 </div>
             </div>
@@ -73,9 +79,9 @@ const Footer = () => {
                     <div className="footer-heading-underline">
                         <h3>Women</h3>
                         <div className="footer-underline">
-                            <div className="line large"></div>
-                            <div className="line medium"></div>
-                            <div className="line small"></div>
+                            <div className="line3 large3"></div>
+                            <div className="line3 medium3"></div>
+                            <div className="line3 small3"></div>
                         </div>
                     </div>
                     <ul>
@@ -95,9 +101,9 @@ const Footer = () => {
                     <div className="footer-heading-underline">
                         <h3>Men</h3>
                         <div className="footer-underline">
-                            <div className="line large"></div>
-                            <div className="line medium"></div>
-                            <div className="line small"></div>
+                            <div className="line3 large3"></div>
+                            <div className="line3 medium3"></div>
+                            <div className="line3 small3"></div>
                         </div>
                     </div>
                     <ul>
@@ -117,9 +123,9 @@ const Footer = () => {
                     <div className="footer-heading-underline">
                         <h3>Kids</h3>
                         <div className="footer-underline">
-                            <div className="line large"></div>
-                            <div className="line medium"></div>
-                            <div className="line small"></div>
+                            <div className="line3 large3"></div>
+                            <div className="line3 medium3"></div>
+                            <div className="line3 small3"></div>
                         </div>
                     </div>
                     <ul>
@@ -139,9 +145,9 @@ const Footer = () => {
                     <div className="footer-heading-underline">
                         <h3>Brands</h3>
                         <div className="footer-underline">
-                            <div className="line large"></div>
-                            <div className="line medium"></div>
-                            <div className="line small"></div>
+                            <div className="line3 large3"></div>
+                            <div className="line3 medium3"></div>
+                            <div className="line3 small3"></div>
                         </div>
                     </div>
                     <ul>

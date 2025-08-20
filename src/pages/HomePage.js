@@ -144,11 +144,11 @@ const HomePage = () => {
             <section className="home-section5">
                 <div className="home-section5-heading">
                     <h2>Women's Collection</h2>
-                    {/*<div className="home-section5-underline">
-                        <div className="line large1"></div>
-                        <div className="line medium1"></div>
-                        <div className="line small1"></div>
-                    </div> */}
+                    <div className="home-section5-underline">
+                        <div className="line1 large1"></div>
+                        <div className="line1 medium1"></div>
+                        <div className="line1 small1"></div>
+                    </div> 
                 </div>
                 <div className="home-section5-slider">
                     <div className="home-section5-slider-track">
@@ -295,9 +295,9 @@ const HomePage = () => {
             <section className="home-section4">
                 <h2 className="home-section4-title">Our Premium Collections</h2>
                 <div className="home-section4-underline">
-                    <div className="line large"></div>
-                    <div className="line medium"></div>
-                    <div className="line small"></div>
+                    <div className="line2 large2"></div>
+                    <div className="line2 medium2"></div>
+                    <div className="line2 small2"></div>
                 </div>
                 <div className="home-section4-grid">
                     <div className="home-section4-card">
