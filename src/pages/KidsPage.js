@@ -62,8 +62,8 @@ const KidsPage = () => {
     <div className="kids-page">
       <Navbar />
       <div className="kids-test">
+        <FilterSidebar onFilterChange={() => {}} />
         <div className="kids-page-main">
-          <FilterSidebar onFilterChange={() => {}} />
           <div className="kids-page-content">
             <section className="kids-section1">
               <div className="kids-section1-bg">

@@ -55,8 +55,9 @@ const MenPage = () => {
     <div className="men-page">
       <Navbar />
       <div className="test">
+        <FilterSidebar onFilterChange={() => {}} />
         <div className="men-page-main">
-          <FilterSidebar onFilterChange={() => {}} />
+          
           <div className="men-page-content">
             <section className="mens-section1">
               <div className="mens-section1-bg">

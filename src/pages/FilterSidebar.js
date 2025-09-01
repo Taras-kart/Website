@@ -1,155 +1,6 @@
-/*import React, { useState, useEffect, useRef } from 'react';
-import './FilterSidebar.css';
-
-const filterData = {
-  gender: ['Men', 'Women', 'Kids'],
-  category: ['Tops', 'Bottoms', 'Ethnic Wear', 'Footwear'],
-  price: ['Under ₹500', '₹500 - ₹1000', '₹1000 - ₹2000', 'Above ₹2000'],
-  brands: ['Nike', 'Adidas', 'Zara', 'H&M'],
-  occasion: ['Casual', 'Formal', 'Party', 'Festive'],
-  discount: ['10% or more', '30% or more', '50% or more'],
-  colors: ['Black', 'White', 'Red', 'Blue'],
-  'size & fit': ['S', 'M', 'L', 'XL'],
-  tags: ['Trending', 'New Arrival', 'Best Seller'],
-  rating: ['4★ & above', '3★ & above']
-};
-
-const FilterSidebar = ({ onFilterChange }) => {
-  const [openSection, setOpenSection] = useState(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [selectedFilters, setSelectedFilters] = useState({});
-  const sidebarRef = useRef(null);
-
-  const toggleSection = (key) => {
-    setOpenSection(openSection === key ? null : key);
-  };
-
-  const handleCheckbox = (category, value) => {
-    const current = selectedFilters[category] || [];
-    const updated = current.includes(value)
-      ? current.filter((v) => v !== value)
-      : [...current, value];
-    const newFilters = { ...selectedFilters, [category]: updated };
-    setSelectedFilters(newFilters);
-    onFilterChange(newFilters);
-  };
-
-  const handleClickOutside = (e) => {
-    if (
-      isSidebarOpen &&
-      sidebarRef.current &&
-      !sidebarRef.current.contains(e.target) &&
-      !e.target.closest('.filter-final-float-button')
-    ) {
-      setIsSidebarOpen(false);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  });
-
-  return (
-    <>
-      <div
-        ref={sidebarRef}
-        className={`filter-final-sidebar ${isSidebarOpen ? 'open' : ''}`}
-      >
-        <div className="filter-final-header">
-          <h3>Filter</h3>
-          <span className="close-btn" onClick={() => setIsSidebarOpen(false)}>
-            &times;
-          </span>
-        </div>
-        {Object.entries(filterData).map(([key, values]) => (
-          <div key={key} className="filter-final-section">
-            <div
-              className="filter-final-section-header"
-              onClick={() => toggleSection(key)}
-            >
-              <h4>{key}</h4>
-              <span>{openSection === key ? '-' : '+'}</span>
-            </div>
-            {openSection === key && (
-              <ul className="filter-final-options">
-                {values.map((item) => (
-                  <li key={item}>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={selectedFilters[key]?.includes(item) || false}
-                        onChange={() => handleCheckbox(key, item)}
-                      />
-                      {item}
-                    </label>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        ))}
-      </div>
-
-      <div
-        className="filter-final-float-button"
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-      >
-        <div className="filter-final-waves"></div>
-        <div className="filter-final-waves delay1"></div>
-        <div className="filter-final-waves delay2"></div>
-        <i className="fa fa-filter"></i>
-      </div>
-    </>
-  );
-};
-
-export default FilterSidebar;
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import React, { useState, useEffect, useRef } from 'react';
 import './FilterSidebar.css';
-import { FaFilter, FaChevronDown, FaChevronUp, FaTimes } from 'react-icons/fa';
+import { FaFilter, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
 const filterData = {
   gender: ['Men', 'Women', 'Kids'],
@@ -164,13 +15,19 @@ const filterData = {
   rating: ['4★ & above', '3★ & above']
 };
 
+const API_BASE = 'http://localhost:5000';
+
+const keyMap = {
+  gender: 'category',
+  brands: 'brand',
+  colors: 'color',
+  'size & fit': 'size'
+};
+
 const FilterSidebar = ({ onFilterChange }) => {
   const [openSection, setOpenSection] = useState(null);
   const [selectedFilters, setSelectedFilters] = useState({});
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [isSidebarFixed, setIsSidebarFixed] = useState(true);
-  const observerRef = useRef(null);
-  const sidebarRef = useRef(null);
+  const wrapRef = useRef(null);
 
   const toggleSection = (key) => {
     setOpenSection(openSection === key ? null : key);
@@ -186,110 +43,116 @@ const FilterSidebar = ({ onFilterChange }) => {
 
   const handleReset = () => {
     setSelectedFilters({});
+    setOpenSection(null);
     sendFiltersToBackend({});
   };
 
   const sendFiltersToBackend = (filters) => {
-    if (filters.category && filters.category.length === 1) {
-      fetch(`/api/products/${filters.category[0]}`)
+    const mapped = {};
+    Object.entries(filters).forEach(([k, vals]) => {
+      const bk = keyMap[k];
+      if (bk && Array.isArray(vals) && vals.length) mapped[bk] = vals;
+    });
+
+    const onlyGender =
+      mapped.category &&
+      mapped.category.length === 1 &&
+      Object.keys(mapped).length === 1;
+
+    if (onlyGender) {
+      fetch(`${API_BASE}/api/products/${encodeURIComponent(mapped.category[0])}`)
         .then((res) => res.json())
-        .then((data) => onFilterChange(data));
-    } else {
-      const query = new URLSearchParams();
-      Object.entries(filters).forEach(([key, values]) => {
-        if (values.length) {
-          query.append(key, values.join(','));
-        }
-      });
-      fetch(`/api/products/search?q=${query.toString()}`)
-        .then((res) => res.json())
-        .then((data) => onFilterChange(data));
+        .then((data) => onFilterChange(Array.isArray(data) ? data : []))
+        .catch(() => onFilterChange([]));
+      return;
     }
+
+    const params = new URLSearchParams();
+    Object.entries(mapped).forEach(([k, vals]) => {
+      if (vals.length) params.append(k, vals.join(','));
+    });
+
+    const url = params.toString()
+      ? `${API_BASE}/api/products/search?${params.toString()}`
+      : `${API_BASE}/api/products/search`;
+
+    fetch(url)
+      .then((res) => res.json())
+      .then((data) => onFilterChange(Array.isArray(data) ? data : []))
+      .catch(() => onFilterChange([]));
   };
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsSidebarFixed(!entry.isIntersecting),
-      { root: null, threshold: 0, rootMargin: '0px' }
-    );
-    const footer = document.querySelector('.footer');
-    if (footer) observer.observe(footer);
-    observerRef.current = observer;
-    return () => {
-      if (footer) observer.unobserve(footer);
+    const onClick = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpenSection(null);
     };
+    document.addEventListener('click', onClick);
+    return () => document.removeEventListener('click', onClick);
   }, []);
-
-  useEffect(() => {
-    const handleOutsideClick = (event) => {
-      if (sidebarRef.current && !sidebarRef.current.contains(event.target) && !event.target.closest('.filter-fab')) {
-        setIsMobileOpen(false);
-      }
-    };
-    if (isMobileOpen) document.addEventListener('click', handleOutsideClick);
-    return () => document.removeEventListener('click', handleOutsideClick);
-  }, [isMobileOpen]);
 
   const sectionCount = (k) => (selectedFilters[k]?.length ? selectedFilters[k].length : 0);
 
   return (
     <>
-      <div className={`filter-sidebar ${isSidebarFixed ? 'fixed' : 'absolute'} ${isMobileOpen ? 'open' : ''}`} ref={sidebarRef}>
-        <div className="filter-top">
-          <div className="filter-title-wrap">
-            <h4 className="filter-title">Filters</h4>
-            <div className="title-glow"></div>
+      <div className="filterbar-wrap" ref={wrapRef}>
+        <div className="filter-bar">
+          <div className="filter-left">
+            <div className="filter-title-wrap">
+              <FaFilter className="filter-icon" />
+              <h4 className="filter-title">Filters</h4>
+              <div className="title-glow"></div>
+            </div>
           </div>
+
+          <div className="chips" role="tablist">
+            {Object.entries(filterData).map(([key]) => {
+              const active = openSection === key;
+              const count = sectionCount(key);
+              return (
+                <button
+                  key={key}
+                  className={`filter-chip ${active ? 'active' : ''}`}
+                  aria-expanded={active}
+                  onClick={() => toggleSection(key)}
+                >
+                  <span className="chip-label">{key}</span>
+                  {count > 0 && <span className="count-badge">{count}</span>}
+                  <span className="chip-chevron">{active ? <FaChevronUp /> : <FaChevronDown />}</span>
+                </button>
+              );
+            })}
+          </div>
+
           <div className="filter-actions">
             <button className="reset-btn" onClick={handleReset}>Reset</button>
-            {/*<button className="close-btn" onClick={() => setIsMobileOpen(false)}><FaTimes /></button> */}
           </div>
         </div>
 
-        <div className="filter-body">
-          {Object.entries(filterData).map(([key, values]) => (
-            <div key={key} className={`filter-section ${openSection === key ? 'expanded' : ''}`}>
-              <button className="filter-header" onClick={() => toggleSection(key)}>
-                <div className="header-left">
-                  <h4>{key}</h4>
-                  {sectionCount(key) > 0 && <span className="count-badge">{sectionCount(key)}</span>}
-                </div>
-                <span className={`chev ${openSection === key ? 'up' : 'down'}`}>
-                  {openSection === key ? <FaChevronUp /> : <FaChevronDown />}
-                </span>
-              </button>
-
-              <div className="filter-collapse" style={{ maxHeight: openSection === key ? '420px' : '0px' }}>
-                <ul className="filter-options">
-                  {values.map((item) => {
-                    const checked = selectedFilters[key]?.includes(item) || false;
-                    return (
-                      <li key={item}>
-                        <label className="chk">
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={() => handleCheckbox(key, item)}
-                          />
-                          <span className="box" />
-                          <span className="txt">{item}</span>
-                        </label>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            </div>
-          ))}
+        <div className={`filter-dropdown ${openSection ? 'open' : ''}`}>
+          {openSection && (
+            <ul className="filter-options horizontal">
+              {filterData[openSection].map((item) => {
+                const checked = selectedFilters[openSection]?.includes(item) || false;
+                return (
+                  <li key={item}>
+                    <label className="chk">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => handleCheckbox(openSection, item)}
+                      />
+                      <span className="box" />
+                      <span className="txt">{item}</span>
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
       </div>
 
-      <div className={`filter-overlay ${isMobileOpen ? 'show' : ''}`} onClick={() => setIsMobileOpen(false)} />
-
-      <button className="filter-fab" onClick={() => setIsMobileOpen(!isMobileOpen)}>
-        <span className="fab-ring"></span>
-        <FaFilter />
-      </button>
+      <div className={`filter-overlay ${openSection ? 'show' : ''}`} onClick={() => setOpenSection(null)} />
     </>
   );
 };

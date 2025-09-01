@@ -166,8 +166,9 @@ useEffect(() => {
   return (
     <div className="women-page">
       <Navbar />
+      <FilterSidebar onFilterChange={(filters) => setFilters(filters)} />
       <div className="women-page-main">
-        <FilterSidebar onFilterChange={(filters) => setFilters(filters)} />
+        
         <div className="women-page-content">
           <section className="mens-section1">
             <div className="mens-section1-bg">

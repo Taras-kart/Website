@@ -7,6 +7,8 @@ import FilterSidebar from './FilterSidebar';
 import './SearchResults.css';
 import { useWishlist } from '../WishlistContext';
 
+const API_BASE = 'http://localhost:5000';
+
 const SearchResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -19,9 +21,12 @@ const SearchResults = () => {
 
   useEffect(() => {
     const fetchResults = async () => {
-      if (!query) return;
+      if (!query) {
+        setLoading(false);
+        return;
+      }
       try {
-        const res = await fetch(`http://localhost:5000/api/products/search?q=${encodeURIComponent(query)}`);
+        const res = await fetch(`${API_BASE}/api/products/search?q=${encodeURIComponent(query)}`);
         const data = await res.json();
         setResults(Array.isArray(data) ? data : []);
       } catch {
@@ -41,8 +46,8 @@ const SearchResults = () => {
   const offerPrice = (p) => (userType === 'B2B' ? p.final_price_b2b : p.final_price_b2c);
   const originalPrice = (p) => (userType === 'B2B' ? p.original_price_b2b : p.original_price_b2c);
   const discountPct = (p) => {
-    const o = originalPrice(p);
-    const f = offerPrice(p);
+    const o = Number(originalPrice(p));
+    const f = Number(offerPrice(p));
     if (!o) return 0;
     return Math.round(((o - f) / o) * 100);
   };
@@ -50,8 +55,8 @@ const SearchResults = () => {
   return (
     <div className="sr-page">
       <Navbar />
+      <FilterSidebar onFilterChange={(data) => setResults(Array.isArray(data) ? data : [])} />
       <div className="sr-page-main">
-        <FilterSidebar onFilterChange={() => {}} />
         <div className="sr-content">
           <div className="sr-header-wrap">
             <h2 className="sr-title">

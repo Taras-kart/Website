@@ -190,8 +190,8 @@ body {
 
 .icon-circle {
   position: relative;
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -224,7 +224,7 @@ body {
 }
 
 .icon {
-  font-size: 22px;
+  font-size: 20px;
   transition: color .2s ease, transform .18s ease, filter .25s ease;
 }
 
