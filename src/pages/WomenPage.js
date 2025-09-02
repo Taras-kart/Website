@@ -11,7 +11,7 @@ const WomenPage = () => {
   /*const [likedProducts, setLikedProducts] = useState({}); */
   const [filters, setFilters] = useState({});
   const [allProducts, setAllProducts] = useState([]);
-  
+
 
 
 
@@ -58,31 +58,31 @@ const WomenPage = () => {
   }, []);
 
   /* for filtering products by brand and price range and so on ikkada */
- useEffect(() => {
-  fetch('http://localhost:5000/api/products/Women')
-    .then(response => response.json())
-    .then(data => {
-      setAllProducts(data);
-      setProducts(data);
-    })
-    .catch(error => console.error('Error fetching products:', error));
-}, []);
+  useEffect(() => {
+    fetch('http://localhost:5000/api/products/Women')
+      .then(response => response.json())
+      .then(data => {
+        setAllProducts(data);
+        setProducts(data);
+      })
+      .catch(error => console.error('Error fetching products:', error));
+  }, []);
 
-useEffect(() => {
-  let filtered = [...allProducts];
+  useEffect(() => {
+    let filtered = [...allProducts];
 
-  if (filters.brand) {
-    filtered = filtered.filter(p => p.brand === filters.brand);
-  }
-  if (filters.priceRange) {
-    filtered = filtered.filter(p =>
-      p.final_price_b2c >= filters.priceRange.min &&
-      p.final_price_b2c <= filters.priceRange.max
-    );
-  }
+    if (filters.brand) {
+      filtered = filtered.filter(p => p.brand === filters.brand);
+    }
+    if (filters.priceRange) {
+      filtered = filtered.filter(p =>
+        p.final_price_b2c >= filters.priceRange.min &&
+        p.final_price_b2c <= filters.priceRange.max
+      );
+    }
 
-  setProducts(filtered);
-}, [filters, allProducts]);
+    setProducts(filtered);
+  }, [filters, allProducts]);
   /* code completed for filters */
 
 
@@ -130,15 +130,15 @@ useEffect(() => {
   const handleAddToCart = async (product, selectedSize, selectedColor) => {
     try {
       await fetch('http://localhost:5000/api/cart/tarascart', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    user_id: userId,
-    product_id: product.id,
-    selected_size: selectedSize,
-    selected_color: selectedColor
-  })
-});
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          product_id: product.id,
+          selected_size: selectedSize,
+          selected_color: selectedColor
+        })
+      });
 
       console.log("Added to cart");
     } catch (error) {
@@ -152,13 +152,13 @@ useEffect(() => {
   }; */
   const handleProductClick = (product) => {
     sessionStorage.setItem('selectedProduct', JSON.stringify(product)); // Save the selected product in sessionStorage
-     const newTab = window.open('/checkout', '_blank');
-  newTab.onload = () => {
-    newTab.sessionStorage.setItem('selectedProduct', JSON.stringify(product));
-  };
+    const newTab = window.open('/checkout', '_blank');
+    newTab.onload = () => {
+      newTab.sessionStorage.setItem('selectedProduct', JSON.stringify(product));
+    };
   };
 
-  
+
 
 
 
@@ -166,9 +166,10 @@ useEffect(() => {
   return (
     <div className="women-page">
       <Navbar />
+      <div className='filter-bar-class'>
       <FilterSidebar onFilterChange={(filters) => setFilters(filters)} />
       <div className="women-page-main">
-        
+
         <div className="women-page-content">
           <section className="mens-section1">
             <div className="mens-section1-bg">
@@ -370,6 +371,7 @@ useEffect(() => {
             </div>
           </section>
         </div>
+      </div>
       </div>
       <Footer />
     </div>

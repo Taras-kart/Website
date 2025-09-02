@@ -411,6 +411,7 @@
   font-size: 2.5rem;
   margin-bottom: 0px;
 }
+
 .home-section4-underline {
   display: flex;
   justify-content: center;
@@ -452,6 +453,7 @@
   align-items: center;
   justify-content: center;
   width: 100%;
+  overflow: hidden;
 }
 
 .home-section4-card img {
@@ -460,7 +462,6 @@
   border-radius: 10px;
   object-fit: cover;
   display: block;
-  margin: 0 auto;
 }
 
 .home-section4-text {
@@ -488,10 +489,19 @@
   .home-section4-grid {
     grid-template-columns: 1fr;
     gap: 30px;
+    padding: 0 20px;
+  }
+
+  .home-section4-card {
+    height: auto;
   }
 
   .home-section4-text {
     font-size: 1.3rem;
+    text-align: center;
+    left: 0;
+    top: 40%;
+    transform: translateY(-50%);
   }
 }
 
@@ -514,6 +524,8 @@
     font-size: 1rem;
   }
 }
+
+
 
 
 
@@ -925,79 +937,75 @@
 }
 
 @media (max-width: 1024px) {
-  .mens-section3-center h2 {
+  .mens-sectionh-center h2 {
     font-size: 1.6rem;
   }
-
-  .mens-section3-discount h1 {
+  .mens-sectionh-discount h1 {
     font-size: 2.2rem;
   }
 }
 
 @media (max-width: 768px) {
-  .mens-section3 {
+  .mens-sectionh {
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
     padding: 30px 15px;
+    gap: 20px;
+    margin-left: auto;
+    margin-right: auto;
   }
-
-  .mens-section3-left,
-  .mens-section3-right,
-  .mens-section3-center {
+  .mens-sectionh-left,
+  .mens-sectionh-right,
+  .mens-sectionh-center {
     width: 100%;
+    max-width: 520px;
   }
-
-  .mens-section3-center {
-    margin: 20px 0;
+  .mens-sectionh-center {
+    text-align: center;
+    margin: 10px 0;
+  }
+  .mens-sectionh-left img,
+  .mens-sectionh-right img {
+    width: 100%;
+    height: 460px;
+    margin: 0 auto;
   }
 }
 
 @media (max-width: 500px) {
-  .mens-section3-center h2 {
+  .mens-sectionh-center h2 {
     font-size: 1.4rem;
   }
-
-  .mens-section3-left,
-  .mens-section3-right {
+  .mens-sectionh-center h3 {
+    font-size: 1rem;
+  }
+  .mens-sectionh {
+    margin: 0 auto;
+  }
+  .mens-sectionh-left,
+  .mens-sectionh-right {
     width: 90%;
     margin: 0 auto;
   }
-
-  .mens-section3-discount h1 {
+  .mens-sectionh-left img,
+  .mens-sectionh-right img {
+    height: 420px;
+  }
+  .mens-sectionh-discount h1 {
     font-size: 2rem;
-  }
-
-  .mens-section3-center h3 {
-    font-size: 1rem;
-  }
-
-  .mens-section3 {
-    margin-top: 100px;
-    display: flex;
-    flex-direction: column; 
-    height: auto;
-    color: white;
-    align-items: center; 
-    justify-content: center; 
-    gap: 20px;
-    margin: 0 auto;
-  }
-
-  .mens-section3-left img,
-  .mens-section3-right img {
-    width: 100%;
-    height: 450px;
-    border-radius: 10px;
-    object-fit: cover;
   }
 }
 
-
 @media (max-width: 400px) {
-  .mens-section3-center h2 {
+  .mens-sectionh-center h2 {
     font-size: 1.2rem;
   }
-
-  .mens-section3-discount h1 {
+  .mens-sectionh-discount h1 {
     font-size: 1.8rem;
+  }
+  .mens-sectionh-left img,
+  .mens-sectionh-right img {
+    height: 360px;
   }
 }

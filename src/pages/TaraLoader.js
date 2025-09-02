@@ -51,7 +51,7 @@ export default function TaraLoader() {
         <div className="tara-gap" />
 
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 140" height="90" width="320" className="tara-inline">
-          <text x="10" y="100" className="tara-word" textRendering="geometricPrecision">TARA</text>
+          <text x="10" y="100" className="tara-word" textRendering="geometricPrecision">TARA KART</text>
         </svg>
 
         <div className="tara-gap" />

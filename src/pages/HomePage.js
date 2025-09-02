@@ -148,7 +148,7 @@ const HomePage = () => {
                         <div className="line1 large1"></div>
                         <div className="line1 medium1"></div>
                         <div className="line1 small1"></div>
-                    </div> 
+                    </div>
                 </div>
                 <div className="home-section5-slider">
                     <div className="home-section5-slider-track">
@@ -177,6 +177,7 @@ const HomePage = () => {
                 </div>
             </section>
 
+
             <section className="mens-sectionh">
                 <div className="mens-sectionh-left">
                     <img src="/images/mens-part1.jpg" alt="Left Fashion" />
@@ -194,6 +195,7 @@ const HomePage = () => {
                     <img src="/images/mens-part2.jpg" alt="Right Fashion" />
                 </div>
             </section>
+
 
 
 

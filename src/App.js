@@ -14,6 +14,7 @@ import Brands from './pages/Brands';
 import { WishlistProvider } from './WishlistContext';
 import SearchResults from './pages/SearchResults';
 import TaraLoader from './pages/TaraLoader';
+import ScrollToTop from './pages/ScrollToTop';
 
 function NavigationLoader() {
   const location = useLocation();
@@ -32,6 +33,7 @@ function AppShell() {
   return (
     <>
       <NavigationLoader />
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/men" element={<MenPage />} />

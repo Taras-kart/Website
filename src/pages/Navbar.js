@@ -11,9 +11,12 @@ const NavbarFinal = () => {
   const { cartItems } = useCart();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showNav, setShowNav] = useState(true);
   const location = useLocation();
   const mobileNavRef = useRef(null);
   const navigate = useNavigate();
+  const lastY = useRef(0);
+  const ticking = useRef(false);
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -27,9 +30,37 @@ const NavbarFinal = () => {
     };
     if (isMobileNavOpen) {
       document.addEventListener('click', handleOutsideClick);
+      document.body.classList.add('drawer-open');
+    } else {
+      document.body.classList.remove('drawer-open');
     }
-    return () => document.removeEventListener('click', handleOutsideClick);
+    return () => {
+      document.removeEventListener('click', handleOutsideClick);
+      document.body.classList.remove('drawer-open');
+    };
   }, [isMobileNavOpen]);
+
+  useEffect(() => {
+    lastY.current = window.scrollY || window.pageYOffset || 0;
+    const threshold = 6;
+    const onScroll = () => {
+      if (ticking.current) return;
+      ticking.current = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY || window.pageYOffset || 0;
+        const delta = y - lastY.current;
+        if (y <= 0) {
+          setShowNav(true);
+        } else if (Math.abs(delta) > threshold) {
+          setShowNav(delta < 0);
+          lastY.current = y;
+        }
+        ticking.current = false;
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const handleNavClick = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -55,7 +86,7 @@ const NavbarFinal = () => {
   const isActive = (p) => location.pathname === p;
 
   return (
-    <nav className="navbar-final">
+    <nav className={`navbar-final ${showNav ? '' : 'nav-hidden'}`}>
       <div className="top-row-final">
         <div className="logo-final">
           <video autoPlay loop muted playsInline>
@@ -63,7 +94,6 @@ const NavbarFinal = () => {
             Your browser does not support the video tag.
           </video>
         </div>
-
 
         <div className="nav-toggle-final" onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}>
           <div className={`dot-grid-final ${isMobileNavOpen ? 'dots-open' : ''}`}>

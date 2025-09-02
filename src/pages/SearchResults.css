@@ -2,6 +2,7 @@
   position: relative;
   font-family: "inter", serif;
   overflow-x: hidden;
+  margin-top: -40px;
 }
 
 .sr-page-main {

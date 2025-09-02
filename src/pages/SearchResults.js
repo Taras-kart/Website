@@ -58,11 +58,7 @@ const SearchResults = () => {
       <FilterSidebar onFilterChange={(data) => setResults(Array.isArray(data) ? data : [])} />
       <div className="sr-page-main">
         <div className="sr-content">
-          <div className="sr-header-wrap">
-            <h2 className="sr-title">
-              Search Results for: <span className="sr-highlight">{query}</span>
-            </h2>
-          </div>
+
 
           {loading ? (
             <p className="sr-status">Loading...</p>
@@ -70,7 +66,13 @@ const SearchResults = () => {
             <p className="sr-status">No products found.</p>
           ) : (
             <section className="sr-section4">
+              <div className="sr-header-wrap">
+                <h2 className="sr-title">
+                  Search Results for: <span className="sr-highlight">{query}</span>
+                </h2>
+              </div>
               <div className="sr-section4-grid">
+
                 {results.map((product) => (
                   <div
                     key={product.id}

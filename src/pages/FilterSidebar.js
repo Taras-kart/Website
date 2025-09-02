@@ -27,7 +27,10 @@ const keyMap = {
 const FilterSidebar = ({ onFilterChange }) => {
   const [openSection, setOpenSection] = useState(null);
   const [selectedFilters, setSelectedFilters] = useState({});
+  const [showBar, setShowBar] = useState(true);
   const wrapRef = useRef(null);
+  const lastY = useRef(0);
+  const ticking = useRef(false);
 
   const toggleSection = (key) => {
     setOpenSection(openSection === key ? null : key);
@@ -86,15 +89,37 @@ const FilterSidebar = ({ onFilterChange }) => {
     const onClick = (e) => {
       if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpenSection(null);
     };
-    document.addEventListener('click', onClick);
+    document.addEventListener('click', onClick, { passive: true });
     return () => document.removeEventListener('click', onClick);
+  }, []);
+
+  useEffect(() => {
+    lastY.current = window.scrollY || window.pageYOffset || 0;
+    const threshold = 6;
+    const handleScroll = () => {
+      if (ticking.current) return;
+      ticking.current = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY || window.pageYOffset || 0;
+        const delta = y - lastY.current;
+        if (y <= 0) {
+          setShowBar(true);
+        } else if (Math.abs(delta) > threshold) {
+          setShowBar(delta < 0);
+          lastY.current = y;
+        }
+        ticking.current = false;
+      });
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const sectionCount = (k) => (selectedFilters[k]?.length ? selectedFilters[k].length : 0);
 
   return (
     <>
-      <div className="filterbar-wrap" ref={wrapRef}>
+      <div className={`filterbar-wrap ${showBar ? '' : 'hidden'}`} ref={wrapRef}>
         <div className="filter-bar">
           <div className="filter-left">
             <div className="filter-title-wrap">
