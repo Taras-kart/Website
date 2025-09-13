@@ -79,7 +79,6 @@ const NavbarFinal = () => {
     { name: 'Women', path: '/women' },
     { name: 'Men', path: '/men' },
     { name: 'Kids', path: '/kids' },
-    { name: 'GenZ', path: '/genz' },
     { name: 'All Brands', path: '/brands' }
   ];
 

@@ -2,6 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import './ForgotPasswordPopup.css';
 import { FiX, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 
+const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
+const API_BASE_RAW =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
+  (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
+  DEFAULT_API_BASE;
+const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
+
 const ForgotPasswordPopup = ({ onClose }) => {
   const cardRef = useRef(null);
   const overlayRef = useRef(null);
@@ -21,6 +28,7 @@ const ForgotPasswordPopup = ({ onClose }) => {
     const next = document.querySelector(`#otp-${idx + 1}`);
     if (next) next.focus();
   };
+
   const focusPrev = (idx) => {
     const prev = document.querySelector(`#otp-${idx - 1}`);
     if (prev) prev.focus();
@@ -42,13 +50,13 @@ const ForgotPasswordPopup = ({ onClose }) => {
     }
     try {
       setLoading(true);
-      const check = await fetch(`http://localhost:5000/api/auth/${encodeURIComponent(email)}`);
+      const check = await fetch(`${API_BASE}/api/auth/${encodeURIComponent(email)}`);
       if (!check.ok) {
         setMsg('You are a new user. Please register');
         setLoading(false);
         return;
       }
-      const start = await fetch('http://localhost:5000/api/auth/forgot/start', {
+      const start = await fetch(`${API_BASE}/api/auth/forgot/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
@@ -75,7 +83,7 @@ const ForgotPasswordPopup = ({ onClose }) => {
     }
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:5000/api/auth/forgot/verify', {
+      const res = await fetch(`${API_BASE}/api/auth/forgot/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp: otpValue })
@@ -102,7 +110,7 @@ const ForgotPasswordPopup = ({ onClose }) => {
     }
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:5000/api/auth/forgot/reset', {
+      const res = await fetch(`${API_BASE}/api/auth/forgot/reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp: otpValue, newPassword: pwd })
@@ -145,7 +153,6 @@ const ForgotPasswordPopup = ({ onClose }) => {
     <div className="fp-overlay" ref={overlayRef} onMouseDown={stop} onClick={stop}>
       <div className="fp-card" ref={cardRef} role="dialog" aria-modal="true" onMouseDown={stop} onClick={stop}>
         <button className="fp-close" onClick={onClose}><FiX /></button>
-
         {step === 'email' && (
           <>
             <h3 className="fp-title">Forgot Password</h3>
@@ -165,7 +172,6 @@ const ForgotPasswordPopup = ({ onClose }) => {
             </button>
           </>
         )}
-
         {step === 'otp' && (
           <>
             <h3 className="fp-title">Verify OTP</h3>
@@ -195,7 +201,6 @@ const ForgotPasswordPopup = ({ onClose }) => {
             </div>
           </>
         )}
-
         {step === 'reset' && (
           <>
             <h3 className="fp-title">Set New Password</h3>

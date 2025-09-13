@@ -8,6 +8,13 @@ import CustomerCare from './CustomerCare';
 import LoginPopup from './LoginPopup';
 import SignupPopup from './SignupPopup';
 
+const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
+const API_BASE_RAW =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
+  (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
+  DEFAULT_API_BASE;
+const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
+
 const Profile = () => {
   const [activeSection, setActiveSection] = useState('Profile');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -18,7 +25,7 @@ const Profile = () => {
   useEffect(() => {
     const email = sessionStorage.getItem('userEmail');
     if (email) {
-      fetch(`http://localhost:5000/api/user/by-email/${email}`)
+      fetch(`${API_BASE}/api/user/by-email/${encodeURIComponent(email)}`)
         .then(res => res.json())
         .then(data => {
           if (data && data.email) {
@@ -52,7 +59,6 @@ const Profile = () => {
       <div className="profile-container">
         <div className="profile-left">
           <div className="profile-title">My Account</div>
-
           {isLoggedIn && userInfo && (
             <div className="mini-card">
               <div className="mini-avatar">
@@ -65,7 +71,6 @@ const Profile = () => {
               </div>
             </div>
           )}
-
           <div className="profile-buttons">
             <button
               className={`profile-button ${activeSection === 'Profile' ? 'active' : ''}`}
@@ -103,7 +108,6 @@ const Profile = () => {
             )}
           </div>
         </div>
-
         <div key={activeSection} className="profile-right animate-section">
           {!isLoggedIn ? (
             <div className="login-signup-panel">
@@ -134,7 +138,6 @@ const Profile = () => {
                     </div>
                   </div>
                 </div>
-
                 <div className="info-grid">
                   <div className="info-item">
                     <div className="info-label">Email</div>
@@ -145,7 +148,6 @@ const Profile = () => {
                     <div className="info-value">{userInfo.mobile}</div>
                   </div>
                 </div>
-
                 <div className="cta-row">
                   <a href="/wishlist" className="glass-cta">View Wishlist</a>
                   <a href="/orders" className="glass-cta">Track Orders</a>
@@ -153,7 +155,6 @@ const Profile = () => {
               </div>
             )
           )}
-
           {activeSection === 'Orders' && isLoggedIn && (
             <div className="section-card">
               <Orders
@@ -170,13 +171,11 @@ const Profile = () => {
               />
             </div>
           )}
-
           {activeSection === 'Terms' && (
             <div className="section-card">
               <TandC />
             </div>
           )}
-
           {activeSection === 'CustomerCare' && (
             <div className="section-card">
               <CustomerCare />
@@ -184,7 +183,6 @@ const Profile = () => {
           )}
         </div>
       </div>
-
       {showLoginPopup && (
         <LoginPopup
           onClose={() => setShowLoginPopup(false)}
@@ -194,7 +192,6 @@ const Profile = () => {
           }}
         />
       )}
-
       {showSignupPopup && (
         <SignupPopup
           onClose={() => setShowSignupPopup(false)}
@@ -204,7 +201,6 @@ const Profile = () => {
           }}
         />
       )}
-
       <Footer />
     </div>
   );

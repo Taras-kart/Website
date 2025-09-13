@@ -5,6 +5,13 @@ import { FiX, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import './LoginPopup.css';
 import ForgotPasswordPopup from './ForgotPasswordPopup';
 
+const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
+const API_BASE_RAW =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
+  (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
+  DEFAULT_API_BASE;
+const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
+
 const LoginPopup = ({ onClose, onSuccess }) => {
   const popupRef = useRef(null);
   const emailRef = useRef(null);
@@ -22,7 +29,7 @@ const LoginPopup = ({ onClose, onSuccess }) => {
     if (!canSubmit) return;
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -75,7 +82,7 @@ const LoginPopup = ({ onClose, onSuccess }) => {
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
     };
-  }, [showForgot]);
+  }, [showForgot, onClose]);
 
   return (
     <>

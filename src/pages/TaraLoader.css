@@ -15,22 +15,30 @@
   inset: 0;
   z-index: 9999;
   display: flex;
+  flex-direction: column;
+  gap: 20px;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(10px);
-  background:
-    radial-gradient(1000px 400px at 20% -10%, rgba(255, 210, 119, .10), transparent 60%),
-    radial-gradient(800px 300px at 80% 110%, rgba(151, 59, 237, .10), transparent 60%),
-    rgba(0, 0, 0, .88);
+  background: #000;
+}
+
+.tara-video {
+  width: min(360px, 60vw);
+  height: auto;
+  border-radius: 16px;
+  outline: 1px solid rgba(255, 255, 255, .08);
+  box-shadow:
+    0 20px 70px rgba(0, 0, 0, .55),
+    0 0 0 1px rgba(255, 255, 255, .03) inset;
 }
 
 .tara-loader {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px 28px;
-  border-radius: 20px;
-  background: rgba(10, 10, 10, .6);
+  padding: 20px 54px;
+  border-radius: 16px;
+  background: rgba(10, 10, 10, .7);
   border: 1px solid rgba(255, 255, 255, .08);
   box-shadow:
     0 20px 70px rgba(0, 0, 0, .55),
@@ -42,18 +50,17 @@
   content: "";
   position: absolute;
   inset: -1px;
-  border-radius: 22px;
+  border-radius: 18px;
   pointer-events: none;
-  background:
-    linear-gradient(120deg, rgba(255, 210, 119, .3), rgba(151, 59, 237, .3), rgba(0, 124, 255, .3));
+  background: linear-gradient(120deg, rgba(255, 211, 106, .35), rgba(255, 255, 255, .35));
   opacity: .08;
-  filter: blur(20px);
+  filter: blur(0px);
 }
 
 .tara-word {
   font-family: Poppins, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
-  font-weight: 900;
-  font-size: 92px;
+  font-weight: 700;
+  font-size: 80px;
   letter-spacing: 6px;
   fill: transparent;
   stroke: url(#tara-b);
@@ -63,8 +70,8 @@
   paint-order: stroke;
   stroke-dasharray: 0 1200;
   stroke-dashoffset: 0;
-  animation: taraWrite 2s ease-in-out infinite, taraGlow 1.8s ease-in-out infinite;
-  filter: drop-shadow(0 0 16px rgba(255, 210, 119, .18));
+  animation: taraWrite 2s ease-in-out infinite;
+  width: 100%;
 }
 
 .tara-dash {
@@ -87,18 +94,6 @@
 
   100% {
     stroke-dasharray: 1200 0
-  }
-}
-
-@keyframes taraGlow {
-
-  0%,
-  100% {
-    filter: drop-shadow(0 0 10px rgba(255, 210, 119, .25))
-  }
-
-  50% {
-    filter: drop-shadow(0 0 20px rgba(151, 59, 237, .35))
   }
 }
 
@@ -167,76 +162,59 @@
 }
 
 @media (max-width: 768px) {
-  .tara-overlay {
-    backdrop-filter: none;
-    background: rgba(0, 0, 0, 0.88);
-  }
-
   .tara-loader {
-    padding: 16px 20px;
+    padding: 16px 18px
   }
 
   .tara-word {
     font-size: 60px;
-    letter-spacing: 4px;
+    letter-spacing: 4px
   }
 
   .tara-dash {
-    stroke-width: 6;
+    stroke-width: 6
   }
 
   .tara-gap {
-    width: .5em;
+    width: .5em
   }
 }
 
 @media (max-width: 500px) {
-  .tara-overlay {
-    backdrop-filter: none;
-    background: rgba(0, 0, 0, 0.88);
-    width: 100%;
-    margin: 0 auto;
-  }
-
   .tara-loader {
-    padding: 14px 18px;
-    width: 80%;
+    padding: 14px 16px;
+    width: 86%
   }
 
   .tara-word {
-    font-size: 50px;
-    letter-spacing: 3px;
+    font-size: 48px;
+    letter-spacing: 3px
   }
 
   .tara-dash {
-    stroke-width: 5;
+    stroke-width: 5
   }
 
   .tara-gap {
-    width: .4em;
+    width: .4em
   }
 }
 
 @media (max-width: 400px) {
-  .tara-overlay {
-    backdrop-filter: none;
-    background: rgba(0, 0, 0, 0.88);
-  }
-
   .tara-loader {
-    padding: 12px 16px;
+    padding: 12px 14px
   }
 
   .tara-word {
     font-size: 40px;
-    letter-spacing: 2px;
+    letter-spacing: 2px
   }
 
   .tara-dash {
-    stroke-width: 4;
+    stroke-width: 4
   }
 
   .tara-gap {
-    width: .35em;
+    width: .35em
   }
 }

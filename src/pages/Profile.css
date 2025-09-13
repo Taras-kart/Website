@@ -436,4 +436,14 @@
   .profile-container { padding: 14px }
   .login-signup-buttons { flex-direction: column }
   .login-button, .signup-button { width: 100% }
+  .profile-page {
+    margin-top: 100px;
+  display: flex;
+  flex-direction: column;
+  background-color: #000;
+  color: #fff;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  }
 }

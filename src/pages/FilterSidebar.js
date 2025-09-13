@@ -15,7 +15,12 @@ const filterData = {
   rating: ['4★ & above', '3★ & above']
 };
 
-const API_BASE = 'http://localhost:5000';
+const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
+const API_BASE_RAW =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
+  (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
+  DEFAULT_API_BASE;
+const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
 
 const keyMap = {
   gender: 'category',

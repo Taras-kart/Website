@@ -7,6 +7,13 @@ import Footer from './Footer';
 import { useWishlist } from '../WishlistContext';
 import { FaTimes } from 'react-icons/fa';
 
+const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
+const API_BASE_RAW =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
+  (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
+  DEFAULT_API_BASE;
+const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
+
 const Wishlist = () => {
   const { wishlistItems, setWishlistItems } = useWishlist();
   const [showPopup, setShowPopup] = useState(false);
@@ -20,12 +27,12 @@ const Wishlist = () => {
 
   useEffect(() => {
     if (userId) {
-      fetch(`http://localhost:5000/api/wishlist/${userId}`)
+      fetch(`${API_BASE}/api/wishlist/${userId}`)
         .then((res) => res.json())
         .then((data) => {
-          setWishlistItems(data);
+          setWishlistItems(Array.isArray(data) ? data : []);
         })
-        .catch((err) => console.error('Error fetching wishlist:', err));
+        .catch(() => {});
     }
   }, [userId, setWishlistItems]);
 
@@ -36,19 +43,15 @@ const Wishlist = () => {
 
   const confirmRemove = async () => {
     try {
-      await fetch('http://localhost:5000/api/wishlist', {
+      await fetch(`${API_BASE}/api/wishlist`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, product_id: selectedItem.id }),
       });
-
-      const updatedWishlist = wishlistItems.filter(
-        (item) => item.id !== selectedItem.id
-      );
+      const updatedWishlist = wishlistItems.filter((item) => item.id !== selectedItem.id);
       setWishlistItems(updatedWishlist);
-    } catch (error) {
-      console.error('Failed to remove from wishlist:', error);
-    } finally {
+    } catch {}
+    finally {
       setShowPopup(false);
     }
   };
@@ -90,12 +93,7 @@ const Wishlist = () => {
                     <span className="wishlist-offer">₹{item.final_price_b2c}</span>
                     <span className="wishlist-original">₹{item.original_price_b2c}</span>
                     <span className="wishlist-discount">
-                      ({Math.round(
-                        ((item.original_price_b2c - item.final_price_b2c) /
-                          item.original_price_b2c) *
-                          100
-                      )}
-                      % OFF)
+                      ({Math.round(((item.original_price_b2c - item.final_price_b2c) / item.original_price_b2c) * 100)}% OFF)
                     </span>
                   </div>
                 </div>

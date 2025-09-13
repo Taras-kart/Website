@@ -5,11 +5,19 @@ import './CheckoutPage.css';
 import { useCart } from '../CartContext';
 import { useWishlist } from '../WishlistContext';
 import { FaHeart, FaShoppingBag } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+
+const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
+const API_BASE_RAW =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
+  (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
+  DEFAULT_API_BASE;
+const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
 
 const CheckoutPage = () => {
+  const navigate = useNavigate();
   const { addToCart } = useCart();
   const { addToWishlist } = useWishlist();
-
   const [lens, setLens] = useState({ x: 0, y: 0, w: 0, h: 0 });
   const [zoomStyles, setZoomStyles] = useState({ offsetX: 0, offsetY: 0, zoomLeft: false });
   const [isHovering, setIsHovering] = useState(false);
@@ -23,9 +31,7 @@ const CheckoutPage = () => {
 
   useEffect(() => {
     const storedProduct = sessionStorage.getItem('selectedProduct');
-    if (storedProduct) {
-      setProduct(JSON.parse(storedProduct));
-    }
+    if (storedProduct) setProduct(JSON.parse(storedProduct));
   }, []);
 
   useEffect(() => {
@@ -44,28 +50,29 @@ const CheckoutPage = () => {
       setTimeout(() => setPopupMessage(''), 2000);
       return;
     }
-
-    const item = {
-      ...product,
-      selectedColor,
-      selectedSize
-    };
-
+    const item = { ...product, selectedColor, selectedSize, quantity: 1 };
     if (type === 'bag') {
-      await fetch('http://localhost:5000/api/cart/tarascart', {
+      const resp = await fetch(`${API_BASE}/api/cart/tarascart`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: userId,
           product_id: product.id,
           selected_size: selectedSize,
-          selected_color: selectedColor
+          selected_color: selectedColor,
+          quantity: 1
         })
       });
-      addToCart(item);
-      setPopupMessage('Added to bag successfully');
+      if (resp.ok) {
+        addToCart(item);
+        window.scrollTo(0, 0);
+        navigate('/cart');
+      } else {
+        setPopupMessage('Failed to add to bag');
+        setTimeout(() => setPopupMessage(''), 2000);
+      }
     } else {
-      await fetch('http://localhost:5000/api/wishlist', {
+      const resp = await fetch(`${API_BASE}/api/wishlist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -73,11 +80,15 @@ const CheckoutPage = () => {
           product_id: product.id
         })
       });
-      addToWishlist(item);
-      setPopupMessage('Added to wishlist successfully');
+      if (resp.ok) {
+        addToWishlist(item);
+        setPopupMessage('Added to wishlist successfully');
+        setTimeout(() => setPopupMessage(''), 2000);
+      } else {
+        setPopupMessage('Failed to add to wishlist');
+        setTimeout(() => setPopupMessage(''), 2000);
+      }
     }
-
-    setTimeout(() => setPopupMessage(''), 2000);
   };
 
   const handleMouseMove = (e) => {
@@ -198,7 +209,7 @@ const CheckoutPage = () => {
                 {['Red', 'Black', 'Gold', 'Green', 'Purple', 'Blue'].map((color) => (
                   <div
                     key={color}
-                    className="bhuvi-color-circle"
+                    className={`bhuvi-color-circle ${selectedColor === color ? 'active' : ''}`}
                     style={{ backgroundColor: color.toLowerCase() }}
                     onClick={() => setSelectedColor(color)}
                   />

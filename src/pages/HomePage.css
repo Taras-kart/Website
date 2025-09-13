@@ -436,7 +436,7 @@
 
 .home-section4-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 40px;
   max-width: 1200px;
   margin: 0 auto;
@@ -454,6 +454,8 @@
   justify-content: center;
   width: 100%;
   overflow: hidden;
+  text-decoration: none;
+  color: inherit;
 }
 
 .home-section4-card img {
@@ -466,8 +468,8 @@
 
 .home-section4-text {
   position: absolute;
-  left: 30px;
-  top: 50%;
+  left: 10px;
+  top: 80%;
   transform: translateY(-50%);
   color: white;
   text-align: left;

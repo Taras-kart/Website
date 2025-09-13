@@ -7,6 +7,13 @@ import './Cart.css';
 import { FaTimes, FaCheck } from 'react-icons/fa';
 import Popup from './Popup';
 
+const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
+const API_BASE_RAW =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
+  (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
+  DEFAULT_API_BASE;
+const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
+
 const Cart = () => {
   const { addToWishlist } = useWishlist();
   const { removeFromCart } = useCart();
@@ -18,39 +25,35 @@ const Cart = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  const fetchCartItems = async () => {
-    const response = await fetch(`http://localhost:5000/api/cart/${userId}`);
-    if (response.ok) {
-      const data = await response.json();
-      setCartItems(data);
-      const initialQuantities = data.reduce((acc, item) => {
-        acc[item.id] = item.quantity || 1;
-        return acc;
-      }, {});
-      setQuantities(initialQuantities);
-    } else {
-      console.error('Error fetching cart items:', response.statusText);
-    }
+    const fetchCartItems = async () => {
+      const response = await fetch(`${API_BASE}/api/cart/${userId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setCartItems(data);
+        const initialQuantities = data.reduce((acc, item) => {
+          acc[item.id] = item.quantity || 1;
+          return acc;
+        }, {});
+        setQuantities(initialQuantities);
+      }
+    };
+    if (userId) fetchCartItems();
+  }, [userId]);
+
+  const handleRemoveClick = (item) => {
+    setSelectedItem(item);
+    setShowPopup(true);
   };
-
-  if (userId) fetchCartItems();
-}, [userId]);
-
-
-const handleRemoveClick = (item) => {
-  setSelectedItem(item);
-  setShowPopup(true);
-};
-
 
   const handleConfirmRemove = async () => {
     if (selectedItem && userId) {
-      await fetch('http://localhost:5000/api/cart', {
+      await fetch(`${API_BASE}/api/cart/tarascart`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, product_id: selectedItem.id })
       });
       setCartItems(prev => prev.filter(item => item.id !== selectedItem.id));
+      removeFromCart(selectedItem.id);
     }
     setShowPopup(false);
   };
@@ -59,7 +62,7 @@ const handleRemoveClick = (item) => {
     const quantity = parseInt(value);
     setQuantities((prev) => ({ ...prev, [productId]: quantity }));
     if (userId) {
-      await fetch('http://localhost:5000/api/cart', {
+      await fetch(`${API_BASE}/api/cart/tarascart`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, product_id: productId, quantity })
@@ -122,7 +125,7 @@ const handleRemoveClick = (item) => {
                           <div
                             className="color-display"
                             style={{
-                              backgroundColor: item.selected_color.toLowerCase(),
+                              backgroundColor: (item.selected_color || '').toLowerCase(),
                               width: '18px',
                               height: '18px',
                               borderRadius: '50%',

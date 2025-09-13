@@ -5,6 +5,13 @@ import { FiEye, FiEyeOff, FiX, FiUser, FiMail, FiPhone, FiLock } from 'react-ico
 import { jwtDecode } from 'jwt-decode';
 import './SignupPopup.css';
 
+const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
+const API_BASE_RAW =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
+  (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
+  DEFAULT_API_BASE;
+const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
+
 const SignupPopup = ({ onClose, onSuccess }) => {
   const popupRef = useRef(null);
   const firstInputRef = useRef(null);
@@ -67,7 +74,7 @@ const SignupPopup = ({ onClose, onSuccess }) => {
     if (!canSubmit) return;
     try {
       setSubmitting(true);
-      const response = await fetch('http://localhost:5000/api/b2c-customers/signup', {
+      const response = await fetch(`${API_BASE}/api/b2c-customers/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: fullName.trim(), email: email.trim(), mobile: mobile.trim(), password })
@@ -99,7 +106,7 @@ const SignupPopup = ({ onClose, onSuccess }) => {
           const decoded = jwtDecode(resp.credential || '');
           const gName = decoded?.name || '';
           const gEmail = decoded?.email || '';
-          const response = await fetch('http://localhost:5000/api/b2c-customers/signup', {
+          const response = await fetch(`${API_BASE}/api/b2c-customers/signup`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: gName, email: gEmail, oauthProvider: 'google' })
@@ -127,12 +134,10 @@ const SignupPopup = ({ onClose, onSuccess }) => {
     <div className="signup-overlay" onMouseDown={handleOverlayMouseDown}>
       <div className="signup-card" ref={popupRef} role="dialog" aria-modal="true">
         <button className="close-btn" onClick={onClose} aria-label="Close"><FiX /></button>
-
         <div className="signup-head">
           <h2 className="signup-title">Create your account</h2>
           <p className="signup-sub">Join Tars Kart to track orders, save items and get faster checkout</p>
         </div>
-
         <form className="signup-form" onSubmit={(e) => e.preventDefault()}>
           <div className="input-row">
             <div className="input-wrap">
@@ -146,7 +151,6 @@ const SignupPopup = ({ onClose, onSuccess }) => {
               />
             </div>
           </div>
-
           <div className="input-row">
             <div className={`input-wrap ${email && !validateEmail(email) ? 'has-error' : ''}`}>
               <span className="i-icon"><FiMail /></span>
@@ -158,7 +162,6 @@ const SignupPopup = ({ onClose, onSuccess }) => {
               />
             </div>
           </div>
-
           <div className="input-row">
             <div className={`input-wrap ${mobile && !validateMobile(mobile) ? 'has-error' : ''}`}>
               <span className="i-icon"><FiPhone /></span>
@@ -171,7 +174,6 @@ const SignupPopup = ({ onClose, onSuccess }) => {
               />
             </div>
           </div>
-
           <div className="input-row">
             <div className={`input-wrap ${password && strength < 3 ? 'warn' : ''}`}>
               <span className="i-icon"><FiLock /></span>
@@ -190,7 +192,6 @@ const SignupPopup = ({ onClose, onSuccess }) => {
               <span className="s-label">{password ? strengthLabel : ''}</span>
             </div>
           </div>
-
           <div className="input-row">
             <div className={`input-wrap ${confirmPassword && confirmPassword !== password ? 'has-error' : ''}`}>
               <span className="i-icon"><FiLock /></span>
@@ -205,15 +206,12 @@ const SignupPopup = ({ onClose, onSuccess }) => {
               </button>
             </div>
           </div>
-
           <label className="terms">
             <input type="checkbox" checked={acceptTerms} onChange={(e) => setAcceptTerms(e.target.checked)} />
             <span>I agree to the Terms & Conditions and Privacy Policy</span>
           </label>
-
           {error && <div className="alert error">{error}</div>}
           {success && <div className="alert success">{success}</div>}
-
           <button
             className={`submit ${canSubmit ? '' : 'disabled'}`}
             onClick={handleSubmit}
@@ -222,19 +220,16 @@ const SignupPopup = ({ onClose, onSuccess }) => {
             {submitting ? <span className="spinner" /> : 'Create Account'}
           </button>
         </form>
-
         <div className="or-row">
           <span className="line" />
           <span className="or">Or</span>
           <span className="line" />
         </div>
-
         <div className="social-row">
           <button className="soc-btn google" onClick={handleGoogleLogin}><FaGoogle /> Continue with Google</button>
           <button className="soc-icon" aria-label="Facebook"><FaFacebookF /></button>
           <button className="soc-icon" aria-label="Instagram"><FaInstagram /></button>
         </div>
-
         <div className="switch-row">
           Already have an account? <span className="switch" onClick={onClose}>Login</span>
         </div>

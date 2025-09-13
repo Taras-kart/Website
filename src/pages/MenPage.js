@@ -7,13 +7,20 @@ import FilterSidebar from './FilterSidebar';
 import { useWishlist } from '../WishlistContext';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 
+const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
+const API_BASE_RAW =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
+  (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
+  DEFAULT_API_BASE;
+const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
+
 const MenPage = () => {
   const navigate = useNavigate();
   const { addToWishlist, wishlistItems } = useWishlist();
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/products/Men')
+    fetch(`${API_BASE}/api/products/Men`)
       .then((res) => res.json())
       .then((data) => setProducts(Array.isArray(data) ? data : []))
       .catch(() => setProducts([]));
@@ -27,13 +34,13 @@ const MenPage = () => {
     );
 
     if (alreadyInWishlist) {
-      await fetch('http://localhost:5000/api/wishlist', {
+      await fetch(`${API_BASE}/api/wishlist`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, product_id: product.id }),
       });
     } else {
-      await fetch('http://localhost:5000/api/wishlist', {
+      await fetch(`${API_BASE}/api/wishlist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, product_id: product.id }),
@@ -44,11 +51,11 @@ const MenPage = () => {
   };
 
   const handleProductClick = (product) => {
-    sessionStorage.setItem('selectedProduct', JSON.stringify(product)); // Save the selected product in sessionStorage
-     const newTab = window.open('/checkout', '_blank');
-  newTab.onload = () => {
-    newTab.sessionStorage.setItem('selectedProduct', JSON.stringify(product));
-  };
+    sessionStorage.setItem('selectedProduct', JSON.stringify(product));
+    const newTab = window.open('/checkout', '_blank');
+    newTab.onload = () => {
+      newTab.sessionStorage.setItem('selectedProduct', JSON.stringify(product));
+    };
   };
 
   return (
@@ -57,7 +64,6 @@ const MenPage = () => {
       <div className="test">
         <FilterSidebar onFilterChange={() => {}} />
         <div className="men-page-main">
-          
           <div className="men-page-content">
             <section className="mens-section1">
               <div className="mens-section1-bg">

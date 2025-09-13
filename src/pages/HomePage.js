@@ -8,8 +8,7 @@ import './HomePage.css';
 import Footer from './Footer';
 import FilterSidebar from './FilterSidebar';
 
-
-const items = [
+const womenItems = [
     { img: 'women-anarkali.jpg', title: 'Anarkali' },
     { img: 'women-chudidar.jpg', title: 'Chudidar' },
     { img: 'women-gowns.jpg', title: 'Gowns' },
@@ -20,31 +19,69 @@ const items = [
     { img: 'women-sarees.jpg', title: 'Sarees' }
 ];
 
+const menItems = [
+    { img: 'mens-casuals.jpg', title: 'Casuals' },
+    { img: 'mens-ethinic.jpg', title: 'Ethnic' },
+    { img: 'mens-formals.jpg', title: 'Formals' },
+    { img: 'mens-party-wear.jpg', title: 'Party Wear' },
+    { img: 'mens-semi-formals.jpg', title: 'Semi Formals' },
+    { img: 'mens-street-wear.jpg', title: 'Street Wear' },
+    { img: 'mens-suits.jpg', title: 'Suits' },
+    { img: 'mens-wedding-wear.jpg', title: 'Wedding Wear' }
+];
+
+const kidsItems = [
+    { img: 'kids-boys-casual-wear.jpg', title: 'Boys Casual Wear' },
+    { img: 'kids-boys-kurta-paijama.jpg', title: 'Boys Kurta Paijama' },
+    { img: 'kids-boys-sherwani.jpg', title: 'Boys Sherwani' },
+    { img: 'kids-formal.jpg', title: 'Formal' },
+    { img: 'kids-girls-frock.jpg', title: 'Girls Frock' },
+    { img: 'kids-girls-gown.jpg', title: 'Girls Gown' },
+    { img: 'kids-girls-lehenga-choli.jpg', title: 'Girls Lehenga Choli' },
+    { img: 'kids-girls-salwar.jpg', title: 'Girls Salwar' }
+];
+
 const HomePage = () => {
     const slides = Array.from({ length: 11 }, (_, i) => `/images/slide${i + 1}.jpg`);
     const section3Images = Array.from({ length: 12 }, (_, i) => `/images/random${i + 1}.jpg`);
 
-    const scrollRef = useRef(null);
+    const womenRef = useRef(null);
+    const menRef = useRef(null);
+    const kidsRef = useRef(null);
 
     useEffect(() => {
-        const scrollContainer = scrollRef.current;
-        let scrollAmount = 0;
-
-        const scrollStep = () => {
-            if (scrollContainer) {
-                scrollAmount += 1;
-                if (scrollAmount >= scrollContainer.scrollWidth / 2) {
-                    scrollAmount = 0;
+        const scrollForward = (el) => {
+            let scrollAmount = 0;
+            return setInterval(() => {
+                if (el) {
+                    scrollAmount += 1;
+                    if (scrollAmount >= el.scrollWidth / 2) scrollAmount = 0;
+                    el.scrollLeft = scrollAmount;
                 }
-                scrollContainer.scrollLeft = scrollAmount;
-            }
+            }, 20);
         };
 
-        const interval = setInterval(scrollStep, 20);
+        const scrollBackward = (el) => {
+            let scrollAmount = el ? el.scrollWidth / 2 : 0;
+            return setInterval(() => {
+                if (el) {
+                    scrollAmount -= 1;
+                    if (scrollAmount <= 0) scrollAmount = el.scrollWidth / 2;
+                    el.scrollLeft = scrollAmount;
+                }
+            }, 20);
+        };
 
-        return () => clearInterval(interval);
+        const womenInterval = scrollForward(womenRef.current?.querySelector(".home-section5-slider"));
+        const menInterval = scrollBackward(menRef.current?.querySelector(".home-section5-slider"));
+        const kidsInterval = scrollForward(kidsRef.current?.querySelector(".home-section5-slider"));
+
+        return () => {
+            clearInterval(womenInterval);
+            clearInterval(menInterval);
+            clearInterval(kidsInterval);
+        };
     }, []);
-
 
 
     return (
@@ -141,7 +178,7 @@ const HomePage = () => {
 
 
 
-            <section className="home-section5">
+            <section className="home-section5" ref={womenRef}>
                 <div className="home-section5-heading">
                     <h2>Women's Collection</h2>
                     <div className="home-section5-underline">
@@ -152,7 +189,7 @@ const HomePage = () => {
                 </div>
                 <div className="home-section5-slider">
                     <div className="home-section5-slider-track">
-                        {[...items, ...items].map((item, index) => (
+                        {[...womenItems, ...womenItems].map((item, index) => (
                             <div className="home-section5-card" key={index}>
                                 <img src={`/images/women/${item.img}`} alt={item.title} />
                                 <h3>{item.title}</h3>
@@ -163,6 +200,53 @@ const HomePage = () => {
                 </div>
             </section>
 
+
+
+            <section className="home-section5" ref={menRef}>
+                <div className="home-section5-heading">
+                    <h2>Men's Collection</h2>
+                    <div className="home-section5-underline">
+                        <div className="line1 large1"></div>
+                        <div className="line1 medium1"></div>
+                        <div className="line1 small1"></div>
+                    </div>
+                </div>
+                <div className="home-section5-slider">
+                    <div className="home-section5-slider-track">
+                        {[...menItems, ...menItems].map((item, index) => (
+                            <div className="home-section5-card" key={index}>
+                                <img src={`/images/men/${item.img}`} alt={item.title} />
+                                <h3>{item.title}</h3>
+                                <button>Buy Now</button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+
+
+            <section className="home-section5" ref={kidsRef}>
+                <div className="home-section5-heading">
+                    <h2>Kid's Collection</h2>
+                    <div className="home-section5-underline">
+                        <div className="line1 large1"></div>
+                        <div className="line1 medium1"></div>
+                        <div className="line1 small1"></div>
+                    </div>
+                </div>
+                <div className="home-section5-slider">
+                    <div className="home-section5-slider-track">
+                        {[...kidsItems, ...kidsItems].map((item, index) => (
+                            <div className="home-section5-card" key={index}>
+                                <img src={`/images/kids/${item.img}`} alt={item.title} />
+                                <h3>{item.title}</h3>
+                                <button>Buy Now</button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
 
             <section className="mens-section2">
                 <div className="mens-section2-bg">
@@ -302,33 +386,24 @@ const HomePage = () => {
                     <div className="line2 small2"></div>
                 </div>
                 <div className="home-section4-grid">
-                    <div className="home-section4-card">
+                    <a href="/men" className="home-section4-card">
                         <div className="home-section4-text">
                             <h3>Mens <br />Fashions</h3>
                         </div>
                         <img src="/images/card1.jpg" alt="Mens Fashions" />
-                    </div>
-                    <div className="home-section4-card">
-                        <div className="home-section4-text">
-                            <h3>Wedding <br /> Varities</h3>
-
-                        </div>
-                        <img src="/images/card2.jpg" alt="Wedding Varities" />
-                    </div>
-                    <div className="home-section4-card">
+                    </a>
+                    <a href="/women" className="home-section4-card">
                         <div className="home-section4-text">
                             <h3>Womens <br />Fashions</h3>
-
                         </div>
-                        <img src="/images/card3.jpg" alt="WoMens Fashions" />
-                    </div>
-                    <div className="home-section4-card">
+                        <img src="/images/card3.jpg" alt="Womens Fashions" />
+                    </a>
+                    <a href="/kids" className="home-section4-card">
                         <div className="home-section4-text">
                             <h3>Kids <br />Fashions</h3>
-
                         </div>
                         <img src="/images/card4.jpg" alt="Kids Fashions" />
-                    </div>
+                    </a>
                 </div>
             </section>
 

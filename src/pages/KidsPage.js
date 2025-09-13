@@ -7,6 +7,13 @@ import FilterSidebar from './FilterSidebar';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import { useWishlist } from '../WishlistContext';
 
+const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
+const API_BASE_RAW =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
+  (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
+  DEFAULT_API_BASE;
+const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
+
 const KidsPage = () => {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
@@ -15,8 +22,8 @@ const KidsPage = () => {
   useEffect(() => {
     const fetchKids = async () => {
       try {
-        const boys = await fetch(`http://localhost:5000/api/products/${encodeURIComponent('Kids - Boys')}`).then(r => r.json());
-        const girls = await fetch(`http://localhost:5000/api/products/${encodeURIComponent('Kids - Girls')}`).then(r => r.json());
+        const boys = await fetch(`${API_BASE}/api/products/${encodeURIComponent('Kids - Boys')}`).then(r => r.json());
+        const girls = await fetch(`${API_BASE}/api/products/${encodeURIComponent('Kids - Girls')}`).then(r => r.json());
         const merged = [...(Array.isArray(boys) ? boys : []), ...(Array.isArray(girls) ? girls : [])];
         setProducts(merged);
       } catch {
@@ -34,13 +41,13 @@ const KidsPage = () => {
     );
 
     if (alreadyInWishlist) {
-      await fetch('http://localhost:5000/api/wishlist', {
+      await fetch(`${API_BASE}/api/wishlist`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, product_id: product.id }),
       });
     } else {
-      await fetch('http://localhost:5000/api/wishlist', {
+      await fetch(`${API_BASE}/api/wishlist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, product_id: product.id }),
@@ -51,11 +58,11 @@ const KidsPage = () => {
   };
 
   const handleProductClick = (product) => {
-    sessionStorage.setItem('selectedProduct', JSON.stringify(product)); // Save the selected product in sessionStorage
-     const newTab = window.open('/checkout', '_blank');
-  newTab.onload = () => {
-    newTab.sessionStorage.setItem('selectedProduct', JSON.stringify(product));
-  };
+    sessionStorage.setItem('selectedProduct', JSON.stringify(product));
+    const newTab = window.open('/checkout', '_blank');
+    newTab.onload = () => {
+      newTab.sessionStorage.setItem('selectedProduct', JSON.stringify(product));
+    };
   };
 
   return (

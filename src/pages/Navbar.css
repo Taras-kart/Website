@@ -150,7 +150,7 @@ body {
   z-index: 0;
 }
 
-.active-final > * {
+.active-final>* {
   position: relative;
   z-index: 1;
 }
@@ -291,6 +291,19 @@ body {
   text-shadow: 0 0 10px rgba(255, 210, 119, 0.4);
 }
 
+.red-dot1 {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(120% 120% at 30% 20%, #ffe199, #ffd277 60%, #b8860b 100%);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .6), 0 0 10px rgba(255, 210, 119, .7);
+  pointer-events: none;
+  transform: translate(0, 0);
+}
+
 .bottom-row-final {
   margin-top: 10px;
   display: none;
@@ -328,6 +341,7 @@ body {
     transform: translateX(20px);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -362,42 +376,52 @@ body {
   .nav-right-final {
     display: none;
   }
+
   .nav-toggle-final {
     display: block;
   }
+
   .bottom-row-final {
     display: flex;
     justify-content: center;
   }
+
   .mobile-only-final {
     display: flex;
     flex-direction: column;
     gap: 10px;
   }
+
   .mobile-drawer-final {
     width: 60vw;
     padding: 40px 24px;
   }
+
   .mobile-drawer-final .nav-links-final {
     flex-direction: column;
     gap: 15px;
   }
+
   .mobile-drawer-final .icon-buttons-final {
     flex-direction: column;
     gap: 20px;
   }
+
   .mobile-drawer-final .nav-link-final {
     font-size: 18px;
     color: white;
   }
+
   .search-bar-final {
     width: 85%;
     margin: 10px auto;
   }
+
   .mobile-icons .icon-circle {
     width: 52px;
     height: 52px;
   }
+
   .mobile-icons .icon {
     font-size: 24px;
   }
@@ -407,38 +431,49 @@ body {
   .navbar-final {
     padding: 10px 15px;
   }
+
   .logo-final img {
     height: 30px;
   }
+
   .nav-toggle-final {
     display: block;
   }
+
   .top-row-final {
     padding: 0 10px;
   }
+
   .nav-right-final {
     display: none;
   }
+
   .mobile-drawer-final {
     display: flex;
   }
+
   .search-bar-final {
     width: 80%;
     margin-top: 10px;
   }
+
   .search-bar-final input {
     font-size: 14px;
   }
+
   .bottom-row-final {
     display: flex;
   }
+
   .active-final {
     height: 35px;
     color: #ffd277 !important;
   }
+
   .active-final span {
     color: #ffd277 !important;
   }
+
   .active-final svg {
     fill: #ffd277 !important;
   }
@@ -448,21 +483,26 @@ body {
   .mobile-drawer-final {
     padding: 32px 20px;
   }
+
   .search-bar-final input {
     font-size: 13px;
   }
+
   .nav-link-final {
     font-size: 14px;
   }
+
   .icon-buttons-final {
     gap: 12px;
   }
+
   .active-final {
     width: 60%;
     height: 40px;
     text-shadow: 0 0 6px #ffd277;
     color: #ffd277 !important;
   }
+
   .active-final span {
     color: #ffd277 !important;
   }

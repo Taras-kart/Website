@@ -7,17 +7,23 @@ import FilterSidebar from './FilterSidebar';
 import './SearchResults.css';
 import { useWishlist } from '../WishlistContext';
 
-const API_BASE = 'http://localhost:5000';
+const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
+const API_BASE_RAW =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
+  (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
+  DEFAULT_API_BASE;
+const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
 
 const SearchResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { wishlistItems, toggleLike } = useWishlist();
+  const { wishlistItems, addToWishlist } = useWishlist();
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const query = new URLSearchParams(location.search).get('q');
   const userType = (localStorage.getItem('userType') || 'B2C').toUpperCase();
+  const userId = sessionStorage.getItem('userId');
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -43,6 +49,23 @@ const SearchResults = () => {
     navigate(`/product/${product.id}`, { state: { product } });
   };
 
+  const handleWishlist = async (e, product) => {
+    e.stopPropagation();
+    if (!userId || !product?.id) return;
+    try {
+      const resp = await fetch(`${API_BASE}/api/wishlist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, product_id: product.id })
+      });
+      if (resp.ok) {
+        addToWishlist(product);
+      }
+    } catch {}
+  };
+
+  const isInWishlist = (id) => wishlistItems.some((w) => String(w.id) === String(id));
+
   const offerPrice = (p) => (userType === 'B2B' ? p.final_price_b2b : p.final_price_b2c);
   const originalPrice = (p) => (userType === 'B2B' ? p.original_price_b2b : p.original_price_b2c);
   const discountPct = (p) => {
@@ -58,8 +81,6 @@ const SearchResults = () => {
       <FilterSidebar onFilterChange={(data) => setResults(Array.isArray(data) ? data : [])} />
       <div className="sr-page-main">
         <div className="sr-content">
-
-
           {loading ? (
             <p className="sr-status">Loading...</p>
           ) : results.length === 0 ? (
@@ -72,7 +93,6 @@ const SearchResults = () => {
                 </h2>
               </div>
               <div className="sr-section4-grid">
-
                 {results.map((product) => (
                   <div
                     key={product.id}
@@ -81,26 +101,21 @@ const SearchResults = () => {
                   >
                     <div className="sr-section4-img">
                       <img src={product.image_url} alt={product.product_name} />
-                      <div
+                      <button
+                        type="button"
                         className="sr-love-icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleLike(product);
-                        }}
+                        onClick={(e) => handleWishlist(e, product)}
+                        aria-label="Add to wishlist"
                       >
-                        {wishlistItems.find(
-                          (item) => item.product_name === product.product_name
-                        ) ? (
-                          <FaHeart style={{ color: 'yellow', fontSize: 20 }} />
+                        {isInWishlist(product.id) ? (
+                          <FaHeart style={{ color: 'gold', fontSize: 20 }} />
                         ) : (
-                          <FaRegHeart style={{ color: 'yellow', fontSize: 20 }} />
+                          <FaRegHeart style={{ color: 'gold', fontSize: 20 }} />
                         )}
-                      </div>
+                      </button>
                     </div>
-
                     <h4 className="sr-brand-name">{product.brand}</h4>
                     <h5 className="sr-product-name">{product.product_name}</h5>
-
                     <div className="sr-section4-price">
                       <span className="sr-offer-price">₹{offerPrice(product)}</span>
                       <span className="sr-original-price">₹{originalPrice(product)}</span>
