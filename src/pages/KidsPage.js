@@ -14,45 +14,65 @@ const API_BASE_RAW =
   DEFAULT_API_BASE;
 const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
 
+const toArray = (x) => (Array.isArray(x) ? x : []);
+
 const KidsPage = () => {
+  const [allProducts, setAllProducts] = useState([]);
   const [products, setProducts] = useState([]);
+  const [filters, setFilters] = useState({});
+  const [userType, setUserType] = useState(null);
   const navigate = useNavigate();
   const { addToWishlist, wishlistItems } = useWishlist();
+  const userId = sessionStorage.getItem('userId');
 
   useEffect(() => {
-    const fetchKids = async () => {
+    const run = async () => {
       try {
-        const boys = await fetch(`${API_BASE}/api/products/${encodeURIComponent('Kids - Boys')}`).then(r => r.json());
-        const girls = await fetch(`${API_BASE}/api/products/${encodeURIComponent('Kids - Girls')}`).then(r => r.json());
-        const merged = [...(Array.isArray(boys) ? boys : []), ...(Array.isArray(girls) ? girls : [])];
+        const boysRes = await fetch(`${API_BASE}/api/products?category=${encodeURIComponent('Kids - Boys')}`);
+        const girlsRes = await fetch(`${API_BASE}/api/products?category=${encodeURIComponent('Kids - Girls')}`);
+        const boys = boysRes.ok ? await boysRes.json() : [];
+        const girls = girlsRes.ok ? await girlsRes.json() : [];
+        const merged = [...toArray(boys), ...toArray(girls)];
+        setAllProducts(merged);
         setProducts(merged);
       } catch {
+        setAllProducts([]);
         setProducts([]);
       }
     };
-    fetchKids();
+    run();
   }, []);
 
-  const userId = sessionStorage.getItem('userId');
+  useEffect(() => {
+    const storedType = sessionStorage.getItem('userType');
+    setUserType(storedType);
+  }, []);
+
+  useEffect(() => {
+    let filtered = [...allProducts];
+    if (filters.brand) filtered = filtered.filter((p) => p.brand === filters.brand);
+    if (filters.priceRange) {
+      filtered = filtered.filter(
+        (p) => Number(p.final_price_b2c) >= filters.priceRange.min && Number(p.final_price_b2c) <= filters.priceRange.max
+      );
+    }
+    setProducts(filtered);
+  }, [filters, allProducts]);
 
   const toggleLike = async (product) => {
-    const alreadyInWishlist = wishlistItems.some(
-      (item) => item.product_name === product.product_name
-    );
-
+    const alreadyInWishlist = wishlistItems.some((item) => item.product_name === product.product_name);
     if (alreadyInWishlist) {
       await fetch(`${API_BASE}/api/wishlist`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, product_id: product.id }),
+        body: JSON.stringify({ user_id: userId, product_id: product.id })
       });
     } else {
       await fetch(`${API_BASE}/api/wishlist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, product_id: product.id }),
+        body: JSON.stringify({ user_id: userId, product_id: product.id })
       });
-
       addToWishlist(product);
     }
   };
@@ -60,16 +80,20 @@ const KidsPage = () => {
   const handleProductClick = (product) => {
     sessionStorage.setItem('selectedProduct', JSON.stringify(product));
     const newTab = window.open('/checkout', '_blank');
-    newTab.onload = () => {
-      newTab.sessionStorage.setItem('selectedProduct', JSON.stringify(product));
-    };
+    if (newTab) {
+      newTab.onload = () => {
+        try {
+          newTab.sessionStorage.setItem('selectedProduct', JSON.stringify(product));
+        } catch {}
+      };
+    }
   };
 
   return (
     <div className="kids-page">
       <Navbar />
       <div className="kids-test">
-        <FilterSidebar onFilterChange={() => {}} />
+        <FilterSidebar onFilterChange={(f) => setFilters(f)} />
         <div className="kids-page-main">
           <div className="kids-page-content">
             <section className="kids-section1">
@@ -86,7 +110,7 @@ const KidsPage = () => {
 
             <section className="kids-section4">
               <div className="kids-section4-grid">
-                {products.map((product) => (
+                {toArray(products).map((product) => (
                   <div
                     key={product.id}
                     className="kids-section4-card"
@@ -101,9 +125,7 @@ const KidsPage = () => {
                           toggleLike(product);
                         }}
                       >
-                        {wishlistItems.find(
-                          (item) => item.product_name === product.product_name
-                        ) ? (
+                        {wishlistItems.find((item) => item.product_name === product.product_name) ? (
                           <FaHeart style={{ color: 'yellow', fontSize: 18 }} />
                         ) : (
                           <FaRegHeart style={{ color: 'yellow', fontSize: 24 }} />
@@ -113,14 +135,21 @@ const KidsPage = () => {
                     <h4 className="brand-name">{product.brand}</h4>
                     <h5 className="product-name">{product.product_name}</h5>
                     <div className="kids-section4-price">
-                      <span className="offer-price">₹{product.final_price_b2c}</span>
-                      <span className="original-price">₹{product.original_price_b2c}</span>
+                      <span className="offer-price">
+                        ₹{userType === 'B2B' ? product.final_price_b2b : product.final_price_b2c}
+                      </span>
+                      <span className="original-price">
+                        ₹{userType === 'B2B' ? product.original_price_b2b : product.original_price_b2c}
+                      </span>
                       <span className="discount">
                         (
                         {Math.round(
-                          ((Number(product.original_price_b2c) - Number(product.final_price_b2c)) / 
-                            Number(product.original_price_b2c)) *
-                            100
+                          ((userType === 'B2B'
+                            ? Number(product.original_price_b2b) - Number(product.final_price_b2b)
+                            : Number(product.original_price_b2c) - Number(product.final_price_b2c)) /
+                            (userType === 'B2B'
+                              ? Number(product.original_price_b2b) || 1
+                              : Number(product.original_price_b2c) || 1)) * 100
                         )}
                         % OFF)
                       </span>

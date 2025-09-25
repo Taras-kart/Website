@@ -40,20 +40,22 @@ const Orders = ({ user }) => {
       : v;
 
   useEffect(() => {
-    const q = new URLSearchParams();
-    if (user?.email) q.set('email', user.email);
-    if (user?.phone) q.set('phone', user.phone);
-    setLoading(true);
-    setError('');
-    fetch(`/api/orders?${q.toString()}`)
-      .then((r) => r.json())
-      .then((d) => setOrders(Array.isArray(d.items) ? d.items.sort(byStatusRank) : []))
-      .catch(() => {
-        setOrders([]);
-        setError('Could not load your orders right now.');
-      })
-      .finally(() => setLoading(false));
-  }, [user?.email, user?.phone]);
+  const q = new URLSearchParams();
+  if (user?.email) q.set('email', user.email);
+  if (user?.phone) q.set('phone', user.phone);
+
+  setLoading(true);
+  setError('');
+
+  fetch(`${process.env.REACT_APP_API_BASE}/api/orders?${q.toString()}`)
+    .then((r) => r.json())
+    .then((d) => setOrders(Array.isArray(d.items) ? d.items.sort(byStatusRank) : []))
+    .catch(() => {
+      setOrders([]);
+      setError('Could not load your orders right now.');
+    })
+    .finally(() => setLoading(false));
+}, [user?.email, user?.phone]);
 
   const filtered = useMemo(() => {
     if (filter === 'All') return orders;

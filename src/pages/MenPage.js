@@ -14,38 +14,66 @@ const API_BASE_RAW =
   DEFAULT_API_BASE;
 const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
 
+const toArray = (x) => (Array.isArray(x) ? x : []);
+
 const MenPage = () => {
   const navigate = useNavigate();
   const { addToWishlist, wishlistItems } = useWishlist();
+  const [allProducts, setAllProducts] = useState([]);
   const [products, setProducts] = useState([]);
-
-  useEffect(() => {
-    fetch(`${API_BASE}/api/products/Men`)
-      .then((res) => res.json())
-      .then((data) => setProducts(Array.isArray(data) ? data : []))
-      .catch(() => setProducts([]));
-  }, []);
-
+  const [filters, setFilters] = useState({});
+  const [userType, setUserType] = useState(null);
   const userId = sessionStorage.getItem('userId');
 
-  const toggleLike = async (product) => {
-    const alreadyInWishlist = wishlistItems.some(
-      (item) => item.product_name === product.product_name
-    );
+  useEffect(() => {
+    const run = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/products?category=${encodeURIComponent('Men')}`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        const arr = toArray(data);
+        setAllProducts(arr);
+        setProducts(arr);
+      } catch {
+        setAllProducts([]);
+        setProducts([]);
+      }
+    };
+    run();
+  }, []);
 
+  useEffect(() => {
+    const storedType = sessionStorage.getItem('userType');
+    setUserType(storedType);
+  }, []);
+
+  useEffect(() => {
+    let filtered = [...allProducts];
+    if (filters.brand) filtered = filtered.filter((p) => p.brand === filters.brand);
+    if (filters.priceRange) {
+      filtered = filtered.filter(
+        (p) =>
+          Number(p.final_price_b2c) >= filters.priceRange.min &&
+          Number(p.final_price_b2c) <= filters.priceRange.max
+      );
+    }
+    setProducts(filtered);
+  }, [filters, allProducts]);
+
+  const toggleLike = async (product) => {
+    const alreadyInWishlist = wishlistItems.some((item) => item.product_name === product.product_name);
     if (alreadyInWishlist) {
       await fetch(`${API_BASE}/api/wishlist`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, product_id: product.id }),
+        body: JSON.stringify({ user_id: userId, product_id: product.id })
       });
     } else {
       await fetch(`${API_BASE}/api/wishlist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, product_id: product.id }),
+        body: JSON.stringify({ user_id: userId, product_id: product.id })
       });
-
       addToWishlist(product);
     }
   };
@@ -53,16 +81,20 @@ const MenPage = () => {
   const handleProductClick = (product) => {
     sessionStorage.setItem('selectedProduct', JSON.stringify(product));
     const newTab = window.open('/checkout', '_blank');
-    newTab.onload = () => {
-      newTab.sessionStorage.setItem('selectedProduct', JSON.stringify(product));
-    };
+    if (newTab) {
+      newTab.onload = () => {
+        try {
+          newTab.sessionStorage.setItem('selectedProduct', JSON.stringify(product));
+        } catch {}
+      };
+    }
   };
 
   return (
     <div className="men-page">
       <Navbar />
       <div className="test">
-        <FilterSidebar onFilterChange={() => {}} />
+        <FilterSidebar onFilterChange={(f) => setFilters(f)} />
         <div className="men-page-main">
           <div className="men-page-content">
             <section className="mens-section1">
@@ -79,7 +111,7 @@ const MenPage = () => {
 
             <section className="mens-section4">
               <div className="mens-section4-grid">
-                {products.map((product) => (
+                {toArray(products).map((product) => (
                   <div
                     key={product.id}
                     className="mens-section4-card"
@@ -94,9 +126,7 @@ const MenPage = () => {
                           toggleLike(product);
                         }}
                       >
-                        {wishlistItems.some(
-                          (item) => item.product_id === product.product_id
-                        ) ? (
+                        {wishlistItems.find((item) => item.product_name === product.product_name) ? (
                           <FaHeart style={{ color: 'yellow', fontSize: 20 }} />
                         ) : (
                           <FaRegHeart style={{ color: 'yellow', fontSize: 20 }} />
@@ -106,14 +136,21 @@ const MenPage = () => {
                     <h4 className="brand-name">{product.brand}</h4>
                     <h5 className="product-name">{product.product_name}</h5>
                     <div className="mens-section4-price">
-                      <span className="offer-price">₹{product.final_price_b2c}</span>
-                      <span className="original-price">₹{product.original_price_b2c}</span>
+                      <span className="offer-price">
+                        ₹{userType === 'B2B' ? product.final_price_b2b : product.final_price_b2c}
+                      </span>
+                      <span className="original-price">
+                        ₹{userType === 'B2B' ? product.original_price_b2b : product.original_price_b2c}
+                      </span>
                       <span className="discount">
                         (
                         {Math.round(
-                          ((Number(product.original_price_b2c) - Number(product.final_price_b2c)) /
-                            Number(product.original_price_b2c)) *
-                            100
+                          ((userType === 'B2B'
+                            ? Number(product.original_price_b2b) - Number(product.final_price_b2b)
+                            : Number(product.original_price_b2c) - Number(product.final_price_b2c)) /
+                            (userType === 'B2B'
+                              ? Number(product.original_price_b2b) || 1
+                              : Number(product.original_price_b2c) || 1)) * 100
                         )}
                         % OFF)
                       </span>
