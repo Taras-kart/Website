@@ -13,7 +13,7 @@ export default function TaraLoader() {
         playsInline
       />
 
-      <svg height="0" width="0" viewBox="0 0 64 64" className="tara-abs">
+      {/*<svg height="0" width="0" viewBox="0 0 64 64" className="tara-abs">
         <defs xmlns="http://www.w3.org/2000/svg">
           <linearGradient gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="tara-b">
             <stop stopColor="#FFD36A"></stop>
@@ -37,9 +37,9 @@ export default function TaraLoader() {
             <stop stopColor="#FFD36A" offset="1"></stop>
           </linearGradient>
         </defs>
-      </svg>
+      </svg> */}
 
-      <div className="tara-loader">
+      {/*<div className="tara-loader">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="64" width="64" className="tara-inline">
           <path
             strokeLinejoin="round"
@@ -71,7 +71,7 @@ export default function TaraLoader() {
             pathLength="360"
           />
         </svg>
-      </div>
+      </div> */}
     </div>
   );
 }
