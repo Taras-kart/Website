@@ -7,6 +7,11 @@
   --accent: #1c1c1c;
 }
 
+html,
+body {
+  overflow-x: hidden;
+}
+
 body.drawer-open {
   overflow: hidden;
 }
@@ -15,7 +20,7 @@ body.drawer-open {
   background: radial-gradient(1200px 400px at 10% 0%, rgba(255, 210, 119, 0.08), transparent 60%), rgba(0, 0, 0, 0.86);
   backdrop-filter: blur(8px);
   color: white;
-  padding: 10px 30px;
+  padding: 10px clamp(12px, 4vw, 30px);
   position: fixed;
   top: 0;
   left: 0;
@@ -25,7 +30,6 @@ body.drawer-open {
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   box-sizing: border-box;
-  overflow: visible;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   transform: translateY(0);
   transition: transform .28s ease;
@@ -45,10 +49,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
 }
 
 .logo-final video {
-  height: 60px;
+  height: clamp(38px, 6.2vw, 60px);
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(255, 210, 119, 0.15);
   object-fit: cover;
@@ -62,8 +67,8 @@ body {
 
 .dot-grid-final {
   display: grid;
-  grid-template-columns: repeat(3, 6px);
-  grid-gap: 4px;
+  grid-template-columns: repeat(3, clamp(5px, 1.3vw, 6px));
+  grid-gap: clamp(3px, 0.9vw, 4px);
   transition: transform .25s ease, opacity .25s ease;
 }
 
@@ -73,8 +78,8 @@ body {
 }
 
 .dot-grid-final span {
-  width: 6px;
-  height: 6px;
+  width: clamp(5px, 1.3vw, 6px);
+  height: clamp(5px, 1.3vw, 6px);
   background: linear-gradient(180deg, #ffd277, #77530a);
   border-radius: 50%;
   box-shadow: 0 0 6px rgba(255, 210, 119, 0.5);
@@ -83,14 +88,13 @@ body {
 .nav-right-final {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: clamp(10px, 2vw, 20px);
   flex-wrap: nowrap;
-  overflow-x: auto;
 }
 
 .nav-links-final {
   display: flex;
-  gap: 24px;
+  gap: clamp(12px, 2vw, 24px);
 }
 
 .nav-link-final {
@@ -103,10 +107,11 @@ body {
   position: relative;
   color: white;
   white-space: nowrap;
-  padding: 8px 12px;
+  padding: clamp(6px, 1vw, 8px) clamp(8px, 1.2vw, 12px);
   border-radius: 12px;
   transition: transform .18s ease, color .2s ease, background .2s ease, box-shadow .2s ease;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  font-size: clamp(12px, 1.6vw, 15px);
 }
 
 .nav-link-final:hover {
@@ -126,7 +131,7 @@ body {
 }
 
 .active-final {
-  padding: 8px 14px;
+  padding: clamp(6px, 1vw, 8px) clamp(10px, 1.4vw, 14px);
   border-radius: 12px;
   background: linear-gradient(90deg, #77530a, #ffd277, #77530a, #ffd277);
   background-size: 250%;
@@ -162,12 +167,13 @@ body {
 .search-bar-final {
   display: flex;
   align-items: center;
-  padding: 6px 12px;
+  padding: clamp(4px, 0.8vw, 6px) clamp(8px, 1.2vw, 12px);
   border-radius: 14px;
   border: 1.5px solid rgba(255, 210, 119, 0.45);
   box-shadow: 0 6px 16px rgba(255, 210, 119, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   background: rgba(0, 0, 0, 0.35);
-  transition: box-shadow .2s ease, border-color .2s ease, transform .2s ease;
+  transition: box-shadow .2s ease, border-color .2s ease, transform .2s ease, width .2s ease;
+  max-width: 100%;
 }
 
 .search-bar-final:focus-within {
@@ -177,7 +183,6 @@ body {
 }
 
 .search-icon-final {
-  color: gold;
   margin-right: 8px;
   cursor: pointer;
   transition: transform .2s ease;
@@ -192,33 +197,32 @@ body {
   border: none;
   color: white;
   outline: none;
-  font-size: 16px;
-  width: 180px;
-  transition: width .25s ease;
+  font-size: clamp(13px, 1.8vw, 16px);
+  width: clamp(120px, 16vw, 180px);
 }
 
 .search-bar-final input:focus {
-  width: 240px;
+  width: clamp(150px, 21vw, 240px);
 }
 
 .icon-buttons-final {
   display: flex;
-  gap: 20px;
+  gap: clamp(12px, 2vw, 20px);
 }
 
 .icon-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   text-decoration: none;
   color: white;
 }
 
 .icon-circle {
   position: relative;
-  width: 40px;
-  height: 40px;
+  width: clamp(34px, 4.5vw, 40px);
+  height: clamp(34px, 4.5vw, 40px);
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -251,7 +255,7 @@ body {
 }
 
 .icon {
-  font-size: 20px;
+  font-size: clamp(18px, 2.3vw, 20px);
   transition: color .2s ease, transform .18s ease, filter .25s ease;
 }
 
@@ -280,10 +284,11 @@ body {
 
 .icon-label {
   font-weight: 700;
-  font-size: 12px;
+  font-size: clamp(11px, 1.6vw, 12px);
   letter-spacing: .2px;
   color: rgba(255, 255, 255, 0.85);
   transition: color .2s ease, text-shadow .25s ease;
+  text-align: center;
 }
 
 .label-active {
@@ -372,6 +377,16 @@ body {
   display: none;
 }
 
+@media (max-width: 1024px) {
+  .nav-links-final {
+    gap: clamp(10px, 1.8vw, 16px);
+  }
+
+  .search-bar-final input {
+    width: clamp(120px, 22vw, 180px);
+  }
+}
+
 @media (max-width: 768px) {
   .nav-right-final {
     display: none;
@@ -393,7 +408,7 @@ body {
   }
 
   .mobile-drawer-final {
-    width: 60vw;
+    width: 70vw;
     padding: 40px 24px;
   }
 
@@ -413,7 +428,7 @@ body {
   }
 
   .search-bar-final {
-    width: 85%;
+    width: 92%;
     margin: 10px auto;
   }
 
@@ -425,6 +440,22 @@ body {
   .mobile-icons .icon {
     font-size: 24px;
   }
+
+  .close-btn-final {
+    display: none;
+  }
+
+  .mobile-drawer-final .nav-link-final.active-final,
+  .mobile-drawer-final .nav-link-final.active-final span,
+  .mobile-drawer-final .nav-link-final.active-final svg {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    text-shadow: none;
+  }
+
+  .mobile-drawer-final .nav-link-final.active-final::before {
+    background: rgba(0, 0, 0, 0.9);
+  }
 }
 
 @media (max-width: 500px) {
@@ -432,8 +463,8 @@ body {
     padding: 10px 15px;
   }
 
-  .logo-final img {
-    height: 30px;
+  .logo-final video {
+    height: 34px;
   }
 
   .nav-toggle-final {
@@ -441,11 +472,7 @@ body {
   }
 
   .top-row-final {
-    padding: 0 10px;
-  }
-
-  .nav-right-final {
-    display: none;
+    padding: 0 6px;
   }
 
   .mobile-drawer-final {
@@ -453,12 +480,13 @@ body {
   }
 
   .search-bar-final {
-    width: 80%;
+    width: 88%;
     margin-top: 10px;
   }
 
   .search-bar-final input {
     font-size: 14px;
+    width: clamp(120px, 60vw, 220px);
   }
 
   .bottom-row-final {
@@ -482,6 +510,7 @@ body {
 @media (max-width: 400px) {
   .mobile-drawer-final {
     padding: 32px 20px;
+    width: 82vw;
   }
 
   .search-bar-final input {

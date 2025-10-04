@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import Navbar from './Navbar';
@@ -14,36 +14,64 @@ const API_BASE_RAW =
   DEFAULT_API_BASE;
 const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
 
+const DEFAULT_IMG_BY_GENDER = {
+  WOMEN: '/images/women/women20.jpeg',
+  MEN: '/images/men/mens13.jpeg',
+  KIDS: '/images/kids/kids-girls-frock.jpg',
+  _: '/images/placeholder.jpg'
+};
+
+const detectGender = (q) => {
+  const s = String(q || '').toLowerCase();
+  if (/\b(women|woman|ladies|female)\b/.test(s)) return { gender: 'WOMEN', cleaned: s.replace(/\b(women|woman|ladies|female)\b/gi, '').trim() };
+  if (/\b(men|man|male|gents)\b/.test(s)) return { gender: 'MEN', cleaned: s.replace(/\b(men|man|male|gents)\b/gi, '').trim() };
+  if (/\b(kids|kid|children|child|boys|girls)\b/.test(s)) return { gender: 'KIDS', cleaned: s.replace(/\b(kids|kid|children|child|boys|girls)\b/gi, '').trim() };
+  return { gender: '', cleaned: s.trim() };
+};
+
 const SearchResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { wishlistItems, addToWishlist } = useWishlist();
+  const [baseResults, setBaseResults] = useState([]);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const query = new URLSearchParams(location.search).get('q');
+  const query = new URLSearchParams(location.search).get('q') || '';
+  const { gender, cleaned } = useMemo(() => detectGender(query), [query]);
+
   const userType = (localStorage.getItem('userType') || 'B2C').toUpperCase();
   const userId = sessionStorage.getItem('userId');
 
   useEffect(() => {
-    const fetchResults = async () => {
-      if (!query) {
-        setLoading(false);
-        return;
-      }
+    let cancelled = false;
+    const run = async () => {
+      setLoading(true);
       try {
-        const res = await fetch(`${API_BASE}/api/products/search?q=${encodeURIComponent(query)}`);
+        const url = gender
+          ? `${API_BASE}/api/products?gender=${encodeURIComponent(gender)}${cleaned ? `&q=${encodeURIComponent(cleaned)}` : ''}`
+          : `${API_BASE}/api/products/search?q=${encodeURIComponent(query)}`;
+        const res = await fetch(url);
         const data = await res.json();
-        setResults(Array.isArray(data) ? data : []);
+        const arr = Array.isArray(data) ? data : [];
+        if (!cancelled) {
+          setBaseResults(arr);
+          setResults(arr);
+        }
       } catch {
-        setResults([]);
+        if (!cancelled) {
+          setBaseResults([]);
+          setResults([]);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
-    setLoading(true);
-    fetchResults();
-  }, [query]);
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [gender, cleaned, query]);
 
   const handleProductClick = (product) => {
     navigate(`/product/${product.id}`, { state: { product } });
@@ -58,75 +86,93 @@ const SearchResults = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, product_id: product.id })
       });
-      if (resp.ok) {
-        addToWishlist(product);
-      }
+      if (resp.ok) addToWishlist(product);
     } catch {}
   };
 
   const isInWishlist = (id) => wishlistItems.some((w) => String(w.id) === String(id));
 
-  const offerPrice = (p) => (userType === 'B2B' ? p.final_price_b2b : p.final_price_b2c);
-  const originalPrice = (p) => (userType === 'B2B' ? p.original_price_b2b : p.original_price_b2c);
+  const offerPrice = (p) => Number(userType === 'B2B' ? p.final_price_b2b : p.final_price_b2c) || 0;
+  const originalPrice = (p) => Number(userType === 'B2B' ? p.original_price_b2b : p.original_price_b2c) || 0;
   const discountPct = (p) => {
-    const o = Number(originalPrice(p));
-    const f = Number(offerPrice(p));
+    const o = originalPrice(p);
+    const f = offerPrice(p);
     if (!o) return 0;
-    return Math.round(((o - f) / o) * 100);
+    const pct = ((o - f) / o) * 100;
+    return Math.max(0, Math.round(pct));
   };
+
+  const getImg = (p) => p.image_url || DEFAULT_IMG_BY_GENDER[p.gender] || DEFAULT_IMG_BY_GENDER._;
 
   return (
     <div className="sr-page">
       <Navbar />
-      <FilterSidebar onFilterChange={(data) => setResults(Array.isArray(data) ? data : [])} />
-      <div className="sr-page-main">
-        <div className="sr-content">
+      <div className="sr-layout">
+        <FilterSidebar
+          onFilterChange={(f) => {
+            let list = [...baseResults];
+            if (f?.brand) list = list.filter((p) => (p.brand || '').toLowerCase() === String(f.brand).toLowerCase());
+            if (f?.priceRange) {
+              list = list.filter((p) => {
+                const price = offerPrice(p);
+                return price >= f.priceRange.min && price <= f.priceRange.max;
+              });
+            }
+            setResults(list);
+          }}
+        />
+        <main className="sr-main">
           {loading ? (
-            <p className="sr-status">Loading...</p>
+            <div className="sr-status-wrap"><p className="sr-status">Loading...</p></div>
           ) : results.length === 0 ? (
-            <p className="sr-status">No products found.</p>
+            <div className="sr-status-wrap"><p className="sr-status">No products found.</p></div>
           ) : (
-            <section className="sr-section4">
-              <div className="sr-header-wrap">
-                <h2 className="sr-title">
-                  Search Results for: <span className="sr-highlight">{query}</span>
-                </h2>
+            <section className="sr-grid-wrap">
+              <div className="sr-header">
+                <h2 className="sr-title">Results for <span className="sr-highlight">{query}</span></h2>
+                <span className="sr-count">{results.length} items</span>
               </div>
-              <div className="sr-section4-grid">
+              <div className="sr-grid">
                 {results.map((product) => (
-                  <div
+                  <article
                     key={product.id}
-                    className="sr-section4-card"
+                    className="sr-card"
                     onClick={() => handleProductClick(product)}
                   >
-                    <div className="sr-section4-img">
-                      <img src={product.image_url} alt={product.product_name} />
+                    <div className="sr-img-wrap">
+                      <img
+                        src={getImg(product)}
+                        alt={product.product_name}
+                        onError={(e) => {
+                          const fallback = DEFAULT_IMG_BY_GENDER[product.gender] || DEFAULT_IMG_BY_GENDER._;
+                          if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback;
+                        }}
+                      />
                       <button
                         type="button"
-                        className="sr-love-icon"
+                        className="sr-love"
                         onClick={(e) => handleWishlist(e, product)}
                         aria-label="Add to wishlist"
                       >
-                        {isInWishlist(product.id) ? (
-                          <FaHeart style={{ color: 'gold', fontSize: 20 }} />
-                        ) : (
-                          <FaRegHeart style={{ color: 'gold', fontSize: 20 }} />
-                        )}
+                        {isInWishlist(product.id) ? <FaHeart /> : <FaRegHeart />}
                       </button>
+                      {product.gender ? <div className="sr-pill">{product.gender}</div> : null}
                     </div>
-                    <h4 className="sr-brand-name">{product.brand}</h4>
-                    <h5 className="sr-product-name">{product.product_name}</h5>
-                    <div className="sr-section4-price">
-                      <span className="sr-offer-price">₹{offerPrice(product)}</span>
-                      <span className="sr-original-price">₹{originalPrice(product)}</span>
-                      <span className="sr-discount">({discountPct(product)}% OFF)</span>
+                    <div className="sr-meta">
+                      <h4 className="sr-brand" title={product.brand}>{product.brand}</h4>
+                      <h5 className="sr-name" title={product.product_name}>{product.product_name}</h5>
                     </div>
-                  </div>
+                    <div className="sr-price">
+                      <span className="sr-offer">₹{offerPrice(product).toFixed(2)}</span>
+                      <span className="sr-mrp">₹{originalPrice(product).toFixed(2)}</span>
+                      <span className="sr-disc">({discountPct(product)}% OFF)</span>
+                    </div>
+                  </article>
                 ))}
               </div>
             </section>
           )}
-        </div>
+        </main>
       </div>
       <Footer />
     </div>

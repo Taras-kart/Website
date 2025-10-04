@@ -1,230 +1,200 @@
-/* section 1 */
-
-
 .kids-page-main {
-    display: flex;
-    width: 100%;
+  display: flex;
+  width: 100%;
 }
 
 .filter-sidebar {
-    width: 14%;
-    padding: 20px;
+  width: 14%;
+  padding: 20px;
 }
 
 .kids-page-content {
-    width: 100%;
+  width: 100%;
 }
 
 .kids-page {
-    position: relative;
-    overflow: visible;
+  position: relative;
+  overflow: visible;
 }
 
 .kids-section1 {
-    position: relative;
-    width: 100%;
-    overflow: hidden;
+  position: relative;
+  width: 100%;
+  overflow: hidden;
 }
 
 .kids-section1-bg {
-    position: relative;
-    width: 100%;
-    height: auto;
+  position: relative;
+  width: 100%;
+  height: auto;
 }
 
 .kids-section1-bg img {
-    width: 100%;
-    height: 540px;
-    object-fit: cover;
-    font-weight: 200;
-    display: block;
+  width: 100%;
+  height: 540px;
+  object-fit: cover;
+  font-weight: 200;
+  display: block;
 }
 
 .kids-section1-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4));
-    display: flex;
-    align-items: flex-end;
-    justify-content: flex-start;
-    padding-left: 60px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4));
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding-left: 60px;
 }
 
 .kids-section1-text h1 {
-    font-family: "inter", sans-serif;
-    color: gold;
-    font-size: 90px;
-    margin: 0;
-    line-height: 1.2;
-    text-align: left;
+  font-family: "inter", sans-serif;
+  color: gold;
+  font-size: 90px;
+  margin: 0;
+  line-height: 1.2;
+  text-align: left;
 }
 
 @media (max-width: 1024px) {
-    .kids-section1-text h1 {
-        font-size: 3.5rem;
-    }
+  .kids-section1-text h1 {
+    font-size: 3.5rem;
+  }
 
-    .kids-section1-overlay {
-        padding-left: 40px;
-    }
+  .kids-section1-overlay {
+    padding-left: 40px;
+  }
 }
 
 @media (max-width: 768px) {
-    .kids-section1-text h1 {
-        font-size: 2.5rem;
-    }
+  .kids-section1-text h1 {
+    font-size: 2.5rem;
+  }
 
-    .kids-section1-overlay {
-        padding-left: 30px;
-    }
+  .kids-section1-overlay {
+    padding-left: 30px;
+  }
 }
 
 @media (max-width: 500px) {
-    .kids-section1-text h1 {
-        font-size: 60px;
-    }
+  .kids-section1-text h1 {
+    font-size: 60px;
+  }
 
-    .kids-section1-bg img {
-        width: 100%;
-        height: 400px;
-        object-fit: cover;
-        font-weight: 200;
-        display: block;
-    }
+  .kids-section1-bg img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    font-weight: 200;
+    display: block;
+  }
 
-    .kids-section1-overlay {
-        padding-left: 10px;
-    }
+  .kids-section1-overlay {
+    padding-left: 10px;
+  }
 }
 
 @media (max-width: 400px) {
-    .kids-section1-text h1 {
-        font-size: 1.6rem;
-    }
+  .kids-section1-text h1 {
+    font-size: 1.6rem;
+  }
 
-    .kids-section1-overlay {
-        padding-left: 15px;
-    }
+  .kids-section1-overlay {
+    padding-left: 15px;
+  }
 }
 
-
-
-
-
-
-
-
-
-
-
-/* section 2 */
 .kids-section2 {
-    margin-top: 100px;
-    margin-bottom: 80px;
-    position: relative;
-    width: 100%;
-    overflow: hidden;
+  margin-top: 100px;
+  margin-bottom: 80px;
+  position: relative;
+  width: 100%;
+  overflow: hidden;
 }
 
 .kids-section2-bg {
-    position: relative;
-    width: 100%;
-    height: auto;
+  position: relative;
+  width: 100%;
+  height: auto;
 }
 
 .kids-section2-bg img {
-    width: 100%;
-    height: 100vh;
-    object-fit: cover;
-    display: block;
+  width: 100%;
+  height: 100vh;
+  object-fit: cover;
+  display: block;
 }
 
 .kids-section2-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    padding-left: 60px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 60px;
 }
 
 .kids-section2-text h1 {
-    color: #253494;
-    font-size: 60px;
-    margin: 0;
-    line-height: 1.2;
-    text-align: left;
+  color: #253494;
+  font-size: 60px;
+  margin: 0;
+  line-height: 1.2;
+  text-align: left;
 }
 
 @media (max-width: 1024px) {
-    .kids-section2-text h1 {
-        font-size: 3.5rem;
-    }
+  .kids-section2-text h1 {
+    font-size: 3.5rem;
+  }
 
-    .kids-section2-overlay {
-        padding-left: 40px;
-    }
+  .kids-section2-overlay {
+    padding-left: 40px;
+  }
 }
 
 @media (max-width: 768px) {
-    .kids-section2-text h1 {
-        font-size: 2.5rem;
-    }
+  .kids-section2-text h1 {
+    font-size: 2.5rem;
+  }
 
-    .kids-section2-overlay {
-        padding-left: 30px;
-    }
+  .kids-section2-overlay {
+    padding-left: 30px;
+  }
 }
 
 @media (max-width: 500px) {
-    .kids-section2-text h1 {
-        font-size: 2rem;
-    }
+  .kids-section2-text h1 {
+    font-size: 2rem;
+  }
 
-    .kids-section2-bg img {
-        width: 100%;
-        height: 400px;
-        object-fit: cover;
-        display: block;
-    }
+  .kids-section2-bg img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    display: block;
+  }
 
-    .kids-section2-overlay {
-        padding-left: 20px;
-    }
+  .kids-section2-overlay {
+    padding-left: 20px;
+  }
 }
 
 @media (max-width: 400px) {
-    .kids-section2-text h1 {
-        font-size: 1.6rem;
-    }
+  .kids-section2-text h1 {
+    font-size: 1.6rem;
+  }
 
-    .kids-section2-overlay {
-        padding-left: 15px;
-    }
+  .kids-section2-overlay {
+    padding-left: 15px;
+  }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* section 3 */
 .kids-section3 {
   display: flex;
   width: 96%;
@@ -340,7 +310,7 @@
     color: white;
     align-items: left;
     justify-content: space-between;
-    gap: 0px;
+    gap: 0;
   }
 
   .kids-section3-left img,
@@ -362,25 +332,20 @@
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* section 4 */
 .kids-section4 {
   margin-left: 0px;
   padding: 50px 20px;
   background-color: #f9f9f9;
+}
+
+.kids-notice {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #eee;
+  color: #222;
 }
 
 .kids-section4-grid {
@@ -453,15 +418,30 @@
 }
 
 .brand-name {
-  margin-top: 5px;
+  margin: 10px 12px 4px 12px;
   font-weight: bold;
-  font-size: 20px;
+  font-size: 18px;
   color: black;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+  min-height: 1.25em;
 }
 
 .product-name {
-  margin-top: -20px;
-  font-size: 16px;
+  margin: 0 12px 10px 12px;
+  font-size: 14px;
+  color: #444;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+  min-height: 2.5em;
 }
 
 .popup-overlay {
