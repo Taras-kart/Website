@@ -312,10 +312,14 @@ const API_BASE_RAW =
   (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
   DEFAULT_API_BASE
 const API_BASE = API_BASE_RAW.replace(/\/+$/, '')
-
+const CLOUD_NAME = 'deymt9uyh'
 const DEFAULT_IMG = '/images/women/women20.jpeg'
 const toArray = (x) => (Array.isArray(x) ? x : [])
-const pick = (obj, keys) => keys.reduce((a, k) => ((a[k] = obj?.[k]), a), {})
+
+function cloudinaryUrlByEan(ean) {
+  if (!ean) return ''
+  return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/f_auto,q_auto/products/${ean}`
+}
 
 export default function WomenPage() {
   const [filters, setFilters] = useState({})
@@ -342,23 +346,34 @@ export default function WomenPage() {
         if (!res.ok) throw new Error('Failed to load products')
         const data = await res.json()
         const arr = toArray(data).map((p, i) => {
-          const norm = {
+          const ean =
+            p.ean_code ??
+            p.EANCode ??
+            p.ean ??
+            p.barcode ??
+            p.bar_code ??
+            ''
+          const img =
+            p.image_url ||
+            (ean ? cloudinaryUrlByEan(ean) : '') ||
+            DEFAULT_IMG
+          return {
             id: p.id ?? p.product_id ?? i + 1,
             brand: p.brand ?? p.brand_name ?? '',
             product_name: p.product_name ?? p.name ?? '',
-            image_url: p.image_url || DEFAULT_IMG,
+            image_url: img,
+            ean_code: ean,
             original_price_b2c: p.original_price_b2c ?? p.mrp ?? p.list_price ?? 0,
             final_price_b2c: p.final_price_b2c ?? p.sale_price ?? p.price ?? p.mrp ?? 0,
             original_price_b2b: p.original_price_b2b ?? p.mrp ?? 0,
             final_price_b2b: p.final_price_b2b ?? p.sale_price ?? 0
           }
-          return norm
         })
         if (!cancelled) {
           setAllProducts(arr)
           setProducts(arr)
         }
-      } catch (e) {
+      } catch {
         if (!cancelled) {
           setAllProducts([])
           setProducts([])
@@ -477,7 +492,9 @@ export default function WomenPage() {
                           src={prod.image_url || DEFAULT_IMG}
                           alt={prod.product_name}
                           onError={(e) => {
-                            e.currentTarget.src = DEFAULT_IMG
+                            e.currentTarget.src = prod.ean_code
+                              ? cloudinaryUrlByEan(prod.ean_code)
+                              : DEFAULT_IMG
                           }}
                         />
                         <div
