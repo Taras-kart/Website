@@ -1,334 +1,427 @@
-.bhuvi-checkout-page {
-  display: flex;
-  flex-direction: column;
-  min-height: auto;
-  background-color: white;
+/* D:\shopping\src\pages\CheckoutPage.css */
+:root {
+  --black: #0a0a0a;
+  --black-2: #121212;
+  --gold: #ffd36e;
+  --gold-2: #ffbf3f;
+  --white: #ffffff;
+  --muted: #8d93a1;
+  --border: rgba(255, 255, 255, 0.12);
+  --glass: rgba(255, 255, 255, 0.06);
+  --shadow: 0 10px 28px rgba(0, 0, 0, .45);
 }
 
-.bhuvi-checkout-main {
-  display: flex;
-  justify-content: center;
-  margin-top: 40px;
+.co-wrap {
+  background:
+    radial-gradient(900px 500px at -10% -20%, rgba(255, 211, 110, .08), transparent 60%),
+    radial-gradient(600px 400px at 110% -10%, rgba(255, 255, 255, .06), transparent 60%),
+    var(--black);
+  min-height: 100vh;
+  color: var(--white);
 }
 
-.bhuvi-checkout-section1 {
-  display: flex;
-  width: 90%;
-  gap: 30px;
+.co-container {
+  max-width: 1200px;
+  margin: 24px auto 48px;
+  padding: 0 16px;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 28px;
 }
 
-.bhuvi-checkout-section1-left {
+.co-left {
+  width: 100%;
+}
+
+.co-right {
+  width: 100%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .03));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px 18px 20px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(8px);
+}
+
+.co-media {
+  background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .03));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 14px;
+}
+
+.co-image-zoom {
   position: relative;
-  flex: 1;
-}
-
-.bhuvi-checkout-section1-right {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  font-family: sans-serif;
-  color: #000;
-  gap: 3px;
-  padding: 10px;
-}
-
-.bhuvi-brand-name {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #000;
-  text-align: left;
+  display: inline-block;
   width: 100%;
-}
-
-.bhuvi-product-name {
-  font-size: 1.2rem;
-  font-weight: 200;
-  color: #000;
-  text-align: left;
-  width: 100%;
-}
-
-.bhuvi-price-row {
-  margin-top: 15px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.bhuvi-price {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #000;
-}
-
-.bhuvi-discount {
-  font-size: 1.6rem;
-  font-weight: 600;
-  color: #068743;
-}
-
-.bhuvi-mrp-info {
-  font-size: 1rem;
-  color: #000;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.bhuvi-tax-note {
-  color: #5c6874;
-}
-
-.bhuvi-section {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.bhuvi-section h3 {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #000;
-  margin-bottom: 5px;
-  text-align: left;
-}
-
-.bhuvi-color-circles {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 5px;
-}
-
-.bhuvi-color-circle {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 2px solid #000;
-  cursor: pointer;
-}
-
-.bhuvi-selected-color {
-  font-size: 1rem;
-  font-weight: 500;
-  color: #000;
-  margin-top: -8px;
-  margin-bottom: 8px;
-  text-align: left;
-}
-
-.bhuvi-size-options {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.bhuvi-size-button {
-  padding: 0px 12px;
-  font-size: 1rem;
-  border: 1.2px solid #000;
-  background: transparent;
-  cursor: pointer;
-  transition: 0.3s;
   border-radius: 12px;
-  height: 20px;
-}
-
-.bhuvi-size-button.selected {
   background: #000;
-  color: #fff;
+  overflow: visible;
 }
 
-.bhuvi-action-buttons {
+.co-image {
+  width: 400px;
+  height: 100%;
+  object-fit: cover;
+  cursor: zoom-in;
+  display: block;
+  margin: 0 auto;
+}
+
+.co-lens {
+  position: absolute;
+  border: 2px solid var(--white);
+  background: rgba(255, 255, 255, .25);
+  pointer-events: none;
+  border-radius: 10px;
+}
+
+.co-zoomed {
+  position: absolute;
+  top: 0;
+  width: 320px;
+  height: 320px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, .2);
+  background: #000;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .5);
+  pointer-events: none;
+  z-index: 20;
+}
+
+.co-zoomed-img {
+  position: absolute;
+}
+
+.co-thumbs {
+  margin-top: 12px;
   display: flex;
+  gap: 10px;
   flex-wrap: wrap;
-  gap: 15px;
-  margin-top: 10px;
 }
 
-.bhuvi-wishlist,
-.bhuvi-bag {
-  background: gold;
-  color: black;
-  padding: 10px 20px;
-  border: none;
-  font-weight: 600;
+.co-thumb {
+  width: 70px;
+  height: 70px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--black-2);
   cursor: pointer;
-  border-radius: 5px;
+  padding: 0;
+}
+
+.co-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.co-brand {
+  margin: 0 0 2px;
+  font-size: 1.7rem;
+  letter-spacing: .3px;
+  color: var(--white);
+}
+
+.co-name {
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.co-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.co-price {
+  font-weight: 800;
+  font-size: 1.55rem;
+  color: var(--white);
+}
+
+.co-disc {
+  color: #22d47b;
+  font-weight: 700;
+}
+
+.co-mrp {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
-.bhuvi-popup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 20px 30px;
+.co-mrp-label {
+  color: var(--muted);
+}
+
+.co-mrp-strike {
+  color: #9aa1b3;
+  text-decoration: line-through;
+}
+
+.co-tax {
+  color: #b1b7c6;
+  font-size: .92rem;
+}
+
+.co-section {
+  margin-top: 16px;
+}
+
+.co-section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.co-section h3 {
+  margin: 0;
+  font-size: 1.02rem;
+  color: var(--white);
+}
+
+.co-chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 211, 110, .12);
+  border: 1px solid rgba(255, 211, 110, .4);
+  color: var(--gold);
+  font-weight: 700;
+  font-size: .8rem;
+}
+
+.co-muted {
+  color: var(--muted);
+  font-size: .95rem;
+}
+
+.co-colors {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.co-swatch {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background-size: cover;
+  background-position: center;
+  background-color: #111;
+  cursor: pointer;
+  transition: transform .15s ease, border-color .15s ease, box-shadow .2s ease;
+}
+
+.co-swatch:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, .25);
+}
+
+.co-swatch.active {
+  box-shadow: 0 0 0 2px var(--gold);
+  border-color: var(--gold);
+}
+
+.co-swatch-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--white);
+  font-weight: 800;
+}
+
+.co-sizes {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.co-size {
+  padding: 9px 12px;
+  border: 1.4px solid var(--border);
+  background: var(--glass);
+  color: var(--white);
+  border-radius: 12px;
+  cursor: pointer;
+  min-width: 52px;
+  text-align: center;
+  font-weight: 700;
+  transition: background .15s ease, color .15s ease, border-color .15s ease, transform .1s ease;
+}
+
+.co-size:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, .25);
+}
+
+.co-size.selected {
+  background: linear-gradient(135deg, var(--gold), var(--gold-2));
+  color: #111;
+  border-color: transparent;
+}
+
+.co-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-weight: 800;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform .15s ease, box-shadow .2s ease, background .2s ease, color .2s ease, border-color .2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn.gold.solid {
+  background: linear-gradient(135deg, var(--gold), var(--gold-2));
+  color: #111;
+  box-shadow: 0 10px 24px rgba(255, 211, 110, .25);
+}
+
+.btn.gold.ghost {
+  background: transparent;
+  color: var(--gold);
+  border-color: rgba(255, 211, 110, .45);
+}
+
+.btn.black {
+  background: #111;
+  color: var(--white);
+  border-color: #222;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.co-sub {
+  color: var(--muted);
+  margin: 0 0 8px;
+}
+
+.co-pin {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.co-pin input {
+  padding: 10px 12px;
+  width: 140px;
+  background: transparent;
+  color: var(--white);
+  border: 1px solid var(--border);
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.3);
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #000;
+  outline: none;
+}
+
+.co-loader {
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  padding: 60px 0;
+}
+
+.spin {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, .18);
+  border-top-color: var(--gold);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.co-popup {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, .04));
+  border: 1px solid var(--border);
+  color: var(--white);
+  padding: 12px 18px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
   z-index: 1000;
 }
 
-.bhuvi-subtext {
-  font-size: 0.95rem;
-  color: #333;
-}
-
-.bhuvi-pincode-form {
-  display: flex;
-  gap: 10px;
-  margin-top: 8px;
-  flex-wrap: wrap;
-}
-
-.bhuvi-pincode-form input {
-  padding: 8px;
-  width: 120px;
-  font-size: 1rem;
-  border: 1px solid #000;
-  border-radius: 4px;
-}
-
-.bhuvi-apply-btn {
-  padding: 8px 14px;
-  font-size: 1rem;
-  background: #000;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.bhuvi-checkout-section1-image-container {
-  position: relative;
-  display: inline-block;
-}
-
-.bhuvi-checkout-section1-image {
-  width: 100%;
-  height: 450px;
-  cursor: zoom-in;
-}
-
-.bhuvi-mrp-strike {
-  text-decoration: line-through;
-  color: #5c6874;
-}
-
-.bhuvi-mrp-line {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-hr {
-  width: 100%;
-  border: none;
-  border-top: 1.5px solid #dcdcdc;
-  margin: 20px 0;
-}
-
-.bhuvi-checkout-section1-zoomed {
-  position: absolute;
-  top: 0;
-  width: 400px;
-  height: 400px;
-  overflow: hidden;
-  border: 2px solid #ccc;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  pointer-events: none;
-  background: #fff;
-  z-index: 10;
-}
-
-.bhuvi-checkout-section1-zoomed-image {
-  position: absolute;
-}
-
-.bhuvi-checkout-section1-lens {
-  position: absolute;
-  border: 2px solid #fff;
-  background: rgba(255, 255, 255, 0.3);
-  pointer-events: none;
-}
-
 @media (max-width: 1024px) {
-  .bhuvi-checkout-section1 {
-    flex-direction: column;
+  .co-container {
+    grid-template-columns: 1fr;
   }
-  .bhuvi-checkout-section1-left,
-  .bhuvi-checkout-section1-right {
-    width: 100%;
+
+  .co-image {
+    height: 380px;
   }
-  .bhuvi-checkout-section1-zoomed {
+
+  .co-zoomed {
     width: 100%;
-    height: 300px;
-    top: 0;
-    left: 0;
+    height: 260px;
+    left: 0 !important;
   }
 }
 
 @media (max-width: 768px) {
-  .bhuvi-checkout-section1-zoomed {
-    width: 80%;
-    height: 200px;
+  .co-image {
+    height: 340px;
   }
-  .bhuvi-brand-name {
-    font-size: 1.7rem;
+
+  .co-right {
+    padding: 16px;
   }
-  .bhuvi-product-name {
-    font-size: 1.3rem;
-  }
-  .bhuvi-price {
-    font-size: 1.6rem;
-  }
-  .bhuvi-discount {
-    font-size: 1.3rem;
+
+  .co-actions .btn {
+    flex: 1;
   }
 }
 
-@media (max-width: 500px) {
-  .bhuvi-checkout-section1-zoomed {
-    width: 70%;
-    height: 180px;
+@media (max-width: 520px) {
+  .co-image {
+    height: 300px;
   }
-  .bhuvi-color-circle {
-    width: 24px;
-    height: 24px;
-  }
-  .bhuvi-wishlist,
-  .bhuvi-bag {
-    font-size: 0.9rem;
-    padding: 8px 14px;
-  }
-}
 
-@media (max-width: 400px) {
-  .bhuvi-checkout-section1-zoomed {
-    width: 60%;
-    height: 150px;
+  .co-thumb {
+    width: 62px;
+    height: 62px;
   }
-  .bhuvi-brand-name {
-    font-size: 1.5rem;
+
+  .co-swatch {
+    width: 32px;
+    height: 32px;
   }
-  .bhuvi-product-name {
-    font-size: 1.1rem;
+
+  .co-size {
+    min-width: 48px;
+    padding: 8px 10px;
   }
-  .bhuvi-price {
-    font-size: 1.4rem;
-  }
-  .bhuvi-discount {
-    font-size: 1.2rem;
-  }
-  .bhuvi-size-button {
-    padding: 6px 12px;
-    font-size: 0.9rem;
+
+  .co-zoomed {
+    height: 220px;
   }
 }

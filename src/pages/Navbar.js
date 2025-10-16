@@ -165,7 +165,7 @@ const NavbarFinal = () => {
                 {cartItems.length > 0 && <span className="red-dot1" />}
                 <span className="inner-ring" />
               </div>
-              <span className={`icon-label ${isActive('/cart') ? 'label-active' : ''}`}>Cart</span>
+              <span className={`icon-label ${isActive('/cart') ? 'label-active' : ''}`}>Kart</span>
             </Link>
           </div>
         </div>

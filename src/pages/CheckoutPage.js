@@ -1,3 +1,4 @@
+// D:\shopping\src\pages\CheckoutPage.js
 import React, { useState, useEffect } from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -18,14 +19,21 @@ const CheckoutPage = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { addToWishlist } = useWishlist();
+
   const [lens, setLens] = useState({ x: 0, y: 0, w: 0, h: 0 });
   const [zoomStyles, setZoomStyles] = useState({ offsetX: 0, offsetY: 0, zoomLeft: false });
   const [isHovering, setIsHovering] = useState(false);
+
+  const [product, setProduct] = useState(null);
+  const [variants, setVariants] = useState([]);
+  const [colorImages, setColorImages] = useState({});
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
+
   const [popupMessage, setPopupMessage] = useState('');
   const [pincode, setPincode] = useState('');
-  const [product, setProduct] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
   const userId = sessionStorage.getItem('userId');
   const zoomFactor = 3;
 
@@ -44,20 +52,110 @@ const CheckoutPage = () => {
     window.scrollTo(0, 0);
   }, []);
 
+  useEffect(() => {
+    const loadVariants = async () => {
+      if (!product) return;
+      setIsLoading(true);
+      try {
+        const q = encodeURIComponent(product.product_name || '');
+        const res = await fetch(`${API_BASE}/api/products?limit=300&hasImage=true&q=${q}`);
+        const data = await res.json();
+        const same = (Array.isArray(data) ? data : []).filter(
+          (r) =>
+            String(r.brand || r.brand_name || '').trim().toUpperCase() ===
+              String(product.brand || '').trim().toUpperCase() &&
+            String(r.product_name || r.name || '').trim().toUpperCase() ===
+              String(product.product_name || '').trim().toUpperCase()
+        );
+        const mapped = same.map((r) => ({
+          id: r.id,
+          product_id: r.product_id,
+          color: r.color || r.colour || '',
+          size: r.size || '',
+          image_url: r.image_url,
+          ean_code: r.ean_code || ''
+        }));
+        setVariants(mapped);
+
+        const byColor = {};
+        mapped.forEach((v) => {
+          const key = v.color || 'DEFAULT';
+          if (!byColor[key]) byColor[key] = [];
+          byColor[key].push(v.image_url);
+        });
+        Object.keys(byColor).forEach((k) => {
+          const unique = Array.from(new Set(byColor[k].filter(Boolean)));
+          byColor[k] = unique;
+        });
+        setColorImages(byColor);
+
+        const initialColor = product.color || product.colour || mapped[0]?.color || null;
+        setSelectedColor(initialColor);
+        const sizesForInitial = Array.from(
+          new Set(mapped.filter((v) => (initialColor ? v.color === initialColor : true)).map((v) => v.size).filter(Boolean))
+        );
+        const preferredSize =
+          sizesForInitial.includes(product.size) ? product.size : sizesForInitial[0] || null;
+        setSelectedSize(preferredSize);
+      } catch {
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadVariants();
+  }, [product]);
+
+  const sizesForColor = () => {
+    if (!selectedColor) return Array.from(new Set(variants.map((v) => v.size).filter(Boolean)));
+    return Array.from(new Set(variants.filter((v) => v.color === selectedColor).map((v) => v.size).filter(Boolean)));
+  };
+
+  const mainImage = () => {
+    if (!product) return '';
+    if (selectedColor) {
+      const foundImage = colorImages[selectedColor]?.[0];
+      if (foundImage) return foundImage;
+    }
+    return product.image_url;
+  };
+
+  const handleColorClick = (color) => {
+    setSelectedColor(color);
+    const sizes = sizesForColor();
+    const newSize = sizes.includes(selectedSize) ? selectedSize : sizes[0] || null;
+    setSelectedSize(newSize);
+  };
+
+  const handleSizeClick = (size) => {
+    setSelectedSize(size);
+  };
+
   const handleAdd = async (type) => {
     if (!selectedColor || !selectedSize || !userId || !product?.id) {
       setPopupMessage('Please select color and size');
       setTimeout(() => setPopupMessage(''), 2000);
       return;
     }
-    const item = { ...product, selectedColor, selectedSize, quantity: 1 };
+    const chosenVariant =
+      variants.find((v) => v.color === selectedColor && v.size === selectedSize) || null;
+
+    const item = {
+      ...product,
+      id: chosenVariant?.id || product.id,
+      product_id: chosenVariant?.product_id || product.product_id || null,
+      image_url: mainImage(),
+      selectedColor,
+      selectedSize,
+      quantity: 1
+    };
+
     if (type === 'bag') {
       const resp = await fetch(`${API_BASE}/api/cart/tarascart`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: userId,
-          product_id: product.id,
+          product_id: item.id,
           selected_size: selectedSize,
           selected_color: selectedColor,
           quantity: 1
@@ -77,7 +175,7 @@ const CheckoutPage = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: userId,
-          product_id: product.id
+          product_id: item.product_id || product.product_id
         })
       });
       if (resp.ok) {
@@ -91,6 +189,8 @@ const CheckoutPage = () => {
     }
   };
 
+  //const zoomFactor = 3;
+
   const handleMouseMove = (e) => {
     const image = e.target;
     const { left, width, height } = image.getBoundingClientRect();
@@ -102,8 +202,8 @@ const CheckoutPage = () => {
     let lensY = Math.max(0, Math.min(y - lensHeight / 2, height - lensHeight));
     const bigImageWidth = width * zoomFactor;
     const bigImageHeight = height * zoomFactor;
-    let containerWidth = window.innerWidth > 1024 ? 400 : width;
-    let containerHeight = window.innerWidth > 1024 ? 400 : window.innerWidth > 768 ? 300 : window.innerWidth > 500 ? 200 : window.innerWidth > 400 ? 180 : 150;
+    let containerWidth = window.innerWidth > 1024 ? 320 : width;
+    let containerHeight = window.innerWidth > 1024 ? 320 : window.innerWidth > 768 ? 260 : window.innerWidth > 520 ? 220 : 180;
     let offsetX = containerWidth / 2 - (lensX * zoomFactor + (lensWidth * zoomFactor) / 2);
     let offsetY = containerHeight / 2 - (lensY * zoomFactor + (lensHeight * zoomFactor) / 2);
     offsetX = Math.max(containerWidth - bigImageWidth, Math.min(0, offsetX));
@@ -132,28 +232,30 @@ const CheckoutPage = () => {
     return Math.round(((mrp - offer) / mrp) * 100);
   };
 
+  const thumbList = selectedColor ? colorImages[selectedColor] || [] : [];
+
   return (
-    <div className="bhuvi-checkout-page">
+    <div className="co-wrap">
       <Navbar />
-      <div className="bhuvi-checkout-main">
-        <div className="bhuvi-checkout-section1">
-          <div className="bhuvi-checkout-section1-left">
+      <div className="co-container">
+        <div className="co-left">
+          <div className="co-media">
             <div
-              className="bhuvi-checkout-section1-image-container"
+              className="co-image-zoom"
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
             >
               {product && (
                 <img
-                  src={product.image_url}
+                  src={mainImage()}
                   alt={product.product_name}
-                  className="bhuvi-checkout-section1-image"
+                  className="co-image"
                 />
               )}
               {isHovering && product && (
                 <>
                   <div
-                    className="bhuvi-checkout-section1-lens"
+                    className="co-lens"
                     style={{
                       width: `${lens.w}px`,
                       height: `${lens.h}px`,
@@ -162,18 +264,18 @@ const CheckoutPage = () => {
                     }}
                   />
                   <div
-                    className="bhuvi-checkout-section1-zoomed"
+                    className="co-zoomed"
                     style={{
                       top: window.innerWidth > 1024 ? 0 : `${lens.h * zoomFactor}px`,
                       left: zoomStyles.zoomLeft
-                        ? `-${window.innerWidth > 1024 ? 400 : lens.w * zoomFactor}px`
+                        ? `-${window.innerWidth > 1024 ? 320 : lens.w * zoomFactor}px`
                         : `${window.innerWidth > 1024 ? lens.w * zoomFactor : 0}px`
                     }}
                   >
                     <img
-                      src={product.image_url}
+                      src={mainImage()}
                       alt="Zoomed"
-                      className="bhuvi-checkout-section1-zoomed-image"
+                      className="co-zoomed-img"
                       style={{
                         width: `${lens.w * zoomFactor * zoomFactor}px`,
                         height: `${lens.h * zoomFactor * zoomFactor}px`,
@@ -185,81 +287,133 @@ const CheckoutPage = () => {
                 </>
               )}
             </div>
-          </div>
 
-          <div className="bhuvi-checkout-section1-right">
-            <h1 className="bhuvi-brand-name">{product?.brand}</h1>
-            <h2 className="bhuvi-product-name">{product?.product_name}</h2>
-            <div className="bhuvi-price-row">
-              <span className="bhuvi-price">₹{product?.final_price_b2c}</span>
-              <span className="bhuvi-discount">{getDiscount()}% Off</span>
-            </div>
-            <div className="bhuvi-mrp-info">
-              <div className="bhuvi-mrp-line">
-                <span>MRP:</span>
-                <span className="bhuvi-mrp-strike">₹{product?.original_price_b2c}</span>
-              </div>
-              <div className="bhuvi-tax-note">Inclusive of all taxes</div>
-            </div>
-            <hr />
-            <div className="bhuvi-section">
-              <h3>Select Color</h3>
-              {selectedColor && <div className="bhuvi-selected-color">{selectedColor}</div>}
-              <div className="bhuvi-color-circles">
-                {['Red', 'Black', 'Gold', 'Green', 'Purple', 'Blue'].map((color) => (
-                  <div
-                    key={color}
-                    className={`bhuvi-color-circle ${selectedColor === color ? 'active' : ''}`}
-                    style={{ backgroundColor: color.toLowerCase() }}
-                    onClick={() => setSelectedColor(color)}
-                  />
-                ))}
-              </div>
-            </div>
-            <hr />
-            <div className="bhuvi-section">
-              <h3>Select Size</h3>
-              <div className="bhuvi-size-options">
-                {['S', 'M', 'L', 'XL', 'XXL'].map((size) => (
+            {thumbList.length > 0 && (
+              <div className="co-thumbs">
+                {thumbList.map((src, i) => (
                   <button
-                    key={size}
-                    className={`bhuvi-size-button ${selectedSize === size ? 'selected' : ''}`}
-                    onClick={() => setSelectedSize(size)}
+                    key={i}
+                    className="co-thumb"
+                    onClick={() => {
+                      const c = selectedColor;
+                      if (!c) return;
+                      setColorImages((prev) => {
+                        const copy = { ...prev };
+                        const arr = copy[c] || [];
+                        if (arr[0] !== src) {
+                          const idx = arr.indexOf(src);
+                          if (idx > -1) {
+                            arr.splice(idx, 1);
+                            arr.unshift(src);
+                            copy[c] = [...arr];
+                          }
+                        }
+                        return copy;
+                      });
+                    }}
                   >
-                    {size}
+                    <img src={src} alt={`thumb-${i}`} />
                   </button>
                 ))}
               </div>
-              <div className="bhuvi-action-buttons">
-                <button className="bhuvi-wishlist" onClick={() => handleAdd('wishlist')}>
-                  <FaHeart style={{ marginRight: '8px' }} /> Add to Wishlist
-                </button>
-                <button className="bhuvi-bag" onClick={() => handleAdd('bag')}>
-                  <FaShoppingBag style={{ marginRight: '8px' }} /> Add to Bag
-                </button>
-              </div>
-            </div>
-            <hr />
-            <div className="bhuvi-section">
-              <h3>Select Delivery Location</h3>
-              <p className="bhuvi-subtext">
-                Enter the pincode of your area to check product availability and delivery options
-              </p>
-              <div className="bhuvi-pincode-form">
-                <input
-                  type="text"
-                  maxLength="6"
-                  value={pincode}
-                  onChange={handlePincodeChange}
-                  placeholder="Enter Pincode"
-                />
-                <button className="bhuvi-apply-btn">Apply</button>
-              </div>
-            </div>
+            )}
           </div>
         </div>
+
+        <div className="co-right">
+          {isLoading ? (
+            <div className="co-loader">
+              <div className="spin"></div>
+              <span>Loading options…</span>
+            </div>
+          ) : (
+            <>
+              <h1 className="co-brand">{product?.brand}</h1>
+              <h2 className="co-name">{product?.product_name}</h2>
+
+              <div className="co-price-row">
+                <span className="co-price">₹{Number(product?.final_price_b2c || 0).toFixed(2)}</span>
+                <span className="co-disc">{getDiscount()}% Off</span>
+              </div>
+
+              <div className="co-mrp">
+                <span className="co-mrp-label">MRP:</span>
+                <span className="co-mrp-strike">₹{Number(product?.original_price_b2c || 0).toFixed(2)}</span>
+                <span className="co-tax">Inclusive of all taxes</span>
+              </div>
+
+              <div className="co-section">
+                <div className="co-section-head">
+                  <h3>Color</h3>
+                  {selectedColor && <span className="co-chip">{selectedColor}</span>}
+                </div>
+                <div className="co-colors">
+                  {Object.keys(colorImages).length === 0 && (
+                    <span className="co-muted">No colors available</span>
+                  )}
+                  {Object.keys(colorImages).map((c) => (
+                    <button
+                      key={c}
+                      className={`co-swatch ${selectedColor === c ? 'active' : ''}`}
+                      onClick={() => handleColorClick(c)}
+                      style={{
+                        backgroundImage: colorImages[c]?.[0] ? `url(${colorImages[c][0]})` : 'none'
+                      }}
+                      title={c}
+                    >
+                      {!colorImages[c]?.[0] && <span className="co-swatch-fallback">{c[0] || '?'}</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="co-section">
+                <div className="co-section-head">
+                  <h3>Size</h3>
+                  {selectedSize && <span className="co-chip">{selectedSize}</span>}
+                </div>
+                <div className="co-sizes">
+                  {sizesForColor().length === 0 && <span className="co-muted">No sizes available</span>}
+                  {sizesForColor().map((s) => (
+                    <button
+                      key={s}
+                      className={`co-size ${selectedSize === s ? 'selected' : ''}`}
+                      onClick={() => handleSizeClick(s)}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+                <div className="co-actions">
+                  <button className="btn gold ghost" onClick={() => handleAdd('wishlist')}>
+                    <FaHeart style={{ marginRight: 8 }} /> Add to Wishlist
+                  </button>
+                  <button className="btn gold solid" onClick={() => handleAdd('bag')}>
+                    <FaShoppingBag style={{ marginRight: 8 }} /> Add to Bag
+                  </button>
+                </div>
+              </div>
+
+              <div className="co-section">
+                <h3>Delivery</h3>
+                <p className="co-sub">Enter your pincode to check delivery options</p>
+                <div className="co-pin">
+                  <input
+                    type="text"
+                    maxLength="6"
+                    value={pincode}
+                    onChange={handlePincodeChange}
+                    placeholder="Enter Pincode"
+                  />
+                  <button className="btn black">Apply</button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       </div>
-      {popupMessage && <div className="bhuvi-popup">{popupMessage}</div>}
+
+      {popupMessage && <div className="co-popup">{popupMessage}</div>}
       <Footer />
     </div>
   );

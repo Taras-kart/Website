@@ -364,6 +364,98 @@ export default function HomePage() {
                 </div>
             </section>
 
+
+            <section className="home-section6">
+                <h2 className="home-section6-title">Trending Now....</h2>
+                <div className="home-section6-grid">
+                    {/* Part 1 */}
+                    <div className="home-section6-item">
+                        <div className="home-section6-left">
+                            <img src="/images/trending-part1-big1.jpeg" alt="Printed Sarees" />
+                        </div>
+                        <div className="home-section6-right">
+                            <h3>Printed Sarees...</h3>
+                            <div className="home-section6-small-images">
+                                <img src="/images/trending-part1-small1.jpeg" alt="Saree 1" />
+                                <img src="/images/trending-part1-small2.jpeg" alt="Saree 2" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Part 2 */}
+                    <div className="home-section6-item">
+                        <div className="home-section6-left">
+                            <img src="/images/trending-part2-big1.jpeg" alt="Lehanga" />
+                        </div>
+                        <div className="home-section6-right">
+                            <h3> Printed Lehanga...</h3>
+                            <div className="home-section6-small-images">
+                                <img src="/images/trending-part2-small1.jpeg" alt="Lehanga 1" />
+                                <img src="/images/trending-part2-small2.jpeg" alt="Lehanga 2" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Part 3 */}
+                    <div className="home-section6-item">
+                        <div className="home-section6-left">
+                            <img src="/images/trending-part3-big1.jpeg" alt="Wedding Sarees" />
+                        </div>
+                        <div className="home-section6-right">
+                            <h3>Wedding Sarees...</h3>
+                            <div className="home-section6-small-images">
+                                <img src="/images/trending-part3-small1.jpeg" alt="Saree 1" />
+                                <img src="/images/trending-part3-small2.jpeg" alt="Saree 2" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Part 4 */}
+                    <div className="home-section6-item">
+                        <div className="home-section6-left">
+                            <img src="/images/trending-part4-big1.jpeg" alt="Printed Sarees" />
+                        </div>
+                        <div className="home-section6-right">
+                            <h3>Printed Chudidars...</h3>
+                            <div className="home-section6-small-images">
+                                <img src="/images/trending-part4-small1.jpeg" alt="Saree 1" />
+                                <img src="/images/trending-part4-small2.jpeg" alt="Saree 2" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Part 5 */}
+                    <div className="home-section6-item">
+                        <div className="home-section6-left">
+                            <img src="/images/trending-part5-big1.jpeg" alt="Lehanga" />
+                        </div>
+                        <div className="home-section6-right">
+                            <h3> Printed Gowns...</h3>
+                            <div className="home-section6-small-images">
+                                <img src="/images/trending-part5-small1.jpeg" alt="Lehanga 1" />
+                                <img src="/images/trending-part5-small2.jpeg" alt="Lehanga 2" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Part 6 */}
+                    <div className="home-section6-item">
+                        <div className="home-section6-left">
+                            <img src="/images/trending-part6-big1.jpeg" alt="Wedding Sarees" />
+                        </div>
+                        <div className="home-section6-right">
+                            <h3>Half Sarees...</h3>
+                            <div className="home-section6-small-images">
+                                <img src="/images/trending-part6-small1.jpeg" alt="Saree 1" />
+                                <img src="/images/trending-part6-small2.jpeg" alt="Saree 2" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+
             <section className="home-section4">
                 <h2 className="home-section4-title">Our Premium Collections</h2>
                 <div className="home-section4-underline">

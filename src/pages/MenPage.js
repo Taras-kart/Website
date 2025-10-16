@@ -25,7 +25,7 @@ function cloudinaryUrlByEan(ean) {
 
 export default function MenPage() {
   const navigate = useNavigate()
-  const { addToWishlist, wishlistItems } = useWishlist()
+  const { addToWishlist, wishlistItems, setWishlistItems } = useWishlist()
   const [allProducts, setAllProducts] = useState([])
   const [products, setProducts] = useState([])
   const [filters, setFilters] = useState({})
@@ -63,7 +63,8 @@ export default function MenPage() {
           const candidateCloudinary = ean ? cloudinaryUrlByEan(ean) : ''
           const img = apiImage || candidateCloudinary || DEFAULT_IMG
           return {
-            id: p.id ?? p.product_id ?? i + 1,
+            id: p.id ?? i + 1,
+            product_id: p.product_id ?? p.pid ?? null,
             brand: p.brand ?? p.brand_name ?? '',
             product_name: p.product_name ?? p.name ?? '',
             image_url: img,
@@ -74,9 +75,15 @@ export default function MenPage() {
             final_price_b2b: p.final_price_b2b ?? p.sale_price ?? 0
           }
         })
+        const uniqMap = new Map()
+        for (const x of arr) {
+          const key = x.product_id || x.id
+          if (!uniqMap.has(key)) uniqMap.set(key, x)
+        }
+        const uniq = Array.from(uniqMap.values())
         if (!cancelled) {
-          setAllProducts(arr)
-          setProducts(arr)
+          setAllProducts(uniq)
+          setProducts(uniq)
         }
       } catch {
         if (!cancelled) {
@@ -93,6 +100,18 @@ export default function MenPage() {
       cancelled = true
     }
   }, [])
+
+  useEffect(() => {
+    const loadWishlist = async () => {
+      if (!userId) return
+      try {
+        const r = await fetch(`${API_BASE}/api/wishlist/${userId}`)
+        const data = await r.json()
+        setWishlistItems(Array.isArray(data) ? data : [])
+      } catch {}
+    }
+    loadWishlist()
+  }, [userId, setWishlistItems])
 
   const filtered = useMemo(() => {
     let list = [...allProducts]
@@ -111,20 +130,27 @@ export default function MenPage() {
     setProducts(filtered)
   }, [filtered])
 
+  const isInWishlist = (product) => {
+    if (!product?.product_id) return false
+    return wishlistItems.some((item) => String(item.product_id) === String(product.product_id))
+  }
+
   const toggleLike = async (product) => {
-    const alreadyInWishlist = wishlistItems.some((item) => item.product_name === product.product_name)
+    if (!userId || !product?.product_id) return
+    const already = isInWishlist(product)
     try {
-      if (alreadyInWishlist) {
+      if (already) {
         await fetch(`${API_BASE}/api/wishlist`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, product_id: product.id })
+          body: JSON.stringify({ user_id: userId, product_id: product.product_id })
         })
+        setWishlistItems((prev) => prev.filter((w) => String(w.product_id) !== String(product.product_id)))
       } else {
         await fetch(`${API_BASE}/api/wishlist`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, product_id: product.id })
+          body: JSON.stringify({ user_id: userId, product_id: product.product_id })
         })
         addToWishlist(product)
       }
@@ -183,7 +209,7 @@ export default function MenPage() {
                 <div className="mens-section4-grid">
                   {toArray(products).map((product, idx) => (
                     <div
-                      key={product.id || idx}
+                      key={product.product_id || product.id || idx}
                       className="mens-section4-card"
                       onClick={() => handleProductClick(product)}
                     >
@@ -209,7 +235,7 @@ export default function MenPage() {
                             toggleLike(product)
                           }}
                         >
-                          {wishlistItems.find((item) => item.product_name === product.product_name) ? (
+                          {isInWishlist(product) ? (
                             <FaHeart style={{ color: 'yellow', fontSize: 20 }} />
                           ) : (
                             <FaRegHeart style={{ color: 'yellow', fontSize: 20 }} />
