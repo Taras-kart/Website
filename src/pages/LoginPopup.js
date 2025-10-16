@@ -1,9 +1,10 @@
 // src/components/LoginPopup.js
 import React, { useState, useRef, useEffect } from 'react';
-import { FaGoogle, FaTwitter, FaGithub } from 'react-icons/fa';
+import { FaGoogle } from 'react-icons/fa';
 import { FiX, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import './LoginPopup.css';
 import ForgotPasswordPopup from './ForgotPasswordPopup';
+import SignupPopup from './SignupPopup';
 
 const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
 const API_BASE_RAW =
@@ -21,6 +22,7 @@ const LoginPopup = ({ onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
+  const [showSignup, setShowSignup] = useState(false);
 
   const validEmail = (v) => /^\S+@\S+\.\S+$/.test(v);
   const canSubmit = validEmail(email) && !loading;
@@ -65,11 +67,11 @@ const LoginPopup = ({ onClose, onSuccess }) => {
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (showForgot) return;
+      if (showForgot || showSignup) return;
       if (popupRef.current && !popupRef.current.contains(e.target)) onClose();
     };
     const onKey = (e) => {
-      if (showForgot) return;
+      if (showForgot || showSignup) return;
       if (e.key === 'Escape') onClose();
       if (e.key === 'Enter') handleLogin();
     };
@@ -82,7 +84,7 @@ const LoginPopup = ({ onClose, onSuccess }) => {
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
     };
-  }, [showForgot, onClose]);
+  }, [showForgot, showSignup, onClose]);
 
   return (
     <>
@@ -145,15 +147,17 @@ const LoginPopup = ({ onClose, onSuccess }) => {
 
           <div className="social-grid-login">
             <button className="btn-google-login"><FaGoogle /> Google</button>
-            <button className="icon-login" aria-label="Twitter"><FaTwitter /></button>
-            <button className="icon-login" aria-label="GitHub"><FaGithub /></button>
           </div>
 
-          <p className="signup-login">Don’t have an account? <a href="#">Sign up</a></p>
+          <p className="signup-login">
+            Don’t have an account?{' '}
+            <button className="signup-link-login" onClick={() => setShowSignup(true)}>Sign up</button>
+          </p>
         </div>
       </div>
 
       {showForgot && <ForgotPasswordPopup onClose={() => setShowForgot(false)} />}
+      {showSignup && <SignupPopup onClose={() => setShowSignup(false)} />}
     </>
   );
 };

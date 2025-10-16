@@ -181,7 +181,7 @@
 
 .social-grid-login {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr;
   gap: 10px;
   margin: 12px 0
 }
@@ -201,41 +201,23 @@
   padding: 0 14px
 }
 
-.icon-login {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgba(255, 255, 255, .08);
-  background: rgba(255, 255, 255, .04);
-  color: #fff
-}
-
 .signup-login {
   text-align: center;
   font-size: 13px;
   color: rgba(255, 255, 255, .9)
 }
 
-.signup-login a {
+.signup-link-login {
   color: #ffd277;
   font-weight: 900;
-  text-decoration: none
+  background: transparent;
+  border: none;
+  padding: 0 0 0 4px;
+  cursor: pointer
 }
 
 @keyframes spin {
   to {
     transform: rotate(360deg)
-  }
-}
-
-@media (max-width:560px) {
-  .social-grid-login {
-    grid-template-columns: 1fr 1fr 1fr
-  }
-
-  .btn-google-login {
-    grid-column: span 3
   }
 }

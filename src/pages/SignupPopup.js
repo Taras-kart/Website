@@ -1,9 +1,10 @@
-/* global google */
+/* D:\shopping\src\components/SignupPopup.jsx */
 import React, { useState, useEffect, useRef } from 'react';
-import { FaFacebookF, FaInstagram, FaGoogle } from 'react-icons/fa';
 import { FiEye, FiEyeOff, FiX, FiUser, FiMail, FiPhone, FiLock } from 'react-icons/fi';
-import { jwtDecode } from 'jwt-decode';
+import { FaGoogle } from 'react-icons/fa';
 import './SignupPopup.css';
+import { initializeApp, getApps } from 'firebase/app';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth';
 
 const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
 const API_BASE_RAW =
@@ -11,6 +12,28 @@ const API_BASE_RAW =
   (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
   DEFAULT_API_BASE;
 const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
+
+const env = (k) =>
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[k]) ||
+  (typeof process !== 'undefined' && process.env && process.env[k]) ||
+  '';
+
+const firebaseConfig = {
+  apiKey: env('VITE_FIREBASE_API_KEY') || env('REACT_APP_FIREBASE_API_KEY'),
+  authDomain: env('VITE_FIREBASE_AUTH_DOMAIN') || env('REACT_APP_FIREBASE_AUTH_DOMAIN'),
+  projectId: env('VITE_FIREBASE_PROJECT_ID') || env('REACT_APP_FIREBASE_PROJECT_ID'),
+  appId: env('VITE_FIREBASE_APP_ID') || env('REACT_APP_FIREBASE_APP_ID'),
+};
+
+function ensureFirebase() {
+  const missing = Object.entries(firebaseConfig).filter(([, v]) => !v);
+  if (missing.length) {
+    const keys = missing.map(([k]) => k).join(', ');
+    throw new Error(`Missing Firebase env: ${keys}`);
+  }
+  if (!getApps().length) initializeApp(firebaseConfig);
+  return getAuth();
+}
 
 const SignupPopup = ({ onClose, onSuccess }) => {
   const popupRef = useRef(null);
@@ -50,7 +73,7 @@ const SignupPopup = ({ onClose, onSuccess }) => {
 
   useEffect(() => {
     const handleEsc = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') onClose && onClose();
     };
     document.addEventListener('keydown', handleEsc);
     document.body.style.overflow = 'hidden';
@@ -64,8 +87,23 @@ const SignupPopup = ({ onClose, onSuccess }) => {
     firstInputRef.current?.focus();
   }, []);
 
+  useEffect(() => {
+    const checkRedirect = async () => {
+      try {
+        const auth = ensureFirebase();
+        const r = await getRedirectResult(auth);
+        if (r?.user) {
+          await completeLoginFromUser(r.user);
+        }
+      } catch (e) {
+        setError(e?.message || 'Google login failed');
+      }
+    };
+    checkRedirect();
+  }, []);
+
   const handleOverlayMouseDown = (e) => {
-    if (e.target === e.currentTarget) onClose();
+    if (e.target === e.currentTarget) onClose && onClose();
   };
 
   const handleSubmit = async () => {
@@ -82,7 +120,7 @@ const SignupPopup = ({ onClose, onSuccess }) => {
       const data = await response.json();
       if (response.ok) {
         setSuccess('Signup successful');
-        setTimeout(() => onSuccess({ name: fullName.trim(), email: email.trim() }), 1200);
+        setTimeout(() => onSuccess && onSuccess({ name: fullName.trim(), email: email.trim() }), 900);
       } else {
         setError(data.message || 'Signup failed');
       }
@@ -93,47 +131,68 @@ const SignupPopup = ({ onClose, onSuccess }) => {
     }
   };
 
-  const handleGoogleLogin = () => {
-    setError('');
-    if (!window.google || !window.google.accounts || !window.google.accounts.id) {
-      setError('Google login not available');
-      return;
+  const openLogin = () => {
+    if (typeof onClose === 'function') onClose('login');
+    try { window.dispatchEvent(new CustomEvent('open-login')); } catch {}
+  };
+
+  const completeLoginFromUser = async (user) => {
+    const gName = user.displayName || 'User';
+    const gEmail = user.email || '';
+    if (!gEmail) throw new Error('No email returned by Google');
+    let existing = null;
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/${encodeURIComponent(gEmail)}`);
+      if (res.ok) existing = await res.json();
+    } catch {}
+    if (!existing) {
+      const createRes = await fetch(`${API_BASE}/api/b2c-customers/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: gName,
+          email: gEmail,
+          mobile: '0000000000',
+          password: 'google-oauth'
+        })
+      });
+      const created = await createRes.json();
+      if (!createRes.ok) throw new Error(created?.message || 'Could not complete Google signup');
     }
-    google.accounts.id.initialize({
-      client_id: 'YOUR_GOOGLE_CLIENT_ID',
-      callback: async (resp) => {
-        try {
-          const decoded = jwtDecode(resp.credential || '');
-          const gName = decoded?.name || '';
-          const gEmail = decoded?.email || '';
-          const response = await fetch(`${API_BASE}/api/b2c-customers/signup`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: gName, email: gEmail, oauthProvider: 'google' })
-          });
-          const data = await response.json();
-          if (response.ok) {
-            onSuccess({ name: data?.name || gName, email: data?.email || gEmail });
-          } else {
-            setError(data?.message || 'Google login failed');
-          }
-        } catch {
-          setError('Google login failed');
+    onSuccess && onSuccess({ name: existing?.name || gName, email: gEmail });
+  };
+
+  const handleGoogleLogin = async () => {
+    setError('');
+    try {
+      const auth = ensureFirebase();
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      let result;
+      try {
+        result = await signInWithPopup(auth, provider);
+      } catch (popupErr) {
+        if (popupErr?.code === 'auth/popup-blocked' || popupErr?.code === 'auth/cancelled-popup-request') {
+          await signInWithRedirect(auth, provider);
+          return;
         }
+        throw popupErr;
       }
-    });
-    google.accounts.id.prompt();
+      await completeLoginFromUser(result.user);
+    } catch (e) {
+      setError(e?.message || 'Google login failed');
+    }
   };
 
   const strength = pwdScore(password);
   const strengthLabel = ['Too weak', 'Weak', 'Fair', 'Strong', 'Strong'][strength];
   const strengthWidth = ['10%', '30%', '55%', '80%', '100%'][strength];
-  const strengthColor = ['#cc3333', '#e67e22', '#ffd277', '#ffd277', '#ffd277'][strength];
+  const strengthColor = ['#cc3333', '#e67e22', '#ffd700', '#ffd700', '#ffd700'][strength];
 
   return (
     <div className="signup-overlay" onMouseDown={handleOverlayMouseDown}>
       <div className="signup-card" ref={popupRef} role="dialog" aria-modal="true">
-        <button className="close-btn" onClick={onClose} aria-label="Close"><FiX /></button>
+        <button className="close-btn" onClick={() => onClose && onClose()} aria-label="Close"><FiX /></button>
         <div className="signup-head">
           <h2 className="signup-title">Create your account</h2>
           <p className="signup-sub">Join Tars Kart to track orders, save items and get faster checkout</p>
@@ -212,11 +271,7 @@ const SignupPopup = ({ onClose, onSuccess }) => {
           </label>
           {error && <div className="alert error">{error}</div>}
           {success && <div className="alert success">{success}</div>}
-          <button
-            className={`submit ${canSubmit ? '' : 'disabled'}`}
-            onClick={handleSubmit}
-            disabled={!canSubmit}
-          >
+          <button className={`submit ${canSubmit ? '' : 'disabled'}`} onClick={handleSubmit} disabled={!canSubmit}>
             {submitting ? <span className="spinner" /> : 'Create Account'}
           </button>
         </form>
@@ -227,11 +282,9 @@ const SignupPopup = ({ onClose, onSuccess }) => {
         </div>
         <div className="social-row">
           <button className="soc-btn google" onClick={handleGoogleLogin}><FaGoogle /> Continue with Google</button>
-          <button className="soc-icon" aria-label="Facebook"><FaFacebookF /></button>
-          <button className="soc-icon" aria-label="Instagram"><FaInstagram /></button>
         </div>
         <div className="switch-row">
-          Already have an account? <span className="switch" onClick={onClose}>Login</span>
+          Already have an account? <span className="switch" onClick={openLogin}>Login</span>
         </div>
       </div>
     </div>
