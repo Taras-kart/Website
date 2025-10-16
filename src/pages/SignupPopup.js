@@ -1,4 +1,4 @@
-/* D:\shopping\src\components/SignupPopup.jsx */
+/* D:\shopping\src\pages\SignupPopup.js */
 import React, { useState, useEffect, useRef } from 'react';
 import { FiEye, FiEyeOff, FiX, FiUser, FiMail, FiPhone, FiLock } from 'react-icons/fi';
 import { FaGoogle } from 'react-icons/fa';
@@ -13,24 +13,14 @@ const API_BASE_RAW =
   DEFAULT_API_BASE;
 const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
 
-const env = (k) =>
-  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[k]) ||
-  (typeof process !== 'undefined' && process.env && process.env[k]) ||
-  '';
-
 const firebaseConfig = {
-  apiKey: env('VITE_FIREBASE_API_KEY') || env('REACT_APP_FIREBASE_API_KEY'),
-  authDomain: env('VITE_FIREBASE_AUTH_DOMAIN') || env('REACT_APP_FIREBASE_AUTH_DOMAIN'),
-  projectId: env('VITE_FIREBASE_PROJECT_ID') || env('REACT_APP_FIREBASE_PROJECT_ID'),
-  appId: env('VITE_FIREBASE_APP_ID') || env('REACT_APP_FIREBASE_APP_ID'),
+  apiKey: "AIzaSyCXytrftmbkF6IHsgpByDcpB4oUSwdJV0M",
+  authDomain: "taraskart-6e601.firebaseapp.com",
+  projectId: "taraskart-6e601",
+  appId: "1:549582561307:web:40827cc8fc2b1696b718be"
 };
 
 function ensureFirebase() {
-  const missing = Object.entries(firebaseConfig).filter(([, v]) => !v);
-  if (missing.length) {
-    const keys = missing.map(([k]) => k).join(', ');
-    throw new Error(`Missing Firebase env: ${keys}`);
-  }
   if (!getApps().length) initializeApp(firebaseConfig);
   return getAuth();
 }
