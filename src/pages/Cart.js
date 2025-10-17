@@ -7,6 +7,7 @@ import { useWishlist } from '../WishlistContext';
 import './Cart.css';
 import { FaTimes, FaCheck, FaTag, FaChevronRight } from 'react-icons/fa';
 import Popup from './Popup';
+import { useNavigate } from 'react-router-dom';
 
 const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
 const API_BASE_RAW =
@@ -16,6 +17,7 @@ const API_BASE_RAW =
 const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
 
 const Cart = () => {
+  const navigate = useNavigate();
   const { addToWishlist } = useWishlist();
   const { removeFromCart } = useCart();
   const [cartItems, setCartItems] = useState([]);
@@ -27,6 +29,7 @@ const Cart = () => {
   const [couponDiscountPct, setCouponDiscountPct] = useState(0);
   const [giftWrap, setGiftWrap] = useState(false);
   const [toast, setToast] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
   const userId = sessionStorage.getItem('userId');
 
   useEffect(() => {
@@ -52,6 +55,22 @@ const Cart = () => {
     setSelectedItem(item);
     setShowPopup(true);
   };
+
+  const applyCoupon = () => {
+  if (couponInput.trim().toUpperCase() === 'GOLD10') {
+    setCouponDiscountPct(10);
+    setToast('GOLD10 applied (10% OFF)');
+  } else if (couponInput.trim().toUpperCase() === 'FREESHIP') {
+    setCouponDiscountPct(0);
+    setToast('FREESHIP applied');
+  } else {
+    setToast('Invalid coupon');
+    setCouponDiscountPct(0);
+  }
+  setShowCoupon(false);
+  setTimeout(() => setToast(''), 1500);
+};
+
 
   const handleConfirmRemove = async () => {
     if (selectedItem && userId) {
@@ -102,22 +121,34 @@ const Cart = () => {
   const youPay = subTotal + convenience + (giftWrap ? 39 : 0);
   const toFreeShipping = Math.max(0, freeShipThreshold - subTotal);
 
-  const applyCoupon = () => {
-    const code = couponInput.trim().toUpperCase();
-    if (code === 'GOLD10') {
-      setCouponDiscountPct(10);
-      setShowCoupon(false);
-      setToast('GOLD10 applied: 10% off');
-      setTimeout(() => setToast(''), 1600);
-    } else if (code === 'FREESHIP') {
-      setCouponDiscountPct(0);
-      setShowCoupon(false);
-      setToast('FREESHIP applied');
-      setTimeout(() => setToast(''), 1600);
-    } else {
-      setToast('Invalid coupon');
-      setTimeout(() => setToast(''), 1400);
-    }
+  const proceedToCheckout = () => {
+    if (!cartItems.length) return;
+    const payload = {
+      totals: {
+        bagTotal,
+        discountTotal,
+        couponPct: couponDiscountPct,
+        couponDiscount,
+        convenience,
+        giftWrap: giftWrap ? 39 : 0,
+        payable: youPay
+      },
+      items: cartItems.map((item) => {
+        const qty = quantities[item.id] || 1;
+        return {
+          variant_id: item.id,
+          product_id: item.product_id || null,
+          qty,
+          price: Number(item.final_price_b2c),
+          mrp: item.original_price_b2c != null ? Number(item.original_price_b2c) : Number(item.final_price_b2c),
+          size: item.selected_size || '',
+          colour: item.selected_color || '',
+          image_url: item.image_url || null
+        };
+      })
+    };
+    sessionStorage.setItem('tk_checkout_payload', JSON.stringify(payload));
+    navigate('/order/checkout');
   };
 
   return (
@@ -259,7 +290,7 @@ const Cart = () => {
                     <FaCheck />
                     <span>You are saving ₹{fmt(discountTotal + couponDiscount)} on this order</span>
                   </div>
-                  <button className="btn-buy">Proceed to Buy</button>
+                  <button className="btn-buy" onClick={proceedToCheckout}>Proceed to Buy</button>
                 </div>
               </div>
             </div>
@@ -269,7 +300,7 @@ const Cart = () => {
                 <strong>₹{fmt(youPay)}</strong>
                 <span>Payable</span>
               </div>
-              <button className="sb-btn">Checkout</button>
+              <button className="sb-btn" onClick={proceedToCheckout}>Checkout</button>
             </div>
           </>
         )}
@@ -307,6 +338,18 @@ const Cart = () => {
               <div className="modal-actions">
                 <button className="btn ghost" onClick={() => setShowCoupon(false)}>Close</button>
                 <button className="btn solid" onClick={applyCoupon}>Apply</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showSuccess && (
+          <div className="modal-wrap" onClick={() => setShowSuccess(false)}>
+            <div className="modal success" onClick={(e) => e.stopPropagation()}>
+              <div className="success-head">Order Placed Successfully</div>
+              <p className="success-sub">Thank you for shopping with us.</p>
+              <div className="modal-actions">
+                <button className="btn solid" onClick={() => setShowSuccess(false)}>Close</button>
               </div>
             </div>
           </div>

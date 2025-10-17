@@ -504,6 +504,19 @@
   font-weight: 900;
 }
 
+.modal.success .success-head {
+  font-weight: 900;
+  font-size: 1.2rem;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+
+.modal.success .success-sub {
+  color: var(--muted);
+  margin: 0 0 6px;
+  font-size: .95rem;
+}
+
 @media (max-width:1024px) {
   .cart-grid {
     grid-template-columns: 1fr;

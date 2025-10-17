@@ -1,7 +1,7 @@
+// src/App.js
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import './App.css';
-
 import HomePage from './pages/HomePage';
 import MenPage from './pages/MenPage';
 import WomenPage from './pages/WomenPage';
@@ -15,17 +15,16 @@ import { WishlistProvider } from './WishlistContext';
 import SearchResults from './pages/SearchResults';
 import TaraLoader from './pages/TaraLoader';
 import ScrollToTop from './pages/ScrollToTop';
+import OrderCheckout from './pages/OrderCheckout';
 
 function NavigationLoader() {
   const location = useLocation();
   const [loading, setLoading] = useState(false);
-
   useEffect(() => {
     setLoading(true);
     const t = setTimeout(() => setLoading(false), 2500);
     return () => clearTimeout(t);
   }, [location.pathname, location.search]);
-
   return loading ? <TaraLoader /> : null;
 }
 
@@ -45,12 +44,13 @@ function AppShell() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/brands" element={<Brands />} />
         <Route path="/search" element={<SearchResults />} />
+        <Route path="/order/checkout" element={<OrderCheckout />} />
       </Routes>
     </>
   );
 }
 
-function App() {
+export default function App() {
   return (
     <WishlistProvider>
       <Router>
@@ -61,5 +61,3 @@ function App() {
     </WishlistProvider>
   );
 }
-
-export default App;
