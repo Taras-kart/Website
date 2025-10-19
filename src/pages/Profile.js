@@ -157,18 +157,7 @@ const Profile = () => {
           )}
           {activeSection === 'Orders' && isLoggedIn && (
             <div className="section-card">
-              <Orders
-                orders={[
-                  {
-                    image: '/images/men/mens4.jpeg',
-                    name: 'Jacket',
-                    date: 'Delivered on June 15, 2025',
-                    brand: 'Zara',
-                    originalPrice: 4500,
-                    offerPrice: 1999
-                  }
-                ]}
-              />
+              <Orders user={{ email: userInfo?.email, mobile: userInfo?.mobile }} />
             </div>
           )}
           {activeSection === 'Terms' && (

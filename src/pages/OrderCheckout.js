@@ -1,4 +1,3 @@
-// src/pages/OrderCheckout.js
 import React, { useEffect, useMemo, useState } from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -65,6 +64,7 @@ export default function OrderCheckout() {
       return;
     }
     setPlacing(true);
+    const loginEmail = sessionStorage.getItem('userEmail') || null;
     const shipping_address = {
       line1: form.address_line1,
       line2: form.address_line2,
@@ -80,7 +80,8 @@ export default function OrderCheckout() {
       totals: payload.totals,
       items: payload.items,
       branch_id: null,
-      payment_status: 'COD'
+      payment_status: 'COD',
+      login_email: loginEmail
     };
     try {
       const resp = await fetch(`${API_BASE}/api/sales/web/place`, {
