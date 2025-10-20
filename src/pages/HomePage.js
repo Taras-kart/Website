@@ -6,6 +6,7 @@ import 'swiper/css';
 import 'swiper/css/effect-coverflow';
 import './HomePage.css';
 import Footer from './Footer';
+import { Link } from "react-router-dom";
 
 const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
 const API_BASE_RAW =
@@ -13,6 +14,9 @@ const API_BASE_RAW =
     (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
     DEFAULT_API_BASE;
 const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
+
+
+
 
 function withWidth(url, w) {
     try {
@@ -78,6 +82,18 @@ export default function HomePage() {
     const womenRef = useRef(null);
     const menRef = useRef(null);
     const kidsRef = useRef(null);
+
+    /* new section 1 */
+    const LUX_DEFAULT_WOMEN = Array.from({ length: 20 }, (_, i) => `/images/women/women${i + 1}.jpeg`);
+    const rotorWomen = React.useMemo(() => {
+        const backendImgs = (womenItems || [])
+            .map(x => (typeof x === 'string' ? x : x?.img))
+            .filter(u => u && typeof u === 'string' && !/^\/images\//.test(u));
+        const pool = backendImgs.length ? backendImgs : LUX_DEFAULT_WOMEN;
+        const pick = pool.slice(0, 12);
+        return pick.map(src => withWidth(src, 900));
+    }, [womenItems]);
+    /* end of new section 1 */
 
     useEffect(() => {
         let mounted = true;
@@ -248,105 +264,381 @@ export default function HomePage() {
                 </div>
             </section>
 
-            <section className="home-section5 galaxy" ref={womenRef}>
+
+
+
+            <section className="women-premium galaxy" ref={womenRef}>
                 <div className="galaxy-layer stars-1"></div>
                 <div className="galaxy-layer stars-2"></div>
                 <div className="galaxy-layer dust"></div>
 
-                <div className="home-section5-heading">
-                    <h2 className="galaxy-title">Women's Collection</h2>
-                    <div className="home-section5-underline">
-                        <div className="line1 large1"></div>
-                        <div className="line1 medium1"></div>
-                        <div className="line1 small1"></div>
+                <div className="women-premium-head">
+                    <h2 className="women-premium-title">Women’s Collection</h2>
+                    <div className="women-premium-underline">
+                        <span className="wl w1"></span>
+                        <span className="wl w2"></span>
+                        <span className="wl w3"></span>
                     </div>
                 </div>
 
-                <div className="home-section5-slider">
-                    <div className="home-section5-slider-track">
-                        {[...womenItems, ...womenItems].map((item, index) => (
-                            <div className="home-section5-card" key={index}>
-                                <div className="card-frame">
-                                    <img
-                                        src={withWidth(item.img, 600)}
-                                        alt={item.title}
-                                        loading="lazy"
-                                        onError={(e) => { e.currentTarget.src = '/images/women/women20.jpeg'; }}
-                                    />
-                                </div>
-                                <h3>{item.title}</h3>
-                                <button className="gold-btn">Buy Now</button>
-                            </div>
-                        ))}
+                <div className="women-premium-wrap">
+                    <Swiper
+                        className="women-premium-swiper"
+                        modules={[Autoplay]}
+                        loop={true}
+                        autoplay={{ delay: 2200, disableOnInteraction: false }}
+                        speed={800}
+                        spaceBetween={18}
+                        slidesPerView={1.25}
+                        breakpoints={{
+                            480: { slidesPerView: 2 },
+                            768: { slidesPerView: 3 },
+                            1100: { slidesPerView: 4 }
+                        }}
+                    >
+                        {[...new Set(womenItems.map(it => JSON.stringify(it)))].map((s, idx) => {
+                            const item = JSON.parse(s);
+                            const src = withWidth(item.img, 800);
+                            const title = item.title || "Women";
+                            return (
+                                <SwiperSlide key={idx}>
+                                    <a href="/women" className="women-premium-card">
+                                        <div className="women-premium-frame">
+                                            <img
+                                                src={src}
+                                                alt={title}
+                                                loading="lazy"
+                                                decoding="async"
+                                                onError={(e) => { e.currentTarget.src = "/images/women/women20.jpeg"; }}
+                                            />
+                                            <div className="women-premium-info">
+                                                <h3 className="women-premium-name">{title}</h3>
+                                                <span className="women-premium-btn">Shop Now</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </SwiperSlide>
+                            );
+                        })}
+                    </Swiper>
+                </div>
+            </section>
+
+
+
+
+
+            <section className="lux-rotor-section">
+                <div className="lux-sky">
+                    <div className="sky-layer stars-1"></div>
+                    <div className="sky-layer stars-2"></div>
+                    <div className="sky-layer stars-3"></div>
+                    <div className="sky-layer nebula"></div>
+                    <div className="sky-layer orbits"></div>
+                    <div className="sky-layer glow"></div>
+                </div>
+                <div className="lux-rotor-shell">
+                    <div className="lux-rotor-header">
+                        <h2 className="lux-rotor-title">Women’s Spotlight</h2>
+                        <div className="lux-rotor-underline">
+                            <span className="lux-line large"></span>
+                            <span className="lux-line medium"></span>
+                            <span className="lux-line small"></span>
+                        </div>
+                    </div>
+                    <div className="lux-rotor-stage">
+                        <div className="lux-rotor-inner" style={{ ['--quantity']: rotorWomen.length }}>
+                            {rotorWomen.map((src, i) => (
+                                <a href="/women" key={i} className="lux-rotor-card" style={{ ['--index']: i }}>
+                                    <div className="lux-rotor-frame">
+                                        <img
+                                            src={src}
+                                            alt={`Women's ${i + 1}`}
+                                            loading="lazy"
+                                            decoding="async"
+                                            onError={(e) => { e.currentTarget.src = LUX_DEFAULT_WOMEN[i % LUX_DEFAULT_WOMEN.length]; }}
+                                        />
+                                    </div>
+                                </a>
+                            ))}
+                        </div>
+                        <div className="lux-rotor-floor"></div>
                     </div>
                 </div>
             </section>
 
-            <section className="home-section5 galaxy" ref={menRef}>
+
+
+
+
+
+
+            <section className="men-premium galaxy" ref={menRef}>
                 <div className="galaxy-layer stars-1"></div>
                 <div className="galaxy-layer stars-2"></div>
                 <div className="galaxy-layer dust"></div>
 
-                <div className="home-section5-heading">
-                    <h2 className="galaxy-title">Men's Collection</h2>
-                    <div className="home-section5-underline">
-                        <div className="line1 large1"></div>
-                        <div className="line1 medium1"></div>
-                        <div className="line1 small1"></div>
+                <div className="men-premium-head">
+                    <h2 className="men-premium-title">Men’s Collection</h2>
+                    <div className="men-premium-underline">
+                        <span className="ml m1"></span>
+                        <span className="ml m2"></span>
+                        <span className="ml m3"></span>
                     </div>
                 </div>
 
-                <div className="home-section5-slider">
-                    <div className="home-section5-slider-track">
-                        {[...menItems, ...menItems].map((item, index) => (
-                            <div className="home-section5-card" key={index}>
-                                <div className="card-frame">
-                                    <img
-                                        src={withWidth(item.img, 600)}
-                                        alt={item.title}
-                                        loading="lazy"
-                                        onError={(e) => { e.currentTarget.src = '/images/men/default.jpg'; }}
-                                    />
+                <div className="men-premium-wrap">
+                    <Swiper
+                        className="men-premium-swiper"
+                        modules={[Autoplay]}
+                        loop={true}
+                        autoplay={{ delay: 2200, disableOnInteraction: false }}
+                        speed={800}
+                        spaceBetween={18}
+                        slidesPerView={1.25}
+                        breakpoints={{
+                            480: { slidesPerView: 2 },
+                            768: { slidesPerView: 3 },
+                            1100: { slidesPerView: 4 }
+                        }}
+                    >
+                        {[...new Set(menItems.map(it => JSON.stringify(it)))].map((s, idx) => {
+                            const item = JSON.parse(s);
+                            const src = withWidth(item.img, 800);
+                            const title = item.title || "Men";
+                            return (
+                                <SwiperSlide key={idx}>
+                                    <a href="/men" className="men-premium-card">
+                                        <div className="men-premium-frame">
+                                            <img
+                                                src={src}
+                                                alt={title}
+                                                loading="lazy"
+                                                decoding="async"
+                                                onError={(e) => { e.currentTarget.src = "/images/men/default.jpg"; }}
+                                            />
+                                            <div className="men-premium-info">
+                                                <h3 className="men-premium-name">{title}</h3>
+                                                <span className="men-premium-btn">Shop Now</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </SwiperSlide>
+                            );
+                        })}
+                    </Swiper>
+                </div>
+            </section>
+
+
+
+
+            <section className="tara-quad-section">
+                <div className="tara-quad-glow"></div>
+                <div className="tara-quad-shell">
+                    <div className="tara-quad-header">
+                        <h2 className="tara-quad-title">Tara Saree</h2>
+                        <div className="tara-quad-underline">
+                            <span className="tara-line large"></span>
+                            <span className="tara-line medium"></span>
+                            <span className="tara-line small"></span>
+                        </div>
+                        <p className="tara-quad-sub">Crafted drapes with a golden touch</p>
+                    </div>
+                    <div className="tara-quad-grid">
+                        <a href="/women" className="tara-quad-card">
+                            <div className="tara-quad-frame">
+                                <div className="tara-quad-media">
+                                    <img src="/images/brands/tara-saree1.png" alt="Tara Saree 1" loading="lazy" decoding="async" />
                                 </div>
-                                <h3>{item.title}</h3>
-                                <button className="gold-btn">Buy Now</button>
+                                <div className="tara-quad-overlay"></div>
+                                <div className="tara-quad-tag">New Arrival</div>
                             </div>
-                        ))}
+                        </a>
+                        <a href="/women" className="tara-quad-card">
+                            <div className="tara-quad-frame">
+                                <div className="tara-quad-media">
+                                    <img src="/images/brands/tara-saree2.png" alt="Tara Saree 2" loading="lazy" decoding="async" />
+                                </div>
+                                <div className="tara-quad-overlay"></div>
+                                <div className="tara-quad-tag">Handpicked</div>
+                            </div>
+                        </a>
+                        <a href="/women" className="tara-quad-card">
+                            <div className="tara-quad-frame">
+                                <div className="tara-quad-media">
+                                    <img src="/images/brands/tara-saree3.png" alt="Tara Saree 3" loading="lazy" decoding="async" />
+                                </div>
+                                <div className="tara-quad-overlay"></div>
+                                <div className="tara-quad-tag">Silk Blend</div>
+                            </div>
+                        </a>
+                        <a href="/women" className="tara-quad-card">
+                            <div className="tara-quad-frame">
+                                <div className="tara-quad-media">
+                                    <img src="/images/brands/tara-saree4.png" alt="Tara Saree 4" loading="lazy" decoding="async" />
+                                </div>
+                                <div className="tara-quad-overlay"></div>
+                                <div className="tara-quad-tag">Limited</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div className="tara-quad-cta-row">
+                        <a href="/women" className="tara-quad-cta">Explore Collection</a>
                     </div>
                 </div>
             </section>
 
-            <section className="home-section5 galaxy" ref={kidsRef}>
+
+
+
+            <section className="ai-duo-section">
+                <div className="ai-duo-container">
+                    <div className="ai-duo-left">
+                        <div className="ai-duo-frame">
+                            <Swiper
+                                className="ai-duo-slider"
+                                modules={[Autoplay]}
+                                loop={true}
+                                slidesPerView={1}
+                                autoplay={{ delay: 3500, disableOnInteraction: false }}
+                                speed={900}
+                            >
+                                <SwiperSlide>
+                                    <div className="ai-duo-slide">
+                                        <img src="/images/brands/ai-sub-slide1.png" alt="AI Slide 1" loading="lazy" decoding="async" />
+                                    </div>
+                                </SwiperSlide>
+                                <SwiperSlide>
+                                    <div className="ai-duo-slide">
+                                        <img src="/images/brands/ai-sub-slide2.png" alt="AI Slide 2" loading="lazy" decoding="async" />
+                                    </div>
+                                </SwiperSlide>
+                                <SwiperSlide>
+                                    <div className="ai-duo-slide">
+                                        <img src="/images/brands/ai-sub-slide3.png" alt="AI Slide 3" loading="lazy" decoding="async" />
+                                    </div>
+                                </SwiperSlide>
+                            </Swiper>
+                        </div>
+                    </div>
+
+                    <div className="ai-duo-right">
+                        <div className="ai-duo-right-bg"></div>
+                        <div className="ai-duo-right-inner">
+                            <div className="ai-duo-head">
+                                <h2 className="ai-duo-title">Crafted Styles, Elevated</h2>
+                                <div className="ai-duo-underline">
+                                    <span className="ai-line large"></span>
+                                    <span className="ai-line medium"></span>
+                                    <span className="ai-line small"></span>
+                                </div>
+                            </div>
+
+                            <p className="ai-duo-desc">
+                                Discover premium looks designed to shine. From timeless silhouettes to trend-forward picks, explore pieces that feel as good as they look.
+                            </p>
+
+                            <div className="ai-duo-pills">
+                                <span className="ai-pill">Comfort Fit</span>
+                                <span className="ai-pill">Luxe Fabric</span>
+                                <span className="ai-pill">Party Ready</span>
+                            </div>
+
+                            <div className="ai-btn-row">
+                                <a href="/women" className="ai-btn">
+                                    Explore Women’s
+                                    <span className="ai-btn-shine"></span>
+                                </a>
+                                <a href="/women" className="ai-btn-outline">View Lookbook</a>
+                            </div>
+
+                            <div className="ai-duo-stats">
+                                <div className="stat">
+                                    <span className="stat-num">100+</span>
+                                    <span className="stat-label">New Arrivals</span>
+                                </div>
+                                <div className="stat">
+                                    <span className="stat-num">24/7</span>
+                                    <span className="stat-label">Style Support</span>
+                                </div>
+                                <div className="stat">
+                                    <span className="stat-num">Top</span>
+                                    <span className="stat-label">Quality</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+
+
+
+
+            <section className="kids-showcase galaxy" ref={kidsRef}>
                 <div className="galaxy-layer stars-1"></div>
                 <div className="galaxy-layer stars-2"></div>
                 <div className="galaxy-layer dust"></div>
 
-                <div className="home-section5-heading">
-                    <h2 className="galaxy-title">Kid's Collection</h2>
-                    <div className="home-section5-underline">
-                        <div className="line1 large1"></div>
-                        <div className="line1 medium1"></div>
-                        <div className="line1 small1"></div>
+                <div className="kids-head">
+                    <h2 className="kids-title">Kids’ Collection</h2>
+                    <div className="kids-underline">
+                        <span className="kl k1"></span>
+                        <span className="kl k2"></span>
+                        <span className="kl k3"></span>
                     </div>
                 </div>
 
-                <div className="home-section5-slider">
-                    <div className="home-section5-slider-track">
-                        {[...kidsItems, ...kidsItems].map((item, index) => (
-                            <div className="home-section5-card" key={index}>
-                                <div className="card-frame">
-                                    <img
-                                        src={withWidth(item.img, 600)}
-                                        alt={item.title}
-                                        loading="lazy"
-                                        onError={(e) => { e.currentTarget.src = '/images/kids/default.jpg'; }}
-                                    />
-                                </div>
-                                <h3>{item.title}</h3>
-                                <button className="gold-btn">Buy Now</button>
-                            </div>
-                        ))}
+                <div className="kids-wrap">
+                    <button
+                        type="button"
+                        className="kids-nav left"
+                        aria-label="Previous"
+                        onClick={() => {
+                            const rail = document.getElementById('kids-rail');
+                            if (rail) rail.scrollBy({ left: -rail.clientWidth * 0.85, behavior: 'smooth' });
+                        }}
+                    >
+                        ‹
+                    </button>
+                    <div id="kids-rail" className="kids-rail">
+                        {[...new Set(kidsItems.map(it => JSON.stringify(it)))].map((s, idx) => {
+                            const item = JSON.parse(s);
+                            const src = withWidth(item.img, 900);
+                            const title = item.title || "Kids";
+                            return (
+                                <a href="/kids" className="kids-card" key={idx}>
+                                    <div className="kids-frame">
+                                        <img
+                                            src={src}
+                                            alt={title}
+                                            loading="lazy"
+                                            decoding="async"
+                                            onError={(e) => { e.currentTarget.src = "/images/kids/default.jpg"; }}
+                                        />
+                                        <div className="kids-chip">{idx % 3 === 0 ? "New" : idx % 3 === 1 ? "Trending" : "Bestseller"}</div>
+                                        <div className="kids-footer">
+                                            <h3 className="kids-name">{title}</h3>
+                                            <span className="kids-cta">View</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            );
+                        })}
                     </div>
+                    <button
+                        type="button"
+                        className="kids-nav right"
+                        aria-label="Next"
+                        onClick={() => {
+                            const rail = document.getElementById('kids-rail');
+                            if (rail) rail.scrollBy({ left: rail.clientWidth * 0.85, behavior: 'smooth' });
+                        }}
+                    >
+                        ›
+                    </button>
                 </div>
             </section>
 
@@ -458,46 +750,98 @@ export default function HomePage() {
 
             <section className="home-section4">
                 <h2 className="home-section4-title">Our Premium Collections</h2>
-                <div className="home-section4-underline">
-                    <div className="line2 large2"></div>
-                    <div className="line2 medium2"></div>
+                <div className="lux4-underline">
+                    <span className="lux4-line large"></span>
+                    <span className="lux4-line medium"></span>
+                    <span className="lux4-line small"></span>
                 </div>
-                <div className="home-section4-grid">
-                    <a href="/men" className="home-section4-card">
-                        <div className="home-section4-text">
-                            <h3>Mens <br />Fashions</h3>
-                        </div>
-                        <img src="/images/card1.jpg" alt="Mens Fashions" />
-                    </a>
-                    <a href="/women" className="home-section4-card">
-                        <div className="home-section4-text">
-                            <h3>Womens <br />Fashions</h3>
-                        </div>
-                        <img src="/images/card3.jpg" alt="Womens Fashions" />
-                    </a>
-                    <a href="/kids" className="home-section4-card">
-                        <div className="home-section4-text">
-                            <h3>Kids <br />Fashions</h3>
-                        </div>
-                        <img src="/images/card4.jpg" alt="Kids Fashions" />
-                    </a>
+                <div className="lux4-container">
+                    <a
+                        href="/men"
+                        aria-label="Shop Men's Fashion"
+                        className="lux4-glass"
+                        data-text="Men"
+                        style={{ ['--r']: '-12', ['--bg']: "url('/images/card1.jpg')" }}
+                    ></a>
+                    <a
+                        href="/women"
+                        aria-label="Shop Women's Fashion"
+                        className="lux4-glass"
+                        data-text="Women"
+                        style={{ ['--r']: '6', ['--bg']: "url('/images/card3.jpg')" }}
+                    ></a>
+                    <a
+                        href="/kids"
+                        aria-label="Shop Kids Fashion"
+                        className="lux4-glass"
+                        data-text="Kids"
+                        style={{ ['--r']: '18', ['--bg']: "url('/images/card4.jpg')" }}
+                    ></a>
                 </div>
             </section>
 
-            <section className="home-section7">
-                <div className="home7-stars layer1"></div>
-                <div className="home7-stars layer2"></div>
-                <div className="home7-glow"></div>
 
-                <h2 className="home-section7-title">Exclusive Waves of Fashion</h2>
-                <div className="home-section7-row">
-                    {Array.from({ length: 9 }, (_, i) => (
-                        <div key={i} className={`home-section7-item item-${i + 1}`}>
-                            <img src={`/images/wave${i + 1}.jpeg`} alt={`Wave ${i + 1}`} />
+
+            <section className="kids-cosmo">
+                <div className="kids-sky layer-a"></div>
+                <div className="kids-sky layer-b"></div>
+                <div className="kids-sky layer-glow"></div>
+                <div className="kids-sparkles"></div>
+
+                <div className="kids-shell">
+                    <h2 className="kids-title">Kids Collection</h2>
+                    <div className="kids-underline">
+                        <span className="kline big"></span>
+                        <span className="kline mid"></span>
+                        <span className="kline tiny"></span>
+                    </div>
+
+                    <div className="kids-tracks">
+                        <div className="kids-track t1">
+                            {Array.from({ length: 9 }, (_, i) => (
+                                <Link key={`t1-${i}`} className="kids-card tilt-left" to="/kids">
+                                    <div className="kids-frame">
+                                        <img
+                                            src={`/images/wave${(i % 9) + 1}.jpeg`}
+                                            alt={`Kids ${i + 1}`}
+                                            loading="lazy"
+                                            decoding="async"
+                                        />
+                                        <div className="shine"></div>
+                                    </div>
+                                </Link>
+                            ))}
                         </div>
-                    ))}
+                        <div className="kids-track t2">
+                            {Array.from({ length: 9 }, (_, i) => (
+                                <Link key={`t2-${i}`} className="kids-card tilt-right" to="/kids">
+                                    <div className="kids-frame">
+                                        <img
+                                            src={`/images/wave${((i + 4) % 9) + 1}.jpeg`}
+                                            alt={`Kids ${i + 10}`}
+                                            loading="lazy"
+                                            decoding="async"
+                                        />
+                                        <div className="shine"></div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="kids-footer-stars">
+                        {Array.from({ length: 18 }, (_, i) => (
+                            <span key={i} className="mini-star"></span>
+                        ))}
+                    </div>
                 </div>
             </section>
+
+
+
+
+
+
 
 
             <Footer />

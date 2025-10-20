@@ -16,6 +16,7 @@ import SearchResults from './pages/SearchResults';
 import TaraLoader from './pages/TaraLoader';
 import ScrollToTop from './pages/ScrollToTop';
 import OrderCheckout from './pages/OrderCheckout';
+import OrderTracking from './pages/OrderTracking';
 
 function NavigationLoader() {
   const location = useLocation();
@@ -45,6 +46,7 @@ function AppShell() {
         <Route path="/brands" element={<Brands />} />
         <Route path="/search" element={<SearchResults />} />
         <Route path="/order/checkout" element={<OrderCheckout />} />
+        <Route path="/track/:id" element={<OrderTracking />} />
       </Routes>
     </>
   );

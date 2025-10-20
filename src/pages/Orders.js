@@ -1,4 +1,3 @@
-// src/pages/Orders.js
 import React, { useEffect, useMemo, useState } from 'react'
 import './Orders.css'
 import { FaArrowRight, FaCheckCircle } from 'react-icons/fa'
@@ -50,8 +49,18 @@ const Orders = ({ user }) => {
   const [trackLoading, setTrackLoading] = useState({})
   const [error, setError] = useState('')
 
-  const loginEmail = useMemo(() => sessionStorage.getItem('userEmail') || '', [])
-  const loginMobile = useMemo(() => sessionStorage.getItem('userMobile') || '', [])
+  const [loginEmail, setLoginEmail] = useState(sessionStorage.getItem('userEmail') || '')
+  const [loginMobile, setLoginMobile] = useState(sessionStorage.getItem('userMobile') || '')
+
+  useEffect(() => {
+    const refreshFromStorage = () => {
+      setLoginEmail(sessionStorage.getItem('userEmail') || '')
+      setLoginMobile(sessionStorage.getItem('userMobile') || '')
+    }
+    refreshFromStorage()
+    window.addEventListener('focus', refreshFromStorage)
+    return () => window.removeEventListener('focus', refreshFromStorage)
+  }, [])
 
   const email = user?.email || loginEmail || ''
   const mobile = user?.phone || user?.mobile || loginMobile || ''
@@ -72,7 +81,7 @@ const Orders = ({ user }) => {
           if (email) q.set('email', email)
           if (mobile) q.set('mobile', mobile)
           const res = await fetch(`${API_BASE}/api/sales/web/by-user?${q.toString()}`, {
-            headers: { 'Cache-Control': 'no-cache' }
+            cache: 'no-store'
           })
           if (!res.ok) throw new Error('bad')
           const data = await res.json()
@@ -91,10 +100,7 @@ const Orders = ({ user }) => {
             id: s.id,
             status: s.status || 'PLACED',
             date: s.created_at ? new Date(s.created_at).toLocaleString('en-IN') : '',
-            name:
-              pname && itemCount > 1
-                ? `${pname} +${itemCount - 1}`
-                : pname || `Order #${s.id}`,
+            name: pname && itemCount > 1 ? `${pname} +${itemCount - 1}` : pname || `Order #${s.id}`,
             image: img,
             thumbs: (Array.isArray(s.items) ? s.items : []).slice(0, 3).map(it => ({
               src: it.image_url || '',
@@ -105,7 +111,7 @@ const Orders = ({ user }) => {
           }
         })
 
-        setOrders(mapped.sort(byStatusRank))
+        setOrders([...mapped].sort(byStatusRank))
       } catch {
         setOrders([])
         setError('Could not load your orders right now.')
@@ -130,7 +136,9 @@ const Orders = ({ user }) => {
     setTrackLoading(m => ({ ...m, [order.id]: true }))
     setExpanded(order.id)
     try {
-      const res = await fetch(`${API_BASE}/api/shipments/by-sale/${encodeURIComponent(order.id)}`)
+      const res = await fetch(`${API_BASE}/api/shipments/by-sale/${encodeURIComponent(order.id)}`, {
+        cache: 'no-store'
+      })
       const rows = await res.json()
       const shipments = Array.isArray(rows) ? rows : []
       setTracking(m => ({ ...m, [order.id]: { shipments } }))
@@ -191,7 +199,7 @@ const Orders = ({ user }) => {
           <div className="orders-topbar">
             <div className="orders-header">
               <h3>Your Orders</h3>
-              <span className="orders-count">{orders.length}</span>
+              <span className="orders-count">{filtered.length}</span>
             </div>
             <div className="orders-actions">
               <div className="orders-filter">
