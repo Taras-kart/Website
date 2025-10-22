@@ -577,71 +577,6 @@ export default function HomePage() {
 
 
 
-            <section className="kids-showcase galaxy" ref={kidsRef}>
-                <div className="galaxy-layer stars-1"></div>
-                <div className="galaxy-layer stars-2"></div>
-                <div className="galaxy-layer dust"></div>
-
-                <div className="kids-head">
-                    <h2 className="kids-title">Kids’ Collection</h2>
-                    <div className="kids-underline">
-                        <span className="kl k1"></span>
-                        <span className="kl k2"></span>
-                        <span className="kl k3"></span>
-                    </div>
-                </div>
-
-                <div className="kids-wrap">
-                    <button
-                        type="button"
-                        className="kids-nav left"
-                        aria-label="Previous"
-                        onClick={() => {
-                            const rail = document.getElementById('kids-rail');
-                            if (rail) rail.scrollBy({ left: -rail.clientWidth * 0.85, behavior: 'smooth' });
-                        }}
-                    >
-                        ‹
-                    </button>
-                    <div id="kids-rail" className="kids-rail">
-                        {[...new Set(kidsItems.map(it => JSON.stringify(it)))].map((s, idx) => {
-                            const item = JSON.parse(s);
-                            const src = withWidth(item.img, 900);
-                            const title = item.title || "Kids";
-                            return (
-                                <a href="/kids" className="kids-card" key={idx}>
-                                    <div className="kids-frame">
-                                        <img
-                                            src={src}
-                                            alt={title}
-                                            loading="lazy"
-                                            decoding="async"
-                                            onError={(e) => { e.currentTarget.src = "/images/kids/default.jpg"; }}
-                                        />
-                                        <div className="kids-chip">{idx % 3 === 0 ? "New" : idx % 3 === 1 ? "Trending" : "Bestseller"}</div>
-                                        <div className="kids-footer">
-                                            <h3 className="kids-name">{title}</h3>
-                                            <span className="kids-cta">View</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            );
-                        })}
-                    </div>
-                    <button
-                        type="button"
-                        className="kids-nav right"
-                        aria-label="Next"
-                        onClick={() => {
-                            const rail = document.getElementById('kids-rail');
-                            if (rail) rail.scrollBy({ left: rail.clientWidth * 0.85, behavior: 'smooth' });
-                        }}
-                    >
-                        ›
-                    </button>
-                </div>
-            </section>
-
 
             <section className="mens-section2">
                 <div className="mens-section2-bg">
@@ -839,82 +774,151 @@ export default function HomePage() {
 
 
 
-<section className="ai-cats">
-  <div className="ai-cats-head">
-    <h2 className="ai-cats-title">Women’s Categories</h2>
-    <div className="ai-cats-underline">
-      <span className="ac ac1"></span>
-      <span className="ac ac2"></span>
-      <span className="ac ac3"></span>
-    </div>
-  </div>
-  <div className="ai-cats-shell">
-    <div className="ai-cats-grid">
-      <a href="/women" className="ai-cats-card">
-        <div className="ai-cats-inner">
-          <img src="/images/ai/womens-sarees.png" alt="" loading="lazy" decoding="async" />
-        </div>
-      </a>
-      <a href="/women" className="ai-cats-card">
-        <div className="ai-cats-inner">
-          <img src="/images/ai/womens-lehangas.png" alt="" loading="lazy" decoding="async" />
-        </div>
-      </a>
-      <a href="/women" className="ai-cats-card">
-        <div className="ai-cats-inner">
-          <img src="/images/ai/womens-kurtis&kurtas.png" alt="" loading="lazy" decoding="async" />
-        </div>
-      </a>
-      <a href="/women" className="ai-cats-card">
-        <div className="ai-cats-inner">
-          <img src="/images/ai/womens-gown&indowesterns.png" alt="" loading="lazy" decoding="async" />
-        </div>
-      </a>
-      <a href="/women" className="ai-cats-card">
-        <div className="ai-cats-inner">
-          <img src="/images/ai/womens-bridal-collection.png" alt="" loading="lazy" decoding="async" />
-        </div>
-      </a>
-      <a href="/women" className="ai-cats-card">
-        <div className="ai-cats-inner">
-          <img src="/images/ai/womens-salwar-kameez.png" alt="" loading="lazy" decoding="async" />
-        </div>
-      </a>
-      <a href="/women" className="ai-cats-card">
-        <div className="ai-cats-inner">
-          <img src="/images/ai/womens-festival-wear.png" alt="" loading="lazy" decoding="async" />
-        </div>
-      </a>
-      <a href="/women" className="ai-cats-card">
-        <div className="ai-cats-inner">
-          <img src="/images/ai/dupattas&stoles.png" alt="" loading="lazy" decoding="async" />
-        </div>
-      </a>
-    </div>
-  </div>
-</section>
+            <section className="ai-cats">
+                <div className="ai-cats-head">
+                    <h2 className="ai-cats-title">Women’s Categories</h2>
+                    <div className="ai-cats-underline">
+                        <span className="ac ac1"></span>
+                        <span className="ac ac2"></span>
+                        <span className="ac ac3"></span>
+                    </div>
+                </div>
+                <div className="ai-cats-shell">
+                    <div className="ai-cats-grid">
+                        <a href="/women" className="ai-cats-card">
+                            <div className="ai-cats-inner">
+                                <img src="/images/ai/womens-sarees.png" alt="" loading="lazy" decoding="async" />
+                            </div>
+                        </a>
+                        <a href="/women" className="ai-cats-card">
+                            <div className="ai-cats-inner">
+                                <img src="/images/ai/womens-lehangas.png" alt="" loading="lazy" decoding="async" />
+                            </div>
+                        </a>
+                        <a href="/women" className="ai-cats-card">
+                            <div className="ai-cats-inner">
+                                <img src="/images/ai/womens-kurtis&kurtas.png" alt="" loading="lazy" decoding="async" />
+                            </div>
+                        </a>
+                        <a href="/women" className="ai-cats-card">
+                            <div className="ai-cats-inner">
+                                <img src="/images/ai/womens-gown&indowesterns.png" alt="" loading="lazy" decoding="async" />
+                            </div>
+                        </a>
+                        <a href="/women" className="ai-cats-card">
+                            <div className="ai-cats-inner">
+                                <img src="/images/ai/womens-bridal-collection.png" alt="" loading="lazy" decoding="async" />
+                            </div>
+                        </a>
+                        <a href="/women" className="ai-cats-card">
+                            <div className="ai-cats-inner">
+                                <img src="/images/ai/womens-salwar-kameez.png" alt="" loading="lazy" decoding="async" />
+                            </div>
+                        </a>
+                        <a href="/women" className="ai-cats-card">
+                            <div className="ai-cats-inner">
+                                <img src="/images/ai/womens-festival-wear.png" alt="" loading="lazy" decoding="async" />
+                            </div>
+                        </a>
+                        <a href="/women" className="ai-cats-card">
+                            <div className="ai-cats-inner">
+                                <img src="/images/ai/dupattas&stoles.png" alt="" loading="lazy" decoding="async" />
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </section>
 
 
 
-<section className="ai-hero-card">
-  <div className="ai-hero-bg">
-    <img src="/images/ai/main-card1.png" alt="" />
-    <div className="ai-hero-shade"></div>
-  </div>
-  <div className="ai-hero-floater">
-    <div className="ai-hero-border"></div>
-    <div className="ai-hero-body">
-      <div className="ai-hero-media">
-        <img src="/images/ai/sub-slide1.png" alt="" loading="lazy" decoding="async" />
-      </div>
-      <div className="ai-hero-content">
-        <h3 className="ai-hero-title">Elegant Styles</h3>
-        <p className="ai-hero-desc">Elegant silhouettes with a golden edge. Discover pieces that move with you and shine in every moment.</p>
-        <a href="/women" className="ai-hero-btn">Shop Now<span className="ai-hero-shine"></span></a>
-      </div>
-    </div>
-  </div>
-</section>
+            <section className="ai-hero-card">
+                <div className="ai-hero-bg">
+                    <img src="/images/ai/main-card1.png" alt="" />
+                    <div className="ai-hero-shade"></div>
+                </div>
+                <div className="ai-hero-floater">
+                    <div className="ai-hero-border"></div>
+                    <div className="ai-hero-body">
+                        <div className="ai-hero-media">
+                            <img src="/images/ai/sub-slide1.png" alt="" loading="lazy" decoding="async" />
+                        </div>
+                        <div className="ai-hero-content">
+                            <h3 className="ai-hero-title">Elegant Styles</h3>
+                            <p className="ai-hero-desc">Elegant silhouettes with a golden edge. Discover pieces that move with you and shine in every moment.</p>
+                            <a href="/women" className="ai-hero-btn">Shop Now<span className="ai-hero-shine"></span></a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+
+            <section className="kids-showcase galaxy" ref={kidsRef}>
+                <div className="galaxy-layer stars-1"></div>
+                <div className="galaxy-layer stars-2"></div>
+                <div className="galaxy-layer dust"></div>
+
+                <div className="kids-head">
+                    <h2 className="kids-title">Kids’ Collection</h2>
+                    <div className="kids-underline">
+                        <span className="kl k1"></span>
+                        <span className="kl k2"></span>
+                        <span className="kl k3"></span>
+                    </div>
+                </div>
+
+                <div className="kids-wrap">
+                    <button
+                        type="button"
+                        className="kids-nav left"
+                        aria-label="Previous"
+                        onClick={() => {
+                            const rail = document.getElementById('kids-rail');
+                            if (rail) rail.scrollBy({ left: -rail.clientWidth * 0.85, behavior: 'smooth' });
+                        }}
+                    >
+                        ‹
+                    </button>
+                    <div id="kids-rail" className="kids-rail">
+                        {[...new Set(kidsItems.map(it => JSON.stringify(it)))].map((s, idx) => {
+                            const item = JSON.parse(s);
+                            const src = withWidth(item.img, 900);
+                            const title = item.title || "Kids";
+                            return (
+                                <a href="/kids" className="kids-card" key={idx}>
+                                    <div className="kids-frame">
+                                        <img
+                                            src={src}
+                                            alt={title}
+                                            loading="lazy"
+                                            decoding="async"
+                                            onError={(e) => { e.currentTarget.src = "/images/kids/default.jpg"; }}
+                                        />
+                                        <div className="kids-chip">{idx % 3 === 0 ? "New" : idx % 3 === 1 ? "Trending" : "Bestseller"}</div>
+                                        <div className="kids-footer">
+                                            <h3 className="kids-name">{title}</h3>
+                                            <span className="kids-cta">View</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            );
+                        })}
+                    </div>
+                    <button
+                        type="button"
+                        className="kids-nav right"
+                        aria-label="Next"
+                        onClick={() => {
+                            const rail = document.getElementById('kids-rail');
+                            if (rail) rail.scrollBy({ left: rail.clientWidth * 0.85, behavior: 'smooth' });
+                        }}
+                    >
+                        ›
+                    </button>
+                </div>
+            </section>
+
+
 
 
 
