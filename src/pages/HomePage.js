@@ -6,7 +6,7 @@ import 'swiper/css';
 import 'swiper/css/effect-coverflow';
 import './HomePage.css';
 import Footer from './Footer';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
 const API_BASE_RAW =
@@ -82,6 +82,7 @@ export default function HomePage() {
     const womenRef = useRef(null);
     const menRef = useRef(null);
     const kidsRef = useRef(null);
+    const navigate = useNavigate()
 
     /* new section 1 */
     const LUX_DEFAULT_WOMEN = Array.from({ length: 20 }, (_, i) => `/images/women/women${i + 1}.jpeg`);
@@ -181,34 +182,54 @@ export default function HomePage() {
         <div className="home-section1-wrapper">
             <Navbar />
             <div className="home-section1">
-                <div className="home-section1-overlay">
-                    <div className="home-section1-content">
-                        <div className="home-section1-left">
-                            <video className="home-section1-video" autoPlay muted loop>
-                                <source src="/images/logo-video.mp4" type="video/mp4" />
-                            </video>
-                            <div className="home-section1-full-text">
-                                <h1>Taras Kart</h1>
-                            </div>
-                        </div>
-                        <div className="home-section1-right">
-                            <div className="category-block">
-                                <img src="/images/home4.jpg" alt="Men" />
-                                <span>Men</span>
-                            </div>
-                            <div className="category-block">
-                                <img src="/images/home5.jpg" alt="Women" />
-                                <span>Women</span>
-                            </div>
-                            <div className="category-block">
-                                <img src="/images/kids-bg.jpg" alt="Kids" />
-                                <span>Kids</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+      <div className="home-section1-overlay">
+        <div className="home-section1-content">
+          <div className="home-section1-left">
+            <video className="home-section1-video" autoPlay muted loop>
+              <source src="/images/logo-video.mp4" type="video/mp4" />
+            </video>
+            <div className="home-section1-full-text">
+              <h1>Taras Kart</h1>
             </div>
-
+          </div>
+          <div className="home-section1-right">
+            <div
+              className="category-block"
+              onClick={() => navigate('/men')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate('/men')}
+              style={{ cursor: 'pointer' }}
+            >
+              <img src="/images/banners/mens-slide2.jpg" alt="Men" />
+              <span>Men</span>
+            </div>
+            <div
+              className="category-block"
+              onClick={() => navigate('/women')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate('/women')}
+              style={{ cursor: 'pointer' }}
+            >
+              <img src="/images/home5.jpg" alt="Women" />
+              <span>Women</span>
+            </div>
+            <div
+              className="category-block"
+              onClick={() => navigate('/kids')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate('/kids')}
+              style={{ cursor: 'pointer' }}
+            >
+              <img src="/images/kids-bg.jpg" alt="Kids" />
+              <span>Kids</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
             <section className="home-section2">
                 <h2 className="home-section2-title">Boost your clothing sales with our fashion varieties!</h2>
                 <div className="home-section2-frame">
