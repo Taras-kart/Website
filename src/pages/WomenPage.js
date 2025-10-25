@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from './Navbar'
 import './WomenPage.css'
@@ -23,7 +23,6 @@ function cloudinaryUrlByEan(ean) {
 }
 
 export default function WomenPage() {
-  const [filters, setFilters] = useState({})
   const [allProducts, setAllProducts] = useState([])
   const [products, setProducts] = useState([])
   const [userType, setUserType] = useState(null)
@@ -78,6 +77,9 @@ export default function WomenPage() {
             product_name: p.product_name ?? p.name ?? '',
             image_url: img,
             ean_code: ean,
+            gender: p.gender ?? 'WOMEN',
+            color: p.color ?? '',
+            size: p.size ?? '',
             original_price_b2c: p.original_price_b2c ?? p.mrp ?? p.list_price ?? 0,
             final_price_b2c: p.final_price_b2c ?? p.sale_price ?? p.price ?? p.mrp ?? 0,
             original_price_b2b: p.original_price_b2b ?? p.mrp ?? 0,
@@ -103,23 +105,6 @@ export default function WomenPage() {
       cancelled = true
     }
   }, [])
-
-  const filtered = useMemo(() => {
-    let list = [...allProducts]
-    if (filters.brand) list = list.filter((p) => p.brand === filters.brand)
-    if (filters.priceRange) {
-      list = list.filter(
-        (p) =>
-          (p.final_price_b2c ?? 0) >= filters.priceRange.min &&
-          (p.final_price_b2c ?? 0) <= filters.priceRange.max
-      )
-    }
-    return list
-  }, [allProducts, filters])
-
-  useEffect(() => {
-    setProducts(filtered)
-  }, [filtered])
 
   const toggleLike = async (prod) => {
     const k = keyFor(prod)
@@ -177,7 +162,10 @@ export default function WomenPage() {
     <div className="women-page">
       <Navbar />
       <div className="filter-bar-class">
-        <FilterSidebar onFilterChange={(f) => setFilters(f)} />
+        <FilterSidebar
+          source={allProducts}
+          onFilterChange={(list) => setProducts(Array.isArray(list) ? list : allProducts)}
+        />
         <div className="women-page-main">
           <div className="women-page-content">
             <section className="mens-section1">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from './Navbar'
 import './MenPage.css'
@@ -27,7 +27,6 @@ export default function MenPage() {
   const { addToWishlist, wishlistItems, setWishlistItems } = useWishlist()
   const [allProducts, setAllProducts] = useState([])
   const [products, setProducts] = useState([])
-  const [filters, setFilters] = useState({})
   const [userType, setUserType] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -81,6 +80,9 @@ export default function MenPage() {
             product_name: p.product_name ?? p.name ?? '',
             image_url: img,
             ean_code: ean,
+            gender: p.gender ?? 'MEN',
+            color: p.color ?? '',
+            size: p.size ?? '',
             original_price_b2c: p.original_price_b2c ?? p.mrp ?? p.list_price ?? 0,
             final_price_b2c: p.final_price_b2c ?? p.sale_price ?? p.price ?? p.mrp ?? 0,
             original_price_b2b: p.original_price_b2b ?? p.mrp ?? 0,
@@ -124,23 +126,6 @@ export default function MenPage() {
     }
     loadWishlist()
   }, [userId, setWishlistItems])
-
-  const filtered = useMemo(() => {
-    let list = [...allProducts]
-    if (filters.brand) list = list.filter((p) => p.brand === filters.brand)
-    if (filters.priceRange) {
-      list = list.filter(
-        (p) =>
-          (p.final_price_b2c ?? 0) >= filters.priceRange.min &&
-          (p.final_price_b2c ?? 0) <= filters.priceRange.max
-      )
-    }
-    return list
-  }, [allProducts, filters])
-
-  useEffect(() => {
-    setProducts(filtered)
-  }, [filtered])
 
   const toggleLike = async (product) => {
     const k = keyFor(product)
@@ -197,7 +182,10 @@ export default function MenPage() {
     <div className="men-page">
       <Navbar />
       <div className="test">
-        <FilterSidebar onFilterChange={(f) => setFilters(f)} />
+        <FilterSidebar
+          source={allProducts}
+          onFilterChange={(list) => setProducts(Array.isArray(list) ? list : allProducts)}
+        />
         <div className="men-page-main">
           <div className="men-page-content">
             <section className="mens-section1">
