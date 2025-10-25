@@ -1,4 +1,3 @@
-// D:\shopping\src\pages\Wishlist.js
 import React, { useState, useEffect } from 'react';
 import './Wishlist.css';
 import { useNavigate } from 'react-router-dom';
@@ -113,7 +112,7 @@ const Wishlist = () => {
                     className="wishlist-image-container"
                     onClick={() => {
                       sessionStorage.setItem('selectedProduct', JSON.stringify(item));
-                      window.open('/checkout', '_blank');
+                      navigate('/checkout');
                     }}
                   >
                     <img src={item.image_url} alt={item.product_name} />
@@ -143,7 +142,7 @@ const Wishlist = () => {
                         onClick={(e) => {
                           e.stopPropagation();
                           sessionStorage.setItem('selectedProduct', JSON.stringify(item));
-                          window.open('/checkout', '_blank');
+                          navigate('/checkout');
                         }}
                       >
                         Buy Now

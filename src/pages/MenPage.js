@@ -1,4 +1,3 @@
-// MenPage.js
 import React, { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from './Navbar'
@@ -32,11 +31,24 @@ export default function MenPage() {
   const [userType, setUserType] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [likedKeys, setLikedKeys] = useState(new Set())
   const userId = sessionStorage.getItem('userId')
+
+  const keyFor = (p) => String(p.ean_code ?? p.product_id ?? p.id ?? `${p.image_url}`)
 
   useEffect(() => {
     setUserType(sessionStorage.getItem('userType'))
   }, [])
+
+  useEffect(() => {
+    setLikedKeys(
+      new Set(
+        toArray(wishlistItems).map(
+          (it) => String(it.ean_code ?? it.product_id ?? it.id ?? `${it.image_url}`)
+        )
+      )
+    )
+  }, [wishlistItems])
 
   useEffect(() => {
     let cancelled = false
@@ -64,7 +76,7 @@ export default function MenPage() {
           const img = apiImage || candidateCloudinary || DEFAULT_IMG
           return {
             id: p.id ?? i + 1,
-            product_id: p.product_id ?? p.pid ?? null,
+            product_id: p.product_id ?? p.pid ?? p.id ?? i + 1,
             brand: p.brand ?? p.brand_name ?? '',
             product_name: p.product_name ?? p.name ?? '',
             image_url: img,
@@ -130,43 +142,45 @@ export default function MenPage() {
     setProducts(filtered)
   }, [filtered])
 
-  const isInWishlist = (product) => {
-    if (!product?.product_id) return false
-    return wishlistItems.some((item) => String(item.product_id) === String(product.product_id))
-  }
-
   const toggleLike = async (product) => {
-    if (!userId || !product?.product_id) return
-    const already = isInWishlist(product)
+    const k = keyFor(product)
+    const already = likedKeys.has(k)
     try {
       if (already) {
         await fetch(`${API_BASE}/api/wishlist`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, product_id: product.product_id })
+          body: JSON.stringify({ user_id: userId, product_id: product.product_id ?? product.id })
         })
-        setWishlistItems((prev) => prev.filter((w) => String(w.product_id) !== String(product.product_id)))
+        setWishlistItems((prev) =>
+          prev.filter(
+            (w) => String(w.ean_code ?? w.product_id ?? w.id ?? `${w.image_url}`) !== k
+          )
+        )
+        setLikedKeys((prev) => {
+          const n = new Set(prev)
+          n.delete(k)
+          return n
+        })
       } else {
         await fetch(`${API_BASE}/api/wishlist`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, product_id: product.product_id })
+          body: JSON.stringify({ user_id: userId, product_id: product.product_id ?? product.id })
         })
-        addToWishlist(product)
+        addToWishlist({ ...product, product_id: product.product_id ?? product.id })
+        setLikedKeys((prev) => {
+          const n = new Set(prev)
+          n.add(k)
+          return n
+        })
       }
     } catch {}
   }
 
   const handleProductClick = (product) => {
     sessionStorage.setItem('selectedProduct', JSON.stringify(product))
-    const newTab = window.open('/checkout', '_blank')
-    if (newTab) {
-      newTab.onload = () => {
-        try {
-          newTab.sessionStorage.setItem('selectedProduct', JSON.stringify(product))
-        } catch {}
-      }
-    }
+    navigate('/checkout')
   }
 
   const priceForUser = (p) => (userType === 'B2B' ? p.final_price_b2b || p.final_price_b2c : p.final_price_b2c)
@@ -207,50 +221,53 @@ export default function MenPage() {
                 <div className="mens-notice">No products found</div>
               ) : (
                 <div className="mens-section4-grid">
-                  {toArray(products).map((product, idx) => (
-                    <div
-                      key={product.product_id || product.id || idx}
-                      className="mens-section4-card"
-                      onClick={() => handleProductClick(product)}
-                    >
-                      <div className="mens-section4-img">
-                        <img
-                          src={product.image_url || DEFAULT_IMG}
-                          alt={product.product_name}
-                          onError={(e) => {
-                            if (e.currentTarget.dataset.fallbackApplied) {
-                              e.currentTarget.src = DEFAULT_IMG
-                              return
-                            }
-                            e.currentTarget.dataset.fallbackApplied = '1'
-                            e.currentTarget.src = product.ean_code
-                              ? cloudinaryUrlByEan(product.ean_code)
-                              : DEFAULT_IMG
-                          }}
-                        />
-                        <div
-                          className="love-icon"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            toggleLike(product)
-                          }}
-                        >
-                          {isInWishlist(product) ? (
-                            <FaHeart style={{ color: 'yellow', fontSize: 20 }} />
-                          ) : (
-                            <FaRegHeart style={{ color: 'yellow', fontSize: 20 }} />
-                          )}
+                  {toArray(products).map((product, idx) => {
+                    const liked = likedKeys.has(keyFor(product))
+                    return (
+                      <div
+                        key={product.product_id || product.id || idx}
+                        className="mens-section4-card"
+                        onClick={() => handleProductClick(product)}
+                      >
+                        <div className="mens-section4-img">
+                          <img
+                            src={product.image_url || DEFAULT_IMG}
+                            alt={product.product_name}
+                            onError={(e) => {
+                              if (e.currentTarget.dataset.fallbackApplied) {
+                                e.currentTarget.src = DEFAULT_IMG
+                                return
+                              }
+                              e.currentTarget.dataset.fallbackApplied = '1'
+                              e.currentTarget.src = product.ean_code
+                                ? cloudinaryUrlByEan(product.ean_code)
+                                : DEFAULT_IMG
+                            }}
+                          />
+                          <div
+                            className="love-icon"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              toggleLike(product)
+                            }}
+                          >
+                            {liked ? (
+                              <FaHeart style={{ color: 'yellow', fontSize: 20 }} />
+                            ) : (
+                              <FaRegHeart style={{ color: 'yellow', fontSize: 20 }} />
+                            )}
+                          </div>
+                        </div>
+                        <h4 className="brand-name">{product.brand}</h4>
+                        <h5 className="product-name">{product.product_name}</h5>
+                        <div className="mens-section4-price">
+                          <span className="offer-price">₹{Number(priceForUser(product) || 0).toFixed(2)}</span>
+                          <span className="original-price">₹{Number(mrpForUser(product) || 0).toFixed(2)}</span>
+                          <span className="discount">({discountPct(product)}% OFF)</span>
                         </div>
                       </div>
-                      <h4 className="brand-name">{product.brand}</h4>
-                      <h5 className="product-name">{product.product_name}</h5>
-                      <div className="mens-section4-price">
-                        <span className="offer-price">₹{Number(priceForUser(product) || 0).toFixed(2)}</span>
-                        <span className="original-price">₹{Number(mrpForUser(product) || 0).toFixed(2)}</span>
-                        <span className="discount">({discountPct(product)}% OFF)</span>
-                      </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </section>
