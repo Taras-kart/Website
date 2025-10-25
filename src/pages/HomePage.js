@@ -182,54 +182,54 @@ export default function HomePage() {
         <div className="home-section1-wrapper">
             <Navbar />
             <div className="home-section1">
-      <div className="home-section1-overlay">
-        <div className="home-section1-content">
-          <div className="home-section1-left">
-            <video className="home-section1-video" autoPlay muted loop>
-              <source src="/images/logo-video.mp4" type="video/mp4" />
-            </video>
-            <div className="home-section1-full-text">
-              <h1>Taras Kart</h1>
+                <div className="home-section1-overlay">
+                    <div className="home-section1-content">
+                        <div className="home-section1-left">
+                            <video className="home-section1-video" autoPlay muted loop>
+                                <source src="/images/logo-video.mp4" type="video/mp4" />
+                            </video>
+                            <div className="home-section1-full-text">
+                                <h1>Taras Kart</h1>
+                            </div>
+                        </div>
+                        <div className="home-section1-right">
+                            <div
+                                className="category-block"
+                                onClick={() => navigate('/men')}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate('/men')}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <img src="/images/banners/mens-slide3.jpg" alt="Men" />
+                                <span>Men</span>
+                            </div>
+                            <div
+                                className="category-block"
+                                onClick={() => navigate('/women')}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate('/women')}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <img src="/images/women-bg.png" alt="Women" />
+                                <span>Women</span>
+                            </div>
+                            <div
+                                className="category-block"
+                                onClick={() => navigate('/kids')}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate('/kids')}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <img src="/images/kids-bg1.png" alt="Kids" />
+                                <span>Kids</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-          <div className="home-section1-right">
-            <div
-              className="category-block"
-              onClick={() => navigate('/men')}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate('/men')}
-              style={{ cursor: 'pointer' }}
-            >
-              <img src="/images/banners/mens-slide2.jpg" alt="Men" />
-              <span>Men</span>
-            </div>
-            <div
-              className="category-block"
-              onClick={() => navigate('/women')}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate('/women')}
-              style={{ cursor: 'pointer' }}
-            >
-              <img src="/images/home5.jpg" alt="Women" />
-              <span>Women</span>
-            </div>
-            <div
-              className="category-block"
-              onClick={() => navigate('/kids')}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate('/kids')}
-              style={{ cursor: 'pointer' }}
-            >
-              <img src="/images/kids-bg.jpg" alt="Kids" />
-              <span>Kids</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
             <section className="home-section2">
                 <h2 className="home-section2-title">Boost your clothing sales with our fashion varieties!</h2>
                 <div className="home-section2-frame">
@@ -282,6 +282,80 @@ export default function HomePage() {
                         <h2 className="home-section3-count">100+</h2>
                         <h2 className="home-section3-varieties">Varieties</h2>
                     </div>
+                </div>
+            </section>
+
+
+            <section className="wcat">
+                <div className="wcat-head">
+                    <h2 className="wcat-title">Shop by Category</h2>
+                    <div className="wcat-underline">
+                        <span className="wl w1"></span>
+                        <span className="wl w2"></span>
+                        <span className="wl w3"></span>
+                    </div>
+                </div>
+
+                <div className="wcat-grid">
+                    <div className="wcat-card">
+                        <Link to="/women" className="wcat-media">
+                            <img src="/images/banners/women-category-anarkali.png" alt="Anarkali" loading="lazy" decoding="async" />
+                        </Link>
+                        <div className="wcat-info">
+                            <h3 className="wcat-brand">Tara Anarkali</h3>
+                            <div className="wcat-price">
+                                <span className="wcat-mrp">₹3,499</span>
+                                <span className="wcat-off">₹4,499</span>
+                            </div>
+                            <Link to="/women" className="wcat-buy">Buy Now</Link>
+                        </div>
+                    </div>
+
+                    <div className="wcat-card">
+                        <Link to="/women" className="wcat-media">
+                            <img src="/images/banners/women-category-halfsaree.png" alt="Half Saree" loading="lazy" decoding="async" />
+                        </Link>
+                        <div className="wcat-info">
+                            <h3 className="wcat-brand">Tara Half Saree</h3>
+                            <div className="wcat-price">
+                                <span className="wcat-mrp">₹5,299</span>
+                                <span className="wcat-off">₹6,499</span>
+                            </div>
+                            <Link to="/women" className="wcat-buy">Buy Now</Link>
+                        </div>
+                    </div>
+
+                    <div className="wcat-card">
+                        <Link to="/women" className="wcat-media">
+                            <img src="/images/banners/women-category-punjabi.png" alt="Punjabi Suit" loading="lazy" decoding="async" />
+                        </Link>
+                        <div className="wcat-info">
+                            <h3 className="wcat-brand">Tara Punjabi</h3>
+                            <div className="wcat-price">
+                                <span className="wcat-mrp">₹2,799</span>
+                                <span className="wcat-off">₹3,499</span>
+                            </div>
+                            <Link to="/women" className="wcat-buy">Buy Now</Link>
+                        </div>
+                    </div>
+
+                    <div className="wcat-card">
+                        <Link to="/women" className="wcat-media">
+                            <img src="/images/banners/women-category-saree.png" alt="Saree" loading="lazy" decoding="async" />
+                        </Link>
+                        <div className="wcat-info">
+                            <h3 className="wcat-brand">Tara Saree</h3>
+                            <div className="wcat-price">
+                                <span className="wcat-mrp">₹4,199</span>
+                                <span className="wcat-off">₹5,299</span>
+                            </div>
+                            <Link to="/women" className="wcat-buy">Buy Now</Link>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="wcat-more">
+                    <Link to="/women" className="wcat-view">View More</Link>
                 </div>
             </section>
 
@@ -676,85 +750,139 @@ export default function HomePage() {
 
 
 
+            <section className="wc-section">
+                <div className="wc-header">
+                    <h2 className="wc-title">Women’s Category</h2>
+                    <Link to="/women" className="wc-viewall">VIEW ALL</Link>
+                </div>
+                <div className="wc-grid">
+                    <div className="wc-card">
+                        <div className="wc-imgwrap">
+                            <img src="/images/banners/women-category-banarasi.png" alt="Banarasi Saree" loading="lazy" decoding="async" />
+                        </div>
+                        <div className="wc-info">
+                            <h3 className="wc-name">Banarasi Saree</h3>
+                            <p className="wc-desc">Rich golden zari work with soft silk texture. Perfect for festive occasions.</p>
+                            <span className="wc-price">₹5,499</span>
+                        </div>
+                    </div>
+
+                    <div className="wc-card">
+                        <div className="wc-imgwrap">
+                            <img src="/images/banners/women-category-kanchipattu.png" alt="Kanchipattu Saree" loading="lazy" decoding="async" />
+                        </div>
+                        <div className="wc-info">
+                            <h3 className="wc-name">Kanchipattu Saree</h3>
+                            <p className="wc-desc">Handwoven silk with traditional gold borders. Timeless elegance for every occasion.</p>
+                            <span className="wc-price">₹7,299</span>
+                        </div>
+                    </div>
+
+                    <div className="wc-card">
+                        <div className="wc-imgwrap">
+                            <img src="/images/banners/women-category-patola.png" alt="Patola Saree" loading="lazy" decoding="async" />
+                        </div>
+                        <div className="wc-info">
+                            <h3 className="wc-name">Patola Saree</h3>
+                            <p className="wc-desc">Intricate double-ikat weave with vibrant detailing and golden finish.</p>
+                            <span className="wc-price">₹6,899</span>
+                        </div>
+                    </div>
+
+                    <div className="wc-card">
+                        <div className="wc-imgwrap">
+                            <img src="/images/banners/women-category-uppada.png" alt="Uppada Saree" loading="lazy" decoding="async" />
+                        </div>
+                        <div className="wc-info">
+                            <h3 className="wc-name">Uppada Saree</h3>
+                            <p className="wc-desc">Lightweight silk woven with golden threads. A perfect blend of grace and luxury.</p>
+                            <span className="wc-price">₹4,999</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+
             <section className="ai-elite-section">
-      <div className="ai-elite-container">
-        <div className="ai-elite-left">
-          <div className="ai-elite-head">
-            <h2 className="ai-elite-title">Refined Menswear</h2>
-          </div>
+                <div className="ai-elite-container">
+                    <div className="ai-elite-left">
+                        <div className="ai-elite-head">
+                            <h2 className="ai-elite-title">Refined Menswear</h2>
+                        </div>
 
-          <p className="ai-elite-desc">
-            Tailored layers, modern cuts, and fabrics that move with you. Build a wardrobe that speaks in quiet confidence.
-          </p>
+                        <p className="ai-elite-desc">
+                            Tailored layers, modern cuts, and fabrics that move with you. Build a wardrobe that speaks in quiet confidence.
+                        </p>
 
-          <ul className="ai-elite-points">
-            <li className="ai-elite-point">Smart Tailoring</li>
-            <li className="ai-elite-point">Breathable Weaves</li>
-            <li className="ai-elite-point">Week-to-Weekend</li>
-          </ul>
+                        <ul className="ai-elite-points">
+                            <li className="ai-elite-point">Smart Tailoring</li>
+                            <li className="ai-elite-point">Breathable Weaves</li>
+                            <li className="ai-elite-point">Week-to-Weekend</li>
+                        </ul>
 
-          <div className="ai-elite-actions">
-            <a href="/men" className="ai-elite-btn-premium">
-              Shop Now
-              <span className="ai-elite-btn-shine" aria-hidden="true"></span>
-            </a>
-            <a href="/men" className="ai-elite-link">Explore Collection</a>
-          </div>
+                        <div className="ai-elite-actions">
+                            <a href="/men" className="ai-elite-btn-premium">
+                                Shop Now
+                                <span className="ai-elite-btn-shine" aria-hidden="true"></span>
+                            </a>
+                            <a href="/men" className="ai-elite-link">Explore Collection</a>
+                        </div>
 
-          <div className="ai-elite-metrics">
-            <div className="ai-elite-metric">
-              <span className="ai-elite-metric-num">50+</span>
-              <span className="ai-elite-metric-label">Fresh Styles</span>
-            </div>
-            <div className="ai-elite-metric">
-              <span className="ai-elite-metric-num">Premium</span>
-              <span className="ai-elite-metric-label">Fabrics</span>
-            </div>
-            <div className="ai-elite-metric">
-              <span className="ai-elite-metric-num">Tailored</span>
-              <span className="ai-elite-metric-label">Comfort</span>
-            </div>
-          </div>
-        </div>
+                        <div className="ai-elite-metrics">
+                            <div className="ai-elite-metric">
+                                <span className="ai-elite-metric-num">50+</span>
+                                <span className="ai-elite-metric-label">Fresh Styles</span>
+                            </div>
+                            <div className="ai-elite-metric">
+                                <span className="ai-elite-metric-num">Premium</span>
+                                <span className="ai-elite-metric-label">Fabrics</span>
+                            </div>
+                            <div className="ai-elite-metric">
+                                <span className="ai-elite-metric-num">Tailored</span>
+                                <span className="ai-elite-metric-label">Comfort</span>
+                            </div>
+                        </div>
+                    </div>
 
-        <div className="ai-elite-right">
-          <div className="ai-elite-frame">
-            <Swiper
-              className="ai-elite-slider"
-              modules={[Autoplay]}
-              loop={true}
-              slidesPerView={1}
-              autoplay={{ delay: 3000, disableOnInteraction: false }}
-              speed={800}
-            >
-              <SwiperSlide>
-                <div className="ai-elite-slide">
-                  <img
-                    src="/images/banners/mens-slide2.jpg"
-                    alt="Menswear look one"
-                    loading="lazy"
-                    decoding="async"
-                    onError={(e) => { e.currentTarget.src = "/images/banners/mens-slide2.jpg"; }}
-                  />
+                    <div className="ai-elite-right">
+                        <div className="ai-elite-frame">
+                            <Swiper
+                                className="ai-elite-slider"
+                                modules={[Autoplay]}
+                                loop={true}
+                                slidesPerView={1}
+                                autoplay={{ delay: 3000, disableOnInteraction: false }}
+                                speed={800}
+                            >
+                                <SwiperSlide>
+                                    <div className="ai-elite-slide">
+                                        <img
+                                            src="/images/banners/mens-slide2.jpg"
+                                            alt="Menswear look one"
+                                            loading="lazy"
+                                            decoding="async"
+                                            onError={(e) => { e.currentTarget.src = "/images/banners/mens-slide2.jpg"; }}
+                                        />
+                                    </div>
+                                </SwiperSlide>
+                                <SwiperSlide>
+                                    <div className="ai-elite-slide">
+                                        <img
+                                            src="/images/banners/mens-slide3.jpg"
+                                            alt="Menswear look two"
+                                            loading="lazy"
+                                            decoding="async"
+                                            onError={(e) => { e.currentTarget.src = "/images/banners/mens-slide3.jpg"; }}
+                                        />
+                                    </div>
+                                </SwiperSlide>
+                            </Swiper>
+                            <div className="ai-elite-glow"></div>
+                        </div>
+                    </div>
                 </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="ai-elite-slide">
-                  <img
-                    src="/images/banners/mens-slide3.jpg"
-                    alt="Menswear look two"
-                    loading="lazy"
-                    decoding="async"
-                    onError={(e) => { e.currentTarget.src = "/images/banners/mens-slide3.jpg"; }}
-                  />
-                </div>
-              </SwiperSlide>
-            </Swiper>
-            <div className="ai-elite-glow"></div>
-          </div>
-        </div>
-      </div>
-    </section>
+            </section>
 
 
             <section className="home-section6">
@@ -1018,6 +1146,98 @@ export default function HomePage() {
 
 
 
+
+
+            
+
+
+
+
+            <section className="ws-section">
+                <div className="ws-top">
+                    <h2 className="ws-title">Women’s Picks</h2>
+                    <div className="ws-underline">
+                        <span className="ws-line l1"></span>
+                        <span className="ws-dot"></span>
+                        <span className="ws-line l2"></span>
+                    </div>
+                </div>
+
+                <div className="ws-wrap">
+                    <div className="ws-left">
+                        <h3 className="ws-heading">Top Deals</h3>
+                        <p className="ws-up">UP TO</p>
+                        <div className="ws-off"><span>30%</span> OFF</div>
+                        <p className="ws-sub">SELECTED STYLES</p>
+                        <Link to="/women" className="ws-cta">SHOP NOW</Link>
+                    </div>
+
+                    <div className="ws-right">
+                        <Swiper
+                            className="ws-swiper"
+                            modules={[Autoplay]}
+                            loop={true}
+                            slidesPerView={1}
+                            autoplay={{ delay: 3200, disableOnInteraction: false }}
+                            speed={900}
+                        >
+                            <SwiperSlide>
+                                <div className="ws-slide">
+                                    <img src="/images/banners/women-banner3.png" alt="Women's Banner 3" loading="lazy" decoding="async" />
+                                </div>
+                            </SwiperSlide>
+                            <SwiperSlide>
+                                <div className="ws-slide">
+                                    <img src="/images/banners/women-banner4.png" alt="Women's Banner 4" loading="lazy" decoding="async" />
+                                </div>
+                            </SwiperSlide>
+                            <SwiperSlide>
+                                <div className="ws-slide">
+                                    <img src="/images/banners/women-banner5.png" alt="Women's Banner 5" loading="lazy" decoding="async" />
+                                </div>
+                            </SwiperSlide>
+                            <SwiperSlide>
+                                <div className="ws-slide">
+                                    <img src="/images/banners/women-banner6.png" alt="Women's Banner 6" loading="lazy" decoding="async" />
+                                </div>
+                            </SwiperSlide>
+                        </Swiper>
+                    </div>
+                </div>
+            </section>
+
+
+
+            <section className="wc-duo">
+                <div className="wc-duo-top">
+                    <h2 className="wc-duo-title">Women’s Showcase</h2>
+                    <div className="wc-duo-underline">
+                        <span className="kl k1"></span>
+                        <span className="kl k2"></span>
+                        <span className="kl k3"></span>
+                    </div>
+                </div>
+
+                <div className="wc-duo-wrap">
+                    <Link to="/women" className="wc-box">
+                        <div className="wc-duo-circle">
+                            <img src="/images/banners/circle.png" alt="Women Collection Circle" loading="lazy" decoding="async" />
+                        </div>
+                    </Link>
+
+                    <Link to="/women" className="wc-box">
+                        <div className="wc-duo-rect">
+                            <img src="/images/banners/square1.png" alt="Women Collection Square" loading="lazy" decoding="async" />
+                        </div>
+                    </Link>
+                </div>
+
+                <div className="wc-duo-cta-row">
+                    <Link to="/women" className="wc-duo-cta">View All</Link>
+                </div>
+            </section>
+
+
             <section className="kids-showcase galaxy" ref={kidsRef}>
                 <div className="galaxy-layer stars-1"></div>
                 <div className="galaxy-layer stars-2"></div>
@@ -1082,6 +1302,8 @@ export default function HomePage() {
                     </button>
                 </div>
             </section>
+
+
 
 
 
