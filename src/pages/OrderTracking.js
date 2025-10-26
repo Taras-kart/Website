@@ -17,20 +17,28 @@ export default function OrderTracking() {
   const orderId = useMemo(() => params.id || sp.get('id') || '', [params.id, sp]);
   const [sale, setSale] = useState(null);
   const [shipments, setShipments] = useState([]);
+  const [eligibility, setEligibility] = useState(null);
+  const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchAll = async () => {
     if (!orderId) return;
     setLoading(true);
     try {
-      const [sRes, shRes] = await Promise.all([
+      const [sRes, shRes, elRes, rrRes] = await Promise.all([
         fetch(`${API_BASE}/api/sales/web/${encodeURIComponent(orderId)}`),
-        fetch(`${API_BASE}/api/shipments/by-sale/${encodeURIComponent(orderId)}`)
+        fetch(`${API_BASE}/api/shipments/by-sale/${encodeURIComponent(orderId)}`),
+        fetch(`${API_BASE}/api/returns/eligibility/${encodeURIComponent(orderId)}`),
+        fetch(`${API_BASE}/api/returns/by-sale/${encodeURIComponent(orderId)}`)
       ]);
       const s = await sRes.json().catch(() => null);
       const sh = await shRes.json().catch(() => []);
+      const el = await elRes.json().catch(() => null);
+      const rr = await rrRes.json().catch(() => ({ rows: [] }));
       setSale(s);
       setShipments(Array.isArray(sh) ? sh : []);
+      setEligibility(el);
+      setRequests(Array.isArray(rr?.rows) ? rr.rows : []);
     } finally {
       setLoading(false);
     }
@@ -150,6 +158,30 @@ export default function OrderTracking() {
               ) : (
                 <div className="track-empty">No items</div>
               )}
+            </div>
+
+            <div className="section-title">Returns & Replacements</div>
+            <div className="returns">
+              {eligibility?.ok ? (
+                <div className="ret-actions">
+                  <a className="btn solid" href={`/returns?saleId=${encodeURIComponent(orderId)}&type=RETURN`}>Request Return</a>
+                  <a className="btn ghost" href={`/returns?saleId=${encodeURIComponent(orderId)}&type=REPLACE`}>Request Replacement</a>
+                </div>
+              ) : (
+                <div className="track-empty">{eligibility?.reason ? `Not eligible: ${eligibility.reason}` : 'Eligibility not available'}</div>
+              )}
+              {Array.isArray(requests) && requests.length ? (
+                <div className="ret-list">
+                  {requests.map(r => (
+                    <div className="ret-row" key={r.id}>
+                      <div className="ret-kv"><span>Type</span><strong>{r.type}</strong></div>
+                      <div className="ret-kv"><span>Status</span><strong>{String(r.status || '').toUpperCase()}</strong></div>
+                      <div className="ret-kv"><span>Reason</span><strong>{r.reason || '-'}</strong></div>
+                      <div className="ret-kv"><span>Created</span><strong>{r.created_at ? new Date(r.created_at).toLocaleString('en-IN') : '-'}</strong></div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
             </div>
           </>
         )}

@@ -13,7 +13,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .orders-header {
@@ -25,7 +25,7 @@
 
 .orders-header h3 {
   margin: 0;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 900;
   letter-spacing: .4px;
   background: linear-gradient(90deg, #ffd277, #ffffff);
@@ -99,7 +99,7 @@
   filter: blur(24px);
   background:
     radial-gradient(closest-side, rgba(255, 210, 119, 0.28), transparent 65%),
-    radial-gradient(closest-side, rgba(151, 59, 237, 0.18), transparent 70%);
+    radial-gradient(closest-side, rgba(255, 255, 255, 0.16), transparent 70%);
   top: -80px;
   left: -60px;
   opacity: .8;
@@ -126,22 +126,24 @@
   margin: 0 0 8px 0;
 }
 
+.btn-outline,
 .orders-start-button {
-  background: linear-gradient(90deg, #ffd277, #77530a);
-  border: none;
+  background: transparent;
+  color: #ffd277;
+  border: 1px solid rgba(255, 210, 119, 0.6);
   padding: 10px 18px;
-  color: #000;
   font-weight: 800;
   font-size: 14px;
   border-radius: 12px;
   cursor: pointer;
-  box-shadow: 0 16px 40px rgba(255, 210, 119, 0.2), inset 0 0 0 1px rgba(0, 0, 0, 0.15);
-  transition: transform .18s ease, box-shadow .2s ease, opacity .2s ease;
+  transition: transform .18s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
 }
 
+.btn-outline:hover,
 .orders-start-button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 22px 60px rgba(255, 210, 119, 0.28);
+  background: rgba(255, 210, 119, 0.08);
+  box-shadow: 0 10px 26px rgba(255, 210, 119, 0.18);
 }
 
 .orders-error {
@@ -162,7 +164,7 @@
   grid-template-columns: 120px 1fr 46px;
   align-items: stretch;
   gap: 14px;
-  padding: 12px;
+  padding: 14px;
   border-radius: 16px;
   background: rgba(10, 10, 10, 0.55);
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -178,17 +180,13 @@
   box-shadow: 0 22px 70px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
-.orders-item.open {
-  border-color: rgba(255, 210, 119, 0.5);
-}
-
 .orders-glow {
   position: absolute;
   inset: -1px;
   border-radius: 16px;
   pointer-events: none;
   background: radial-gradient(600px 120px at -10% 0%, rgba(255, 210, 119, 0.08), transparent 50%),
-    radial-gradient(600px 120px at 110% 100%, rgba(151, 59, 237, 0.07), transparent 50%);
+    radial-gradient(600px 120px at 110% 100%, rgba(255, 255, 255, 0.06), transparent 50%);
   opacity: .6;
 }
 
@@ -198,8 +196,8 @@
   left: 12px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
+  gap: 8px;
+  padding: 6px 12px;
   font-size: 11px;
   font-weight: 800;
   color: #000;
@@ -208,25 +206,19 @@
   box-shadow: 0 10px 20px rgba(255, 210, 119, 0.18);
 }
 
-.orders-badge svg {
-  color: #000;
-}
-
-.orders-badge.delivered,
-.orders-badge.shipped,
-.orders-badge.outfordelivery,
-.orders-badge.confirmed,
-.orders-badge.orderplaced,
-.orders-badge.rto,
-.orders-badge.cancelled {
-  background: linear-gradient(90deg, #ffd277, #ffffff);
-  color: #000;
+.orders-badge .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #000;
+  opacity: .7;
 }
 
 .orders-image {
   display: grid;
   align-items: center;
   justify-items: center;
+  cursor: pointer;
 }
 
 .thumbs {
@@ -262,7 +254,7 @@
 .orders-info {
   display: grid;
   grid-auto-rows: max-content;
-  gap: 10px;
+  gap: 12px;
 }
 
 .orders-row {
@@ -281,11 +273,11 @@
 
 .orders-brand {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.85);
+  color: #000;
+  background: linear-gradient(90deg, #ffd277, #ffffff);
   padding: 2px 8px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 210, 119, 0.45);
 }
 
 .orders-meta {
@@ -326,56 +318,6 @@
   flex-wrap: wrap;
 }
 
-.btn-primary {
-  background: linear-gradient(90deg, #ffd277, #77530a);
-  color: #000;
-  border: 1px solid rgba(255, 210, 119, 0.5);
-  padding: 8px 12px;
-  border-radius: 10px;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.btn-primary:disabled {
-  opacity: .6;
-  cursor: default;
-}
-
-.btn-secondary {
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 8px 12px;
-  border-radius: 10px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.btn-link {
-  color: #ffd277;
-  font-weight: 800;
-  text-decoration: none;
-  border: 1px dashed rgba(255, 210, 119, 0.4);
-  padding: 8px 10px;
-  border-radius: 10px;
-}
-
-.orders-tracking {
-  margin-top: 6px;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
-  padding: 10px;
-}
-
-.orders-track-empty {
-  display: grid;
-  place-items: center;
-  padding: 12px;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 13px;
-}
-
 .orders-arrow {
   display: grid;
   place-items: center;
@@ -388,6 +330,7 @@
   cursor: pointer;
   transition: transform .18s ease, box-shadow .25s ease, background .25s ease;
   align-self: center;
+  font-size: 18px;
 }
 
 .orders-arrow:hover {
@@ -403,35 +346,6 @@
   border-radius: 12px;
   background: linear-gradient(90deg, #111, #171717, #111);
   border: 1px solid rgba(255, 255, 255, .08);
-}
-
-.ship-rows {
-  display: grid;
-  gap: 10px;
-}
-
-.ship-row {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(120px, 1fr)) auto;
-  gap: 10px;
-  align-items: center;
-}
-
-.ship-row span {
-  display: block;
-  font-size: 12px;
-  color: rgba(255, 255, 255, .75);
-}
-
-.ship-row strong {
-  display: block;
-  color: #fff;
-}
-
-.ship-row .ship-actions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
 }
 
 .skeleton-list {
@@ -468,11 +382,11 @@
 }
 
 .sk-line.short {
-  width: 40%
+  width: 40%;
 }
 
 .sk-line.tiny {
-  width: 25%
+  width: 25%;
 }
 
 .shimmer {
@@ -491,22 +405,13 @@
 
 @keyframes shimmer {
   100% {
-    transform: translateX(100%)
+    transform: translateX(100%);
   }
 }
 
 @keyframes ordersGlow {
-
-  0%,
-  100% {
-    opacity: .65;
-    transform: translateY(0)
-  }
-
-  50% {
-    opacity: .9;
-    transform: translateY(6px)
-  }
+  0%, 100% { opacity: .65; transform: translateY(0) }
+  50% { opacity: .9; transform: translateY(6px) }
 }
 
 @media (max-width: 560px) {
@@ -516,19 +421,19 @@
   }
 
   .thumbs {
-    width: 100px
+    width: 100px;
   }
 
   .orders-arrow {
     width: 40px;
-    height: 40px
+    height: 40px;
   }
 
   .orders-name {
-    font-size: 15px
+    font-size: 15px;
   }
 
   .price-current {
-    font-size: 15px
+    font-size: 15px;
   }
 }

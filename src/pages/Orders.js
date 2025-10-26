@@ -1,6 +1,6 @@
+// src/pages/Orders.js
 import React, { useEffect, useMemo, useState } from 'react'
 import './Orders.css'
-import { FaArrowRight, FaCheckCircle } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 
 const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app'
@@ -44,9 +44,6 @@ const Orders = ({ user }) => {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('All')
-  const [expanded, setExpanded] = useState(null)
-  const [tracking, setTracking] = useState({})
-  const [trackLoading, setTrackLoading] = useState({})
   const [error, setError] = useState('')
 
   const [loginEmail, setLoginEmail] = useState(sessionStorage.getItem('userEmail') || '')
@@ -80,9 +77,7 @@ const Orders = ({ user }) => {
           const q = new URLSearchParams()
           if (email) q.set('email', email)
           if (mobile) q.set('mobile', mobile)
-          const res = await fetch(`${API_BASE}/api/sales/web/by-user?${q.toString()}`, {
-            cache: 'no-store'
-          })
+          const res = await fetch(`${API_BASE}/api/sales/web/by-user?${q.toString()}`, { cache: 'no-store' })
           if (!res.ok) throw new Error('bad')
           const data = await res.json()
           list = Array.isArray(data) ? data : Array.isArray(data.items) ? data.items : []
@@ -91,7 +86,6 @@ const Orders = ({ user }) => {
           setOrders([])
           return
         }
-
         const mapped = list.map(s => {
           const img = firstImg(s.items)
           const pname = firstName(s.items)
@@ -110,7 +104,6 @@ const Orders = ({ user }) => {
             originalPrice: null
           }
         })
-
         setOrders([...mapped].sort(byStatusRank))
       } catch {
         setOrders([])
@@ -127,28 +120,6 @@ const Orders = ({ user }) => {
     return orders.filter(o => normalizeStatus(o.status) === filter)
   }, [orders, filter])
 
-  const fetchTracking = async order => {
-    if (!order?.id) return
-    if (tracking[order.id]) {
-      setExpanded(expanded === order.id ? null : order.id)
-      return
-    }
-    setTrackLoading(m => ({ ...m, [order.id]: true }))
-    setExpanded(order.id)
-    try {
-      const res = await fetch(`${API_BASE}/api/shipments/by-sale/${encodeURIComponent(order.id)}`, {
-        cache: 'no-store'
-      })
-      const rows = await res.json()
-      const shipments = Array.isArray(rows) ? rows : []
-      setTracking(m => ({ ...m, [order.id]: { shipments } }))
-    } catch {
-      setTracking(m => ({ ...m, [order.id]: { error: true, shipments: [] } }))
-    } finally {
-      setTrackLoading(m => ({ ...m, [order.id]: false }))
-    }
-  }
-
   const statusList = ['All', ...STATUS_ORDER]
 
   if (!email && !mobile) {
@@ -158,7 +129,7 @@ const Orders = ({ user }) => {
           <div className="empty-orb"></div>
           <h2 className="orders-empty-title">Sign in to see your orders</h2>
           <p className="orders-empty-subtitle">Use the same email or mobile you used at checkout.</p>
-          <button className="orders-start-button" onClick={() => navigate('/profile')}>Sign In</button>
+          <button className="btn-outline" onClick={() => navigate('/profile')}>Sign In</button>
         </div>
       </div>
     )
@@ -191,7 +162,7 @@ const Orders = ({ user }) => {
           <img src="/images/no-order.svg" alt="No Orders" className="orders-empty-img" />
           <h2 className="orders-empty-title">No orders yet</h2>
           <p className="orders-empty-subtitle">Place an order and it will appear here.</p>
-          <button className="orders-start-button" onClick={() => navigate('/')}>Start Shopping</button>
+          <button className="btn-outline" onClick={() => navigate('/')}>Start Shopping</button>
           {error ? <p className="orders-error">{error}</p> : null}
         </div>
       ) : (
@@ -216,21 +187,16 @@ const Orders = ({ user }) => {
           <div className="orders-list">
             {filtered.map(order => {
               const st = normalizeStatus(order.status)
-              const isOpen = expanded === order.id
-              const t = tracking[order.id]
-              const shipments = t?.shipments || []
-              const firstTrack = shipments.find(s => s.tracking_url)?.tracking_url || ''
-
               return (
-                <div key={order.id} className={`orders-item ${isOpen ? 'open' : ''}`}>
+                <div key={order.id} className="orders-item">
                   <span className="orders-glow"></span>
 
                   <div className={`orders-badge ${st.replace(/\s/g, '').toLowerCase()}`}>
-                    <FaCheckCircle />
+                    <span className="dot" />
                     <span>{st}</span>
                   </div>
 
-                  <div className="orders-image" onClick={() => navigate(`/track/${order.id}`)}>
+                  <div className="orders-image" onClick={() => navigate(`/order/${order.id}`)}>
                     {order.thumbs?.length ? (
                       <div className="thumbs">
                         {order.thumbs.map((t, idx) => (
@@ -258,44 +224,13 @@ const Orders = ({ user }) => {
                     </div>
 
                     <div className="orders-cta">
-                      <button className="btn-secondary" onClick={() => navigate(`/track/${order.id}`)}>View</button>
-                      <button className="btn-primary" onClick={() => fetchTracking(order)} disabled={trackLoading[order.id]}>
-                        {trackLoading[order.id] ? 'Loading…' : isOpen ? 'Hide Shipments' : 'Show Shipments'}
-                      </button>
-                      {firstTrack ? (
-                        <a className="btn-link" href={firstTrack} target="_blank" rel="noreferrer">Open Tracking</a>
-                      ) : null}
+                      <button className="btn-outline" onClick={() => navigate(`/order/${order.id}`)}>View</button>
+                      <button className="btn-outline" onClick={() => navigate(`/order/${order.id}/tracking`)}>Track Order</button>
                     </div>
-
-                    {isOpen ? (
-                      <div className="orders-tracking">
-                        {t?.error ? (
-                          <div className="orders-track-empty"><p>Tracking unavailable right now.</p></div>
-                        ) : shipments.length === 0 && trackLoading[order.id] ? (
-                          <div className="orders-track-empty"><p>Fetching shipments…</p></div>
-                        ) : shipments.length === 0 ? (
-                          <div className="orders-track-empty"><p>No shipments yet.</p></div>
-                        ) : (
-                          <div className="ship-rows">
-                            {shipments.map(s => (
-                              <div className="ship-row" key={s.id}>
-                                <div><span>Branch</span><strong>#{s.branch_id}</strong></div>
-                                <div><span>AWB</span><strong>{s.awb || '-'}</strong></div>
-                                <div><span>Status</span><strong>{String(s.status || 'CREATED').toUpperCase()}</strong></div>
-                                <div className="ship-actions">
-                                  {s.tracking_url ? <a className="btn-link" href={s.tracking_url} target="_blank" rel="noreferrer">Track</a> : null}
-                                  {s.label_url ? <a className="btn-primary" href={s.label_url} target="_blank" rel="noreferrer">Label</a> : null}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ) : null}
                   </div>
 
-                  <div className="orders-arrow" onClick={() => fetchTracking(order)}>
-                    <FaArrowRight />
+                  <div className="orders-arrow" onClick={() => navigate(`/order/${order.id}`)}>
+                    →
                   </div>
                 </div>
               )

@@ -1,3 +1,4 @@
+// src/components/LoginPopup.js
 import React, { useState, useRef, useEffect } from 'react';
 import { FaGoogle } from 'react-icons/fa';
 import { FiX, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
@@ -6,6 +7,13 @@ import ForgotPasswordPopup from './ForgotPasswordPopup';
 import SignupPopup from './SignupPopup';
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+
+const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
+const API_BASE_RAW =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
+  (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
+  DEFAULT_API_BASE;
+const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
 
 const env = (typeof import.meta !== 'undefined' && import.meta.env)
   ? import.meta.env
@@ -64,8 +72,8 @@ const LoginPopup = ({ onClose, onSuccess }) => {
 
   const handleLogin = async () => {
     if (!canSubmit) return;
+    setLoading(true);
     try {
-      setLoading(true);
       const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
       const u = cred.user;
       const token = await u.getIdToken();
@@ -80,9 +88,43 @@ const LoginPopup = ({ onClose, onSuccess }) => {
         setPopupMessage('');
       }, 900);
     } catch (e) {
-      const code = String(e.code || '');
-      if (code.includes('invalid-credential')) setMsg('Invalid email or password');
-      else if (code.includes('too-many-requests')) setMsg('Too many attempts, try later');
+      const code = String(e.code || e.message || '').toLowerCase();
+      const shouldFallback =
+        code.includes('invalid-credential') ||
+        code.includes('user-not-found') ||
+        code.includes('operation-not-allowed') ||
+        code.includes('password_login_disabled');
+      if (shouldFallback) {
+        try {
+          const response = await fetch(`${API_BASE}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+          const data = await response.json();
+          if (response.ok) {
+            sessionStorage.setItem('userId', data.id);
+            sessionStorage.setItem('userEmail', data.email);
+            sessionStorage.setItem('userName', data.name);
+            sessionStorage.setItem('userType', data.type);
+            setPopupMessage('Successfully Logged In!');
+            setTimeout(() => {
+              onSuccess({
+                id: data.id,
+                name: data.name,
+                email: data.email,
+                profilePic: '/images/profile-pic.png',
+                userType: data.type
+              });
+              setPopupMessage('');
+            }, 1200);
+          } else {
+            setMsg(data.message || 'Invalid email or password');
+          }
+        } catch {
+          setMsg('Server error');
+        }
+      } else if (code.includes('too-many-requests')) setMsg('Too many attempts, try later');
       else if (code.includes('user-disabled')) setMsg('Account disabled');
       else if (code.includes('network-request-failed')) setMsg('Network error');
       else if (code.includes('invalid-api-key')) setMsg('Invalid Firebase API key');
@@ -109,7 +151,7 @@ const LoginPopup = ({ onClose, onSuccess }) => {
         setPopupMessage('');
       }, 900);
     } catch (e) {
-      const code = String(e.code || '');
+      const code = String(e.code || '').toLowerCase();
       if (code.includes('popup-closed-by-user')) setMsg('Popup closed');
       else if (code.includes('unauthorized-domain')) setMsg('Domain not authorized in Firebase');
       else if (code.includes('invalid-api-key')) setMsg('Invalid Firebase API key');
