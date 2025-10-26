@@ -804,85 +804,88 @@ export default function HomePage() {
 
 
 
-            <section className="ai-elite-section">
-                <div className="ai-elite-container">
-                    <div className="ai-elite-left">
-                        <div className="ai-elite-head">
-                            <h2 className="ai-elite-title">Refined Menswear</h2>
-                        </div>
+            {/*<section className="ai-elite-section-final">
+  <div className="ai-elite-container-final">
+    <div className="ai-elite-left-final">
+      <div className="ai-elite-head-final">
+        <h2 className="ai-elite-title-final">Refined Menswear</h2>
+      </div>
 
-                        <p className="ai-elite-desc">
-                            Tailored layers, modern cuts, and fabrics that move with you. Build a wardrobe that speaks in quiet confidence.
-                        </p>
+      <p className="ai-elite-desc-final">
+        Tailored layers, modern cuts, and fabrics that move with you. Build a wardrobe that speaks in quiet confidence.
+      </p>
 
-                        <ul className="ai-elite-points">
-                            <li className="ai-elite-point">Smart Tailoring</li>
-                            <li className="ai-elite-point">Breathable Weaves</li>
-                            <li className="ai-elite-point">Week-to-Weekend</li>
-                        </ul>
+      <ul className="ai-elite-points-final">
+        <li className="ai-elite-point-final">Smart Tailoring</li>
+        <li className="ai-elite-point-final">Breathable Weaves</li>
+        <li className="ai-elite-point-final">Week-to-Weekend</li>
+      </ul>
 
-                        <div className="ai-elite-actions">
-                            <a href="/men" className="ai-elite-btn-premium">
-                                Shop Now
-                                <span className="ai-elite-btn-shine" aria-hidden="true"></span>
-                            </a>
-                            <a href="/men" className="ai-elite-link">Explore Collection</a>
-                        </div>
+      <div className="ai-elite-actions-final">
+        <a href="/men" className="ai-elite-btn-premium-final">
+          <span className="ai-elite-btn-glow-final"></span>
+          <span className="ai-elite-btn-text-final">Shop Now</span>
+          <span className="ai-elite-btn-shine-final" aria-hidden="true"></span>
+        </a>
+        <a href="/men" className="ai-elite-link-final">Explore Collection</a>
+      </div>
 
-                        <div className="ai-elite-metrics">
-                            <div className="ai-elite-metric">
-                                <span className="ai-elite-metric-num">50+</span>
-                                <span className="ai-elite-metric-label">Fresh Styles</span>
-                            </div>
-                            <div className="ai-elite-metric">
-                                <span className="ai-elite-metric-num">Premium</span>
-                                <span className="ai-elite-metric-label">Fabrics</span>
-                            </div>
-                            <div className="ai-elite-metric">
-                                <span className="ai-elite-metric-num">Tailored</span>
-                                <span className="ai-elite-metric-label">Comfort</span>
-                            </div>
-                        </div>
-                    </div>
+      <div className="ai-elite-metrics-final">
+        <div className="ai-elite-metric-final">
+          <span className="ai-elite-metric-num-final">50+</span>
+          <span className="ai-elite-metric-label-final">Fresh Styles</span>
+        </div>
+        <div className="ai-elite-metric-final">
+          <span className="ai-elite-metric-num-final">Premium</span>
+          <span className="ai-elite-metric-label-final">Fabrics</span>
+        </div>
+        <div className="ai-elite-metric-final">
+          <span className="ai-elite-metric-num-final">Tailored</span>
+          <span className="ai-elite-metric-label-final">Comfort</span>
+        </div>
+      </div>
+    </div>
 
-                    <div className="ai-elite-right">
-                        <div className="ai-elite-frame">
-                            <Swiper
-                                className="ai-elite-slider"
-                                modules={[Autoplay]}
-                                loop={true}
-                                slidesPerView={1}
-                                autoplay={{ delay: 3000, disableOnInteraction: false }}
-                                speed={800}
-                            >
-                                <SwiperSlide>
-                                    <div className="ai-elite-slide">
-                                        <img
-                                            src="/images/banners/mens-slide2.jpg"
-                                            alt="Menswear look one"
-                                            loading="lazy"
-                                            decoding="async"
-                                            onError={(e) => { e.currentTarget.src = "/images/banners/mens-slide2.jpg"; }}
-                                        />
-                                    </div>
-                                </SwiperSlide>
-                                <SwiperSlide>
-                                    <div className="ai-elite-slide">
-                                        <img
-                                            src="/images/banners/mens-slide3.jpg"
-                                            alt="Menswear look two"
-                                            loading="lazy"
-                                            decoding="async"
-                                            onError={(e) => { e.currentTarget.src = "/images/banners/mens-slide3.jpg"; }}
-                                        />
-                                    </div>
-                                </SwiperSlide>
-                            </Swiper>
-                            <div className="ai-elite-glow"></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+    <div className="ai-elite-right-final">
+      <div className="ai-elite-frame-final">
+        <Swiper
+          className="ai-elite-slider-final"
+          modules={[Autoplay]}
+          loop={true}
+          slidesPerView={1}
+          autoplay={{ delay: 3000, disableOnInteraction: false }}
+          speed={800}
+        >
+          <SwiperSlide>
+            <div className="ai-elite-slide-final">
+              <img
+                src="/images/banners/mens-slide2.jpg"
+                alt="Menswear look one"
+                loading="lazy"
+                decoding="async"
+                onError={(e) => { e.currentTarget.src = "/images/banners/mens-slide2.jpg"; }}
+              />
+            </div>
+          </SwiperSlide>
+          <SwiperSlide>
+            <div className="ai-elite-slide-final">
+              <img
+                src="/images/banners/mens-slide3.jpg"
+                alt="Menswear look two"
+                loading="lazy"
+                decoding="async"
+                onError={(e) => { e.currentTarget.src = "/images/banners/mens-slide3.jpg"; }}
+              />
+            </div>
+          </SwiperSlide>
+        </Swiper>
+        <div className="ai-elite-glow-final"></div>
+        <div className="ai-elite-border-final"></div>
+      </div>
+    </div>
+  </div>
+</section>  */}
+
 
 
             <section className="home-section6">
