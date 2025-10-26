@@ -1,3 +1,4 @@
+// D:\shopping\src\pages\Navbar.js
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaUser, FaHeart, FaShoppingBag, FaSearch, FaTimes, FaRegUser, FaRegHeart } from 'react-icons/fa';
@@ -199,7 +200,7 @@ const NavbarFinal = () => {
                 onClick={handleNavClick}
                 className={`nav-link-final Btn ${isActive(path) ? 'active-final' : ''}`}
               >
-                {name}
+                <span>{name}</span>
               </Link>
             ))}
           </div>

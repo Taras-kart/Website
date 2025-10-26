@@ -4557,7 +4557,6 @@
   border-top: 2px solid var(--gold);
   border-bottom: 2px solid var(--gold)
 }
-
 .wcat-head {
   max-width: 1280px;
   margin: 0 auto 18px;
@@ -4566,7 +4565,6 @@
   align-items: center;
   gap: 4px
 }
-
 .wcat-title {
   color: var(--gold);
   font-size: 34px;
@@ -4574,32 +4572,20 @@
   letter-spacing: .6px;
   text-align: center
 }
-
 .wcat-underline {
   display: flex;
   justify-content: center;
   gap: 6px
 }
-
 .wcat-underline .wl {
   height: 3px;
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
   box-shadow: 0 0 12px rgba(212, 175, 55, .18);
   border-radius: 3px
 }
-
-.wcat-underline .w1 {
-  width: 200px
-}
-
-.wcat-underline .w2 {
-  width: 110px
-}
-
-.wcat-underline .w3 {
-  width: 54px
-}
-
+.wcat-underline .w1 { width: 200px }
+.wcat-underline .w2 { width: 110px }
+.wcat-underline .w3 { width: 54px }
 .wcat-grid {
   max-width: 1280px;
   margin: 0 auto;
@@ -4607,7 +4593,6 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 22px
 }
-
 .wcat-card {
   background: #0c0c0c;
   border: 1px solid rgba(212, 175, 55, .35);
@@ -4617,25 +4602,21 @@
   flex-direction: column;
   transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease
 }
-
 .wcat-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 16px 32px rgba(0, 0, 0, .35), 0 0 0 1px inset rgba(212, 175, 55, .35);
   border-color: rgba(212, 175, 55, .6)
 }
-
 .wcat-media {
   display: block;
   position: relative
 }
-
 .wcat-media img {
   width: 100%;
   height: 300px;
   object-fit: cover;
   display: block
 }
-
 .wcat-info {
   padding: 14px;
   display: flex;
@@ -4643,32 +4624,27 @@
   gap: 8px;
   text-align: left
 }
-
 .wcat-brand {
   color: var(--gold);
   font-size: 18px;
   font-weight: 800;
   letter-spacing: .2px
 }
-
 .wcat-price {
   display: flex;
   align-items: baseline;
   gap: 10px
 }
-
 .wcat-mrp {
   color: #fff;
   font-weight: 800;
   font-size: 18px
 }
-
 .wcat-off {
   color: #bbb;
   text-decoration: line-through;
   font-size: 15px
 }
-
 .wcat-buy {
   margin-top: 6px;
   display: inline-flex;
@@ -4684,21 +4660,18 @@
   letter-spacing: .6px;
   transition: transform .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease
 }
-
 .wcat-buy:hover {
   background: var(--gold);
   color: #000;
   transform: translateY(-2px);
   box-shadow: 0 10px 18px rgba(212, 175, 55, .25)
 }
-
 .wcat-more {
   max-width: 1280px;
   margin: 22px auto 0;
   display: flex;
   justify-content: center
 }
-
 .wcat-view {
   display: inline-flex;
   align-items: center;
@@ -4713,51 +4686,25 @@
   letter-spacing: .8px;
   transition: transform .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease
 }
-
 .wcat-view:hover {
   background: var(--gold);
   color: #000;
   transform: translateY(-2px);
   box-shadow: 0 12px 22px rgba(212, 175, 55, .25)
 }
-
 @media(max-width:1100px) {
-  .wcat-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr))
-  }
-
-  .wcat-media img {
-    height: 210px
-  }
+  .wcat-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) }
+  .wcat-media img { height: 210px }
 }
-
 @media(max-width:820px) {
-  .wcat-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr))
-  }
-
-  .wcat-title {
-    font-size: 30px
-  }
+  .wcat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+  .wcat-title { font-size: 30px }
 }
-
 @media(max-width:460px) {
-  .wcat {
-    padding: 36px 12px
-  }
-
-  .wcat-grid {
-    grid-template-columns: 1fr;
-    gap: 16px
-  }
-
-  .wcat-title {
-    font-size: 26px
-  }
-
-  .wcat-media img {
-    height: 200px
-  }
+  .wcat { padding: 36px 12px }
+  .wcat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px }
+  .wcat-title { font-size: 26px }
+  .wcat-media img { height: 200px }
 }
 
 

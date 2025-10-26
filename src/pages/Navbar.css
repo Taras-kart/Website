@@ -1,3 +1,4 @@
+/* D:\shopping\src\pages\Navbar.css */
 :root {
   --bg-1: #edf6f5;
   --bg-2: #3fb8a9;
@@ -333,10 +334,6 @@ body {
   overflow-y: auto;
 }
 
-.mobile-drawer-final .nav-link-final.active-final {
-  color: #ffd277 !important;
-}
-
 .slide-in {
   animation: slideIn .24s ease both;
 }
@@ -346,7 +343,6 @@ body {
     transform: translateX(20px);
     opacity: 0;
   }
-
   to {
     transform: translateX(0);
     opacity: 1;
@@ -381,7 +377,6 @@ body {
   .nav-links-final {
     gap: clamp(10px, 1.8vw, 16px);
   }
-
   .search-bar-final input {
     width: clamp(120px, 22vw, 180px);
   }
@@ -389,72 +384,53 @@ body {
 
 @media (max-width: 768px) {
   .nav-right-final {
+    
     display: none;
   }
-
   .nav-toggle-final {
     display: block;
+    
   }
-
   .bottom-row-final {
     display: flex;
     justify-content: center;
+    
   }
-
   .mobile-only-final {
     display: flex;
     flex-direction: column;
     gap: 10px;
   }
-
   .mobile-drawer-final {
     width: 70vw;
     padding: 40px 24px;
+    margin-top: 30px;
   }
-
   .mobile-drawer-final .nav-links-final {
     flex-direction: column;
     gap: 15px;
   }
-
   .mobile-drawer-final .icon-buttons-final {
     flex-direction: column;
     gap: 20px;
   }
-
   .mobile-drawer-final .nav-link-final {
     font-size: 18px;
     color: white;
   }
-
   .search-bar-final {
     width: 92%;
     margin: 10px auto;
   }
-
   .mobile-icons .icon-circle {
     width: 52px;
     height: 52px;
   }
-
   .mobile-icons .icon {
     font-size: 24px;
   }
-
   .close-btn-final {
     display: none;
-  }
-
-  .mobile-drawer-final .nav-link-final.active-final,
-  .mobile-drawer-final .nav-link-final.active-final span,
-  .mobile-drawer-final .nav-link-final.active-final svg {
-    color: #ffffff !important;
-    fill: #ffffff !important;
-    text-shadow: none;
-  }
-
-  .mobile-drawer-final .nav-link-final.active-final::before {
-    background: rgba(0, 0, 0, 0.9);
   }
 }
 
@@ -462,46 +438,36 @@ body {
   .navbar-final {
     padding: 10px 15px;
   }
-
   .logo-final video {
     height: 34px;
   }
-
   .nav-toggle-final {
     display: block;
   }
-
   .top-row-final {
     padding: 0 6px;
   }
-
   .mobile-drawer-final {
     display: flex;
   }
-
   .search-bar-final {
     width: 88%;
     margin-top: 10px;
   }
-
   .search-bar-final input {
     font-size: 14px;
     width: clamp(120px, 60vw, 220px);
   }
-
   .bottom-row-final {
     display: flex;
   }
-
   .active-final {
     height: 35px;
     color: #ffd277 !important;
   }
-
   .active-final span {
     color: #ffd277 !important;
   }
-
   .active-final svg {
     fill: #ffd277 !important;
   }
@@ -509,29 +475,25 @@ body {
 
 @media (max-width: 400px) {
   .mobile-drawer-final {
+    margin-top: 20px;
     padding: 32px 20px;
     width: 82vw;
   }
-
   .search-bar-final input {
     font-size: 13px;
   }
-
   .nav-link-final {
     font-size: 14px;
   }
-
   .icon-buttons-final {
     gap: 12px;
   }
-
   .active-final {
     width: 60%;
     height: 40px;
     text-shadow: 0 0 6px #ffd277;
     color: #ffd277 !important;
   }
-
   .active-final span {
     color: #ffd277 !important;
   }
