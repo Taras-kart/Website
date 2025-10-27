@@ -126,7 +126,6 @@ const Orders = ({ user }) => {
     return (
       <div className="orders-container">
         <div className="orders-empty-card">
-          <div className="empty-orb"></div>
           <h2 className="orders-empty-title">Sign in to see your orders</h2>
           <p className="orders-empty-subtitle">Use the same email or mobile you used at checkout.</p>
           <button className="btn-outline" onClick={() => navigate('/profile')}>Sign In</button>
@@ -158,7 +157,6 @@ const Orders = ({ user }) => {
     <div className="orders-container">
       {filtered.length === 0 ? (
         <div className="orders-empty-card">
-          <div className="empty-orb"></div>
           <img src="/images/no-order.svg" alt="No Orders" className="orders-empty-img" />
           <h2 className="orders-empty-title">No orders yet</h2>
           <p className="orders-empty-subtitle">Place an order and it will appear here.</p>
@@ -189,20 +187,12 @@ const Orders = ({ user }) => {
               const st = normalizeStatus(order.status)
               return (
                 <div key={order.id} className="orders-item">
-                  <span className="orders-glow"></span>
-
-                  <div className={`orders-badge ${st.replace(/\s/g, '').toLowerCase()}`}>
-                    <span className="dot" />
-                    <span>{st}</span>
-                  </div>
-
                   <div className="orders-image" onClick={() => navigate(`/order/${order.id}`)}>
                     {order.thumbs?.length ? (
                       <div className="thumbs">
                         {order.thumbs.map((t, idx) => (
                           <img key={idx} src={t.src} alt={t.alt || 'Item'} loading="lazy" />
                         ))}
-                        {Array.isArray(order.thumbs) && order.thumbs.length === 3 ? <div className="thumbs-more">+more</div> : null}
                       </div>
                     ) : (
                       <div className="orders-ph" />
@@ -212,13 +202,12 @@ const Orders = ({ user }) => {
                   <div className="orders-info">
                     <div className="orders-row">
                       <h4 className="orders-name">{order.name}</h4>
-                      <div className="orders-brand">TARS KART</div>
+                      <span className="orders-badge">{st}</span>
                     </div>
 
                     <div className="orders-meta">
                       <div className="orders-price">
                         <span className="price-current">{formatPrice(order.offerPrice)}</span>
-                        {order.originalPrice ? <span className="price-original">{formatPrice(order.originalPrice)}</span> : null}
                       </div>
                       <p className="orders-date">{order.date}</p>
                     </div>
@@ -227,10 +216,6 @@ const Orders = ({ user }) => {
                       <button className="btn-outline" onClick={() => navigate(`/order/${order.id}`)}>View</button>
                       <button className="btn-outline" onClick={() => navigate(`/order/${order.id}/tracking`)}>Track Order</button>
                     </div>
-                  </div>
-
-                  <div className="orders-arrow" onClick={() => navigate(`/order/${order.id}`)}>
-                    →
                   </div>
                 </div>
               )

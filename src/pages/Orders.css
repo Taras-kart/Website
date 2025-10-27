@@ -1,9 +1,15 @@
 /* src/pages/Orders.css */
+:root {
+  --gold: #d4af37;
+  --black: #0f0f10;
+  --white: #ffffff;
+}
+
 .orders-container {
   width: 100%;
-  padding: 16px;
+  padding: 20px 16px;
   box-sizing: border-box;
-  color: #fff;
+  color: var(--white);
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
   background: transparent;
 }
@@ -13,26 +19,20 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .orders-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 8px 4px 8px;
 }
 
 .orders-header h3 {
   margin: 0;
-  font-size: 22px;
-  font-weight: 900;
-  letter-spacing: .4px;
-  background: linear-gradient(90deg, #ffd277, #ffffff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  text-shadow: 0 0 14px rgba(255, 210, 119, 0.15);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--white);
 }
 
 .orders-count {
@@ -43,11 +43,11 @@
   height: 28px;
   padding: 0 8px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
-  color: #000;
-  background: linear-gradient(90deg, #ffd277, #77530a);
-  box-shadow: 0 8px 20px rgba(255, 210, 119, 0.25);
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  background: transparent;
 }
 
 .orders-actions {
@@ -63,14 +63,13 @@
 
 .orders-filter label {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.75);
+  color: #cccccc;
 }
 
 .orders-filter select {
-  appearance: none;
-  background: rgba(0, 0, 0, 0.55);
-  color: #ffd277;
-  border: 1px solid rgba(255, 210, 119, 0.35);
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid rgba(212, 175, 55, .6);
   padding: 8px 10px;
   border-radius: 10px;
   font-weight: 700;
@@ -78,140 +77,72 @@
 }
 
 .orders-empty-card {
-  position: relative;
   display: grid;
   justify-items: center;
   text-align: center;
   gap: 10px;
   padding: 28px 18px;
-  border-radius: 18px;
-  background: rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
-  overflow: hidden;
-}
-
-.empty-orb {
-  position: absolute;
-  width: 280px;
-  height: 280px;
-  border-radius: 50%;
-  filter: blur(24px);
-  background:
-    radial-gradient(closest-side, rgba(255, 210, 119, 0.28), transparent 65%),
-    radial-gradient(closest-side, rgba(255, 255, 255, 0.16), transparent 70%);
-  top: -80px;
-  left: -60px;
-  opacity: .8;
-  animation: ordersGlow 3s ease-in-out infinite;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, .35);
+  border: 1px solid rgba(255, 255, 255, .08);
 }
 
 .orders-empty-img {
-  width: 180px;
+  width: 160px;
   height: auto;
-  margin-bottom: 8px;
-  filter: drop-shadow(0 10px 24px rgba(255, 210, 119, 0.12));
 }
 
 .orders-empty-title {
-  font-size: 22px;
-  font-weight: 900;
+  font-size: 20px;
+  font-weight: 800;
   margin: 0;
-  color: #fff;
+  color: var(--white);
 }
 
 .orders-empty-subtitle {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.85);
+  color: #d9d9d9;
   margin: 0 0 8px 0;
 }
 
-.btn-outline,
-.orders-start-button {
+.btn-outline {
   background: transparent;
-  color: #ffd277;
-  border: 1px solid rgba(255, 210, 119, 0.6);
-  padding: 10px 18px;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  padding: 10px 16px;
   font-weight: 800;
   font-size: 14px;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: transform .18s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
+  transition: transform .16s ease, background .16s ease, color .16s ease, border-color .16s ease;
 }
 
-.btn-outline:hover,
-.orders-start-button:hover {
+.btn-outline:hover {
   transform: translateY(-1px);
-  background: rgba(255, 210, 119, 0.08);
-  box-shadow: 0 10px 26px rgba(255, 210, 119, 0.18);
+  background: rgba(212, 175, 55, .08);
+  border-color: var(--gold);
+  color: var(--gold);
 }
 
 .orders-error {
-  color: #ffefc7;
+  color: #ffe9a6;
   font-size: 12px;
-  opacity: .9;
 }
 
 .orders-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .orders-item {
-  position: relative;
   display: grid;
-  grid-template-columns: 120px 1fr 46px;
-  align-items: stretch;
+  grid-template-columns: 110px 1fr;
   gap: 14px;
   padding: 14px;
-  border-radius: 16px;
-  background: rgba(10, 10, 10, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
-  overflow: hidden;
-  transition: transform .18s ease, background .25s ease, box-shadow .25s ease, border-color .25s ease;
-}
-
-.orders-item:hover {
-  transform: translateY(-2px);
-  background: rgba(20, 20, 20, 0.6);
-  border-color: rgba(255, 210, 119, 0.35);
-  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
-}
-
-.orders-glow {
-  position: absolute;
-  inset: -1px;
-  border-radius: 16px;
-  pointer-events: none;
-  background: radial-gradient(600px 120px at -10% 0%, rgba(255, 210, 119, 0.08), transparent 50%),
-    radial-gradient(600px 120px at 110% 100%, rgba(255, 255, 255, 0.06), transparent 50%);
-  opacity: .6;
-}
-
-.orders-badge {
-  position: absolute;
-  top: 10px;
-  left: 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  font-size: 11px;
-  font-weight: 800;
-  color: #000;
-  background: linear-gradient(90deg, #ffd277, #ffffff);
-  border-radius: 999px;
-  box-shadow: 0 10px 20px rgba(255, 210, 119, 0.18);
-}
-
-.orders-badge .dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: #000;
-  opacity: .7;
+  border-radius: 14px;
+  background: rgba(15, 15, 16, .55);
+  border: 1px solid rgba(255, 255, 255, .06);
 }
 
 .orders-image {
@@ -225,59 +156,56 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
-  width: 120px;
+  width: 110px;
 }
 
 .thumbs img {
   width: 100%;
   height: 100%;
-  max-height: 112px;
+  max-height: 104px;
   object-fit: cover;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, .08);
 }
 
-.thumbs-more {
-  grid-column: 3 / 4;
-  align-self: center;
-  justify-self: center;
-  padding: 2px 6px;
-  font-size: 11px;
-  font-weight: 800;
-  color: #000;
-  background: #ffd277;
-  border-radius: 999px;
-  box-shadow: 0 8px 18px rgba(255, 210, 119, 0.25);
+.orders-ph {
+  width: 110px;
+  height: 104px;
+  border-radius: 10px;
+  background: #1b1b1c;
+  border: 1px solid rgba(255, 255, 255, .08);
 }
 
 .orders-info {
   display: grid;
-  grid-auto-rows: max-content;
-  gap: 12px;
+  gap: 10px;
 }
 
 .orders-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
   flex-wrap: wrap;
 }
 
 .orders-name {
   font-size: 16px;
-  font-weight: 900;
+  font-weight: 800;
   margin: 0;
-  color: #fff;
+  color: var(--white);
 }
 
-.orders-brand {
-  font-size: 12px;
-  color: #000;
-  background: linear-gradient(90deg, #ffd277, #ffffff);
-  padding: 2px 8px;
+.orders-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 210, 119, 0.45);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  background: transparent;
 }
 
 .orders-meta {
@@ -294,21 +222,14 @@
 }
 
 .price-current {
-  color: #ffd277;
+  color: var(--gold);
   font-weight: 900;
   font-size: 16px;
-  text-shadow: 0 0 14px rgba(255, 210, 119, 0.25);
-}
-
-.price-original {
-  color: rgba(255, 255, 255, 0.55);
-  text-decoration: line-through;
-  font-size: 13px;
 }
 
 .orders-date {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.75);
+  color: #d0d0d0;
 }
 
 .orders-cta {
@@ -318,36 +239,6 @@
   flex-wrap: wrap;
 }
 
-.orders-arrow {
-  display: grid;
-  place-items: center;
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
-  color: #ffd277;
-  background: rgba(255, 210, 119, 0.08);
-  border: 1px solid rgba(255, 210, 119, 0.35);
-  cursor: pointer;
-  transition: transform .18s ease, box-shadow .25s ease, background .25s ease;
-  align-self: center;
-  font-size: 18px;
-}
-
-.orders-arrow:hover {
-  transform: translateX(3px);
-  background: linear-gradient(90deg, #ffd277, #77530a);
-  color: #000;
-  box-shadow: 0 16px 40px rgba(255, 210, 119, 0.22);
-}
-
-.orders-image .orders-ph {
-  width: 120px;
-  height: 112px;
-  border-radius: 12px;
-  background: linear-gradient(90deg, #111, #171717, #111);
-  border: 1px solid rgba(255, 255, 255, .08);
-}
-
 .skeleton-list {
   display: grid;
   gap: 12px;
@@ -355,19 +246,19 @@
 
 .skeleton-item {
   display: grid;
-  grid-template-columns: 120px 1fr;
+  grid-template-columns: 110px 1fr;
   gap: 12px;
   padding: 12px;
-  border-radius: 16px;
-  background: rgba(10, 10, 10, .45);
+  border-radius: 14px;
+  background: rgba(10, 10, 10, .35);
   border: 1px solid rgba(255, 255, 255, .06);
 }
 
 .sk-img {
-  width: 120px;
-  height: 112px;
-  border-radius: 12px;
-  background: #141414;
+  width: 110px;
+  height: 104px;
+  border-radius: 10px;
+  background: #1a1a1b;
 }
 
 .sk-body {
@@ -376,17 +267,17 @@
 }
 
 .sk-line {
-  height: 14px;
+  height: 12px;
   border-radius: 6px;
-  background: #161616;
+  background: #171717;
 }
 
 .sk-line.short {
-  width: 40%;
+  width: 40%
 }
 
 .sk-line.tiny {
-  width: 25%;
+  width: 25%
 }
 
 .shimmer {
@@ -399,41 +290,35 @@
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .08), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .06), transparent);
   animation: shimmer 1.25s infinite;
 }
 
 @keyframes shimmer {
   100% {
-    transform: translateX(100%);
+    transform: translateX(100%)
   }
 }
 
-@keyframes ordersGlow {
-  0%, 100% { opacity: .65; transform: translateY(0) }
-  50% { opacity: .9; transform: translateY(6px) }
-}
-
-@media (max-width: 560px) {
+@media (max-width:640px) {
   .orders-item {
-    grid-template-columns: 100px 1fr 40px;
-    padding: 10px;
+    grid-template-columns: 90px 1fr
   }
 
   .thumbs {
-    width: 100px;
+    width: 90px
   }
 
-  .orders-arrow {
-    width: 40px;
-    height: 40px;
+  .orders-ph {
+    width: 90px;
+    height: 90px
   }
 
   .orders-name {
-    font-size: 15px;
+    font-size: 15px
   }
 
   .price-current {
-    font-size: 15px;
+    font-size: 15px
   }
 }
