@@ -96,10 +96,6 @@ const Orders = ({ user }) => {
             date: s.created_at ? new Date(s.created_at).toLocaleString('en-IN') : '',
             name: pname && itemCount > 1 ? `${pname} +${itemCount - 1}` : pname || `Order #${s.id}`,
             image: img,
-            thumbs: (Array.isArray(s.items) ? s.items : []).slice(0, 3).map(it => ({
-              src: it.image_url || '',
-              alt: it.product_name || 'Item'
-            })),
             offerPrice: Number(s?.totals?.payable ?? s?.total ?? 0),
             originalPrice: null
           }
@@ -188,12 +184,8 @@ const Orders = ({ user }) => {
               return (
                 <div key={order.id} className="orders-item">
                   <div className="orders-image" onClick={() => navigate(`/order/${order.id}`)}>
-                    {order.thumbs?.length ? (
-                      <div className="thumbs">
-                        {order.thumbs.map((t, idx) => (
-                          <img key={idx} src={t.src} alt={t.alt || 'Item'} loading="lazy" />
-                        ))}
-                      </div>
+                    {order.image ? (
+                      <img src={order.image} alt={order.name || 'Item'} loading="lazy" />
                     ) : (
                       <div className="orders-ph" />
                     )}

@@ -137,7 +137,7 @@
 
 .orders-item {
   display: grid;
-  grid-template-columns: 110px 1fr;
+  grid-template-columns: 120px 1fr;
   gap: 14px;
   padding: 14px;
   border-radius: 14px;
@@ -152,25 +152,17 @@
   cursor: pointer;
 }
 
-.thumbs {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  width: 110px;
-}
-
-.thumbs img {
-  width: 100%;
-  height: 100%;
-  max-height: 104px;
+.orders-image img {
+  width: 120px;
+  height: 230px;
   object-fit: cover;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, .08);
 }
 
 .orders-ph {
-  width: 110px;
-  height: 104px;
+  width: 120px;
+  height: 230px;
   border-radius: 10px;
   background: #1b1b1c;
   border: 1px solid rgba(255, 255, 255, .08);
@@ -246,7 +238,7 @@
 
 .skeleton-item {
   display: grid;
-  grid-template-columns: 110px 1fr;
+  grid-template-columns: 120px 1fr;
   gap: 12px;
   padding: 12px;
   border-radius: 14px;
@@ -255,8 +247,8 @@
 }
 
 .sk-img {
-  width: 110px;
-  height: 104px;
+  width: 120px;
+  height: 230px;
   border-radius: 10px;
   background: #1a1a1b;
 }
@@ -273,11 +265,11 @@
 }
 
 .sk-line.short {
-  width: 40%
+  width: 40%;
 }
 
 .sk-line.tiny {
-  width: 25%
+  width: 25%;
 }
 
 .shimmer {
@@ -296,29 +288,20 @@
 
 @keyframes shimmer {
   100% {
-    transform: translateX(100%)
+    transform: translateX(100%);
   }
 }
 
 @media (max-width:640px) {
   .orders-item {
-    grid-template-columns: 90px 1fr
-  }
-
-  .thumbs {
-    width: 90px
-  }
-
-  .orders-ph {
-    width: 90px;
-    height: 90px
+    grid-template-columns: 120px 1fr;
   }
 
   .orders-name {
-    font-size: 15px
+    font-size: 15px;
   }
 
   .price-current {
-    font-size: 15px
+    font-size: 15px;
   }
 }
