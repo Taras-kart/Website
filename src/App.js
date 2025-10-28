@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import './App.css';
@@ -19,6 +18,7 @@ import OrderCheckout from './pages/OrderCheckout';
 import OrderTracking from './pages/OrderTracking';
 import ReturnsPage from './pages/ReturnsPage';
 import OrderDetails from './pages/OrderDetails';
+import PaymentPage from './pages/PaymentPage';
 
 function NavigationLoader() {
   const location = useLocation();
@@ -51,7 +51,7 @@ function AppShell() {
         <Route path="/track/:id" element={<OrderTracking />} />
         <Route path="/returns" element={<ReturnsPage />} />
         <Route path="/order/:id" element={<OrderDetails />} />
-
+        <Route path="/payment" element={<PaymentPage />} />
       </Routes>
     </>
   );

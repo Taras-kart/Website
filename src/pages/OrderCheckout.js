@@ -1,5 +1,5 @@
-// D:\shopping\src\pages\OrderCheckout.js
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import './OrderCheckout.css';
@@ -12,6 +12,7 @@ const API_BASE_RAW =
 const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
 
 export default function OrderCheckout() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -46,12 +47,9 @@ export default function OrderCheckout() {
   }, []);
 
   const fmt = (n) => Number(n || 0).toFixed(2);
-
   const itemsCount = Array.isArray(payload?.items) ? payload.items.reduce((a, i) => a + Number(i.qty || 1), 0) : 0;
   const payable = payload?.totals?.payable || 0;
-
   const setF = (k, v) => setForm((s) => ({ ...s, [k]: v }));
-
   const isValidEmail = (e) => !e || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
   const isValidMobile = (m) => !m || /^[0-9]{10}$/.test(String(m).replace(/\D/g, ''));
   const isValidPincode = (p) => !p || /^[0-9]{6}$/.test(String(p).replace(/\D/g, ''));
@@ -65,16 +63,6 @@ export default function OrderCheckout() {
     setToast(msg);
     setTimeout(() => setToast(''), ms);
   };
-
-  const loadRazorpay = () =>
-    new Promise((resolve, reject) => {
-      if (window.Razorpay) return resolve(true);
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.onload = () => resolve(true);
-      script.onerror = () => reject(new Error('Razorpay SDK failed to load'));
-      document.body.appendChild(script);
-    });
 
   const createSale = async (statusForBackend) => {
     const shipping_address = {
@@ -115,70 +103,6 @@ export default function OrderCheckout() {
     return saleId;
   };
 
-  const startRazorpayCheckout = async (saleId) => {
-    const r = await fetch(`${API_BASE}/api/razorpay/payments/create-order`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sale_id: saleId })
-    });
-    if (!r.ok) {
-      let m = 'Unable to create payment order';
-      try {
-        const d = await r.json();
-        m = d?.message || m;
-      } catch {}
-      throw new Error(m);
-    }
-    const info = await r.json();
-    await loadRazorpay();
-
-    return new Promise((resolve, reject) => {
-      const rz = new window.Razorpay({
-        key: info.key_id,
-        amount: info.amount,
-        currency: info.currency || 'INR',
-        order_id: info.order_id,
-        name: 'Taras Kart',
-        description: 'Order Payment',
-        prefill: {
-          name: form.name || '',
-          email: form.email || '',
-          contact: form.mobile || ''
-        },
-        notes: { sale_id: saleId },
-        theme: { color: '#ffd700' },
-        handler: async function (response) {
-          try {
-            const v = await fetch(`${API_BASE}/api/razorpay/payments/verify`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature
-              })
-            });
-            if (!v.ok) throw new Error('Verification failed');
-            const data = await v.json();
-            if (data.ok) {
-              resolve(true);
-            } else {
-              reject(new Error('Payment not verified'));
-            }
-          } catch (e) {
-            reject(e);
-          }
-        },
-        modal: {
-          ondismiss: function () {
-            reject(new Error('Payment cancelled'));
-          }
-        }
-      });
-      rz.open();
-    });
-  };
-
   const placeOrder = async () => {
     if (!canPlace) {
       showToast('Please complete the form correctly');
@@ -190,10 +114,11 @@ export default function OrderCheckout() {
     }
     setPlacing(true);
     try {
-      const statusForBackend = paymentMethod === 'COD' ? 'COD' : 'COD';
+      const statusForBackend = paymentMethod === 'COD' ? 'COD' : 'PENDING';
       const saleId = await createSale(statusForBackend);
       if (paymentMethod === 'ONLINE') {
-        await startRazorpayCheckout(saleId);
+        navigate('/payment', { state: { saleId } });
+        return;
       }
       setOrderId(saleId);
       setSuccess(true);
