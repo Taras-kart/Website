@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import './Footer.css';
-import { FaFacebookF, FaInstagram, FaTwitter, FaEnvelope, FaPhone, FaPhoneAlt } from 'react-icons/fa';
+import { FaFacebookF, FaInstagram, FaTwitter, FaEnvelope, FaPhoneAlt } from 'react-icons/fa';
+
+const POLICY_LINKS = {
+  shipping: 'https://merchant.razorpay.com/policy/RYmfT0IFIA9UC6/shipping',
+  terms: 'https://merchant.razorpay.com/policy/RYmfT0IFIA9UC6/terms',
+  refund: 'https://merchant.razorpay.com/policy/RYmfT0IFIA9UC6/refund'
+};
 
 const Footer = () => {
   const [openIndex, setOpenIndex] = useState(null);
-  const navigate = useNavigate();
 
-  const toggleSection = (index) => {
-    setOpenIndex(openIndex === index ? null : index);
-  };
+  const toggleSection = (index) => setOpenIndex(openIndex === index ? null : index);
 
   const buildPath = (section, item) => {
     const slug = encodeURIComponent(item);
@@ -41,6 +44,18 @@ const Footer = () => {
     </ul>
   );
 
+  const ExternalList = ({ items }) => (
+    <ul>
+      {items.map((it, i) => (
+        <li key={i}>
+          <a className="link-btn" href={it.href} target="_blank" rel="noreferrer">
+            {it.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+
   const mobileSections = [
     { title: 'Categories', items: ['Mens', 'Womens', 'Kids'], social: false },
     {
@@ -49,22 +64,41 @@ const Footer = () => {
       social: false
     },
     {
+      title: 'Policies',
+      items: [
+        { href: POLICY_LINKS.shipping, label: 'Shipping Policy' },
+        { href: POLICY_LINKS.terms, label: 'Terms & Conditions' },
+        { href: POLICY_LINKS.refund, label: 'Cancellation & Refunds' }
+      ],
+      external: true
+    },
+    {
       title: 'Follow Us',
       items: [
         <>
-          <FaFacebookF /> Facebook
+          <a className="link-btn" href="https://facebook.com" target="_blank" rel="noreferrer">
+            <FaFacebookF /> Facebook
+          </a>
         </>,
         <>
-          <FaInstagram /> Instagram
+          <a className="link-btn" href="https://instagram.com" target="_blank" rel="noreferrer">
+            <FaInstagram /> Instagram
+          </a>
         </>,
         <>
-          <FaTwitter /> Twitter
+          <a className="link-btn" href="https://twitter.com" target="_blank" rel="noreferrer">
+            <FaTwitter /> Twitter
+          </a>
         </>,
         <>
-          <FaEnvelope /> support@tarskart.com
+          <a className="link-btn" href="mailto:support@tarskart.com">
+            <FaEnvelope /> support@tarskart.com
+          </a>
         </>,
         <>
-          <FaPhone /> +91-XXXXXXXXXX
+          <a className="link-btn" href="tel:+919999999999">
+            <FaPhoneAlt /> +91-XXXXXXXXXX
+          </a>
         </>
       ],
       social: true
@@ -132,7 +166,6 @@ const Footer = () => {
           <div className="logo-final1">
             <video autoPlay loop muted playsInline>
               <source src="/images/logo.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
             </video>
           </div>
         </div>
@@ -149,27 +182,33 @@ const Footer = () => {
         </div>
         <div className="footer-column">
           <h3>Follow Us</h3>
-          <DesktopList
-            section="Follow Us"
-            isSocial
-            items={[
-              <>
+          <ul>
+            <li>
+              <a className="link-btn" href="https://facebook.com" target="_blank" rel="noreferrer">
                 <FaFacebookF /> Facebook
-              </>,
-              <>
+              </a>
+            </li>
+            <li>
+              <a className="link-btn" href="https://instagram.com" target="_blank" rel="noreferrer">
                 <FaInstagram /> Instagram
-              </>,
-              <>
+              </a>
+            </li>
+            <li>
+              <a className="link-btn" href="https://twitter.com" target="_blank" rel="noreferrer">
                 <FaTwitter /> Twitter
-              </>,
-              <>
+              </a>
+            </li>
+            <li>
+              <a className="link-btn" href="mailto:support@tarskart.com">
                 <FaEnvelope /> support@tarskart.com
-              </>,
-              <>
+              </a>
+            </li>
+            <li>
+              <a className="link-btn" href="tel:+919999999999">
                 <FaPhoneAlt /> +91-XXXXXXXXXX
-              </>
-            ]}
-          />
+              </a>
+            </li>
+          </ul>
         </div>
       </div>
 
@@ -236,6 +275,31 @@ const Footer = () => {
         </div>
       </div>
 
+      <div className="footer-divider"></div>
+
+      <div className="footer-desktop">
+        <div className="footer-column">
+          <h3>Policies</h3>
+          <ExternalList
+            items={[
+              { href: POLICY_LINKS.shipping, label: 'Shipping Policy' },
+              { href: POLICY_LINKS.terms, label: 'Terms & Conditions' },
+              { href: POLICY_LINKS.refund, label: 'Cancellation & Refunds' }
+            ]}
+          />
+        </div>
+        <div className="footer-column footer-pay-secure">
+          <h3>Secure Payments</h3>
+          <div className="payments-row">
+            <img src="/images/payments/visa.png" alt="Visa" />
+            <img src="/images/payments/mastercard.png" alt="Mastercard" />
+            <img src="/images/payments/rupay.png" alt="RuPay" />
+            <img src="/images/payments/upi.png" alt="UPI" />
+            <img src="/images/payments/razorpay.svg" alt="Razorpay" />
+          </div>
+        </div>
+      </div>
+
       <div className="footer-mobile">
         <h2 className="footer-title">Tars Kart</h2>
         {mobileSections.map((section, index) => (
@@ -246,21 +310,40 @@ const Footer = () => {
             </div>
             <div className={`footer-mobile-list ${openIndex === index ? 'show' : ''}`}>
               <ul>
-                {section.items.map((item, i) =>
-                  section.social ? (
-                    <li key={i}>{item}</li>
-                  ) : (
-                    <li key={i}>
-                      <Link className="link-btn" to={buildPath(section.title, typeof item === 'string' ? item : '')}>
-                        {item}
-                      </Link>
-                    </li>
-                  )
-                )}
+                {section.external
+                  ? section.items.map((it, i) => (
+                      <li key={i}>
+                        <a className="link-btn" href={it.href} target="_blank" rel="noreferrer">
+                          {it.label}
+                        </a>
+                      </li>
+                    ))
+                  : section.items.map((item, i) =>
+                      section.social ? (
+                        <li key={i}>{item}</li>
+                      ) : (
+                        <li key={i}>
+                          <Link className="link-btn" to={buildPath(section.title, typeof item === 'string' ? item : '')}>
+                            {item}
+                          </Link>
+                        </li>
+                      )
+                    )}
               </ul>
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="footer-bottom">
+        <div className="footer-bottom-left">
+          <a href={POLICY_LINKS.shipping} target="_blank" rel="noreferrer">Shipping</a>
+          <span>•</span>
+          <a href={POLICY_LINKS.refund} target="_blank" rel="noreferrer">Cancellation & Refunds</a>
+          <span>•</span>
+          <a href={POLICY_LINKS.terms} target="_blank" rel="noreferrer">Terms & Conditions</a>
+        </div>
+        <div className="footer-bottom-right">© {new Date().getFullYear()} Tars Kart</div>
       </div>
     </footer>
   );

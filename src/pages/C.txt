@@ -1,0 +1,15 @@
+razorpay ki links
+
+
+
+Shipping
+
+https://merchant.razorpay.com/policy/RYmfT0IFIA9UC6/shipping
+
+Terms and Conditions
+
+https://merchant.razorpay.com/policy/RYmfT0IFIA9UC6/terms
+
+Cancellation & Refunds
+
+https://merchant.razorpay.com/policy/RYmfT0IFIA9UC6/refund
