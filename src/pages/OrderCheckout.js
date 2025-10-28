@@ -26,6 +26,7 @@ export default function OrderCheckout() {
   const [toast, setToast] = useState('');
   const [success, setSuccess] = useState(false);
   const [orderId, setOrderId] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('COD');
 
   const payload = useMemo(() => {
     try {
@@ -56,16 +57,26 @@ export default function OrderCheckout() {
   const isValidPincode = (p) => !p || /^[0-9]{6}$/.test(String(p).replace(/\D/g, ''));
   const requiredOk = form.name && form.mobile && form.address_line1 && form.city && form.state && form.pincode;
   const formatsOk = isValidEmail(form.email) && isValidMobile(form.mobile) && isValidPincode(form.pincode);
-  const canPlace = requiredOk && formatsOk && Array.isArray(payload?.items) && payload.items.length > 0 && !placing;
+  const hasItems = Array.isArray(payload?.items) && payload.items.length > 0;
+  const canPlace = requiredOk && formatsOk && hasItems && !placing;
+  const loginEmail = typeof window !== 'undefined' ? sessionStorage.getItem('userEmail') || null : null;
 
-  const placeOrder = async () => {
-    if (!canPlace) {
-      setToast('Please complete the form correctly');
-      setTimeout(() => setToast(''), 1500);
-      return;
-    }
-    setPlacing(true);
-    const loginEmail = sessionStorage.getItem('userEmail') || null;
+  const showToast = (msg, ms = 1500) => {
+    setToast(msg);
+    setTimeout(() => setToast(''), ms);
+  };
+
+  const loadRazorpay = () =>
+    new Promise((resolve, reject) => {
+      if (window.Razorpay) return resolve(true);
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => reject(new Error('Razorpay SDK failed to load'));
+      document.body.appendChild(script);
+    });
+
+  const createSale = async (statusForBackend) => {
     const shipping_address = {
       line1: form.address_line1,
       line2: form.address_line2,
@@ -81,24 +92,115 @@ export default function OrderCheckout() {
       totals: payload.totals,
       items: payload.items,
       branch_id: null,
-      payment_status: 'COD',
-      login_email: loginEmail
+      payment_status: statusForBackend,
+      login_email: loginEmail,
+      payment_method: paymentMethod
     };
-    try {
-      const resp = await fetch(`${API_BASE}/api/sales/web/place`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+    const resp = await fetch(`${API_BASE}/api/sales/web/place`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!resp.ok) {
+      let m = 'Failed';
+      try {
+        const d = await resp.json();
+        m = d?.message || m;
+      } catch {}
+      throw new Error(m);
+    }
+    const data = await resp.json();
+    const saleId = data?.id || null;
+    if (!saleId) throw new Error('No sale id');
+    return saleId;
+  };
+
+  const startRazorpayCheckout = async (saleId) => {
+    const r = await fetch(`${API_BASE}/api/razorpay/payments/create-order`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sale_id: saleId })
+    });
+    if (!r.ok) {
+      let m = 'Unable to create payment order';
+      try {
+        const d = await r.json();
+        m = d?.message || m;
+      } catch {}
+      throw new Error(m);
+    }
+    const info = await r.json();
+    await loadRazorpay();
+
+    return new Promise((resolve, reject) => {
+      const rz = new window.Razorpay({
+        key: info.key_id,
+        amount: info.amount,
+        currency: info.currency || 'INR',
+        order_id: info.order_id,
+        name: 'Taras Kart',
+        description: 'Order Payment',
+        prefill: {
+          name: form.name || '',
+          email: form.email || '',
+          contact: form.mobile || ''
+        },
+        notes: { sale_id: saleId },
+        theme: { color: '#ffd700' },
+        handler: async function (response) {
+          try {
+            const v = await fetch(`${API_BASE}/api/razorpay/payments/verify`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
+            if (!v.ok) throw new Error('Verification failed');
+            const data = await v.json();
+            if (data.ok) {
+              resolve(true);
+            } else {
+              reject(new Error('Payment not verified'));
+            }
+          } catch (e) {
+            reject(e);
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            reject(new Error('Payment cancelled'));
+          }
+        }
       });
-      if (!resp.ok) throw new Error('Failed');
-      const data = await resp.json();
-      setOrderId(data?.id || null);
+      rz.open();
+    });
+  };
+
+  const placeOrder = async () => {
+    if (!canPlace) {
+      showToast('Please complete the form correctly');
+      return;
+    }
+    if (paymentMethod === 'ONLINE' && payable <= 0) {
+      showToast('Invalid payable amount');
+      return;
+    }
+    setPlacing(true);
+    try {
+      const statusForBackend = paymentMethod === 'COD' ? 'COD' : 'COD';
+      const saleId = await createSale(statusForBackend);
+      if (paymentMethod === 'ONLINE') {
+        await startRazorpayCheckout(saleId);
+      }
+      setOrderId(saleId);
       setSuccess(true);
       sessionStorage.removeItem('tk_checkout_payload');
       localStorage.setItem('tk_checkout_address', JSON.stringify(form));
-    } catch {
-      setToast('Failed to place order');
-      setTimeout(() => setToast(''), 1500);
+    } catch (e) {
+      showToast(String(e.message || 'Failed to place order'), 2000);
     } finally {
       setPlacing(false);
     }
@@ -177,14 +279,41 @@ export default function OrderCheckout() {
                 <button
                   onClick={() => {
                     localStorage.setItem('tk_checkout_address', JSON.stringify(form));
-                    setToast('Address saved');
-                    setTimeout(() => setToast(''), 1200);
+                    showToast('Address saved', 1200);
                   }}
                   className="ghost"
                 >
                   Save Address
                 </button>
               </div>
+            </div>
+
+            <div className="card">
+              <h3>Payment</h3>
+              <div className="pay-grid">
+                <button
+                  type="button"
+                  className={`pay-option ${paymentMethod === 'COD' ? 'active' : ''}`}
+                  onClick={() => setPaymentMethod('COD')}
+                >
+                  <span className="pay-title">Cash on Delivery</span>
+                  <span className="pay-sub">Pay in cash when you receive</span>
+                </button>
+                <button
+                  type="button"
+                  className={`pay-option ${paymentMethod === 'ONLINE' ? 'active' : ''}`}
+                  onClick={() => setPaymentMethod('ONLINE')}
+                  disabled={payable <= 0}
+                >
+                  <span className="pay-title">UPI / Card / Netbanking</span>
+                  <span className="pay-sub">Secure payment via Razorpay</span>
+                </button>
+              </div>
+              {paymentMethod === 'ONLINE' ? (
+                <div className="pay-note">Click Pay Now to open Razorpay and complete your payment.</div>
+              ) : (
+                <div className="pay-note">No advance required. Please ensure phone number is reachable.</div>
+              )}
             </div>
           </div>
 
@@ -206,7 +335,7 @@ export default function OrderCheckout() {
               </div>
               <button onClick={placeOrder} disabled={!canPlace} className="cta">
                 {placing ? <span className="spinner" /> : null}
-                {placing ? 'Placing…' : 'Place Order (COD)'}
+                {placing ? 'Processing…' : paymentMethod === 'COD' ? 'Place Order (COD)' : 'Pay Now'}
               </button>
               <div className="note">Secure checkout • No extra fees</div>
             </div>
