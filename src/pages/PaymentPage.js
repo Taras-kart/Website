@@ -64,6 +64,14 @@ export default function PaymentPage() {
     []
   );
 
+  const setCodPaths = useMemo(
+    () => [
+      `${API_BASE}/api/sales/web/set-payment-status`,
+      `${API_BASE}/sales/web/set-payment-status`
+    ],
+    []
+  );
+
   const loadRazorpay = () =>
     new Promise((resolve, reject) => {
       if (window.Razorpay) return resolve(true);
@@ -147,8 +155,17 @@ export default function PaymentPage() {
 
   const confirmCOD = async () => {
     setError('');
-    setSuccessType('COD');
-    setSuccess(true);
+    setLoading(true);
+    try {
+      if (!saleId) throw new Error('Missing sale reference')
+      await postWithFallback(setCodPaths, { sale_id: saleId, status: 'COD' })
+      setSuccessType('COD');
+      setSuccess(true);
+    } catch (e) {
+      setError(e.message || 'Unable to set COD');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (initializing) {
@@ -226,7 +243,7 @@ export default function PaymentPage() {
                     Choose Cash on Delivery to pay in cash to our delivery partner. Keep the exact amount ready and ensure your phone is reachable.
                   </p>
                   <div className="panel-actions">
-                    <button className="btn solid" onClick={confirmCOD}>Confirm COD</button>
+                    <button disabled={loading} className="btn solid" onClick={confirmCOD}>{loading ? 'Confirming…' : 'Confirm COD'}</button>
                     <button className="btn ghost" onClick={() => navigate('/cart')}>Back to Cart</button>
                   </div>
                   <div className="trust-note">No advance required • Pay only at delivery</div>
@@ -238,7 +255,7 @@ export default function PaymentPage() {
 
         {error && (
           <div className="error">
-            <h2>We couldn’t complete your payment</h2>
+            <h2>We couldn’t complete your request</h2>
             <p>{error}</p>
             <div className="actions">
               <button className="btn solid" onClick={() => setError('')}>Try Again</button>
