@@ -48,6 +48,7 @@ export default function OrderCheckout() {
 
   const fmt = (n) => Number(n || 0).toFixed(2);
   const itemsCount = Array.isArray(payload?.items) ? payload.items.reduce((a, i) => a + Number(i.qty || 1), 0) : 0;
+  if (payload?.totals) payload.totals.convenience = 0;
   const payable = payload?.totals?.payable || 0;
   const setF = (k, v) => setForm((s) => ({ ...s, [k]: v }));
   const isValidEmail = (e) => !e || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
@@ -251,7 +252,7 @@ export default function OrderCheckout() {
                 {!!payload?.totals?.couponPct && (
                   <div><span>Coupon</span><span>-₹{fmt(payload?.totals?.couponDiscount)}</span></div>
                 )}
-                <div><span>Convenience</span><span>₹{fmt(payload?.totals?.convenience)}</span></div>
+                <div><span>Convenience</span><span>₹{fmt(0)}</span></div>
                 {!!payload?.totals?.giftWrap && (
                   <div><span>Gift Wrap</span><span>₹{fmt(payload?.totals?.giftWrap)}</span></div>
                 )}
