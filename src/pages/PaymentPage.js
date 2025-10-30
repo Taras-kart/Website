@@ -11,24 +11,6 @@ const API_BASE_RAW =
   DEFAULT_API_BASE;
 const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
 
-async function postWithFallback(paths, payload) {
-  let lastErr = null;
-  for (const url of paths) {
-    try {
-      const r = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (r.ok) return await r.json();
-      lastErr = new Error((await r.json().catch(() => ({})))?.message || `HTTP ${r.status}`);
-    } catch (e) {
-      lastErr = e;
-    }
-  }
-  throw lastErr || new Error('Request failed');
-}
-
 export default function PaymentPage() {
   const [searchParams] = useSearchParams();
   const location = useLocation();
@@ -46,31 +28,9 @@ export default function PaymentPage() {
   const [orderInfo, setOrderInfo] = useState(null);
   const [activeMethod, setActiveMethod] = useState('ONLINE_UPI');
 
-  const createOrderPaths = useMemo(
-    () => [
-      `${API_BASE}/api/razorpay/payments/create-order`,
-      `${API_BASE}/razorpay/payments/create-order`,
-      `${API_BASE}/api/payments/create-order`
-    ],
-    []
-  );
-
-  const verifyPaths = useMemo(
-    () => [
-      `${API_BASE}/api/razorpay/payments/verify`,
-      `${API_BASE}/razorpay/payments/verify`,
-      `${API_BASE}/api/payments/verify`
-    ],
-    []
-  );
-
-  const setCodPaths = useMemo(
-    () => [
-      `${API_BASE}/api/sales/web/set-payment-status`,
-      `${API_BASE}/sales/web/set-payment-status`
-    ],
-    []
-  );
+  const createOrderUrl = `${API_BASE}/api/razorpay/payments/create-order`;
+  const verifyUrl = `${API_BASE}/api/razorpay/payments/verify`;
+  const codUrl = `${API_BASE}/api/sales/web/set-payment-status`;
 
   const loadRazorpay = () =>
     new Promise((resolve, reject) => {
@@ -103,7 +63,16 @@ export default function PaymentPage() {
     setError('');
     setLoading(true);
     try {
-      const info = await postWithFallback(createOrderPaths, { sale_id: saleId });
+      const r = await fetch(createOrderUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sale_id: saleId })
+      });
+      if (!r.ok) {
+        const d = await r.json().catch(() => ({}));
+        throw new Error(d.message || 'Unable to create payment order');
+      }
+      const info = await r.json();
       setOrderInfo(info);
       await loadRazorpay();
       const methodConfig =
@@ -124,11 +93,16 @@ export default function PaymentPage() {
         ...methodConfig,
         handler: async function (response) {
           try {
-            const res = await postWithFallback(verifyPaths, {
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature
+            const verify = await fetch(verifyUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              })
             });
+            const res = await verify.json();
             if (res.ok) {
               setSuccessType('ONLINE');
               setSuccess(true);
@@ -157,8 +131,16 @@ export default function PaymentPage() {
     setError('');
     setLoading(true);
     try {
-      if (!saleId) throw new Error('Missing sale reference')
-      await postWithFallback(setCodPaths, { sale_id: saleId, status: 'COD' })
+      if (!saleId) throw new Error('Missing sale reference');
+      const r = await fetch(codUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sale_id: saleId, status: 'COD' })
+      });
+      if (!r.ok) {
+        const d = await r.json().catch(() => ({}));
+        throw new Error(d.message || 'Unable to confirm COD');
+      }
       setSuccessType('COD');
       setSuccess(true);
     } catch (e) {
