@@ -177,7 +177,7 @@ const Profile = () => {
           onClose={() => setShowLoginPopup(false)}
           onSuccess={(user) => {
             sessionStorage.setItem('userEmail', user.email);
-            window.location.reload();
+            window.location.href = '/';
           }}
         />
       )}
@@ -186,7 +186,7 @@ const Profile = () => {
           onClose={() => setShowSignupPopup(false)}
           onSuccess={(user) => {
             sessionStorage.setItem('userEmail', user.email);
-            window.location.reload();
+            window.location.href = '/';
           }}
         />
       )}

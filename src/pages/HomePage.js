@@ -1157,57 +1157,61 @@ export default function HomePage() {
 
 
             <section className="ws-section">
-                <div className="ws-top">
-                    <h2 className="ws-title">Women’s Picks</h2>
-                    <div className="ws-underline">
-                        <span className="ws-line l1"></span>
-                        <span className="ws-dot"></span>
-                        <span className="ws-line l2"></span>
-                    </div>
-                </div>
+  <div className="ws-top">
+    <h2 className="ws-title">Women’s Picks</h2>
+    <div className="ws-underline">
+      <span className="ws-line l1"></span>
+      <span className="ws-dot"></span>
+      <span className="ws-line l2"></span>
+    </div>
+  </div>
 
-                <div className="ws-wrap">
-                    <div className="ws-left">
-                        <h3 className="ws-heading">Top Deals</h3>
-                        <p className="ws-up">UP TO</p>
-                        <div className="ws-off"><span>30%</span> OFF</div>
-                        <p className="ws-sub">SELECTED STYLES</p>
-                        <Link to="/women" className="ws-cta">SHOP NOW</Link>
-                    </div>
+  <div className="ws-wrap">
+    <div className="ws-left">
+      <div className="ws-left-inner">
+        <h3 className="ws-heading">Top Deals</h3>
+        <p className="ws-up">UP TO</p>
+        <div className="ws-off"><span>30%</span> OFF</div>
+        <p className="ws-sub">SELECTED STYLES</p>
+        <Link to="/women" className="ws-cta">SHOP NOW</Link>
+      </div>
+    </div>
 
-                    <div className="ws-right">
-                        <Swiper
-                            className="ws-swiper"
-                            modules={[Autoplay]}
-                            loop={true}
-                            slidesPerView={1}
-                            autoplay={{ delay: 3200, disableOnInteraction: false }}
-                            speed={900}
-                        >
-                            <SwiperSlide>
-                                <div className="ws-slide">
-                                    <img src="/images/banners/women-banner3.png" alt="Women's Banner 3" loading="lazy" decoding="async" />
-                                </div>
-                            </SwiperSlide>
-                            <SwiperSlide>
-                                <div className="ws-slide">
-                                    <img src="/images/banners/women-banner4.png" alt="Women's Banner 4" loading="lazy" decoding="async" />
-                                </div>
-                            </SwiperSlide>
-                            <SwiperSlide>
-                                <div className="ws-slide">
-                                    <img src="/images/banners/women-banner5.png" alt="Women's Banner 5" loading="lazy" decoding="async" />
-                                </div>
-                            </SwiperSlide>
-                            <SwiperSlide>
-                                <div className="ws-slide">
-                                    <img src="/images/banners/women-banner6.png" alt="Women's Banner 6" loading="lazy" decoding="async" />
-                                </div>
-                            </SwiperSlide>
-                        </Swiper>
-                    </div>
-                </div>
-            </section>
+    <div className="ws-right">
+      <div className="ws-media">
+        <Swiper
+          className="ws-swiper"
+          modules={[Autoplay]}
+          loop={true}
+          slidesPerView={1}
+          autoplay={{ delay: 3200, disableOnInteraction: false }}
+          speed={900}
+        >
+          <SwiperSlide>
+            <div className="ws-slide">
+              <img src="/images/banners/women-banner3.png" alt="Women's Banner 3" loading="lazy" decoding="async" />
+            </div>
+          </SwiperSlide>
+          <SwiperSlide>
+            <div className="ws-slide">
+              <img src="/images/banners/women-banner4.png" alt="Women's Banner 4" loading="lazy" decoding="async" />
+            </div>
+          </SwiperSlide>
+          <SwiperSlide>
+            <div className="ws-slide">
+              <img src="/images/banners/women-banner5.png" alt="Women's Banner 5" loading="lazy" decoding="async" />
+            </div>
+          </SwiperSlide>
+          <SwiperSlide>
+            <div className="ws-slide">
+              <img src="/images/banners/women-banner6.png" alt="Women's Banner 6" loading="lazy" decoding="async" />
+            </div>
+          </SwiperSlide>
+        </Swiper>
+      </div>
+    </div>
+  </div>
+</section>
 
 
 

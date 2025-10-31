@@ -1,3 +1,4 @@
+// src/App.js
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import './App.css';
@@ -19,6 +20,7 @@ import OrderTracking from './pages/OrderTracking';
 import ReturnsPage from './pages/ReturnsPage';
 import OrderDetails from './pages/OrderDetails';
 import PaymentPage from './pages/PaymentPage';
+import Home1 from './pages/Home1';
 
 function NavigationLoader() {
   const location = useLocation();
@@ -38,6 +40,7 @@ function AppShell() {
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/home1" element={<Home1 />} />
         <Route path="/men" element={<MenPage />} />
         <Route path="/women" element={<WomenPage />} />
         <Route path="/profile" element={<Profile />} />
