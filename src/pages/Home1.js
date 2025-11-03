@@ -215,27 +215,12 @@ export default function Home1() {
               </a>
               <a href="/women" className="ai-cats-card-test">
                 <div className="ai-cats-inner-test">
-                  <img src="/images/ai/category2.png" alt="" loading="lazy" decoding="async" />
+                  <img src="/images/ai/category7.png" alt="" loading="lazy" decoding="async" />
                 </div>
               </a>
               <a href="/women" className="ai-cats-card-test">
                 <div className="ai-cats-inner-test">
-                  <img src="/images/ai/category3.png" alt="" loading="lazy" decoding="async" />
-                </div>
-              </a>
-              <a href="/women" className="ai-cats-card-test">
-                <div className="ai-cats-inner-test">
-                  <img src="/images/ai/category4.png" alt="" loading="lazy" decoding="async" />
-                </div>
-              </a>
-              <a href="/women" className="ai-cats-card-test">
-                <div className="ai-cats-inner-test">
-                  <img src="/images/ai/category5.png" alt="" loading="lazy" decoding="async" />
-                </div>
-              </a>
-              <a href="/women" className="ai-cats-card-test">
-                <div className="ai-cats-inner-test">
-                  <img src="/images/ai/category6.png" alt="" loading="lazy" decoding="async" />
+                  <img src="/images/ai/category1.png" alt="" loading="lazy" decoding="async" />
                 </div>
               </a>
               <a href="/women" className="ai-cats-card-test">
@@ -245,7 +230,22 @@ export default function Home1() {
               </a>
               <a href="/women" className="ai-cats-card-test">
                 <div className="ai-cats-inner-test">
-                  <img src="/images/ai/category8.png" alt="" loading="lazy" decoding="async" />
+                  <img src="/images/ai/category1.png" alt="" loading="lazy" decoding="async" />
+                </div>
+              </a>
+              <a href="/women" className="ai-cats-card-test">
+                <div className="ai-cats-inner-test">
+                  <img src="/images/ai/category7.png" alt="" loading="lazy" decoding="async" />
+                </div>
+              </a>
+              <a href="/women" className="ai-cats-card-test">
+                <div className="ai-cats-inner-test">
+                  <img src="/images/ai/category1.png" alt="" loading="lazy" decoding="async" />
+                </div>
+              </a>
+              <a href="/women" className="ai-cats-card-test">
+                <div className="ai-cats-inner-test">
+                  <img src="/images/ai/category7.png" alt="" loading="lazy" decoding="async" />
                 </div>
               </a>
             </div>
