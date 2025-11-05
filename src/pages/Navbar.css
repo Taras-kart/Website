@@ -18,7 +18,7 @@ body.drawer-open {
 }
 
 .navbar-final {
-  background: radial-gradient(1200px 400px at 10% 0%, rgba(255, 210, 119, 0.08), transparent 60%), rgba(0, 0, 0, 0.86);
+  background: black;
   backdrop-filter: blur(8px);
   color: white;
   padding: 10px clamp(12px, 4vw, 30px);
@@ -56,7 +56,6 @@ body {
 .logo-final video {
   height: clamp(38px, 6.2vw, 60px);
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(255, 210, 119, 0.15);
   object-fit: cover;
 }
 

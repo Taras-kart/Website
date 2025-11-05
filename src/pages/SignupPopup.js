@@ -25,6 +25,19 @@ function ensureFirebase() {
   return getAuth();
 }
 
+function persistSession(userLike = {}) {
+  const id = userLike.id || userLike._id || userLike.userId || userLike.customerId || userLike.uid || userLike.customer?.id;
+  const email = userLike.email || userLike.userEmail || userLike.customer?.email || '';
+  const name = userLike.name || userLike.userName || userLike.customer?.name || '';
+  const type = userLike.type || userLike.userType || 'B2C';
+  if (id) sessionStorage.setItem('userId', String(id));
+  if (email) sessionStorage.setItem('userEmail', String(email));
+  if (name) sessionStorage.setItem('userName', String(name));
+  if (type) sessionStorage.setItem('userType', String(type));
+  if (userLike.token) sessionStorage.setItem('tk_id_token', String(userLike.token));
+  return { id, email, name, userType: type };
+}
+
 const SignupPopup = ({ onClose, onSuccess }) => {
   const popupRef = useRef(null);
   const firstInputRef = useRef(null);
@@ -109,8 +122,9 @@ const SignupPopup = ({ onClose, onSuccess }) => {
       });
       const data = await response.json();
       if (response.ok) {
+        const persisted = persistSession({ ...(data || {}), name: fullName.trim(), email: email.trim() });
         setSuccess('Signup successful');
-        setTimeout(() => onSuccess && onSuccess({ name: fullName.trim(), email: email.trim() }), 900);
+        setTimeout(() => onSuccess && onSuccess(persisted), 900);
       } else {
         setError(data.message || 'Signup failed');
       }
@@ -135,6 +149,7 @@ const SignupPopup = ({ onClose, onSuccess }) => {
       const res = await fetch(`${API_BASE}/api/auth/${encodeURIComponent(gEmail)}`);
       if (res.ok) existing = await res.json();
     } catch {}
+    let created = null;
     if (!existing) {
       const createRes = await fetch(`${API_BASE}/api/b2c-customers/signup`, {
         method: 'POST',
@@ -146,10 +161,22 @@ const SignupPopup = ({ onClose, onSuccess }) => {
           password: 'google-oauth'
         })
       });
-      const created = await createRes.json();
+      created = await createRes.json();
       if (!createRes.ok) throw new Error(created?.message || 'Could not complete Google signup');
     }
-    onSuccess && onSuccess({ name: existing?.name || gName, email: gEmail });
+    let token = '';
+    try {
+      token = (await user.getIdToken?.()) || '';
+    } catch {}
+    const baseUser = existing || created || {};
+    const persisted = persistSession({
+      ...baseUser,
+      id: baseUser.id || baseUser._id || baseUser.userId || baseUser.customerId || user.uid,
+      name: baseUser.name || gName,
+      email: baseUser.email || gEmail,
+      token
+    });
+    onSuccess && onSuccess(persisted);
   };
 
   const handleGoogleLogin = async () => {

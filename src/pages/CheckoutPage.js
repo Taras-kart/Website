@@ -1,4 +1,3 @@
-// D:\shopping\src\pages\CheckoutPage.js
 import React, { useState, useEffect } from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -34,7 +33,7 @@ const CheckoutPage = () => {
   const [pincode, setPincode] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
-  const userId = sessionStorage.getItem('userId');
+  const [userId, setUserId] = useState(() => sessionStorage.getItem('userId'));
   const zoomFactor = 3;
 
   useEffect(() => {
@@ -105,6 +104,16 @@ const CheckoutPage = () => {
     loadVariants();
   }, [product]);
 
+  useEffect(() => {
+    const syncUserId = () => setUserId(sessionStorage.getItem('userId'));
+    window.addEventListener('storage', syncUserId);
+    const interval = setInterval(syncUserId, 500);
+    return () => {
+      window.removeEventListener('storage', syncUserId);
+      clearInterval(interval);
+    };
+  }, []);
+
   const sizesForColor = () => {
     if (!selectedColor) return Array.from(new Set(variants.map((v) => v.size).filter(Boolean)));
     return Array.from(new Set(variants.filter((v) => v.color === selectedColor).map((v) => v.size).filter(Boolean)));
@@ -131,10 +140,17 @@ const CheckoutPage = () => {
   };
 
   const handleAdd = async (type) => {
-    if (!selectedColor || !selectedSize || !userId || !product?.id) {
-      setPopupMessage('Please select color and size');
+    if (!userId) {
+      setPopupMessage('Please sign in to continue');
       setTimeout(() => setPopupMessage(''), 2000);
       return;
+    }
+    if (type === 'bag') {
+      if (!selectedColor || !selectedSize || !product?.id) {
+        setPopupMessage('Please select color and size');
+        setTimeout(() => setPopupMessage(''), 2000);
+        return;
+      }
     }
     const chosenVariant =
       variants.find((v) => v.color === selectedColor && v.size === selectedSize) || null;
@@ -188,8 +204,6 @@ const CheckoutPage = () => {
       }
     }
   };
-
-  //const zoomFactor = 3;
 
   const handleMouseMove = (e) => {
     const image = e.target;

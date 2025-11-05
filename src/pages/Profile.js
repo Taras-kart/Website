@@ -36,12 +36,16 @@ const Profile = () => {
               mobile: data.mobile
             });
             setIsLoggedIn(true);
+          } else {
+            setIsLoggedIn(!!sessionStorage.getItem('userId'));
           }
         })
         .catch(() => {
-          setIsLoggedIn(false);
+          setIsLoggedIn(!!sessionStorage.getItem('userId'));
           setUserInfo(null);
         });
+    } else {
+      setIsLoggedIn(!!sessionStorage.getItem('userId'));
     }
   }, []);
 
@@ -176,7 +180,10 @@ const Profile = () => {
         <LoginPopup
           onClose={() => setShowLoginPopup(false)}
           onSuccess={(user) => {
-            sessionStorage.setItem('userEmail', user.email);
+            if (user?.id) sessionStorage.setItem('userId', String(user.id));
+            if (user?.email) sessionStorage.setItem('userEmail', String(user.email));
+            if (user?.name) sessionStorage.setItem('userName', String(user.name));
+            if (user?.userType) sessionStorage.setItem('userType', String(user.userType));
             window.location.href = '/';
           }}
         />
@@ -185,7 +192,10 @@ const Profile = () => {
         <SignupPopup
           onClose={() => setShowSignupPopup(false)}
           onSuccess={(user) => {
-            sessionStorage.setItem('userEmail', user.email);
+            if (user?.id) sessionStorage.setItem('userId', String(user.id));
+            if (user?.email) sessionStorage.setItem('userEmail', String(user.email));
+            if (user?.name) sessionStorage.setItem('userName', String(user.name));
+            if (user?.userType) sessionStorage.setItem('userType', String(user.userType));
             window.location.href = '/';
           }}
         />
