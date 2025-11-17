@@ -4,8 +4,11 @@ import Navbar from './Navbar'
 import './WomenPage.css'
 import Footer from './Footer'
 import FilterSidebar from './FilterSidebar'
-import { FaHeart, FaRegHeart } from 'react-icons/fa'
 import { useWishlist } from '../WishlistContext'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Autoplay } from 'swiper'
+import 'swiper/css'
+import WomenDisplayPage from './WomenDisplayPage'
 
 const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app'
 const API_BASE_RAW =
@@ -33,8 +36,6 @@ export default function WomenPage() {
   const { addToWishlist, wishlistItems, setWishlistItems } = useWishlist()
   const userId = sessionStorage.getItem('userId')
 
-  const keyFor = (p) => String(p.ean_code ?? p.product_id ?? p.id ?? `${p.image_url}`)
-
   useEffect(() => {
     setUserType(sessionStorage.getItem('userType'))
   }, [])
@@ -55,7 +56,7 @@ export default function WomenPage() {
       setLoading(true)
       setError('')
       try {
-        const res = await fetch(`${API_BASE}/api/products?gender=WOMEN`)
+        const res = await fetch(`${API_BASE}/api/products?gender=WOMEN&limit=50000`)
         if (!res.ok) throw new Error('Failed to load products')
         const data = await res.json()
         const arr = toArray(data).map((p, i) => {
@@ -106,15 +107,18 @@ export default function WomenPage() {
     }
   }, [])
 
-  const toggleLike = async (prod) => {
-    const k = keyFor(prod)
+  const keyFor = (p) => String(p.ean_code || p.product_id || p.id || p.key || `${p.images?.[0]}`)
+
+  const toggleLike = async (group) => {
+    const k = keyFor(group)
     const inList = likedKeys.has(k)
+    const pid = group.product_id || group.id
     try {
       if (inList) {
         await fetch(`${API_BASE}/api/wishlist`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, product_id: prod.product_id ?? prod.id })
+          body: JSON.stringify({ user_id: userId, product_id: pid })
         })
         setWishlistItems((prev) =>
           prev.filter(
@@ -131,9 +135,9 @@ export default function WomenPage() {
         await fetch(`${API_BASE}/api/wishlist`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, product_id: prod.product_id ?? prod.id })
+          body: JSON.stringify({ user_id: userId, product_id: pid })
         })
-        addToWishlist({ ...prod, product_id: prod.product_id ?? prod.id })
+        addToWishlist({ ...group, product_id: pid })
         setLikedKeys((prev) => {
           const n = new Set(prev)
           n.add(k)
@@ -143,19 +147,17 @@ export default function WomenPage() {
     } catch {}
   }
 
-  const handleProductClick = (prod) => {
-    sessionStorage.setItem('selectedProduct', JSON.stringify(prod))
+  const handleProductClick = (group) => {
+    const rep = group.variants?.[0] || group.rep
+    const payload = {
+      ...rep,
+      ean_code: group.ean_code || rep.ean_code,
+      image_url: group.images?.[group.activeIndex || 0] || rep.image_url,
+      variants: group.variants,
+      images: group.images
+    }
+    sessionStorage.setItem('selectedProduct', JSON.stringify(payload))
     navigate('/checkout')
-  }
-
-  const priceForUser = (p) => (userType === 'B2B' ? p.final_price_b2b || p.final_price_b2c : p.final_price_b2c)
-  const mrpForUser = (p) => (userType === 'B2B' ? p.original_price_b2b || p.original_price_b2c : p.original_price_b2c)
-  const discountPct = (p) => {
-    const mrp = Number(mrpForUser(p) || 0)
-    const price = Number(priceForUser(p) || 0)
-    if (!mrp || mrp <= 0) return 0
-    const pct = ((mrp - price) / mrp) * 100
-    return Math.max(0, Math.round(pct))
   }
 
   return (
@@ -168,77 +170,55 @@ export default function WomenPage() {
         />
         <div className="women-page-main">
           <div className="women-page-content">
-            <section className="mens-section1">
-              <div className="mens-section1-bg">
-                <img src="/images/womens-bg.jpg" alt="Womens Fashion Background" />
-                <div className="mens-section1-overlay">
-                  <div className="mens-section1-text">
-                    <h1>Womens</h1>
-                    <h1>Fashion</h1>
-                  </div>
-                </div>
+            <section className="home1-hero-new-home-2">
+              <div className="home1-hero-frame-new-home-2">
+                <Swiper
+                  className="home1-hero-swiper-new-home-2"
+                  modules={[Autoplay]}
+                  loop
+                  slidesPerView={1}
+                  autoplay={{ delay: 3500, disableOnInteraction: false }}
+                  speed={900}
+                >
+                  <SwiperSlide>
+                    <div className="home1-hero-slide-new-home-2">
+                      <img src="/images/banners/banner1.jpg" alt="Women Banner" loading="eager" />
+                    </div>
+                  </SwiperSlide>
+                  <SwiperSlide>
+                    <div className="home1-hero-slide-new-home-2">
+                      <img
+                        src="/images/banners/banner2.jpg"
+                        alt="Women Banner"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </div>
+                  </SwiperSlide>
+                  <SwiperSlide>
+                    <div className="home1-hero-slide-new-home-2">
+                      <img
+                        src="/images/banners/banner3.jpg"
+                        alt="Women Banner"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </div>
+                  </SwiperSlide>
+                </Swiper>
               </div>
             </section>
 
-            <section className="womens-section4">
-              <div className="section-head">
-                <h2>Women’s Collection</h2>
-                <div className="count">{products.length} items</div>
-              </div>
-
-              {loading ? (
-                <div className="loading">Loading products…</div>
-              ) : error ? (
-                <div className="error">{error}</div>
-              ) : !products.length ? (
-                <div className="empty">No products found</div>
-              ) : (
-                <div className="womens-section4-grid">
-                  {toArray(products).map((prod, index) => {
-                    const liked = likedKeys.has(keyFor(prod))
-                    return (
-                      <div
-                        key={prod.id || index}
-                        className="womens-section4-card"
-                        onClick={() => handleProductClick(prod)}
-                      >
-                        <div className="womens-section4-img">
-                          <img
-                            src={prod.image_url || DEFAULT_IMG}
-                            alt={prod.product_name}
-                            onError={(e) => {
-                              e.currentTarget.src = prod.ean_code
-                                ? cloudinaryUrlByEan(prod.ean_code)
-                                : DEFAULT_IMG
-                            }}
-                          />
-                          <div
-                            className="love-icon"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              toggleLike(prod)
-                            }}
-                          >
-                            {liked ? (
-                              <FaHeart style={{ color: 'gold', fontSize: '20px' }} />
-                            ) : (
-                              <FaRegHeart style={{ color: 'gold', fontSize: '20px' }} />
-                            )}
-                          </div>
-                        </div>
-                        <h4 className="brand-name">{prod.brand}</h4>
-                        <h5 className="product-name">{prod.product_name}</h5>
-                        <div className="womens-section4-price">
-                          <span className="offer-price">₹{Number(priceForUser(prod) || 0).toFixed(2)}</span>
-                          <span className="original-price">₹{Number(mrpForUser(prod) || 0).toFixed(2)}</span>
-                          <span className="discount">({discountPct(prod)}% OFF)</span>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </section>
+            <WomenDisplayPage
+              products={products}
+              userType={userType}
+              loading={loading}
+              error={error}
+              likedKeys={likedKeys}
+              keyFor={keyFor}
+              onToggleLike={toggleLike}
+              onProductClick={handleProductClick}
+            />
 
             <section className="home-section6">
               <h2 className="home-section6-title">Trending Now....</h2>

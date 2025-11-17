@@ -1,36 +1,35 @@
-// src/App.js
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import './App.css';
-import HomePage from './pages/HomePage';
-import MenPage from './pages/MenPage';
-import WomenPage from './pages/WomenPage';
-import Profile from './pages/Profile';
-import CheckoutPage from './pages/CheckoutPage';
-import KidsPage from './pages/KidsPage';
-import Wishlist from './pages/Wishlist';
-import Cart from './pages/Cart';
-import Brands from './pages/Brands';
-import { WishlistProvider } from './WishlistContext';
-import SearchResults from './pages/SearchResults';
-import TaraLoader from './pages/TaraLoader';
-import ScrollToTop from './pages/ScrollToTop';
-import OrderCheckout from './pages/OrderCheckout';
-import OrderTracking from './pages/OrderTracking';
-import ReturnsPage from './pages/ReturnsPage';
-import OrderDetails from './pages/OrderDetails';
-import PaymentPage from './pages/PaymentPage';
-import Home1 from './pages/Home1';
+import React, { useEffect, useState } from 'react'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import './App.css'
+import HomePage from './pages/HomePage'
+import MenPage from './pages/MenPage'
+import WomenPage from './pages/WomenPage'
+import Profile from './pages/Profile'
+import CheckoutPage from './pages/CheckoutPage'
+import KidsPage from './pages/KidsPage'
+import Wishlist from './pages/Wishlist'
+import Cart from './pages/Cart'
+import Brands from './pages/Brands'
+import { WishlistProvider } from './WishlistContext'
+import SearchResults from './pages/SearchResults'
+import TaraLoader from './pages/TaraLoader'
+import ScrollToTop from './pages/ScrollToTop'
+import OrderCheckout from './pages/OrderCheckout'
+import OrderTracking from './pages/OrderTracking'
+import ReturnsPage from './pages/ReturnsPage'
+import OrderDetails from './pages/OrderDetails'
+import PaymentPage from './pages/PaymentPage'
+import Home1 from './pages/Home1'
 
 function NavigationLoader() {
-  const location = useLocation();
-  const [loading, setLoading] = useState(false);
+  const location = useLocation()
+  const [loading, setLoading] = useState(false)
   useEffect(() => {
-    setLoading(true);
-    const t = setTimeout(() => setLoading(false), 2500);
-    return () => clearTimeout(t);
-  }, [location.pathname, location.search]);
-  return loading ? <TaraLoader /> : null;
+    setLoading(true)
+    const t = setTimeout(() => setLoading(false), 2500)
+    return () => clearTimeout(t)
+  }, [location.pathname, location.search])
+  return loading ? <TaraLoader /> : null
 }
 
 function AppShell() {
@@ -57,7 +56,7 @@ function AppShell() {
         <Route path="/payment" element={<PaymentPage />} />
       </Routes>
     </>
-  );
+  )
 }
 
 export default function App() {
@@ -69,5 +68,5 @@ export default function App() {
         </div>
       </Router>
     </WishlistProvider>
-  );
+  )
 }
