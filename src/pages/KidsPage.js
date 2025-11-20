@@ -4,8 +4,8 @@ import Navbar from './Navbar'
 import './KidsPage.css'
 import Footer from './Footer'
 import FilterSidebar from './FilterSidebar'
-import { FaHeart, FaRegHeart } from 'react-icons/fa'
 import { useWishlist } from '../WishlistContext'
+import KidsDisplayPage from './KidsDisplayPage'
 
 const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app'
 const API_BASE_RAW =
@@ -130,7 +130,8 @@ export default function KidsPage() {
   }
 
   const priceForUser = (p) => (userType === 'B2B' ? p.final_price_b2b || p.final_price_b2c : p.final_price_b2c)
-  const mrpForUser = (p) => (userType === 'B2B' ? p.original_price_b2b || p.original_price_b2c : p.original_price_b2c)
+  const mrpForUser = (p) =>
+    userType === 'B2B' ? p.original_price_b2b || p.original_price_b2c : p.original_price_b2c
   const discountPct = (p) => {
     const mrp = Number(mrpForUser(p) || 0)
     const price = Number(priceForUser(p) || 0)
@@ -161,58 +162,19 @@ export default function KidsPage() {
               </div>
             </section>
 
-            <section className="kids-section4">
-              {loading ? (
-                <div className="kids-notice">Loading products…</div>
-              ) : error ? (
-                <div className="kids-notice">{error}</div>
-              ) : !products.length ? (
-                <div className="kids-notice">No products found</div>
-              ) : (
-                <div className="kids-section4-grid">
-                  {toArray(products).map((product, idx) => {
-                    const liked = likedKeys.has(keyFor(product))
-                    return (
-                      <div
-                        key={product.id || idx}
-                        className="kids-section4-card"
-                        onClick={() => handleProductClick(product)}
-                      >
-                        <div className="kids-section4-img">
-                          <img
-                            src={product.image_url || DEFAULT_IMG}
-                            alt={product.product_name}
-                            onError={(e) => {
-                              e.currentTarget.src = DEFAULT_IMG
-                            }}
-                          />
-                          <div
-                            className="love-icon"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              toggleLike(product)
-                            }}
-                          >
-                            {liked ? (
-                              <FaHeart style={{ color: 'yellow', fontSize: 18 }} />
-                            ) : (
-                              <FaRegHeart style={{ color: 'yellow', fontSize: 24 }} />
-                            )}
-                          </div>
-                        </div>
-                        <h4 className="brand-name">{product.brand}</h4>
-                        <h5 className="product-name">{product.product_name}</h5>
-                        <div className="kids-section4-price">
-                          <span className="offer-price">₹{Number(priceForUser(product) || 0).toFixed(2)}</span>
-                          <span className="original-price">₹{Number(mrpForUser(product) || 0).toFixed(2)}</span>
-                          <span className="discount">({discountPct(product)}% OFF)</span>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </section>
+            <KidsDisplayPage
+              products={products}
+              userType={userType}
+              loading={loading}
+              error={error}
+              likedKeys={likedKeys}
+              keyFor={keyFor}
+              onToggleLike={toggleLike}
+              onProductClick={handleProductClick}
+              priceForUser={priceForUser}
+              mrpForUser={mrpForUser}
+              discountPct={discountPct}
+            />
 
             <section className="kids-section2">
               <div className="kids-section2-bg">

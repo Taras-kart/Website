@@ -5,7 +5,7 @@ import './MenPage.css'
 import Footer from './Footer'
 import FilterSidebar from './FilterSidebar'
 import { useWishlist } from '../WishlistContext'
-import { FaHeart, FaRegHeart } from 'react-icons/fa'
+import MenDisplayPage from './MenDisplayPage'
 
 const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app'
 const API_BASE_RAW =
@@ -168,16 +168,6 @@ export default function MenPage() {
     navigate('/checkout')
   }
 
-  const priceForUser = (p) => (userType === 'B2B' ? p.final_price_b2b || p.final_price_b2c : p.final_price_b2c)
-  const mrpForUser = (p) => (userType === 'B2B' ? p.original_price_b2b || p.original_price_b2c : p.original_price_b2c)
-  const discountPct = (p) => {
-    const mrp = Number(mrpForUser(p) || 0)
-    const price = Number(priceForUser(p) || 0)
-    if (!mrp || mrp <= 0) return 0
-    const pct = ((mrp - price) / mrp) * 100
-    return Math.max(0, Math.round(pct))
-  }
-
   return (
     <div className="men-page">
       <Navbar />
@@ -200,65 +190,16 @@ export default function MenPage() {
               </div>
             </section>
 
-            <section className="mens-section4">
-              {loading ? (
-                <div className="mens-notice">Loading products…</div>
-              ) : error ? (
-                <div className="mens-notice">{error}</div>
-              ) : !products.length ? (
-                <div className="mens-notice">No products found</div>
-              ) : (
-                <div className="mens-section4-grid">
-                  {toArray(products).map((product, idx) => {
-                    const liked = likedKeys.has(keyFor(product))
-                    return (
-                      <div
-                        key={product.product_id || product.id || idx}
-                        className="mens-section4-card"
-                        onClick={() => handleProductClick(product)}
-                      >
-                        <div className="mens-section4-img">
-                          <img
-                            src={product.image_url || DEFAULT_IMG}
-                            alt={product.product_name}
-                            onError={(e) => {
-                              if (e.currentTarget.dataset.fallbackApplied) {
-                                e.currentTarget.src = DEFAULT_IMG
-                                return
-                              }
-                              e.currentTarget.dataset.fallbackApplied = '1'
-                              e.currentTarget.src = product.ean_code
-                                ? cloudinaryUrlByEan(product.ean_code)
-                                : DEFAULT_IMG
-                            }}
-                          />
-                          <div
-                            className="love-icon"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              toggleLike(product)
-                            }}
-                          >
-                            {liked ? (
-                              <FaHeart style={{ color: 'yellow', fontSize: 20 }} />
-                            ) : (
-                              <FaRegHeart style={{ color: 'yellow', fontSize: 20 }} />
-                            )}
-                          </div>
-                        </div>
-                        <h4 className="brand-name">{product.brand}</h4>
-                        <h5 className="product-name">{product.product_name}</h5>
-                        <div className="mens-section4-price">
-                          <span className="offer-price">₹{Number(priceForUser(product) || 0).toFixed(2)}</span>
-                          <span className="original-price">₹{Number(mrpForUser(product) || 0).toFixed(2)}</span>
-                          <span className="discount">({discountPct(product)}% OFF)</span>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </section>
+            <MenDisplayPage
+              products={products}
+              userType={userType}
+              loading={loading}
+              error={error}
+              likedKeys={likedKeys}
+              keyFor={keyFor}
+              onToggleLike={toggleLike}
+              onProductClick={handleProductClick}
+            />
 
             <section className="mens-section2">
               <div className="mens-section2-bg">

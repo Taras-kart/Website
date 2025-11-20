@@ -55,21 +55,36 @@ export default function WomenDisplayPage({
           variants: []
         })
       }
-      byKey.get(k).variants.push(p)
+      const g = byKey.get(k)
+      g.variants.push(p)
     }
+
     const out = []
     for (const g of byKey.values()) {
       const imgs = uniq([
         ...g.variants.map((v) => v.image_url),
         g.ean_code ? cloudinaryUrlByEan(g.ean_code) : ''
       ])
+
+      const hasStockInfo = g.variants.some(
+        (v) => v.in_stock !== undefined || v.available_qty !== undefined
+      )
+
+      const anyVariantInStock = g.variants.some((v) => {
+        const qty = Number(v.available_qty ?? 0)
+        if (v.in_stock === true) return true
+        if (v.in_stock === false) return qty > 0
+        return qty > 0
+      })
+
       out.push({
         ...g,
         images: imgs,
         id: g.rep.id,
         product_id: g.rep.product_id,
         brand: g.brand || g.rep.brand,
-        product_name: g.product_name || g.rep.product_name
+        product_name: g.product_name || g.rep.product_name,
+        is_out_of_stock: hasStockInfo ? !anyVariantInStock : false
       })
     }
     return out
@@ -158,11 +173,12 @@ export default function WomenDisplayPage({
             const total = group.images?.length || 1
             const discount = discountPct(group)
             const hasVariants = group.variants && group.variants.length > 1
+            const isOutOfStock = group.is_out_of_stock
 
             return (
               <div
                 key={group.key || index}
-                className="womens-section4-card"
+                className={`womens-section4-card${isOutOfStock ? ' out-of-stock' : ''}`}
                 onClick={() => handleCardClick(group)}
               >
                 <div className="womens-section4-img">
@@ -185,6 +201,11 @@ export default function WomenDisplayPage({
                       e.currentTarget.src = DEFAULT_IMG
                     }}
                   />
+                  {isOutOfStock && (
+                    <div className="out-of-stock-overlay">
+                      <span>Out of Stock</span>
+                    </div>
+                  )}
                   {total > 1 && (
                     <>
                       <button

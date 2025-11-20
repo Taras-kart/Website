@@ -95,6 +95,19 @@
   border-color: rgba(99, 102, 241, 0.4);
 }
 
+.womens-section4-card.out-of-stock {
+  opacity: 0.9;
+}
+
+.womens-section4-card.out-of-stock .womens-section4-img img {
+  filter: grayscale(0.7) blur(1px);
+  transform: scale(1.02);
+}
+
+.womens-section4-card.out-of-stock .womens-section4-body {
+  opacity: 0.95;
+}
+
 .womens-section4-img {
   position: relative;
   background: linear-gradient(135deg, #f3e8ff, #ffe4e6);
@@ -302,6 +315,27 @@
   background: rgba(15, 23, 42, 0.7);
   padding: 2px 8px;
   border-radius: 999px;
+}
+
+.out-of-stock-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.55);
+  pointer-events: none;
+}
+
+.out-of-stock-overlay span {
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.9);
+  color: #f9fafb;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
 }
 
 @media (max-width: 1200px) {
