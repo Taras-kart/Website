@@ -32,15 +32,57 @@ export default function OrderCheckout() {
   const payload = useMemo(() => {
     try {
       const stored = JSON.parse(sessionStorage.getItem('tk_checkout_payload') || '{}');
-      if (stored?.totals) {
-        stored.totals.convenience = 0;
-        stored.totals.payable =
-          (stored.totals.bagTotal || 0) -
-          (stored.totals.discountTotal || 0) -
-          (stored.totals.couponDiscount || 0) +
-          (stored.totals.giftWrap || 0);
+      if (!stored || !Array.isArray(stored.items) || stored.items.length === 0) {
+        return {};
       }
-      return stored;
+
+      const normalizedItems = (stored.items || []).map((it) => {
+        const mrp = Number(it.mrp ?? it.price ?? 0) || 0;
+        let price = Number(it.price ?? 0) || 0;
+        const qty = Number(it.qty ?? 1) || 1;
+
+        if ((!price || price <= 0) && mrp > 0) {
+          price = mrp;
+        }
+
+        return {
+          ...it,
+          mrp,
+          price,
+          qty
+        };
+      });
+
+      let bagTotal = 0;
+      let discountTotal = 0;
+
+      for (const it of normalizedItems) {
+        const mrp = Number(it.mrp || 0);
+        const price = Number(it.price || 0);
+        const qty = Number(it.qty || 1);
+        bagTotal += mrp * qty;
+        discountTotal += Math.max(mrp - price, 0) * qty;
+      }
+
+      const couponPct = Number(stored?.totals?.couponPct ?? 0);
+      const couponDiscount = Math.floor(((bagTotal - discountTotal) * couponPct) / 100);
+      const convenience = 0;
+      const giftWrap = Number(stored?.totals?.giftWrap ?? 0);
+      const payable = bagTotal - discountTotal - couponDiscount + giftWrap + convenience;
+
+      return {
+        ...stored,
+        items: normalizedItems,
+        totals: {
+          bagTotal,
+          discountTotal,
+          couponPct,
+          couponDiscount,
+          convenience,
+          giftWrap,
+          payable
+        }
+      };
     } catch {
       return {};
     }
@@ -56,17 +98,31 @@ export default function OrderCheckout() {
   }, []);
 
   const fmt = (n) => Number(n || 0).toFixed(2);
-  const itemsCount = Array.isArray(payload?.items) ? payload.items.reduce((a, i) => a + Number(i.qty || 1), 0) : 0;
+  const itemsCount = Array.isArray(payload?.items)
+    ? payload.items.reduce((a, i) => a + Number(i.qty || 1), 0)
+    : 0;
   const payable = payload?.totals?.payable || 0;
   const setF = (k, v) => setForm((s) => ({ ...s, [k]: v }));
   const isValidEmail = (e) => !e || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
   const isValidMobile = (m) => !m || /^[0-9]{10}$/.test(String(m).replace(/\D/g, ''));
   const isValidPincode = (p) => !p || /^[0-9]{6}$/.test(String(p).replace(/\D/g, ''));
-  const requiredOk = form.name && form.mobile && form.address_line1 && form.city && form.state && form.pincode;
-  const formatsOk = isValidEmail(form.email) && isValidMobile(form.mobile) && isValidPincode(form.pincode);
+  const requiredOk =
+    form.name &&
+    form.mobile &&
+    form.address_line1 &&
+    form.city &&
+    form.state &&
+    form.pincode;
+  const formatsOk =
+    isValidEmail(form.email) &&
+    isValidMobile(form.mobile) &&
+    isValidPincode(form.pincode);
   const hasItems = Array.isArray(payload?.items) && payload.items.length > 0;
   const canPlace = requiredOk && formatsOk && hasItems && !placing;
-  const loginEmail = typeof window !== 'undefined' ? sessionStorage.getItem('userEmail') || null : null;
+  const loginEmail =
+    typeof window !== 'undefined'
+      ? sessionStorage.getItem('userEmail') || null
+      : null;
 
   const showToast = (msg, ms = 1500) => {
     setToast(msg);
@@ -153,58 +209,180 @@ export default function OrderCheckout() {
             <div className="card">
               <h3>Contact</h3>
               <div className="row2">
-                <input placeholder="Full Name*" value={form.name} onChange={(e) => setF('name', e.target.value)} className={!form.name ? 'err' : ''} />
-                <input placeholder="Email" value={form.email} onChange={(e) => setF('email', e.target.value)} className={form.email && !isValidEmail(form.email) ? 'err' : ''} />
+                <input
+                  placeholder="Full Name*"
+                  value={form.name}
+                  onChange={(e) => setF('name', e.target.value)}
+                  className={!form.name ? 'err' : ''}
+                />
+                <input
+                  placeholder="Email"
+                  value={form.email}
+                  onChange={(e) => setF('email', e.target.value)}
+                  className={
+                    form.email && !isValidEmail(form.email) ? 'err' : ''
+                  }
+                />
               </div>
-              <input placeholder="Mobile* (10 digits)" value={form.mobile} onChange={(e) => setF('mobile', e.target.value.replace(/\D/g, '').slice(0, 10))} className={!isValidMobile(form.mobile) ? 'err' : ''} />
+              <input
+                placeholder="Mobile* (10 digits)"
+                value={form.mobile}
+                onChange={(e) =>
+                  setF(
+                    'mobile',
+                    e.target.value.replace(/\D/g, '').slice(0, 10)
+                  )
+                }
+                className={!isValidMobile(form.mobile) ? 'err' : ''}
+              />
             </div>
             <div className="card">
               <h3>Shipping</h3>
-              <input placeholder="Address Line 1*" value={form.address_line1} onChange={(e) => setF('address_line1', e.target.value)} className={!form.address_line1 ? 'err' : ''} />
-              <input placeholder="Address Line 2" value={form.address_line2} onChange={(e) => setF('address_line2', e.target.value)} />
+              <input
+                placeholder="Address Line 1*"
+                value={form.address_line1}
+                onChange={(e) => setF('address_line1', e.target.value)}
+                className={!form.address_line1 ? 'err' : ''}
+              />
+              <input
+                placeholder="Address Line 2"
+                value={form.address_line2}
+                onChange={(e) => setF('address_line2', e.target.value)}
+              />
               <div className="row2">
-                <input placeholder="City*" value={form.city} onChange={(e) => setF('city', e.target.value)} className={!form.city ? 'err' : ''} />
-                <input placeholder="State*" value={form.state} onChange={(e) => setF('state', e.target.value)} className={!form.state ? 'err' : ''} />
+                <input
+                  placeholder="City*"
+                  value={form.city}
+                  onChange={(e) => setF('city', e.target.value)}
+                  className={!form.city ? 'err' : ''}
+                />
+                <input
+                  placeholder="State*"
+                  value={form.state}
+                  onChange={(e) => setF('state', e.target.value)}
+                  className={!form.state ? 'err' : ''}
+                />
               </div>
-              <input placeholder="Pincode* (6 digits)" value={form.pincode} onChange={(e) => setF('pincode', e.target.value.replace(/\D/g, '').slice(0, 6))} className={!isValidPincode(form.pincode) ? 'err' : ''} />
+              <input
+                placeholder="Pincode* (6 digits)"
+                value={form.pincode}
+                onChange={(e) =>
+                  setF(
+                    'pincode',
+                    e.target.value.replace(/\D/g, '').slice(0, 6)
+                  )
+                }
+                className={!isValidPincode(form.pincode) ? 'err' : ''}
+              />
               <div className="inline-actions">
-                <a className="link" href="/cart">Back to Cart</a>
-                <button onClick={() => { localStorage.setItem('tk_checkout_address', JSON.stringify(form)); showToast('Address saved', 1200); }} className="ghost">Save Address</button>
+                <a className="link" href="/cart">
+                  Back to Cart
+                </a>
+                <button
+                  onClick={() => {
+                    localStorage.setItem(
+                      'tk_checkout_address',
+                      JSON.stringify(form)
+                    );
+                    showToast('Address saved', 1200);
+                  }}
+                  className="ghost"
+                >
+                  Save Address
+                </button>
               </div>
             </div>
             <div className="card">
               <h3>Payment</h3>
               <div className="pay-grid">
-                <button type="button" className={`pay-option ${paymentMethod === 'COD' ? 'active' : ''}`} onClick={() => setPaymentMethod('COD')}>
+                <button
+                  type="button"
+                  className={`pay-option ${
+                    paymentMethod === 'COD' ? 'active' : ''
+                  }`}
+                  onClick={() => setPaymentMethod('COD')}
+                >
                   <span className="pay-title">Cash on Delivery</span>
                   <span className="pay-sub">Pay in cash when you receive</span>
                 </button>
-                <button type="button" className={`pay-option ${paymentMethod === 'ONLINE' ? 'active' : ''}`} onClick={() => setPaymentMethod('ONLINE')} disabled={payable <= 0}>
+                <button
+                  type="button"
+                  className={`pay-option ${
+                    paymentMethod === 'ONLINE' ? 'active' : ''
+                  }`}
+                  onClick={() => setPaymentMethod('ONLINE')}
+                >
                   <span className="pay-title">UPI / Card / Netbanking</span>
                   <span className="pay-sub">Secure payment via Razorpay</span>
                 </button>
               </div>
-              {paymentMethod === 'ONLINE' ? <div className="pay-note">Click Pay Now to open Razorpay and complete your payment.</div> : <div className="pay-note">No advance required. Please ensure phone number is reachable.</div>}
+              {paymentMethod === 'ONLINE' ? (
+                <div className="pay-note">
+                  Click Pay Now to open Razorpay and complete your payment.
+                </div>
+              ) : (
+                <div className="pay-note">
+                  No advance required. Please ensure phone number is reachable.
+                </div>
+              )}
             </div>
           </div>
           <div className="checkout-summary">
             <div className="card gold">
               <h3>Order Summary</h3>
               <div className="summary">
-                <div><span>Bag Total</span><span>₹{fmt(payload?.totals?.bagTotal)}</span></div>
-                <div><span>Discount</span><span>-₹{fmt(payload?.totals?.discountTotal)}</span></div>
-                {!!payload?.totals?.couponPct && <div><span>Coupon</span><span>-₹{fmt(payload?.totals?.couponDiscount)}</span></div>}
-                <div><span>Convenience</span><span>₹0.00</span></div>
-                {!!payload?.totals?.giftWrap && <div><span>Gift Wrap</span><span>₹{fmt(payload?.totals?.giftWrap)}</span></div>}
+                <div>
+                  <span>Bag Total</span>
+                  <span>₹{fmt(payload?.totals?.bagTotal)}</span>
+                </div>
+                <div>
+                  <span>Discount</span>
+                  <span>-₹{fmt(payload?.totals?.discountTotal)}</span>
+                </div>
+                {!!payload?.totals?.couponPct && (
+                  <div>
+                    <span>Coupon</span>
+                    <span>-₹{fmt(payload?.totals?.couponDiscount)}</span>
+                  </div>
+                )}
+                <div>
+                  <span>Convenience</span>
+                  <span>₹0.00</span>
+                </div>
+                {!!payload?.totals?.giftWrap && (
+                  <div>
+                    <span>Gift Wrap</span>
+                    <span>₹{fmt(payload?.totals?.giftWrap)}</span>
+                  </div>
+                )}
                 <div className="sep" />
-                <div className="total"><span>Total</span><span>₹{fmt(payload?.totals?.payable)}</span></div>
+                <div className="total">
+                  <span>Total</span>
+                  <span>₹{fmt(payload?.totals?.payable)}</span>
+                </div>
               </div>
-              <button onClick={placeOrder} disabled={!canPlace} className="cta">{placing ? <span className="spinner" /> : null}{placing ? 'Processing…' : paymentMethod === 'COD' ? 'Place Order (COD)' : 'Pay Now'}</button>
+              <button
+                onClick={placeOrder}
+                disabled={!canPlace}
+                className="cta"
+              >
+                {placing ? <span className="spinner" /> : null}
+                {placing
+                  ? 'Processing…'
+                  : paymentMethod === 'COD'
+                  ? 'Place Order (COD)'
+                  : 'Pay Now'}
+              </button>
               <div className="note">Secure checkout • No extra fees</div>
             </div>
             <div className="card mini">
               <h4>Need Help?</h4>
-              <p>Questions about delivery or payment? Write to <a href="mailto:taraskartonline@gmail.com">taraskartonline@gmail.com</a></p>
+              <p>
+                Questions about delivery or payment? Write to{' '}
+                <a href="mailto:taraskartonline@gmail.com">
+                  taraskartonline@gmail.com
+                </a>
+              </p>
             </div>
           </div>
         </div>
@@ -214,10 +392,19 @@ export default function OrderCheckout() {
               <div className="success-icon">✓</div>
               <h2>Order Placed</h2>
               <p>Thank you for shopping with us.</p>
-              {orderId ? <div className="order-id">Order ID: #{orderId}</div> : null}
+              {orderId ? (
+                <div className="order-id">Order ID: #{orderId}</div>
+              ) : null}
               <div className="modal-actions">
-                <a className="btn ghost" href="/">Continue Shopping</a>
-                <button className="btn solid" onClick={() => setSuccess(false)}>Close</button>
+                <a className="btn ghost" href="/">
+                  Continue Shopping
+                </a>
+                <button
+                  className="btn solid"
+                  onClick={() => setSuccess(false)}
+                >
+                  Close
+                </button>
               </div>
             </div>
           </div>

@@ -57,20 +57,19 @@ const Cart = () => {
   };
 
   const applyCoupon = () => {
-  if (couponInput.trim().toUpperCase() === 'GOLD10') {
-    setCouponDiscountPct(10);
-    setToast('GOLD10 applied (10% OFF)');
-  } else if (couponInput.trim().toUpperCase() === 'FREESHIP') {
-    setCouponDiscountPct(0);
-    setToast('FREESHIP applied');
-  } else {
-    setToast('Invalid coupon');
-    setCouponDiscountPct(0);
-  }
-  setShowCoupon(false);
-  setTimeout(() => setToast(''), 1500);
-};
-
+    if (couponInput.trim().toUpperCase() === 'GOLD10') {
+      setCouponDiscountPct(10);
+      setToast('GOLD10 applied (10% OFF)');
+    } else if (couponInput.trim().toUpperCase() === 'FREESHIP') {
+      setCouponDiscountPct(0);
+      setToast('FREESHIP applied');
+    } else {
+      setToast('Invalid coupon');
+      setCouponDiscountPct(0);
+    }
+    setShowCoupon(false);
+    setTimeout(() => setToast(''), 1500);
+  };
 
   const handleConfirmRemove = async () => {
     if (selectedItem && userId) {
@@ -107,19 +106,14 @@ const Cart = () => {
     return total + Number(mrp) * qty;
   }, 0);
 
-  const discountTotal = cartItems.reduce((total, item) => {
-    const qty = quantities[item.id] || 1;
-    const mrp = item.original_price_b2c || item.final_price_b2c;
-    return total + (Number(mrp) - Number(item.final_price_b2c)) * qty;
-  }, 0);
-
-  const subTotalBeforeCoupon = bagTotal - discountTotal;
+  const discountTotal = 0;
+  const subTotalBeforeCoupon = bagTotal;
   const couponDiscount = Math.floor((subTotalBeforeCoupon * couponDiscountPct) / 100);
   const subTotal = subTotalBeforeCoupon - couponDiscount;
-  const freeShipThreshold = 999;
-  const convenience = subTotal >= freeShipThreshold ? 0 : 50;
-  const youPay = subTotal + convenience + (giftWrap ? 39 : 0);
-  const toFreeShipping = Math.max(0, freeShipThreshold - subTotal);
+  const freeShipThreshold = 0;
+  const convenience = 0;
+  const youPay = subTotal + (giftWrap ? 39 : 0);
+  const toFreeShipping = 0;
 
   const proceedToCheckout = () => {
     if (!cartItems.length) return;
@@ -140,7 +134,10 @@ const Cart = () => {
           product_id: item.product_id || null,
           qty,
           price: Number(item.final_price_b2c),
-          mrp: item.original_price_b2c != null ? Number(item.original_price_b2c) : Number(item.final_price_b2c),
+          mrp:
+            item.original_price_b2c != null
+              ? Number(item.original_price_b2c)
+              : Number(item.final_price_b2c),
           size: item.selected_size || '',
           colour: item.selected_color || '',
           image_url: item.image_url || null
@@ -160,13 +157,23 @@ const Cart = () => {
             <img src="/images/emptyWishlist.avif" alt="Empty Cart" />
             <h2>Your Bag is empty</h2>
             <p>Add items to your bag to view them here.</p>
-            <a className="btn-shop" href="/">Start Shopping</a>
+            <a className="btn-shop" href="/">
+              Start Shopping
+            </a>
           </div>
         ) : (
           <>
             {toFreeShipping > 0 ? (
               <div className="progress-bar">
-                <div className="progress-fill" style={{ width: `${Math.min(100, ((freeShipThreshold - toFreeShipping) / freeShipThreshold) * 100)}%` }} />
+                <div
+                  className="progress-fill"
+                  style={{
+                    width: `${Math.min(
+                      100,
+                      ((freeShipThreshold - toFreeShipping) / freeShipThreshold) * 100
+                    )}%`
+                  }}
+                />
                 <span>You're ₹{fmt(toFreeShipping)} away from Free Shipping</span>
               </div>
             ) : (
@@ -183,11 +190,19 @@ const Cart = () => {
                 {cartItems.map((item) => {
                   const qty = quantities[item.id] || 1;
                   const mrp = Number(item.original_price_b2c || item.final_price_b2c);
-                  const discountPct = mrp > 0 ? Math.round(((mrp - Number(item.final_price_b2c)) / mrp) * 100) : 0;
+                  const discountPct =
+                    mrp > 0
+                      ? Math.round(
+                          ((mrp - Number(item.final_price_b2c)) / mrp) * 100
+                        )
+                      : 0;
 
                   return (
                     <div className="cart-card" key={item.id}>
-                      <button className="card-remove" onClick={() => handleRemoveClick(item)}>
+                      <button
+                        className="card-remove"
+                        onClick={() => handleRemoveClick(item)}
+                      >
                         <FaTimes />
                       </button>
 
@@ -204,13 +219,23 @@ const Cart = () => {
                         <div className="card-opts">
                           <div className="opt">
                             <span>Color</span>
-                            <span className="color-dot" style={{ backgroundColor: (item.selected_color || '').toLowerCase() }} />
+                            <span
+                              className="color-dot"
+                              style={{
+                                backgroundColor: (item.selected_color || '').toLowerCase()
+                              }}
+                            />
                           </div>
                           <div className="opt">
                             <span>Size</span>
-                            <select defaultValue={item.selected_size} className="select">
+                            <select
+                              defaultValue={item.selected_size}
+                              className="select"
+                            >
                               {['S', 'M', 'L', 'XL', 'XXL', 'FREE'].map((s) => (
-                                <option key={s} value={s}>{s}</option>
+                                <option key={s} value={s}>
+                                  {s}
+                                </option>
                               ))}
                             </select>
                           </div>
@@ -219,10 +244,14 @@ const Cart = () => {
                             <select
                               value={qty}
                               className="select"
-                              onChange={(e) => handleQuantityChange(item.id, e.target.value)}
+                              onChange={(e) =>
+                                handleQuantityChange(item.id, e.target.value)
+                              }
                             >
                               {[...Array(10)].map((_, i) => (
-                                <option key={i + 1} value={i + 1}>{i + 1}</option>
+                                <option key={i + 1} value={i + 1}>
+                                  {i + 1}
+                                </option>
                               ))}
                             </select>
                           </div>
@@ -237,10 +266,16 @@ const Cart = () => {
                         </div>
 
                         <div className="card-actions">
-                          <button className="mini gold" onClick={() => setShowCoupon(true)}>
+                          <button
+                            className="mini gold"
+                            onClick={() => setShowCoupon(true)}
+                          >
                             <FaTag /> Apply Coupon
                           </button>
-                          <a className="mini link" href={`/product/${item.product_id}`}>
+                          <a
+                            className="mini link"
+                            href={`/product/${item.product_id}`}
+                          >
                             View Details <FaChevronRight />
                           </a>
                         </div>
@@ -273,14 +308,18 @@ const Cart = () => {
                   )}
                   <div className="sum-row opt-row">
                     <label className="chk">
-                      <input type="checkbox" checked={giftWrap} onChange={(e) => setGiftWrap(e.target.checked)} />
+                      <input
+                        type="checkbox"
+                        checked={giftWrap}
+                        onChange={(e) => setGiftWrap(e.target.checked)}
+                      />
                       <span>Gift Wrap</span>
                     </label>
                     <span>{giftWrap ? '₹39.00' : '₹0.00'}</span>
                   </div>
                   <div className="sum-row">
                     <span>Convenience Charges</span>
-                    <span>{convenience === 0 ? '₹0.00' : '₹50.00'}</span>
+                    <span>₹0.00</span>
                   </div>
                   <div className="sum-row total">
                     <span>You Pay</span>
@@ -288,9 +327,13 @@ const Cart = () => {
                   </div>
                   <div className="save-note">
                     <FaCheck />
-                    <span>You are saving ₹{fmt(discountTotal + couponDiscount)} on this order</span>
+                    <span>
+                      You are saving ₹{fmt(couponDiscount)} on this order
+                    </span>
                   </div>
-                  <button className="btn-buy" onClick={proceedToCheckout}>Proceed to Buy</button>
+                  <button className="btn-buy" onClick={proceedToCheckout}>
+                    Proceed to Buy
+                  </button>
                 </div>
               </div>
             </div>
@@ -300,7 +343,9 @@ const Cart = () => {
                 <strong>₹{fmt(youPay)}</strong>
                 <span>Payable</span>
               </div>
-              <button className="sb-btn" onClick={proceedToCheckout}>Checkout</button>
+              <button className="sb-btn" onClick={proceedToCheckout}>
+                Checkout
+              </button>
             </div>
           </>
         )}
@@ -336,8 +381,15 @@ const Cart = () => {
                 placeholder="Enter code"
               />
               <div className="modal-actions">
-                <button className="btn ghost" onClick={() => setShowCoupon(false)}>Close</button>
-                <button className="btn solid" onClick={applyCoupon}>Apply</button>
+                <button
+                  className="btn ghost"
+                  onClick={() => setShowCoupon(false)}
+                >
+                  Close
+                </button>
+                <button className="btn solid" onClick={applyCoupon}>
+                  Apply
+                </button>
               </div>
             </div>
           </div>
@@ -345,11 +397,19 @@ const Cart = () => {
 
         {showSuccess && (
           <div className="modal-wrap" onClick={() => setShowSuccess(false)}>
-            <div className="modal success" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="modal success"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="success-head">Order Placed Successfully</div>
               <p className="success-sub">Thank you for shopping with us.</p>
               <div className="modal-actions">
-                <button className="btn solid" onClick={() => setShowSuccess(false)}>Close</button>
+                <button
+                  className="btn solid"
+                  onClick={() => setShowSuccess(false)}
+                >
+                  Close
+                </button>
               </div>
             </div>
           </div>
