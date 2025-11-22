@@ -108,7 +108,11 @@ const Cart = () => {
 
   const discountTotal = 0;
   const subTotalBeforeCoupon = bagTotal;
-  const couponDiscount = Math.floor((subTotalBeforeCoupon * couponDiscountPct) / 100);
+  const rawCouponDiscount = Math.floor(
+    (subTotalBeforeCoupon * couponDiscountPct) / 100
+  );
+  const maxCouponDiscount = Math.max(0, subTotalBeforeCoupon - 1);
+  const couponDiscount = Math.min(rawCouponDiscount, maxCouponDiscount);
   const subTotal = subTotalBeforeCoupon - couponDiscount;
   const freeShipThreshold = 0;
   const convenience = 0;
