@@ -39,8 +39,8 @@ function AppShell() {
       <NavigationLoader />
       <ScrollToTop />
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/home1" element={<Home1 />} />
+        {/*<Route path="/" element={<HomePage />} /> */}
+        <Route path="/" element={<Home1 />} />
         <Route path="/men" element={<MenPage />} />
         <Route path="/women" element={<WomenPage />} />
         <Route path="/profile" element={<Profile />} />

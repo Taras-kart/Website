@@ -77,7 +77,7 @@ const NavbarFinal = () => {
 
   const navLinks = [
     { name: 'Home', path: '/' },
-    { name: 'Home1', path: '/home1' },
+    /*{ name: 'Home1', path: '/home1' }, */
     { name: 'Women', path: '/women' },
     { name: 'Men', path: '/men' },
     { name: 'Kids', path: '/kids' },
