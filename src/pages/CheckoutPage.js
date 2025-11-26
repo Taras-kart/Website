@@ -6,6 +6,8 @@ import { useCart } from '../CartContext';
 import { useWishlist } from '../WishlistContext';
 import { FaHeart, FaShoppingBag } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { initializeApp, getApps } from 'firebase/app';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
 const API_BASE_RAW =
@@ -13,6 +15,33 @@ const API_BASE_RAW =
   (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
   DEFAULT_API_BASE;
 const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
+
+const env = (typeof import.meta !== 'undefined' && import.meta.env)
+  ? import.meta.env
+  : (typeof process !== 'undefined' && process.env)
+    ? process.env
+    : {};
+
+const fallbackFirebase = {
+  apiKey: 'AIzaSyCXytrftmbkF6IHsgpByDcpB4oUSwdJV0M',
+  authDomain: 'taraskart-6e601.firebaseapp.com',
+  projectId: 'taraskart-6e601',
+  storageBucket: 'taraskart-6e601.appspot.com',
+  messagingSenderId: '549582561307',
+  appId: '1:549582561307:web:40827cc8fc2b1696b718be'
+};
+
+const firebaseConfig = {
+  apiKey: env.VITE_FIREBASE_API_KEY || env.REACT_APP_FIREBASE_API_KEY || fallbackFirebase.apiKey,
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || env.REACT_APP_FIREBASE_AUTH_DOMAIN || fallbackFirebase.authDomain,
+  projectId: env.VITE_FIREBASE_PROJECT_ID || env.REACT_APP_FIREBASE_PROJECT_ID || fallbackFirebase.projectId,
+  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || env.REACT_APP_FIREBASE_STORAGE_BUCKET || fallbackFirebase.storageBucket,
+  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || fallbackFirebase.messagingSenderId,
+  appId: env.VITE_FIREBASE_APP_ID || env.REACT_APP_FIREBASE_APP_ID || fallbackFirebase.appId
+};
+
+if (!getApps().length) initializeApp(firebaseConfig);
+const auth = getAuth();
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -33,7 +62,14 @@ const CheckoutPage = () => {
   const [pincode, setPincode] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
-  const [userId, setUserId] = useState(() => sessionStorage.getItem('userId'));
+  const [userId, setUserId] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    const stored = sessionStorage.getItem('userId');
+    if (stored) return stored;
+    const current = auth.currentUser;
+    return current && current.uid ? current.uid : '';
+  });
+
   const zoomFactor = 3;
 
   useEffect(() => {
@@ -91,7 +127,12 @@ const CheckoutPage = () => {
         const initialColor = product.color || product.colour || mapped[0]?.color || null;
         setSelectedColor(initialColor);
         const sizesForInitial = Array.from(
-          new Set(mapped.filter((v) => (initialColor ? v.color === initialColor : true)).map((v) => v.size).filter(Boolean))
+          new Set(
+            mapped
+              .filter((v) => (initialColor ? v.color === initialColor : true))
+              .map((v) => v.size)
+              .filter(Boolean)
+          )
         );
         const preferredSize =
           sizesForInitial.includes(product.size) ? product.size : sizesForInitial[0] || null;
@@ -105,13 +146,42 @@ const CheckoutPage = () => {
   }, [product]);
 
   useEffect(() => {
-    const syncUserId = () => setUserId(sessionStorage.getItem('userId'));
+    const syncUserId = () => {
+      if (typeof window === 'undefined') return;
+      const stored = sessionStorage.getItem('userId');
+      if (stored && stored !== userId) setUserId(stored);
+    };
     window.addEventListener('storage', syncUserId);
     const interval = setInterval(syncUserId, 500);
     return () => {
       window.removeEventListener('storage', syncUserId);
       clearInterval(interval);
     };
+  }, [userId]);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      if (u) {
+        const uid = u.uid;
+        setUserId(uid);
+        if (typeof window !== 'undefined') {
+          if (!sessionStorage.getItem('userId')) {
+            sessionStorage.setItem('userId', uid);
+          }
+          if (!sessionStorage.getItem('userEmail') && u.email) {
+            sessionStorage.setItem('userEmail', u.email || '');
+          }
+          if (!sessionStorage.getItem('userName')) {
+            const name = u.displayName || (u.email ? u.email.split('@')[0] : 'User');
+            sessionStorage.setItem('userName', name);
+          }
+          if (!sessionStorage.getItem('userType')) {
+            sessionStorage.setItem('userType', 'B2C');
+          }
+        }
+      }
+    });
+    return () => unsubscribe();
   }, []);
 
   const sizesForColor = () => {
@@ -207,9 +277,10 @@ const CheckoutPage = () => {
 
   const handleMouseMove = (e) => {
     const image = e.target;
-    const { left, width, height } = image.getBoundingClientRect();
+    const rect = image.getBoundingClientRect();
+    const { left, width, height } = rect;
     const x = e.clientX - left;
-    const y = e.clientY - image.getBoundingClientRect().top;
+    const y = e.clientY - rect.top;
     const lensWidth = width / zoomFactor;
     const lensHeight = height / zoomFactor;
     let lensX = Math.max(0, Math.min(x - lensWidth / 2, width - lensWidth));
@@ -217,7 +288,8 @@ const CheckoutPage = () => {
     const bigImageWidth = width * zoomFactor;
     const bigImageHeight = height * zoomFactor;
     let containerWidth = window.innerWidth > 1024 ? 320 : width;
-    let containerHeight = window.innerWidth > 1024 ? 320 : window.innerWidth > 768 ? 260 : window.innerWidth > 520 ? 220 : 180;
+    let containerHeight =
+      window.innerWidth > 1024 ? 320 : window.innerWidth > 768 ? 260 : window.innerWidth > 520 ? 220 : 180;
     let offsetX = containerWidth / 2 - (lensX * zoomFactor + (lensWidth * zoomFactor) / 2);
     let offsetY = containerHeight / 2 - (lensY * zoomFactor + (lensHeight * zoomFactor) / 2);
     offsetX = Math.max(containerWidth - bigImageWidth, Math.min(0, offsetX));

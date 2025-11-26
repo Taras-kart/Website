@@ -62,13 +62,41 @@ const LoginPopup = ({ onClose, onSuccess }) => {
     setTimeout(() => setPopupMessage(''), 2200);
   };
 
-  const toUserShape = (u) => ({
-    id: u.uid,
-    name: u.displayName || u.email?.split('@')[0] || 'User',
-    email: u.email || '',
-    profilePic: u.photoURL || '/images/profile-pic.png',
-    userType: 'B2C'
+  const toUserShape = (src) => ({
+    id: src.id || src.uid,
+    name: src.name || src.displayName || src.email?.split('@')[0] || 'User',
+    email: src.email || '',
+    profilePic: src.profilePic || src.photoURL || '/images/profile-pic.png',
+    userType: src.userType || src.type || 'B2C'
   });
+
+  const syncUserWithBackend = async (u) => {
+    try {
+      const resp = await fetch(`${API_BASE}/api/auth/firebase-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          uid: u.uid,
+          email: u.email,
+          name: u.displayName || u.email?.split('@')[0] || 'User'
+        })
+      });
+      if (!resp.ok) throw new Error('sync failed');
+      const data = await resp.json();
+      sessionStorage.setItem('userId', String(data.id));
+      sessionStorage.setItem('userEmail', data.email || u.email || '');
+      sessionStorage.setItem('userName', data.name || u.displayName || u.email?.split('@')[0] || 'User');
+      sessionStorage.setItem('userType', data.type || 'B2C');
+      sessionStorage.setItem('firebaseUid', u.uid);
+      return data;
+    } catch (e) {
+      sessionStorage.setItem('firebaseUid', u.uid);
+      if (!sessionStorage.getItem('userId')) {
+        sessionStorage.setItem('userId', u.uid);
+      }
+      return null;
+    }
+  };
 
   const handleLogin = async () => {
     if (!canSubmit) return;
@@ -78,13 +106,10 @@ const LoginPopup = ({ onClose, onSuccess }) => {
       const u = cred.user;
       const token = await u.getIdToken();
       sessionStorage.setItem('tk_id_token', token);
-      sessionStorage.setItem('userId', u.uid);
-      sessionStorage.setItem('userEmail', u.email || '');
-      sessionStorage.setItem('userName', u.displayName || u.email?.split('@')[0] || 'User');
-      sessionStorage.setItem('userType', 'B2C');
+      const backendUser = await syncUserWithBackend(u);
       setPopupMessage('Successfully Logged In!');
       setTimeout(() => {
-        onSuccess(toUserShape(u));
+        onSuccess(toUserShape(backendUser || u));
         setPopupMessage('');
       }, 900);
     } catch (e) {
@@ -141,13 +166,10 @@ const LoginPopup = ({ onClose, onSuccess }) => {
       const u = cred.user;
       const token = await u.getIdToken();
       sessionStorage.setItem('tk_id_token', token);
-      sessionStorage.setItem('userId', u.uid);
-      sessionStorage.setItem('userEmail', u.email || '');
-      sessionStorage.setItem('userName', u.displayName || u.email?.split('@')[0] || 'User');
-      sessionStorage.setItem('userType', 'B2C');
+      const backendUser = await syncUserWithBackend(u);
       setPopupMessage('Successfully Logged In!');
       setTimeout(() => {
-        onSuccess(toUserShape(u));
+        onSuccess(toUserShape(backendUser || u));
         setPopupMessage('');
       }, 900);
     } catch (e) {
@@ -241,7 +263,7 @@ const LoginPopup = ({ onClose, onSuccess }) => {
             <button className="btn-google-login" onClick={loginWithGoogle}><FaGoogle /> Google</button>
           </div>
           <p className="signup-login">
-            Don’t have an account?{' '}
+            Don’t have an account{' '}
             <button className="signup-link-login" onClick={() => setShowSignup(true)}>Sign up</button>
           </p>
         </div>
