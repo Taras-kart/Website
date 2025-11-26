@@ -1,4 +1,3 @@
-// src/pages/Cart.js
 import React, { useState, useEffect } from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -57,16 +56,15 @@ const Cart = () => {
   };
 
   const applyCoupon = () => {
-    if (couponInput.trim().toUpperCase() === 'GOLD10') {
-      setCouponDiscountPct(10);
-      setToast('GOLD10 applied (10% OFF)');
-    } else if (couponInput.trim().toUpperCase() === 'FREESHIP') {
-      setCouponDiscountPct(0);
+    const code = couponInput.trim().toUpperCase();
+    if (code === 'GOLD10') {
+      setToast('GOLD10 applied');
+    } else if (code === 'FREESHIP') {
       setToast('FREESHIP applied');
     } else {
       setToast('Invalid coupon');
-      setCouponDiscountPct(0);
     }
+    setCouponDiscountPct(0);
     setShowCoupon(false);
     setTimeout(() => setToast(''), 1500);
   };
@@ -108,11 +106,9 @@ const Cart = () => {
 
   const discountTotal = 0;
   const subTotalBeforeCoupon = bagTotal;
-  const rawCouponDiscount = Math.floor(
-    (subTotalBeforeCoupon * couponDiscountPct) / 100
-  );
-  const maxCouponDiscount = Math.max(0, subTotalBeforeCoupon - 1);
-  const couponDiscount = Math.min(rawCouponDiscount, maxCouponDiscount);
+  const rawCouponDiscount = 0;
+  const maxCouponDiscount = 0;
+  const couponDiscount = 0;
   const subTotal = subTotalBeforeCoupon - couponDiscount;
   const freeShipThreshold = 0;
   const convenience = 0;
@@ -125,8 +121,8 @@ const Cart = () => {
       totals: {
         bagTotal,
         discountTotal,
-        couponPct: couponDiscountPct,
-        couponDiscount,
+        couponPct: 0,
+        couponDiscount: 0,
         convenience,
         giftWrap: giftWrap ? 39 : 0,
         payable: youPay
@@ -194,12 +190,7 @@ const Cart = () => {
                 {cartItems.map((item) => {
                   const qty = quantities[item.id] || 1;
                   const mrp = Number(item.original_price_b2c || item.final_price_b2c);
-                  const discountPct =
-                    mrp > 0
-                      ? Math.round(
-                          ((mrp - Number(item.final_price_b2c)) / mrp) * 100
-                        )
-                      : 0;
+                  const discountPct = 0;
 
                   return (
                     <div className="cart-card" key={item.id}>
@@ -265,7 +256,9 @@ const Cart = () => {
                           <div className="now">₹{fmt(item.final_price_b2c * qty)}</div>
                           <div className="was">
                             <span className="mrp">₹{fmt(mrp * qty)}</span>
-                            <span className="off">{discountPct}% OFF</span>
+                            {discountPct > 0 && (
+                              <span className="off">{discountPct}% OFF</span>
+                            )}
                           </div>
                         </div>
 

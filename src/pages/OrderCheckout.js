@@ -54,21 +54,19 @@ export default function OrderCheckout() {
       });
 
       let bagTotal = 0;
-      let discountTotal = 0;
 
       for (const it of normalizedItems) {
         const mrp = Number(it.mrp || 0);
-        const price = Number(it.price || 0);
         const qty = Number(it.qty || 1);
         bagTotal += mrp * qty;
-        discountTotal += Math.max(mrp - price, 0) * qty;
       }
 
-      const couponPct = Number(stored?.totals?.couponPct ?? 0);
-      const couponDiscount = Math.floor(((bagTotal - discountTotal) * couponPct) / 100);
+      const discountTotal = 0;
+      const couponPct = 0;
+      const couponDiscount = 0;
       const convenience = 0;
       const giftWrap = Number(stored?.totals?.giftWrap ?? 0);
-      const payable = bagTotal - discountTotal - couponDiscount + giftWrap + convenience;
+      const payable = bagTotal + giftWrap + convenience;
 
       return {
         ...stored,
