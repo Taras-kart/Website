@@ -1,4 +1,3 @@
-/* D:\shopping\src\pages\OrderTracking.css */
 :root {
   --ot-gold: #ffd36e;
   --ot-white: #ffffff;
@@ -149,11 +148,76 @@
   color: var(--ot-muted);
 }
 
-/* summary cards */
+.ot-top-card {
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background:
+    radial-gradient(circle at top left, rgba(255, 211, 110, 0.20), transparent 70%),
+    rgba(9, 9, 12, 0.98);
+  padding: 14px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ot-top-row-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.ot-top-status-pill {
+  font-size: 11px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ot-black);
+  background: var(--ot-gold);
+  font-weight: 600;
+}
+
+.ot-top-status-text {
+  font-size: 13px;
+  color: var(--ot-white);
+  opacity: 0.9;
+}
+
+.ot-top-row-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ot-top-meta-block {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ot-top-label {
+  font-size: 11px;
+  color: var(--ot-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ot-top-value {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ot-top-actions {
+  display: flex;
+  justify-content: flex-end;
+}
 
 .ot-summary-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.2fr) minmax(0, 1.4fr);
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr) minmax(0, 1.4fr);
   gap: 12px;
 }
 
@@ -224,8 +288,6 @@
   color: #ff9b9b;
 }
 
-/* sections */
-
 .ot-section {
   margin-top: 10px;
   border-radius: var(--ot-radius-lg);
@@ -270,8 +332,6 @@
   color: #ff9b9b;
   border-color: rgba(255, 155, 155, 0.4);
 }
-
-/* progress */
 
 .ot-progress {
   position: relative;
@@ -344,7 +404,51 @@
   color: var(--ot-muted);
 }
 
-/* shipments */
+.ot-tracking-timeline {
+  margin-top: 14px;
+  border-radius: var(--ot-radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(5, 6, 9, 0.98);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ot-tracking-row {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.ot-tracking-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  margin-top: 4px;
+  background: var(--ot-gold);
+}
+
+.ot-tracking-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ot-tracking-status {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ot-tracking-location {
+  font-size: 11px;
+  color: var(--ot-muted);
+}
+
+.ot-tracking-date {
+  font-size: 11px;
+  color: var(--ot-muted);
+}
 
 .ot-shipments {
   display: flex;
@@ -404,8 +508,6 @@
   justify-content: flex-end;
   gap: 8px;
 }
-
-/* items */
 
 .ot-items {
   border-radius: var(--ot-radius-md);
@@ -506,8 +608,6 @@
   color: var(--ot-muted);
 }
 
-/* price summary */
-
 .ot-price-summary {
   margin-top: 10px;
   border-radius: var(--ot-radius-md);
@@ -542,8 +642,6 @@
   color: var(--ot-gold);
   font-weight: 600;
 }
-
-/* returns */
 
 .ot-returns {
   display: flex;
@@ -610,8 +708,6 @@
   color: var(--ot-muted);
 }
 
-/* buttons */
-
 .ot-btn {
   border-radius: var(--ot-radius-sm);
   padding: 7px 12px;
@@ -649,15 +745,17 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
 }
 
-/* animations */
-
 @keyframes ot-spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-/* responsive */
+.ot-summary-status-loading {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-left: 8px;
+}
 
 @media (max-width: 900px) {
   .ot-wrap {
@@ -671,6 +769,10 @@
 
   .ot-head-side {
     align-items: flex-start;
+  }
+
+  .ot-top-row-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .ot-summary-grid {
@@ -722,6 +824,10 @@
     display: none;
   }
 
+  .ot-top-row-grid {
+    grid-template-columns: 1fr;
+  }
+
   .ot-ship-main {
     grid-template-columns: 1fr;
   }
@@ -741,11 +847,4 @@
   .ot-return-row {
     grid-template-columns: 1fr;
   }
-}
-
-
-.ot-summary-status-loading {
-  font-size: 12px;
-  opacity: 0.7;
-  margin-left: 8px;
 }

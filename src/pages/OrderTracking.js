@@ -23,14 +23,31 @@ function computeStepFromLocal(orderStatus) {
   return idx;
 }
 
-function computeStepFromShiprocket(srStatus) {
+function computeStepFromShiprocketStatus(srStatus) {
   const s = statusText(srStatus);
   if (!s) return 0;
   if (s.includes('DELIVERED')) return 4;
   if (s.includes('OUT FOR DELIVERY') || s.includes('OUT_FOR_DELIVERY')) return 3;
   if (s.includes('PICKED') || s.includes('DISPATCH') || s.includes('IN TRANSIT') || s.includes('SHIPPED')) return 3;
-  if (s.includes('PACKED')) return 2;
-  if (s.includes('CONFIRMED') || s.includes('PROCESSING') || s.includes('ACCEPTED')) return 1;
+  if (s.includes('PACKED') || s.includes('MANIFEST')) return 2;
+  if (s.includes('CONFIRMED') || s.includes('PROCESSING') || s.includes('ACCEPTED') || s.includes('CREATED')) return 1;
+  return 0;
+}
+
+function computeStepFromShipment(sh, srCore) {
+  if (!sh && !srCore) return 0;
+  const s = statusText(sh?.status || '');
+  const sr = statusText(srCore?.current_status || '');
+  const combined = `${s} ${sr}`.trim();
+  if (!combined) {
+    if (sh && sh.awb) return 2;
+    return 1;
+  }
+  if (combined.includes('DELIVERED')) return 4;
+  if (combined.includes('OUT FOR DELIVERY') || combined.includes('OUT_FOR_DELIVERY')) return 3;
+  if (combined.includes('IN TRANSIT') || combined.includes('DISPATCH') || combined.includes('SHIPPED') || combined.includes('PICKED')) return 3;
+  if (combined.includes('PACKED') || combined.includes('MANIFEST')) return 2;
+  if (combined.includes('CONFIRMED') || combined.includes('PROCESSING') || combined.includes('ACCEPTED') || combined.includes('CREATED')) return 1;
   return 0;
 }
 
@@ -74,7 +91,7 @@ function buildTrackingSnapshot(raw) {
     core.edd ||
     null;
   const lastEventRaw =
-    (lastTrack && (lastTrack.date || lastTrack.pickup_date)) ||
+    (lastTrack && (lastTrack.date || lastTrack.pickup_date || lastTrack.updated_time_stamp)) ||
     core.updated_time_stamp ||
     core.last_status_time ||
     null;
@@ -140,7 +157,7 @@ export default function OrderTracking() {
       const shJson = await shRes.json().catch(() => []);
       const elJson = await elRes.json().catch(() => null);
       const rrJson = await rrRes.json().catch(() => ({ rows: [] }));
-      const nextSale = sJson && sJson.sale ? sJson.sale : sJson;
+      const nextSale = sJson && sJson.sale ? { ...sJson.sale, items: sJson.items || [] } : sJson;
       const nextShipments = Array.isArray(shJson) ? shJson : [];
       setSale(nextSale);
       setShipments(nextShipments);
@@ -166,16 +183,25 @@ export default function OrderTracking() {
 
   const shiprocketStatus = statusText(trackingSnapshot.status);
 
+  const latestShipment = shipments && shipments.length > 0 ? shipments[shipments.length - 1] : null;
+
+  const shipmentStepIndex = useMemo(
+    () => computeStepFromShipment(latestShipment, trackingSnapshot.core),
+    [latestShipment, trackingSnapshot.core]
+  );
+
   const effectiveStepIndex = useMemo(() => {
     const localStep = computeStepFromLocal(localOrderStatus);
-    const srStep = computeStepFromShiprocket(shiprocketStatus);
-    return Math.max(localStep, srStep);
-  }, [localOrderStatus, shiprocketStatus]);
+    const srStep = computeStepFromShiprocketStatus(shiprocketStatus);
+    return Math.max(localStep, srStep, shipmentStepIndex);
+  }, [localOrderStatus, shiprocketStatus, shipmentStepIndex]);
 
   const isCancelled = localOrderStatus === 'CANCELLED';
 
   const placedDate = sale?.created_at ? new Date(sale.created_at) : null;
-  const placedDateText = placedDate ? placedDate.toLocaleString('en-IN') : '-';
+  const placedDateText = placedDate && !Number.isNaN(placedDate.getTime())
+    ? placedDate.toLocaleString('en-IN')
+    : '-';
 
   const destinationCity = sale?.shipping_address?.city || '';
   const destinationState = sale?.shipping_address?.state || '';
@@ -184,8 +210,6 @@ export default function OrderTracking() {
     destinationCity || destinationState || destinationPincode
       ? [destinationCity, destinationState, destinationPincode].filter(Boolean).join(', ')
       : '-';
-
-  const latestShipment = shipments && shipments.length > 0 ? shipments[shipments.length - 1] : null;
 
   const lastUpdateTime = useMemo(() => {
     if (trackingSnapshot.lastEventText) return trackingSnapshot.lastEventText;
@@ -207,6 +231,59 @@ export default function OrderTracking() {
     return 'On the way';
   }, [isCancelled, effectiveStepIndex, shiprocketStatus]);
 
+  const primaryAwb = latestShipment?.awb || '-';
+  const trackingUrl = latestShipment?.tracking_url || null;
+
+  const computedEddDate = useMemo(() => {
+    if (trackingSnapshot.eddText) return null;
+    const base =
+      latestShipment?.created_at ||
+      sale?.created_at ||
+      null;
+    if (!base) return null;
+    const d = new Date(base);
+    if (Number.isNaN(d.getTime())) return null;
+    d.setDate(d.getDate() + 5);
+    return d;
+  }, [trackingSnapshot.eddText, latestShipment, sale]);
+
+  const expectedDeliveryText = useMemo(() => {
+    if (trackingSnapshot.eddText) return trackingSnapshot.eddText;
+    if (!computedEddDate) return 'To be updated soon';
+    return computedEddDate.toLocaleDateString('en-IN', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: '2-digit'
+    });
+  }, [trackingSnapshot.eddText, computedEddDate]);
+
+  const trackingEvents = useMemo(() => {
+    const core = trackingSnapshot.core;
+    if (!core) return [];
+    const raw = Array.isArray(core.shipment_track) ? core.shipment_track : [];
+    return raw
+      .map(ev => {
+        const rawDate = ev.updated_time_stamp || ev.pickup_date || ev.delivered_date || ev.date || '';
+        const d = rawDate ? new Date(rawDate) : null;
+        const dateText = d && !Number.isNaN(d.getTime()) ? d.toLocaleString('en-IN') : '';
+        const loc =
+          ev.destination ||
+          ev.destination_city ||
+          ev.city ||
+          ev.origin ||
+          ev.scan_location ||
+          ev.scanned_location ||
+          '';
+        return {
+          status: statusText(ev.current_status || ''),
+          location: loc,
+          dateText
+        };
+      })
+      .filter(e => e.status || e.dateText || e.location);
+  }, [trackingSnapshot.core]);
+
   return (
     <div className="ot-page">
       <Navbar />
@@ -215,13 +292,13 @@ export default function OrderTracking() {
           <div className="ot-head-main">
             <h1 className="ot-title">Track your order</h1>
             <p className="ot-subtitle">
-              Live status, shipment details and return options for your purchase
+              Live courier updates, expected delivery and return options
             </p>
           </div>
           <div className="ot-head-side">
             <div className="ot-order-chip">Order #{orderId || 'NA'}</div>
             {lastUpdateTime !== '-' && (
-              <div className="ot-updated-text">Last updated: {lastUpdateTime}</div>
+              <div className="ot-updated-text">Last updated {lastUpdateTime}</div>
             )}
           </div>
         </div>
@@ -242,18 +319,47 @@ export default function OrderTracking() {
           </div>
         ) : (
           <>
+            <div className="ot-top-card">
+              <div className="ot-top-row-main">
+                <div className="ot-top-status-pill">
+                  {isCancelled ? 'CANCELLED' : shiprocketStatus || localOrderStatus || 'PLACED'}
+                </div>
+                <div className="ot-top-status-text">{deliveryStatusText}</div>
+              </div>
+              <div className="ot-top-row-grid">
+                <div className="ot-top-meta-block">
+                  <div className="ot-top-label">AWB NUMBER</div>
+                  <div className="ot-top-value">{primaryAwb || '-'}</div>
+                </div>
+                <div className="ot-top-meta-block">
+                  <div className="ot-top-label">EXPECTED DELIVERY</div>
+                  <div className="ot-top-value">{expectedDeliveryText}</div>
+                </div>
+                <div className="ot-top-meta-block">
+                  <div className="ot-top-label">DESTINATION</div>
+                  <div className="ot-top-value">{destinationText}</div>
+                </div>
+                <div className="ot-top-meta-block">
+                  <div className="ot-top-label">PLACED ON</div>
+                  <div className="ot-top-value">{placedDateText}</div>
+                </div>
+              </div>
+              <div className="ot-top-actions">
+                {trackingUrl && (
+                  <a
+                    href={trackingUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="ot-btn ot-btn-solid"
+                  >
+                    Track on courier site
+                  </a>
+                )}
+              </div>
+            </div>
+
             <div className="ot-summary-grid">
               <div className="ot-summary-card">
-                <div className="ot-summary-row">
-                  <span className="ot-summary-label">Status</span>
-                  <span
-                    className={`ot-summary-status-pill ${
-                      isCancelled ? 'ot-status-cancelled' : 'ot-status-active'
-                    }`}
-                  >
-                    {shiprocketStatus || localOrderStatus || 'PLACED'}
-                  </span>
-                </div>
                 <div className="ot-summary-row">
                   <span className="ot-summary-label">Payment</span>
                   <span className="ot-summary-value">
@@ -267,8 +373,14 @@ export default function OrderTracking() {
                   </span>
                 </div>
                 <div className="ot-summary-row">
-                  <span className="ot-summary-label">Placed on</span>
-                  <span className="ot-summary-value">{placedDateText}</span>
+                  <span className="ot-summary-label">Order status</span>
+                  <span
+                    className={`ot-summary-status-pill ${
+                      isCancelled ? 'ot-status-cancelled' : 'ot-status-active'
+                    }`}
+                  >
+                    {localOrderStatus}
+                  </span>
                 </div>
               </div>
 
@@ -286,10 +398,6 @@ export default function OrderTracking() {
                   </span>
                 </div>
                 <div className="ot-summary-row">
-                  <span className="ot-summary-label">Destination</span>
-                  <span className="ot-summary-value">{destinationText}</span>
-                </div>
-                <div className="ot-summary-row">
                   <span className="ot-summary-label">Contact email</span>
                   <span className="ot-summary-value">
                     {sale?.customer_email || '-'}
@@ -304,14 +412,12 @@ export default function OrderTracking() {
                     {deliveryStatusText}
                   </span>
                 </div>
-                {trackingSnapshot.eddText && (
-                  <div className="ot-summary-row">
-                    <span className="ot-summary-label">Estimated delivery</span>
-                    <span className="ot-summary-value">
-                      {trackingSnapshot.eddText}
-                    </span>
-                  </div>
-                )}
+                <div className="ot-summary-row">
+                  <span className="ot-summary-label">Estimated delivery</span>
+                  <span className="ot-summary-value">
+                    {expectedDeliveryText}
+                  </span>
+                </div>
                 <div className="ot-summary-row">
                   <span className="ot-summary-label">Current location</span>
                   <span className="ot-summary-value">
@@ -322,12 +428,6 @@ export default function OrderTracking() {
                       : destinationCity || '-'}
                   </span>
                 </div>
-                <div className="ot-summary-row">
-                  <span className="ot-summary-label">Tip</span>
-                  <span className="ot-summary-value">
-                    Keep SMS and WhatsApp notifications enabled for real time delivery updates.
-                  </span>
-                </div>
               </div>
             </div>
 
@@ -336,7 +436,7 @@ export default function OrderTracking() {
                 <div>
                   <div className="ot-section-title">Order progress</div>
                   <div className="ot-section-subtitle">
-                    Follow your order step by step from placement to delivery
+                    Follow your parcel from placement to delivery
                   </div>
                 </div>
                 {!isCancelled && (
@@ -382,6 +482,25 @@ export default function OrderTracking() {
                   })}
                 </div>
               </div>
+
+              {trackingEvents.length > 0 && (
+                <div className="ot-tracking-timeline">
+                  {trackingEvents.map((ev, idx) => (
+                    <div className="ot-tracking-row" key={`${ev.dateText}-${idx}`}>
+                      <div className="ot-tracking-dot" />
+                      <div className="ot-tracking-content">
+                        <div className="ot-tracking-status">{ev.status || 'Update'}</div>
+                        {ev.location ? (
+                          <div className="ot-tracking-location">{ev.location}</div>
+                        ) : null}
+                        {ev.dateText ? (
+                          <div className="ot-tracking-date">{ev.dateText}</div>
+                        ) : null}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="ot-section">
