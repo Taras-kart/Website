@@ -178,25 +178,13 @@ export default function OrderTracking() {
   const fmt = n => `₹${Number(n || 0).toFixed(2)}`;
 
   const localOrderStatus = statusText(sale?.status || 'PLACED');
+  const isCancelled = localOrderStatus === 'CANCELLED';
 
   const trackingSnapshot = useMemo(() => buildTrackingSnapshot(trackingRaw), [trackingRaw]);
 
   const shiprocketStatus = statusText(trackingSnapshot.status);
-
   const latestShipment = shipments && shipments.length > 0 ? shipments[shipments.length - 1] : null;
-
-  const shipmentStepIndex = useMemo(
-    () => computeStepFromShipment(latestShipment, trackingSnapshot.core),
-    [latestShipment, trackingSnapshot.core]
-  );
-
-  const effectiveStepIndex = useMemo(() => {
-    const localStep = computeStepFromLocal(localOrderStatus);
-    const srStep = computeStepFromShiprocketStatus(shiprocketStatus);
-    return Math.max(localStep, srStep, shipmentStepIndex);
-  }, [localOrderStatus, shiprocketStatus, shipmentStepIndex]);
-
-  const isCancelled = localOrderStatus === 'CANCELLED';
+  const shipmentStepIndex = computeStepFromShipment(latestShipment, trackingSnapshot.core);
 
   const placedDate = sale?.created_at ? new Date(sale.created_at) : null;
   const placedDateText = placedDate && !Number.isNaN(placedDate.getTime())
@@ -224,13 +212,6 @@ export default function OrderTracking() {
     return t.toLocaleString('en-IN');
   }, [trackingSnapshot, latestShipment, sale]);
 
-  const deliveryStatusText = useMemo(() => {
-    if (isCancelled) return 'This order has been cancelled';
-    if (effectiveStepIndex === ORDER_STEPS.length - 1) return 'Delivered';
-    if (shiprocketStatus) return shiprocketStatus;
-    return 'On the way';
-  }, [isCancelled, effectiveStepIndex, shiprocketStatus]);
-
   const primaryAwb = latestShipment?.awb || '-';
   const trackingUrl = latestShipment?.tracking_url || null;
 
@@ -257,6 +238,28 @@ export default function OrderTracking() {
       day: '2-digit'
     });
   }, [trackingSnapshot.eddText, computedEddDate]);
+
+  const baseLocalStep = computeStepFromLocal(localOrderStatus);
+  let baseShiprocketStep = computeStepFromShiprocketStatus(shiprocketStatus);
+  if (!isCancelled && trackingSnapshot.eddText && baseShiprocketStep < 3) {
+    baseShiprocketStep = 3;
+  }
+  let effectiveStepIndex = Math.max(baseLocalStep, baseShiprocketStep, shipmentStepIndex);
+  if (
+    !isCancelled &&
+    expectedDeliveryText &&
+    expectedDeliveryText !== 'To be updated soon' &&
+    effectiveStepIndex < 3
+  ) {
+    effectiveStepIndex = 3;
+  }
+
+  const deliveryStatusText = (() => {
+    if (isCancelled) return 'This order has been cancelled';
+    if (effectiveStepIndex === ORDER_STEPS.length - 1) return 'Delivered';
+    if (shiprocketStatus) return shiprocketStatus;
+    return 'On the way';
+  })();
 
   const trackingEvents = useMemo(() => {
     const core = trackingSnapshot.core;
