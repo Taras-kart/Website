@@ -1,4 +1,3 @@
-// D:\shopping\src\pages\OrderTracking.js
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import Navbar from './Navbar';
@@ -25,7 +24,13 @@ export default function OrderTracking() {
   const [loading, setLoading] = useState(true);
 
   const fetchAll = async () => {
-    if (!orderId) return;
+    if (!orderId) {
+      setSale(null);
+      setShipments([]);
+      setEligibility(null);
+      setRequests([]);
+      return;
+    }
     setLoading(true);
     try {
       const [sRes, shRes, elRes, rrRes] = await Promise.all([
@@ -34,14 +39,29 @@ export default function OrderTracking() {
         fetch(`${API_BASE}/api/returns/eligibility/${encodeURIComponent(orderId)}`),
         fetch(`${API_BASE}/api/returns/by-sale/${encodeURIComponent(orderId)}`)
       ]);
-      const s = await sRes.json().catch(() => null);
+
+      let sJson = await sRes.json().catch(() => null);
+      const saleObj = sJson && sJson.sale ? sJson.sale : sJson;
+      const itemsArr =
+        (sJson && Array.isArray(sJson.items) && sJson.items) ||
+        (saleObj && Array.isArray(saleObj.items) && saleObj.items) ||
+        [];
+      const mergedSale = saleObj ? { ...saleObj, items: itemsArr } : null;
+
       const sh = await shRes.json().catch(() => []);
       const el = await elRes.json().catch(() => null);
       const rr = await rrRes.json().catch(() => ({ rows: [] }));
-      setSale(s);
+
+      setSale(mergedSale);
       setShipments(Array.isArray(sh) ? sh : []);
       setEligibility(el);
       setRequests(Array.isArray(rr?.rows) ? rr.rows : []);
+    } catch (e) {
+      console.error('OrderTracking fetchAll error', e);
+      setSale(null);
+      setShipments([]);
+      setEligibility(null);
+      setRequests([]);
     } finally {
       setLoading(false);
     }
@@ -187,10 +207,11 @@ export default function OrderTracking() {
                 <div className="ot-summary-row">
                   <span className="ot-summary-label">Current location</span>
                   <span className="ot-summary-value">
-                    {latestShipment?.current_location ||
-                      latestShipment?.branch_id
-                        ? `Branch #${latestShipment.branch_id}`
-                        : destinationCity || '-'}
+                    {latestShipment?.current_location
+                      ? latestShipment.current_location
+                      : latestShipment?.branch_id
+                      ? `Branch #${latestShipment.branch_id}`
+                      : destinationCity || '-'}
                   </span>
                 </div>
                 <div className="ot-summary-row">
@@ -271,70 +292,86 @@ export default function OrderTracking() {
                     soon.
                   </div>
                 ) : (
-                  shipments.map((sh) => (
-                    <div className="ot-ship-card" key={sh.id}>
-                      <div className="ot-ship-main">
-                        <div className="ot-ship-col">
-                          <span className="ot-ship-label">Shipment</span>
-                          <span className="ot-ship-value">#{sh.id}</span>
-                          <span className="ot-ship-meta">
-                            Branch #{sh.branch_id || '-'}
-                          </span>
+                  shipments.map((sh) => {
+                    const trackOrderId = sh.shiprocket_order_id || sh.awb || '';
+                    return (
+                      <div className="ot-ship-card" key={sh.id}>
+                        <div className="ot-ship-main">
+                          <div className="ot-ship-col">
+                            <span className="ot-ship-label">Shipment</span>
+                            <span className="ot-ship-value">#{sh.id}</span>
+                            <span className="ot-ship-meta">
+                              Branch #{sh.branch_id || '-'}
+                            </span>
+                            {sh.shiprocket_order_id ? (
+                              <span className="ot-ship-meta">
+                                Shiprocket order {sh.shiprocket_order_id}
+                              </span>
+                            ) : null}
+                          </div>
+                          <div className="ot-ship-col">
+                            <span className="ot-ship-label">AWB</span>
+                            <span className="ot-ship-value">
+                              {sh.awb || '-'}
+                            </span>
+                            <span className="ot-ship-meta">
+                              {sh.courier_name || 'Courier partner'}
+                            </span>
+                          </div>
+                          <div className="ot-ship-col">
+                            <span className="ot-ship-label">Status</span>
+                            <span className="ot-ship-status">
+                              {statusText(sh.status || 'CREATED')}
+                            </span>
+                            <span className="ot-ship-meta">
+                              {sh.updated_at
+                                ? `Updated on ${new Date(sh.updated_at).toLocaleString('en-IN')}`
+                                : ''}
+                            </span>
+                          </div>
+                          <div className="ot-ship-col">
+                            <span className="ot-ship-label">Destination</span>
+                            <span className="ot-ship-value">
+                              {destinationText}
+                            </span>
+                            <span className="ot-ship-meta">
+                              We share live updates by SMS when picked up
+                            </span>
+                          </div>
                         </div>
-                        <div className="ot-ship-col">
-                          <span className="ot-ship-label">AWB</span>
-                          <span className="ot-ship-value">
-                            {sh.awb || '-'}
-                          </span>
-                          <span className="ot-ship-meta">
-                            {sh.courier_name || 'Courier partner'}
-                          </span>
-                        </div>
-                        <div className="ot-ship-col">
-                          <span className="ot-ship-label">Status</span>
-                          <span className="ot-ship-status">
-                            {statusText(sh.status || 'CREATED')}
-                          </span>
-                          <span className="ot-ship-meta">
-                            {sh.updated_at
-                              ? `Updated on ${new Date(sh.updated_at).toLocaleString('en-IN')}`
-                              : ''}
-                          </span>
-                        </div>
-                        <div className="ot-ship-col">
-                          <span className="ot-ship-label">Destination</span>
-                          <span className="ot-ship-value">
-                            {destinationText}
-                          </span>
-                          <span className="ot-ship-meta">
-                            We share live updates by SMS when picked up
-                          </span>
+                        <div className="ot-ship-actions">
+                          {trackOrderId ? (
+                            <a
+                              className="ot-btn ot-btn-ghost"
+                              href={`/track-order?orderId=${encodeURIComponent(trackOrderId)}`}
+                            >
+                              Track shipment
+                            </a>
+                          ) : null}
+                          {sh.tracking_url ? (
+                            <a
+                              className="ot-btn ot-btn-ghost"
+                              href={sh.tracking_url}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              View live tracking
+                            </a>
+                          ) : null}
+                          {sh.label_url ? (
+                            <a
+                              className="ot-btn ot-btn-solid"
+                              href={sh.label_url}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Download label
+                            </a>
+                          ) : null}
                         </div>
                       </div>
-                      <div className="ot-ship-actions">
-                        {sh.tracking_url ? (
-                          <a
-                            className="ot-btn ot-btn-ghost"
-                            href={sh.tracking_url}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            View live tracking
-                          </a>
-                        ) : null}
-                        {sh.label_url ? (
-                          <a
-                            className="ot-btn ot-btn-solid"
-                            href={sh.label_url}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            Download label
-                          </a>
-                        ) : null}
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>
@@ -361,7 +398,7 @@ export default function OrderTracking() {
                       </div>
                       <div className="ot-item-main">
                         <div className="ot-item-name">
-                          {it.name || `Variant #${it.variant_id}`}
+                          {it.name || it.product_name || `Variant #${it.variant_id}`}
                         </div>
                         <div className="ot-item-meta">
                           <span>EAN {it.ean_code || '-'}</span>
