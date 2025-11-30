@@ -742,3 +742,10 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+.ot-summary-status-loading {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-left: 8px;
+}

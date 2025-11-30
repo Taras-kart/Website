@@ -13,6 +13,85 @@ const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
 
 const ORDER_STEPS = ['PLACED', 'CONFIRMED', 'PACKED', 'SHIPPED', 'DELIVERED'];
 
+function statusText(s) {
+  return String(s || '').toUpperCase();
+}
+
+function computeStepFromLocal(orderStatus) {
+  const idx = ORDER_STEPS.indexOf(orderStatus || 'PLACED');
+  if (idx === -1) return 0;
+  return idx;
+}
+
+function computeStepFromShiprocket(srStatus) {
+  const s = statusText(srStatus);
+  if (!s) return 0;
+  if (s.includes('DELIVERED')) return 4;
+  if (s.includes('OUT FOR DELIVERY') || s.includes('OUT_FOR_DELIVERY')) return 3;
+  if (s.includes('PICKED') || s.includes('DISPATCH') || s.includes('IN TRANSIT') || s.includes('SHIPPED')) return 3;
+  if (s.includes('PACKED')) return 2;
+  if (s.includes('CONFIRMED') || s.includes('PROCESSING') || s.includes('ACCEPTED')) return 1;
+  return 0;
+}
+
+function extractTrackingCore(raw) {
+  if (!raw) return null;
+  let core = raw;
+  if (Array.isArray(core) && core.length) {
+    const first = core[0];
+    if (first && typeof first === 'object') {
+      const key = Object.keys(first)[0];
+      if (key && first[key] && first[key].tracking_data) {
+        core = first[key].tracking_data;
+      }
+    }
+  } else if (core.tracking_data) {
+    core = core.tracking_data;
+  }
+  if (!core || typeof core !== 'object') return null;
+  return core;
+}
+
+function buildTrackingSnapshot(raw) {
+  const core = extractTrackingCore(raw);
+  if (!core) {
+    return {
+      status: '',
+      eddText: null,
+      lastEventText: null,
+      core: null
+    };
+  }
+  const tracks = Array.isArray(core.shipment_track) ? core.shipment_track : [];
+  const lastTrack = tracks.length ? tracks[tracks.length - 1] : null;
+  const status =
+    (lastTrack && lastTrack.current_status) ||
+    core.current_status ||
+    core.status ||
+    '';
+  const eddRaw =
+    (lastTrack && lastTrack.edd) ||
+    core.edd ||
+    null;
+  const lastEventRaw =
+    (lastTrack && (lastTrack.date || lastTrack.pickup_date)) ||
+    core.updated_time_stamp ||
+    core.last_status_time ||
+    null;
+  const edd = eddRaw ? new Date(eddRaw) : null;
+  const lastEvent = lastEventRaw ? new Date(lastEventRaw) : null;
+  return {
+    status,
+    eddText: edd && !Number.isNaN(edd.getTime())
+      ? edd.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: '2-digit' })
+      : null,
+    lastEventText: lastEvent && !Number.isNaN(lastEvent.getTime())
+      ? lastEvent.toLocaleString('en-IN')
+      : null,
+    core
+  };
+}
+
 export default function OrderTracking() {
   const params = useParams();
   const [sp] = useSearchParams();
@@ -22,15 +101,33 @@ export default function OrderTracking() {
   const [eligibility, setEligibility] = useState(null);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [trackingRaw, setTrackingRaw] = useState(null);
 
-  const fetchAll = async () => {
-    if (!orderId) {
-      setSale(null);
-      setShipments([]);
-      setEligibility(null);
-      setRequests([]);
+  const fetchShiprocketTracking = async shArray => {
+    const arr = Array.isArray(shArray) ? shArray : [];
+    const latest = arr.length ? arr[arr.length - 1] : null;
+    const trackOrderId = latest?.shiprocket_order_id || latest?.awb || '';
+    if (!trackOrderId) {
+      setTrackingRaw(null);
       return;
     }
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/shiprocket/track/${encodeURIComponent(trackOrderId)}`
+      );
+      const data = await res.json().catch(() => null);
+      if (res.ok && data) {
+        setTrackingRaw(data);
+      } else {
+        setTrackingRaw(null);
+      }
+    } catch {
+      setTrackingRaw(null);
+    }
+  };
+
+  const fetchAll = async () => {
+    if (!orderId) return;
     setLoading(true);
     try {
       const [sRes, shRes, elRes, rrRes] = await Promise.all([
@@ -39,29 +136,17 @@ export default function OrderTracking() {
         fetch(`${API_BASE}/api/returns/eligibility/${encodeURIComponent(orderId)}`),
         fetch(`${API_BASE}/api/returns/by-sale/${encodeURIComponent(orderId)}`)
       ]);
-
-      let sJson = await sRes.json().catch(() => null);
-      const saleObj = sJson && sJson.sale ? sJson.sale : sJson;
-      const itemsArr =
-        (sJson && Array.isArray(sJson.items) && sJson.items) ||
-        (saleObj && Array.isArray(saleObj.items) && saleObj.items) ||
-        [];
-      const mergedSale = saleObj ? { ...saleObj, items: itemsArr } : null;
-
-      const sh = await shRes.json().catch(() => []);
-      const el = await elRes.json().catch(() => null);
-      const rr = await rrRes.json().catch(() => ({ rows: [] }));
-
-      setSale(mergedSale);
-      setShipments(Array.isArray(sh) ? sh : []);
-      setEligibility(el);
-      setRequests(Array.isArray(rr?.rows) ? rr.rows : []);
-    } catch (e) {
-      console.error('OrderTracking fetchAll error', e);
-      setSale(null);
-      setShipments([]);
-      setEligibility(null);
-      setRequests([]);
+      const sJson = await sRes.json().catch(() => null);
+      const shJson = await shRes.json().catch(() => []);
+      const elJson = await elRes.json().catch(() => null);
+      const rrJson = await rrRes.json().catch(() => ({ rows: [] }));
+      const nextSale = sJson && sJson.sale ? sJson.sale : sJson;
+      const nextShipments = Array.isArray(shJson) ? shJson : [];
+      setSale(nextSale);
+      setShipments(nextShipments);
+      setEligibility(elJson);
+      setRequests(Array.isArray(rrJson?.rows) ? rrJson.rows : []);
+      fetchShiprocketTracking(nextShipments);
     } finally {
       setLoading(false);
     }
@@ -73,16 +158,21 @@ export default function OrderTracking() {
     return () => clearInterval(t);
   }, [orderId]);
 
-  const fmt = (n) => `₹${Number(n || 0).toFixed(2)}`;
-  const statusText = (s) => String(s || '').toUpperCase();
+  const fmt = n => `₹${Number(n || 0).toFixed(2)}`;
 
-  const orderStatus = statusText(sale?.status || '');
-  const isCancelled = orderStatus === 'CANCELLED';
-  const stepIndex = useMemo(() => {
-    const idx = ORDER_STEPS.indexOf(orderStatus || 'PLACED');
-    if (idx === -1) return 0;
-    return idx;
-  }, [orderStatus]);
+  const localOrderStatus = statusText(sale?.status || 'PLACED');
+
+  const trackingSnapshot = useMemo(() => buildTrackingSnapshot(trackingRaw), [trackingRaw]);
+
+  const shiprocketStatus = statusText(trackingSnapshot.status);
+
+  const effectiveStepIndex = useMemo(() => {
+    const localStep = computeStepFromLocal(localOrderStatus);
+    const srStep = computeStepFromShiprocket(shiprocketStatus);
+    return Math.max(localStep, srStep);
+  }, [localOrderStatus, shiprocketStatus]);
+
+  const isCancelled = localOrderStatus === 'CANCELLED';
 
   const placedDate = sale?.created_at ? new Date(sale.created_at) : null;
   const placedDateText = placedDate ? placedDate.toLocaleString('en-IN') : '-';
@@ -97,11 +187,25 @@ export default function OrderTracking() {
 
   const latestShipment = shipments && shipments.length > 0 ? shipments[shipments.length - 1] : null;
 
-  const lastUpdateTime =
-    latestShipment?.updated_at || latestShipment?.created_at || sale?.updated_at || sale?.created_at;
-  const lastUpdateText = lastUpdateTime
-    ? new Date(lastUpdateTime).toLocaleString('en-IN')
-    : '-';
+  const lastUpdateTime = useMemo(() => {
+    if (trackingSnapshot.lastEventText) return trackingSnapshot.lastEventText;
+    const fallbackTime =
+      latestShipment?.updated_at ||
+      latestShipment?.created_at ||
+      sale?.updated_at ||
+      sale?.created_at;
+    if (!fallbackTime) return '-';
+    const t = new Date(fallbackTime);
+    if (Number.isNaN(t.getTime())) return '-';
+    return t.toLocaleString('en-IN');
+  }, [trackingSnapshot, latestShipment, sale]);
+
+  const deliveryStatusText = useMemo(() => {
+    if (isCancelled) return 'This order has been cancelled';
+    if (effectiveStepIndex === ORDER_STEPS.length - 1) return 'Delivered';
+    if (shiprocketStatus) return shiprocketStatus;
+    return 'On the way';
+  }, [isCancelled, effectiveStepIndex, shiprocketStatus]);
 
   return (
     <div className="ot-page">
@@ -116,8 +220,8 @@ export default function OrderTracking() {
           </div>
           <div className="ot-head-side">
             <div className="ot-order-chip">Order #{orderId || 'NA'}</div>
-            {lastUpdateText !== '-' && (
-              <div className="ot-updated-text">Last updated: {lastUpdateText}</div>
+            {lastUpdateTime !== '-' && (
+              <div className="ot-updated-text">Last updated: {lastUpdateTime}</div>
             )}
           </div>
         </div>
@@ -147,7 +251,7 @@ export default function OrderTracking() {
                       isCancelled ? 'ot-status-cancelled' : 'ot-status-active'
                     }`}
                   >
-                    {orderStatus || 'PLACED'}
+                    {shiprocketStatus || localOrderStatus || 'PLACED'}
                   </span>
                 </div>
                 <div className="ot-summary-row">
@@ -197,13 +301,17 @@ export default function OrderTracking() {
                 <div className="ot-summary-row">
                   <span className="ot-summary-label">Delivery status</span>
                   <span className="ot-summary-value">
-                    {isCancelled
-                      ? 'This order has been cancelled'
-                      : orderStatus === 'DELIVERED'
-                      ? 'Delivered'
-                      : 'On the way'}
+                    {deliveryStatusText}
                   </span>
                 </div>
+                {trackingSnapshot.eddText && (
+                  <div className="ot-summary-row">
+                    <span className="ot-summary-label">Estimated delivery</span>
+                    <span className="ot-summary-value">
+                      {trackingSnapshot.eddText}
+                    </span>
+                  </div>
+                )}
                 <div className="ot-summary-row">
                   <span className="ot-summary-label">Current location</span>
                   <span className="ot-summary-value">
@@ -233,7 +341,7 @@ export default function OrderTracking() {
                 </div>
                 {!isCancelled && (
                   <div className="ot-section-pill">
-                    {orderStatus === 'DELIVERED'
+                    {effectiveStepIndex === ORDER_STEPS.length - 1
                       ? 'Delivered successfully'
                       : 'We will notify you as soon as the next step is completed'}
                   </div>
@@ -253,9 +361,9 @@ export default function OrderTracking() {
                     const stepState =
                       isCancelled && step !== 'PLACED'
                         ? 'upcoming'
-                        : index < stepIndex
+                        : index < effectiveStepIndex
                         ? 'done'
-                        : index === stepIndex
+                        : index === effectiveStepIndex
                         ? 'active'
                         : 'upcoming';
                     return (
@@ -292,7 +400,7 @@ export default function OrderTracking() {
                     soon.
                   </div>
                 ) : (
-                  shipments.map((sh) => {
+                  shipments.map(sh => {
                     const trackOrderId = sh.shiprocket_order_id || sh.awb || '';
                     return (
                       <div className="ot-ship-card" key={sh.id}>
@@ -340,24 +448,11 @@ export default function OrderTracking() {
                           </div>
                         </div>
                         <div className="ot-ship-actions">
-                          {trackOrderId ? (
-                            <a
-                              className="ot-btn ot-btn-ghost"
-                              href={`/track-order?orderId=${encodeURIComponent(trackOrderId)}`}
-                            >
-                              Track shipment
-                            </a>
-                          ) : null}
-                          {sh.tracking_url ? (
-                            <a
-                              className="ot-btn ot-btn-ghost"
-                              href={sh.tracking_url}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              View live tracking
-                            </a>
-                          ) : null}
+                          {trackOrderId && (
+                            <span className="ot-ship-meta">
+                              Linked to Shiprocket tracking
+                            </span>
+                          )}
                           {sh.label_url ? (
                             <a
                               className="ot-btn ot-btn-solid"
@@ -478,7 +573,7 @@ export default function OrderTracking() {
                 )}
                 {Array.isArray(requests) && requests.length ? (
                   <div className="ot-returns-list">
-                    {requests.map((r) => (
+                    {requests.map(r => (
                       <div className="ot-return-row" key={r.id}>
                         <div className="ot-return-cell">
                           <span className="ot-return-label">Type</span>
