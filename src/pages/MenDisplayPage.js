@@ -1,6 +1,7 @@
-import React from 'react'
+// D:\shopping\src\pages\MenDisplayPage.js
+import React, { useMemo, useState, useEffect } from 'react'
 import './MenDisplayPage.css'
-import { FaHeart, FaRegHeart } from 'react-icons/fa'
+import { FaHeart, FaRegHeart, FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 
 const CLOUD_NAME = 'deymt9uyh'
 const DEFAULT_IMG = '/images/men/mens13.jpeg'
@@ -10,20 +11,17 @@ function cloudinaryUrlByEan(ean) {
   return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/f_auto,q_auto/products/${ean}`
 }
 
-function priceForUser(p, userType) {
-  return userType === 'B2B' ? p.final_price_b2b || p.final_price_b2c : p.final_price_b2c
-}
-
-function mrpForUser(p, userType) {
-  return userType === 'B2B' ? p.original_price_b2b || p.original_price_b2c : p.original_price_b2c
-}
-
-function discountPct(p, userType) {
-  const mrp = Number(mrpForUser(p, userType) || 0)
-  const price = Number(priceForUser(p, userType) || 0)
-  if (!mrp || mrp <= 0) return 0
-  const pct = ((mrp - price) / mrp) * 100
-  return Math.max(0, Math.round(pct))
+function uniq(arr) {
+  const seen = new Set()
+  const out = []
+  for (const x of arr) {
+    const k = String(x || '')
+    if (!seen.has(k) && k) {
+      seen.add(k)
+      out.push(k)
+    }
+  }
+  return out
 }
 
 export default function MenDisplayPage({
@@ -36,103 +34,247 @@ export default function MenDisplayPage({
   onToggleLike,
   onProductClick
 }) {
-  const items = Array.isArray(products) ? products : []
+  const [carouselIndex, setCarouselIndex] = useState({})
+
+  const grouped = useMemo(() => {
+    const byKey = new Map()
+    for (const p of products || []) {
+      const k = p.ean_code || `__noean__:${p.product_id || p.id}`
+      if (!byKey.has(k)) {
+        byKey.set(k, {
+          key: k,
+          ean_code: p.ean_code || '',
+          brand: p.brand,
+          product_name: p.product_name,
+          price_fields: {
+            original_price_b2c: p.original_price_b2c,
+            final_price_b2c: p.final_price_b2c,
+            original_price_b2b: p.original_price_b2b,
+            final_price_b2b: p.final_price_b2b
+          },
+          rep: p,
+          variants: []
+        })
+      }
+      const g = byKey.get(k)
+      g.variants.push(p)
+    }
+
+    const out = []
+    for (const g of byKey.values()) {
+      const imgs = uniq([
+        ...g.variants.map((v) => v.image_url),
+        g.ean_code ? cloudinaryUrlByEan(g.ean_code) : ''
+      ])
+
+      const hasStockInfo = g.variants.some(
+        (v) => v.in_stock !== undefined || v.available_qty !== undefined
+      )
+
+      const anyVariantInStock = g.variants.some((v) => {
+        const qty = Number(v.available_qty ?? 0)
+        if (v.in_stock === true) return true
+        if (v.in_stock === false) return qty > 0
+        return qty > 0
+      })
+
+      out.push({
+        ...g,
+        images: imgs,
+        id: g.rep.id,
+        product_id: g.rep.product_id,
+        brand: g.brand || g.rep.brand,
+        product_name: g.product_name || g.rep.product_name,
+        is_out_of_stock: hasStockInfo ? !anyVariantInStock : false
+      })
+    }
+    return out
+  }, [products])
+
+  useEffect(() => {
+    const init = {}
+    for (const g of grouped) {
+      init[g.key] = 0
+    }
+    setCarouselIndex(init)
+  }, [grouped])
+
+  const priceForUser = (g) => {
+    const p = g.price_fields || {}
+    return userType === 'B2B' ? p.final_price_b2b || p.final_price_b2c : p.final_price_b2c
+  }
+
+  const mrpForUser = (g) => {
+    const p = g.price_fields || {}
+    return userType === 'B2B' ? p.original_price_b2b || p.original_price_b2c : p.original_price_b2c
+  }
+
+  const discountPct = (g) => {
+    const mrp = Number(mrpForUser(g) || 0)
+    const price = Number(priceForUser(g) || 0)
+    if (!mrp || mrp <= 0) return 0
+    const pct = ((mrp - price) / mrp) * 100
+    return Math.max(0, Math.round(pct))
+  }
+
+  const nextImg = (group, e) => {
+    e?.stopPropagation?.()
+    setCarouselIndex((prev) => {
+      const i = prev[group.key] || 0
+      const n = group.images?.length || 1
+      return { ...prev, [group.key]: (i + 1) % n }
+    })
+  }
+
+  const prevImg = (group, e) => {
+    e?.stopPropagation?.()
+    setCarouselIndex((prev) => {
+      const i = prev[group.key] || 0
+      const n = group.images?.length || 1
+      return { ...prev, [group.key]: (i - 1 + n) % n }
+    })
+  }
+
+  const handleCardClick = (group) => {
+    const idx = carouselIndex[group.key] || 0
+    const enriched = { ...group, activeIndex: idx }
+    onProductClick(enriched)
+  }
+
+  const userLabel = userType === 'B2B' ? 'B2B view' : 'Retail view'
 
   return (
     <section className="mens-section4">
-      <div className="mens-collection-head">
-        <div className="mens-collection-head-left">
+      <div className="section-head">
+        <div className="section-head-left">
           <h2>Men’s Collection</h2>
-          <p className="mens-collection-subtitle">Sharp fits, clean lines and everyday essentials</p>
+          <p className="section-sub">Sharp fits, clean lines and everyday essentials</p>
         </div>
-        <div className="mens-collection-count">{items.length} styles</div>
+        <div className="section-head-right">
+          <span className="count">{grouped.length} items</span>
+          <span className="user-pill">{userLabel}</span>
+        </div>
       </div>
 
       {loading ? (
-        <div className="mens-notice">Loading your styles…</div>
+        <div className="state-card">Loading products…</div>
       ) : error ? (
-        <div className="mens-notice">{error}</div>
-      ) : !items.length ? (
-        <div className="mens-notice">No products found. Try changing your filters.</div>
+        <div className="state-card error-state">{error}</div>
+      ) : !grouped.length ? (
+        <div className="state-card">No products found</div>
       ) : (
         <div className="mens-section4-grid">
-          {items.map((product, idx) => {
-            const liked = likedKeys.has(keyFor(product))
-            const dPct = discountPct(product, userType)
-            const price = Number(priceForUser(product, userType) || 0)
-            const mrp = Number(mrpForUser(product, userType) || 0)
+          {grouped.map((group, index) => {
+            const liked = likedKeys.has(keyFor(group))
+            const idx = carouselIndex[group.key] || 0
+            const imgSrc =
+              group.images?.[idx] ||
+              (group.ean_code ? cloudinaryUrlByEan(group.ean_code) : '') ||
+              DEFAULT_IMG
+            const total = group.images?.length || 1
+            const discount = discountPct(group)
+            const hasVariants = group.variants && group.variants.length > 1
+            const isOutOfStock = group.is_out_of_stock
+
             return (
               <div
-                key={product.product_id || product.id || idx}
-                className="mens-section4-card"
-                onClick={() => onProductClick(product)}
+                key={group.key || index}
+                className={`mens-section4-card${isOutOfStock ? ' out-of-stock' : ''}`}
+                onClick={() => handleCardClick(group)}
               >
                 <div className="mens-section4-img">
+                  {discount > 0 && (
+                    <div className="discount-ribbon">
+                      <span>{discount}% OFF</span>
+                    </div>
+                  )}
+                  {hasVariants && (
+                    <div className="variant-pill">
+                      {group.variants.length} sizes
+                    </div>
+                  )}
                   <img
-                    src={product.image_url || DEFAULT_IMG}
-                    alt={product.product_name}
-                    loading="lazy"
+                    src={imgSrc}
+                    alt={group.product_name}
+                    className="fade-image"
                     onError={(e) => {
-                      if (e.currentTarget.dataset.fallbackApplied) {
-                        e.currentTarget.src = DEFAULT_IMG
-                        return
-                      }
-                      e.currentTarget.dataset.fallbackApplied = '1'
-                      e.currentTarget.src = product.ean_code
-                        ? cloudinaryUrlByEan(product.ean_code)
-                        : DEFAULT_IMG
+                      e.currentTarget.onerror = null
+                      e.currentTarget.src = DEFAULT_IMG
                     }}
                   />
+                  {isOutOfStock && (
+                    <div className="out-of-stock-overlay">
+                      <span>Out of Stock</span>
+                    </div>
+                  )}
+                  {total > 1 && (
+                    <>
+                      <button
+                        className="carousel-arrow left"
+                        onClick={(e) => prevImg(group, e)}
+                        aria-label="Previous"
+                      >
+                        <FaChevronLeft />
+                      </button>
+                      <button
+                        className="carousel-arrow right"
+                        onClick={(e) => nextImg(group, e)}
+                        aria-label="Next"
+                      >
+                        <FaChevronRight />
+                      </button>
+                      <div className="carousel-dots">
+                        {group.images.map((_, i) => (
+                          <span
+                            key={i}
+                            className={i === idx ? 'dot active' : 'dot'}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setCarouselIndex((prev) => ({ ...prev, [group.key]: i }))
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <div className="carousel-count">
+                        {idx + 1}/{total}
+                      </div>
+                    </>
+                  )}
                   <div
-                    className="mens-love-icon"
+                    className="love-icon"
                     onClick={(e) => {
                       e.stopPropagation()
-                      onToggleLike(product)
+                      onToggleLike(group)
                     }}
                   >
                     {liked ? (
-                      <FaHeart className="mens-love-icon-heart active" />
+                      <FaHeart style={{ color: 'gold', fontSize: '20px' }} />
                     ) : (
-                      <FaRegHeart className="mens-love-icon-heart" />
+                      <FaRegHeart style={{ color: 'gold', fontSize: '20px' }} />
                     )}
                   </div>
-                  {dPct > 0 && (
-                    <div className="mens-badge mens-badge-discount">
-                      {dPct}% OFF
-                    </div>
-                  )}
                 </div>
 
-                <div className="mens-card-body">
-                  <div className="mens-brand-name">{product.brand}</div>
-                  <div className="mens-product-name">{product.product_name}</div>
-
-                  {(product.color || product.size) && (
-                    <div className="mens-meta-row">
-                      {product.color && (
-                        <span className="mens-meta-pill">
-                          {product.color}
-                        </span>
-                      )}
-                      {product.size && (
-                        <span className="mens-meta-pill">
-                          Size {product.size}
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  <div className="mens-section4-price">
-                    <span className="mens-offer-price">
-                      ₹{price.toFixed(2)}
+                <div className="mens-section4-body">
+                  <div className="brand-row">
+                    <h4 className="brand-name">{group.brand}</h4>
+                    <span className="brand-chip">New in</span>
+                  </div>
+                  <h5 className="product-name">{group.product_name}</h5>
+                  <div className="card-price-row">
+                    <span className="card-offer-price">
+                      ₹{Number(priceForUser(group) || 0).toFixed(2)}
                     </span>
-                    {mrp > price && (
-                      <span className="mens-original-price">
-                        ₹{mrp.toFixed(2)}
-                      </span>
-                    )}
-                    {dPct > 0 && (
-                      <span className="mens-discount">{dPct}% OFF</span>
+                    <span className="card-original-price">
+                      ₹{Number(mrpForUser(group) || 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="mens-section4-meta">
+                    <span className="price-type">
+                      {userType === 'B2B' ? 'Best B2B margin' : 'Inclusive of all taxes'}
+                    </span>
+                    {discount > 0 && (
+                      <span className="saving-text">You save {discount}%</span>
                     )}
                   </div>
                 </div>
