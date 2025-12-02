@@ -40,11 +40,9 @@ export default function OrderCheckout() {
         const mrp = Number(it.mrp ?? it.price ?? 0) || 0;
         let price = Number(it.price ?? 0) || 0;
         const qty = Number(it.qty ?? 1) || 1;
-
         if ((!price || price <= 0) && mrp > 0) {
           price = mrp;
         }
-
         return {
           ...it,
           mrp,
@@ -53,20 +51,17 @@ export default function OrderCheckout() {
         };
       });
 
-      let bagTotal = 0;
-
-      for (const it of normalizedItems) {
-        const mrp = Number(it.mrp || 0);
-        const qty = Number(it.qty || 1);
-        bagTotal += mrp * qty;
+      const rawTotals = stored.totals || {};
+      const bagTotal = Number(rawTotals.bagTotal ?? 0);
+      const discountTotal = Number(rawTotals.discountTotal ?? 0);
+      const couponPct = Number(rawTotals.couponPct ?? 0);
+      const couponDiscount = Number(rawTotals.couponDiscount ?? 0);
+      const convenience = Number(rawTotals.convenience ?? 0);
+      const giftWrap = Number(rawTotals.giftWrap ?? 0);
+      let payable = Number(rawTotals.payable ?? 0);
+      if (!payable || payable <= 0) {
+        payable = bagTotal - discountTotal - couponDiscount + convenience + giftWrap;
       }
-
-      const discountTotal = 0;
-      const couponPct = 0;
-      const couponDiscount = 0;
-      const convenience = 0;
-      const giftWrap = Number(stored?.totals?.giftWrap ?? 0);
-      const payable = bagTotal + giftWrap + convenience;
 
       return {
         ...stored,
@@ -345,7 +340,7 @@ export default function OrderCheckout() {
                 )}
                 <div>
                   <span>Convenience</span>
-                  <span>₹0.00</span>
+                  <span>₹{fmt(payload?.totals?.convenience)}</span>
                 </div>
                 {!!payload?.totals?.giftWrap && (
                   <div>

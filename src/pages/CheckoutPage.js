@@ -70,6 +70,11 @@ const CheckoutPage = () => {
     return current && current.uid ? current.uid : '';
   });
 
+  const [userType, setUserType] = useState(() => {
+    if (typeof window === 'undefined') return 'B2C';
+    return sessionStorage.getItem('userType') || 'B2C';
+  });
+
   const zoomFactor = 3;
 
   useEffect(() => {
@@ -108,7 +113,13 @@ const CheckoutPage = () => {
           color: r.color || r.colour || '',
           size: r.size || '',
           image_url: r.image_url,
-          ean_code: r.ean_code || ''
+          ean_code: r.ean_code || '',
+          original_price_b2c: r.original_price_b2c,
+          final_price_b2c: r.final_price_b2c,
+          original_price_b2b: r.original_price_b2b,
+          final_price_b2b: r.final_price_b2b,
+          mrp: r.mrp,
+          sale_price: r.sale_price
         }));
         setVariants(mapped);
 
@@ -146,18 +157,20 @@ const CheckoutPage = () => {
   }, [product]);
 
   useEffect(() => {
-    const syncUserId = () => {
+    const syncUser = () => {
       if (typeof window === 'undefined') return;
-      const stored = sessionStorage.getItem('userId');
-      if (stored && stored !== userId) setUserId(stored);
+      const storedId = sessionStorage.getItem('userId');
+      if (storedId && storedId !== userId) setUserId(storedId);
+      const storedType = sessionStorage.getItem('userType');
+      if (storedType && storedType !== userType) setUserType(storedType);
     };
-    window.addEventListener('storage', syncUserId);
-    const interval = setInterval(syncUserId, 500);
+    window.addEventListener('storage', syncUser);
+    const interval = setInterval(syncUser, 500);
     return () => {
-      window.removeEventListener('storage', syncUserId);
+      window.removeEventListener('storage', syncUser);
       clearInterval(interval);
     };
-  }, [userId]);
+  }, [userId, userType]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
@@ -209,6 +222,26 @@ const CheckoutPage = () => {
     setSelectedSize(size);
   };
 
+  const getActivePricing = () => {
+    const variant =
+      variants.find((v) => v.color === selectedColor && v.size === selectedSize) || null;
+    const base = variant || product || {};
+    if (userType === 'B2B') {
+      const mrp = Number(base.original_price_b2b || base.mrp || 0);
+      const offer = Number(base.final_price_b2b || base.sale_price || 0) || 0;
+      return { mrp, offer };
+    }
+    const mrp = Number(base.original_price_b2c || base.mrp || 0);
+    const offer = Number(base.final_price_b2c || base.sale_price || 0) || 0;
+    return { mrp, offer };
+  };
+
+  const getDiscount = () => {
+    const { mrp, offer } = getActivePricing();
+    if (!mrp || !offer || mrp <= offer) return 0;
+    return Math.round(((mrp - offer) / mrp) * 100);
+  };
+
   const handleAdd = async (type) => {
     if (!userId) {
       setPopupMessage('Please sign in to continue');
@@ -227,6 +260,7 @@ const CheckoutPage = () => {
 
     const item = {
       ...product,
+      ...(chosenVariant || {}),
       id: chosenVariant?.id || product.id,
       product_id: chosenVariant?.product_id || product.product_id || null,
       image_url: mainImage(),
@@ -311,13 +345,7 @@ const CheckoutPage = () => {
     if (/^\d{0,6}$/.test(value)) setPincode(value);
   };
 
-  const getDiscount = () => {
-    const mrp = product?.original_price_b2c || 0;
-    const offer = product?.final_price_b2c || 0;
-    if (!mrp || mrp <= offer) return 0;
-    return Math.round(((mrp - offer) / mrp) * 100);
-  };
-
+  const pricing = getActivePricing();
   const thumbList = selectedColor ? colorImages[selectedColor] || [] : [];
 
   return (
@@ -418,13 +446,13 @@ const CheckoutPage = () => {
               <h2 className="co-name">{product?.product_name}</h2>
 
               <div className="co-price-row">
-                <span className="co-price">₹{Number(product?.final_price_b2c || 0).toFixed(2)}</span>
+                <span className="co-price">₹{Number(pricing.offer || pricing.mrp || 0).toFixed(2)}</span>
                 <span className="co-disc">{getDiscount()}% Off</span>
               </div>
 
               <div className="co-mrp">
                 <span className="co-mrp-label">MRP:</span>
-                <span className="co-mrp-strike">₹{Number(product?.original_price_b2c || 0).toFixed(2)}</span>
+                <span className="co-mrp-strike">₹{Number(pricing.mrp || 0).toFixed(2)}</span>
                 <span className="co-tax">Inclusive of all taxes</span>
               </div>
 

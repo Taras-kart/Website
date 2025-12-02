@@ -30,6 +30,24 @@ const Cart = () => {
   const [toast, setToast] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
   const userId = sessionStorage.getItem('userId');
+  const [userType, setUserType] = useState(() => {
+    if (typeof window === 'undefined') return 'B2C';
+    return sessionStorage.getItem('userType') || 'B2C';
+  });
+
+  useEffect(() => {
+    const syncUserType = () => {
+      if (typeof window === 'undefined') return;
+      const storedType = sessionStorage.getItem('userType') || 'B2C';
+      if (storedType !== userType) setUserType(storedType);
+    };
+    window.addEventListener('storage', syncUserType);
+    const interval = setInterval(syncUserType, 500);
+    return () => {
+      window.removeEventListener('storage', syncUserType);
+      clearInterval(interval);
+    };
+  }, [userType]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -50,6 +68,40 @@ const Cart = () => {
 
   const fmt = (n) => Number(n || 0).toFixed(2);
 
+  const getItemPricing = (item) => {
+    if (userType === 'B2B') {
+      const mrp = Number(
+        item.original_price_b2b ??
+          item.mrp ??
+          item.original_price_b2c ??
+          item.final_price_b2b ??
+          item.final_price_b2c ??
+          0
+      );
+      const offer = Number(
+        item.final_price_b2b ??
+          item.final_price_b2c ??
+          item.sale_price ??
+          mrp
+      );
+      return { mrp, offer };
+    }
+    const mrp = Number(
+      item.original_price_b2c ??
+        item.mrp ??
+        item.original_price_b2b ??
+        item.final_price_b2c ??
+        item.final_price_b2b ??
+        0
+    );
+    const offer = Number(
+      item.final_price_b2c ??
+        item.sale_price ??
+        mrp
+    );
+    return { mrp, offer };
+  };
+
   const handleRemoveClick = (item) => {
     setSelectedItem(item);
     setShowPopup(true);
@@ -58,13 +110,15 @@ const Cart = () => {
   const applyCoupon = () => {
     const code = couponInput.trim().toUpperCase();
     if (code === 'GOLD10') {
+      setCouponDiscountPct(10);
       setToast('GOLD10 applied');
     } else if (code === 'FREESHIP') {
+      setCouponDiscountPct(0);
       setToast('FREESHIP applied');
     } else {
+      setCouponDiscountPct(0);
       setToast('Invalid coupon');
     }
-    setCouponDiscountPct(0);
     setShowCoupon(false);
     setTimeout(() => setToast(''), 1500);
   };
@@ -100,20 +154,28 @@ const Cart = () => {
 
   const bagTotal = cartItems.reduce((total, item) => {
     const qty = quantities[item.id] || 1;
-    const mrp = item.original_price_b2c || item.final_price_b2c;
-    return total + Number(mrp) * qty;
+    const { mrp } = getItemPricing(item);
+    return total + mrp * qty;
   }, 0);
 
-  const discountTotal = 0;
-  const subTotalBeforeCoupon = bagTotal;
-  const rawCouponDiscount = 0;
+  const discountTotal = cartItems.reduce((total, item) => {
+    const qty = quantities[item.id] || 1;
+    const { mrp, offer } = getItemPricing(item);
+    if (!mrp || offer >= mrp) return total;
+    return total + (mrp - offer) * qty;
+  }, 0);
+
+  const subTotalBeforeCoupon = bagTotal - discountTotal;
+  const rawCouponDiscount = (subTotalBeforeCoupon * couponDiscountPct) / 100;
   const maxCouponDiscount = 0;
-  const couponDiscount = 0;
+  const couponDiscount =
+    maxCouponDiscount > 0 ? Math.min(rawCouponDiscount, maxCouponDiscount) : rawCouponDiscount;
   const subTotal = subTotalBeforeCoupon - couponDiscount;
   const freeShipThreshold = 0;
   const convenience = 0;
   const youPay = subTotal + (giftWrap ? 39 : 0);
   const toFreeShipping = 0;
+  const totalSaving = discountTotal + couponDiscount;
 
   const proceedToCheckout = () => {
     if (!cartItems.length) return;
@@ -121,23 +183,21 @@ const Cart = () => {
       totals: {
         bagTotal,
         discountTotal,
-        couponPct: 0,
-        couponDiscount: 0,
+        couponPct: couponDiscountPct,
+        couponDiscount,
         convenience,
         giftWrap: giftWrap ? 39 : 0,
         payable: youPay
       },
       items: cartItems.map((item) => {
         const qty = quantities[item.id] || 1;
+        const { mrp, offer } = getItemPricing(item);
         return {
           variant_id: item.id,
           product_id: item.product_id || null,
           qty,
-          price: Number(item.final_price_b2c),
-          mrp:
-            item.original_price_b2c != null
-              ? Number(item.original_price_b2c)
-              : Number(item.final_price_b2c),
+          price: Number(offer),
+          mrp: Number(mrp),
           size: item.selected_size || '',
           colour: item.selected_color || '',
           image_url: item.image_url || null
@@ -189,8 +249,11 @@ const Cart = () => {
 
                 {cartItems.map((item) => {
                   const qty = quantities[item.id] || 1;
-                  const mrp = Number(item.original_price_b2c || item.final_price_b2c);
-                  const discountPct = 0;
+                  const { mrp, offer } = getItemPricing(item);
+                  const discountPct =
+                    mrp > 0 && offer < mrp
+                      ? Math.round(((mrp - offer) / mrp) * 100)
+                      : 0;
 
                   return (
                     <div className="cart-card" key={item.id}>
@@ -253,7 +316,7 @@ const Cart = () => {
                         </div>
 
                         <div className="card-price">
-                          <div className="now">₹{fmt(item.final_price_b2c * qty)}</div>
+                          <div className="now">₹{fmt(offer * qty)}</div>
                           <div className="was">
                             <span className="mrp">₹{fmt(mrp * qty)}</span>
                             {discountPct > 0 && (
@@ -325,7 +388,7 @@ const Cart = () => {
                   <div className="save-note">
                     <FaCheck />
                     <span>
-                      You are saving ₹{fmt(couponDiscount)} on this order
+                      You are saving ₹{fmt(totalSaving)} on this order
                     </span>
                   </div>
                   <button className="btn-buy" onClick={proceedToCheckout}>

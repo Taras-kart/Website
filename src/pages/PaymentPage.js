@@ -1,4 +1,3 @@
-// D:\shopping\src\pages\PaymentPage.js
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
@@ -131,6 +130,16 @@ export default function PaymentPage() {
               razorpay_signature: response.razorpay_signature
             });
             if (res.ok) {
+              try {
+                if (saleId) {
+                  await postWithFallback(codPaths, {
+                    sale_id: saleId,
+                    status: 'PAID'
+                  });
+                }
+              } catch (err2) {
+                console.error('Failed to set sale as PAID', err2);
+              }
               setSuccessType('ONLINE');
               setSuccess(true);
             } else {
