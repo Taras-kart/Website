@@ -159,7 +159,7 @@
   margin: 0;
   max-height: 360px;
   overflow: auto;
-  font-family: Menlo, Monaco, Consolas, monospace;
+  font-family: "Noto Sans", sans-serif;
   font-size: 11px;
   background-color: black;
   color: white;

@@ -95,9 +95,9 @@ export default function Home1() {
           <div className="cat-inner-new-home">
             <div className="cat-head-new-home">
               <h2 className="cat-title-new-home">Category</h2>
-              <Link to="/women" className="cat-view-new-home">
+              {/*<Link to="/women" className="cat-view-new-home">
                 View All
-              </Link>
+              </Link> */}
             </div>
             <div className="cat-row-new-home">
               <Link to="/women" className="cat-card-new-home">

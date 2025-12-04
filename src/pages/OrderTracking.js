@@ -28,8 +28,8 @@ function computeStepFromShiprocketStatus(srStatus) {
   if (!s) return 0;
   if (s.includes('DELIVERED')) return 4;
   if (s.includes('OUT FOR DELIVERY') || s.includes('OUT_FOR_DELIVERY')) return 3;
-  if (s.includes('PICKED') || s.includes('DISPATCH') || s.includes('IN TRANSIT') || s.includes('SHIPPED')) return 3;
-  if (s.includes('PACKED') || s.includes('MANIFEST')) return 2;
+  if (s.includes('IN TRANSIT') || s.includes('DISPATCH') || s.includes('SHIPPED') || s.includes('PICKED')) return 3;
+  if (s.includes('AWB') || s.includes('PACKED') || s.includes('MANIFEST')) return 2;
   if (s.includes('CONFIRMED') || s.includes('PROCESSING') || s.includes('ACCEPTED') || s.includes('CREATED')) return 1;
   return 0;
 }
@@ -240,19 +240,8 @@ export default function OrderTracking() {
   }, [trackingSnapshot.eddText, computedEddDate]);
 
   const baseLocalStep = computeStepFromLocal(localOrderStatus);
-  let baseShiprocketStep = computeStepFromShiprocketStatus(shiprocketStatus);
-  if (!isCancelled && trackingSnapshot.eddText && baseShiprocketStep < 3) {
-    baseShiprocketStep = 3;
-  }
-  let effectiveStepIndex = Math.max(baseLocalStep, baseShiprocketStep, shipmentStepIndex);
-  if (
-    !isCancelled &&
-    expectedDeliveryText &&
-    expectedDeliveryText !== 'To be updated soon' &&
-    effectiveStepIndex < 3
-  ) {
-    effectiveStepIndex = 3;
-  }
+  const baseShiprocketStep = computeStepFromShiprocketStatus(shiprocketStatus);
+  const effectiveStepIndex = Math.max(baseLocalStep, baseShiprocketStep, shipmentStepIndex);
 
   const deliveryStatusText = (() => {
     if (isCancelled) return 'This order has been cancelled';

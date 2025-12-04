@@ -62,6 +62,10 @@ const CheckoutPage = () => {
   const [pincode, setPincode] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
+  const [isCheckingPin, setIsCheckingPin] = useState(false);
+  const [pincodeStatus, setPincodeStatus] = useState(null);
+  const [pincodeMessage, setPincodeMessage] = useState('');
+
   const [userId, setUserId] = useState(() => {
     if (typeof window === 'undefined') return '';
     const stored = sessionStorage.getItem('userId');
@@ -343,6 +347,50 @@ const CheckoutPage = () => {
   const handlePincodeChange = (e) => {
     const value = e.target.value;
     if (/^\d{0,6}$/.test(value)) setPincode(value);
+    setPincodeStatus(null);
+    setPincodeMessage('');
+  };
+
+  const handlePincodeApply = async () => {
+    if (!pincode || pincode.length !== 6) {
+      setPincodeStatus('error');
+      setPincodeMessage('Please enter a valid 6-digit pincode');
+      return;
+    }
+
+    try {
+      setIsCheckingPin(true);
+      setPincodeStatus(null);
+      setPincodeMessage('');
+
+      const resp = await fetch(
+        `${API_BASE}/api/shiprocket/pincode?pincode=${encodeURIComponent(pincode)}`
+      );
+      const data = await resp.json();
+
+      if (!resp.ok || !data.ok) {
+        setPincodeStatus('error');
+        setPincodeMessage(data.message || 'Unable to check delivery for this pincode');
+        return;
+      }
+
+      if (data.serviceable) {
+        setPincodeStatus('ok');
+        if (data.est_delivery) {
+          setPincodeMessage(`Delivery available. Estimated delivery: ${data.est_delivery}`);
+        } else {
+          setPincodeMessage('Delivery available to this pincode');
+        }
+      } else {
+        setPincodeStatus('unserviceable');
+        setPincodeMessage('Sorry, we currently do not deliver to this pincode');
+      }
+    } catch (err) {
+      setPincodeStatus('error');
+      setPincodeMessage('Something went wrong while checking pincode');
+    } finally {
+      setIsCheckingPin(false);
+    }
   };
 
   const pricing = getActivePricing();
@@ -519,8 +567,27 @@ const CheckoutPage = () => {
                     onChange={handlePincodeChange}
                     placeholder="Enter Pincode"
                   />
-                  <button className="btn black">Apply</button>
+                  <button
+                    className="btn black"
+                    onClick={handlePincodeApply}
+                    disabled={isCheckingPin}
+                  >
+                    {isCheckingPin ? 'Checking…' : 'Apply'}
+                  </button>
                 </div>
+                {pincodeMessage && (
+                  <p
+                    className={
+                      pincodeStatus === 'ok'
+                        ? 'co-pin-msg success'
+                        : pincodeStatus === 'unserviceable'
+                        ? 'co-pin-msg warn'
+                        : 'co-pin-msg error'
+                    }
+                  >
+                    {pincodeMessage}
+                  </p>
+                )}
               </div>
             </>
           )}
