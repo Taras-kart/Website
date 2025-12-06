@@ -3,7 +3,13 @@ import './WomenDisplayPage.css'
 import { FaHeart, FaRegHeart, FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 
 const CLOUD_NAME = 'deymt9uyh'
-const DEFAULT_IMG = '/images/women/women20.jpeg'
+
+const DEFAULT_IMG_BY_GENDER = {
+  WOMEN: '/images/women/women20.jpeg',
+  MEN: '/images/men/mens13.jpeg',
+  KIDS: '/images/kids/kids-girls-frock.jpg',
+  _: '/images/women/women20.jpeg'
+}
 
 function cloudinaryUrlByEan(ean) {
   if (!ean) return ''
@@ -23,6 +29,88 @@ function uniq(arr) {
   return out
 }
 
+function groupProductsByColor(products) {
+  const byKey = new Map()
+  for (const p of products || []) {
+    if (!p) continue
+    const baseKey = [
+      p.product_name || '',
+      p.brand || '',
+      p.color || '',
+      p.gender || ''
+    ].join('||')
+    const key =
+      baseKey.trim() ||
+      `__fallback__:${p.ean_code || p.product_id || p.id || Math.random()}`
+    if (!byKey.has(key)) {
+      byKey.set(key, {
+        key,
+        color: p.color,
+        brand: p.brand,
+        product_name: p.product_name,
+        gender: p.gender,
+        price_fields: {
+          original_price_b2c: p.original_price_b2c,
+          final_price_b2c: p.final_price_b2c,
+          original_price_b2b: p.original_price_b2b,
+          final_price_b2b: p.final_price_b2b,
+          mrp: p.mrp,
+          sale_price: p.sale_price
+        },
+        rep: p,
+        variants: []
+      })
+    }
+    const g = byKey.get(key)
+    g.variants.push(p)
+  }
+
+  const out = []
+  for (const g of byKey.values()) {
+    const eans = uniq(g.variants.map((v) => v.ean_code))
+    const imgs = uniq([
+      ...g.variants.map((v) => v.image_url),
+      ...eans.map((ean) => cloudinaryUrlByEan(ean))
+    ])
+
+    const hasStockInfo = g.variants.some(
+      (v) =>
+        v.in_stock !== undefined ||
+        v.available_qty !== undefined ||
+        v.on_hand !== undefined
+    )
+
+    const allVariantsOutOfStock = g.variants.every((v) => {
+      const qty = Number(
+        v.available_qty !== undefined
+          ? v.available_qty
+          : v.on_hand !== undefined
+          ? v.on_hand
+          : 0
+      )
+      if (v.is_out_of_stock === true) return true
+      if (v.is_out_of_stock === false) return false
+      if (v.in_stock === true) return false
+      if (v.in_stock === false) return qty <= 0
+      return qty <= 0
+    })
+
+    const isOutOfStock = hasStockInfo ? allVariantsOutOfStock : false
+
+    out.push({
+      ...g,
+      images: imgs,
+      ean_code: eans[0] || '',
+      id: g.rep.id,
+      product_id: g.rep.product_id,
+      brand: g.brand || g.rep.brand,
+      product_name: g.product_name || g.rep.product_name,
+      is_out_of_stock: isOutOfStock
+    })
+  }
+  return out
+}
+
 export default function WomenDisplayPage({
   products,
   userType,
@@ -35,60 +123,7 @@ export default function WomenDisplayPage({
 }) {
   const [carouselIndex, setCarouselIndex] = useState({})
 
-  const grouped = useMemo(() => {
-    const byKey = new Map()
-    for (const p of products) {
-      const k = p.ean_code || `__noean__:${p.product_id || p.id}`
-      if (!byKey.has(k)) {
-        byKey.set(k, {
-          key: k,
-          ean_code: p.ean_code || '',
-          brand: p.brand,
-          product_name: p.product_name,
-          price_fields: {
-            original_price_b2c: p.original_price_b2c,
-            final_price_b2c: p.final_price_b2c,
-            original_price_b2b: p.original_price_b2b,
-            final_price_b2b: p.final_price_b2b
-          },
-          rep: p,
-          variants: []
-        })
-      }
-      const g = byKey.get(k)
-      g.variants.push(p)
-    }
-
-    const out = []
-    for (const g of byKey.values()) {
-      const imgs = uniq([
-        ...g.variants.map((v) => v.image_url),
-        g.ean_code ? cloudinaryUrlByEan(g.ean_code) : ''
-      ])
-
-      const hasStockInfo = g.variants.some(
-        (v) => v.in_stock !== undefined || v.available_qty !== undefined
-      )
-
-      const anyVariantInStock = g.variants.some((v) => {
-        const qty = Number(v.available_qty ?? 0)
-        if (v.in_stock === true) return true
-        if (v.in_stock === false) return qty > 0
-        return qty > 0
-      })
-
-      out.push({
-        ...g,
-        images: imgs,
-        id: g.rep.id,
-        product_id: g.rep.product_id,
-        brand: g.brand || g.rep.brand,
-        product_name: g.product_name || g.rep.product_name,
-        is_out_of_stock: hasStockInfo ? !anyVariantInStock : false
-      })
-    }
-    return out
-  }, [products])
+  const grouped = useMemo(() => groupProductsByColor(products || []), [products])
 
   useEffect(() => {
     const init = {}
@@ -98,21 +133,56 @@ export default function WomenDisplayPage({
     setCarouselIndex(init)
   }, [grouped])
 
-  const priceForUser = (g) => {
-    const p = g.price_fields || {}
-    return userType === 'B2B' ? p.final_price_b2b || p.final_price_b2c : p.final_price_b2c
+  const getPriceFields = (g) => {
+    const p = g.price_fields || g || {}
+    const num = (v) => {
+      const n = Number(v)
+      return Number.isFinite(n) && n > 0 ? n : 0
+    }
+    if (userType === 'B2B') {
+      const offerCandidates = [
+        p.final_price_b2b,
+        p.sale_price,
+        p.mrp,
+        p.original_price_b2b,
+        p.original_price_b2c
+      ]
+      const mrpCandidates = [
+        p.mrp,
+        p.original_price_b2b,
+        p.original_price_b2c,
+        p.final_price_b2b,
+        p.sale_price
+      ]
+      const offer = offerCandidates.map(num).find((v) => v > 0) || 0
+      const mrp = mrpCandidates.map(num).find((v) => v > 0) || offer
+      return { offer, mrp }
+    }
+    const offerCandidates = [
+      p.final_price_b2c,
+      p.sale_price,
+      p.mrp,
+      p.original_price_b2c
+    ]
+    const mrpCandidates = [
+      p.mrp,
+      p.original_price_b2c,
+      p.final_price_b2c,
+      p.sale_price
+    ]
+    const offer = offerCandidates.map(num).find((v) => v > 0) || 0
+    const mrp = mrpCandidates.map(num).find((v) => v > 0) || offer
+    return { offer, mrp }
   }
 
-  const mrpForUser = (g) => {
-    const p = g.price_fields || {}
-    return userType === 'B2B' ? p.original_price_b2b || p.original_price_b2c : p.original_price_b2c
-  }
+  const priceForUser = (g) => getPriceFields(g).offer
+  const mrpForUser = (g) => getPriceFields(g).mrp
 
   const discountPct = (g) => {
-    const mrp = Number(mrpForUser(g) || 0)
-    const price = Number(priceForUser(g) || 0)
+    const { offer, mrp } = getPriceFields(g)
     if (!mrp || mrp <= 0) return 0
-    const pct = ((mrp - price) / mrp) * 100
+    if (!offer || offer <= 0 || offer >= mrp) return 0
+    const pct = ((mrp - offer) / mrp) * 100
     return Math.max(0, Math.round(pct))
   }
 
@@ -142,6 +212,13 @@ export default function WomenDisplayPage({
 
   const userLabel = userType === 'B2B' ? 'B2B view' : 'Retail view'
 
+  const getImgForGroup = (group, idx) => {
+    const img = group.images?.[idx]
+    if (img) return img
+    const gender = group.gender || group.rep?.gender || 'WOMEN'
+    return DEFAULT_IMG_BY_GENDER[gender] || DEFAULT_IMG_BY_GENDER._
+  }
+
   return (
     <section className="womens-section4">
       <div className="section-head">
@@ -166,10 +243,7 @@ export default function WomenDisplayPage({
           {grouped.map((group, index) => {
             const liked = likedKeys.has(keyFor(group))
             const idx = carouselIndex[group.key] || 0
-            const imgSrc =
-              group.images?.[idx] ||
-              (group.ean_code ? cloudinaryUrlByEan(group.ean_code) : '') ||
-              DEFAULT_IMG
+            const imgSrc = getImgForGroup(group, idx)
             const total = group.images?.length || 1
             const discount = discountPct(group)
             const hasVariants = group.variants && group.variants.length > 1
@@ -197,8 +271,10 @@ export default function WomenDisplayPage({
                     alt={group.product_name}
                     className="fade-image"
                     onError={(e) => {
-                      e.currentTarget.onerror = null
-                      e.currentTarget.src = DEFAULT_IMG
+                      const gender = group.gender || group.rep?.gender || 'WOMEN'
+                      const fallback =
+                        DEFAULT_IMG_BY_GENDER[gender] || DEFAULT_IMG_BY_GENDER._
+                      if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback
                     }}
                   />
                   {isOutOfStock && (

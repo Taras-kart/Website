@@ -1,4 +1,3 @@
-// D:\shopping\src\pages\KidsDisplayPage.js
 import React, { useMemo, useState, useEffect } from 'react'
 import './KidsDisplayPage.css'
 import { FaHeart, FaRegHeart, FaChevronLeft, FaChevronRight } from 'react-icons/fa'
@@ -39,11 +38,20 @@ export default function KidsDisplayPage({
   const grouped = useMemo(() => {
     const byKey = new Map()
     for (const p of products || []) {
-      const k = p.ean_code || `__noean__:${p.product_id || p.id}`
-      if (!byKey.has(k)) {
-        byKey.set(k, {
-          key: k,
-          ean_code: p.ean_code || '',
+      if (!p) continue
+      const baseKey = [
+        p.product_name || '',
+        p.brand || '',
+        p.color || '',
+        p.gender || ''
+      ].join('||')
+      const key =
+        baseKey.trim() ||
+        `__fallback__:${p.ean_code || p.product_id || p.id || Math.random()}`
+      if (!byKey.has(key)) {
+        byKey.set(key, {
+          key,
+          color: p.color,
           brand: p.brand,
           product_name: p.product_name,
           price_fields: {
@@ -56,15 +64,16 @@ export default function KidsDisplayPage({
           variants: []
         })
       }
-      const g = byKey.get(k)
+      const g = byKey.get(key)
       g.variants.push(p)
     }
 
     const out = []
     for (const g of byKey.values()) {
+      const eans = uniq(g.variants.map((v) => v.ean_code))
       const imgs = uniq([
         ...g.variants.map((v) => v.image_url),
-        g.ean_code ? cloudinaryUrlByEan(g.ean_code) : ''
+        ...eans.map((ean) => cloudinaryUrlByEan(ean))
       ])
 
       const hasStockInfo = g.variants.some(
@@ -81,6 +90,7 @@ export default function KidsDisplayPage({
       out.push({
         ...g,
         images: imgs,
+        ean_code: eans[0] || '',
         id: g.rep.id,
         product_id: g.rep.product_id,
         brand: g.brand || g.rep.brand,

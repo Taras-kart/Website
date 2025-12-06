@@ -1,7 +1,18 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Footer.css';
-import { FaFacebookF, FaInstagram, FaTwitter, FaEnvelope, FaPhoneAlt } from 'react-icons/fa';
+import { 
+  FaFacebookF, 
+  FaInstagram, 
+  FaTwitter, 
+  FaEnvelope, 
+  FaPhoneAlt, 
+  FaCcVisa, 
+  FaCcMastercard, 
+  FaCreditCard, 
+  FaMoneyBillAlt 
+} from 'react-icons/fa';
+import { SiRazorpay } from 'react-icons/si';
 
 const POLICY_LINKS = {
   shipping: 'https://merchant.razorpay.com/policy/RYmfT0IFIA9UC6/shipping',
@@ -11,7 +22,6 @@ const POLICY_LINKS = {
 
 const Footer = () => {
   const [openIndex, setOpenIndex] = useState(null);
-
   const toggleSection = (index) => setOpenIndex(openIndex === index ? null : index);
 
   const buildPath = (section, item) => {
@@ -169,45 +179,25 @@ const Footer = () => {
             </video>
           </div>
         </div>
+
         <div className="footer-column">
           <h3>Categories</h3>
           <DesktopList section="Categories" items={['Mens', 'Womens', 'Kids']} />
         </div>
+
         <div className="footer-column">
           <h3>Customer Service</h3>
-          <DesktopList
-            section="Customer Service"
-            items={['Help Center', 'Returns & Exchanges', 'Shipping Info', 'Track Order', 'FAQs']}
-          />
+          <DesktopList section="Customer Service" items={['Help Center', 'Returns & Exchanges', 'Shipping Info', 'Track Order', 'FAQs']} />
         </div>
+
         <div className="footer-column">
           <h3>Follow Us</h3>
           <ul>
-            <li>
-              <a className="link-btn" href="https://facebook.com" target="_blank" rel="noreferrer">
-                <FaFacebookF /> Facebook
-              </a>
-            </li>
-            <li>
-              <a className="link-btn" href="https://instagram.com" target="_blank" rel="noreferrer">
-                <FaInstagram /> Instagram
-              </a>
-            </li>
-            <li>
-              <a className="link-btn" href="https://twitter.com" target="_blank" rel="noreferrer">
-                <FaTwitter /> Twitter
-              </a>
-            </li>
-            <li>
-              <a className="link-btn" href="mailto:support@tarskart.com">
-                <FaEnvelope /> support@tarskart.com
-              </a>
-            </li>
-            <li>
-              <a className="link-btn" href="tel:+919999999999">
-                <FaPhoneAlt /> +91-XXXXXXXXXX
-              </a>
-            </li>
+            <li><a className="link-btn" href="https://facebook.com" target="_blank" rel="noreferrer"><FaFacebookF /> Facebook</a></li>
+            <li><a className="link-btn" href="https://instagram.com" target="_blank" rel="noreferrer"><FaInstagram /> Instagram</a></li>
+            <li><a className="link-btn" href="https://twitter.com" target="_blank" rel="noreferrer"><FaTwitter /> Twitter</a></li>
+            <li><a className="link-btn" href="mailto:support@tarskart.com"><FaEnvelope /> support@tarskart.com</a></li>
+            <li><a className="link-btn" href="tel:+919999999999"><FaPhoneAlt /> +91-XXXXXXXXXX</a></li>
           </ul>
         </div>
       </div>
@@ -233,6 +223,7 @@ const Footer = () => {
             ]}
           />
         </div>
+
         <div className="footer-column">
           <h3>Men</h3>
           <DesktopList
@@ -251,6 +242,7 @@ const Footer = () => {
             ]}
           />
         </div>
+
         <div className="footer-column">
           <h3>Kids</h3>
           <DesktopList
@@ -269,6 +261,7 @@ const Footer = () => {
             ]}
           />
         </div>
+
         <div className="footer-column">
           <h3>Brands</h3>
           <DesktopList section="Brands" items={['Jockey', 'Tasin Birds', 'Intimacy', 'Naidu hall', 'Indian flower', 'Cucumber', 'Dazzle', 'Quick dry', 'LUX']} />
@@ -288,14 +281,15 @@ const Footer = () => {
             ]}
           />
         </div>
+
         <div className="footer-column footer-pay-secure">
           <h3>Secure Payments</h3>
           <div className="payments-row">
-            <img src="/images/payments/visa.png" alt="Visa" />
-            <img src="/images/payments/mastercard.png" alt="Mastercard" />
-            <img src="/images/payments/rupay.png" alt="RuPay" />
-            <img src="/images/payments/upi.png" alt="UPI" />
-            <img src="/images/payments/razorpay.svg" alt="Razorpay" />
+            <FaCcVisa className="payment-icon" />
+            <FaCcMastercard className="payment-icon" />
+            <FaCreditCard className="payment-icon" />
+            <FaMoneyBillAlt className="payment-icon" />
+            <SiRazorpay className="payment-icon" />
           </div>
         </div>
       </div>

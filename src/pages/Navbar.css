@@ -1,4 +1,3 @@
-/* D:\shopping\src\pages\Navbar.css */
 :root {
   --bg-1: #edf6f5;
   --bg-2: #3fb8a9;
@@ -174,6 +173,7 @@ body {
   background: rgba(0, 0, 0, 0.35);
   transition: box-shadow .2s ease, border-color .2s ease, transform .2s ease, width .2s ease;
   max-width: 100%;
+  position: relative;
 }
 
 .search-bar-final:focus-within {
@@ -201,8 +201,49 @@ body {
   width: clamp(120px, 16vw, 180px);
 }
 
+.search-bar-final input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
 .search-bar-final input:focus {
   width: clamp(150px, 21vw, 240px);
+}
+
+.nav-suggestions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  margin-top: 6px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
+  max-height: 260px;
+  overflow-y: auto;
+  z-index: 1200;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.nav-suggestion-item {
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #000;
+}
+
+.nav-suggestion-item:hover {
+  background: #ffd700;
+  color: #000;
+}
+
+.nav-suggestion-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #000;
 }
 
 .icon-buttons-final {
@@ -383,17 +424,14 @@ body {
 
 @media (max-width: 768px) {
   .nav-right-final {
-    
     display: none;
   }
   .nav-toggle-final {
     display: block;
-    
   }
   .bottom-row-final {
     display: flex;
     justify-content: center;
-    
   }
   .mobile-only-final {
     display: flex;

@@ -364,13 +364,13 @@ export default function Home1() {
                 <div className="aurum-info">
                   <div className="aurum-row">
                     <span className="aurum-brand">Twin Birds</span>
-                    <span className="aurum-offer">25% OFF</span>
+                    {/*<span className="aurum-offer">25% OFF</span> */}
                   </div>
                   <div className="aurum-row">
-                    <span className="aurum-cat">Leggings • Viscose</span>
-                    <span className="aurum-price">
+                    <span className="aurum-cat">salwar Kameez</span>
+                    {/*<span className="aurum-price">
                       <span className="aurum-strike">₹1,299</span> ₹999
-                    </span>
+                    </span> */}
                   </div>
                 </div>
               </a>
@@ -387,13 +387,13 @@ export default function Home1() {
                 <div className="aurum-info">
                   <div className="aurum-row">
                     <span className="aurum-brand">Indian Flower</span>
-                    <span className="aurum-offer">30% OFF</span>
+                    {/*<span className="aurum-offer">30% OFF</span> */}
                   </div>
                   <div className="aurum-row">
-                    <span className="aurum-cat">Tops • Hoodies</span>
-                    <span className="aurum-price">
+                    <span className="aurum-cat">Punjabi Suits</span>
+                    {/*<span className="aurum-price">
                       <span className="aurum-strike">₹1,799</span> ₹1,259
-                    </span>
+                    </span> */}
                   </div>
                 </div>
               </a>
@@ -410,13 +410,13 @@ export default function Home1() {
                 <div className="aurum-info">
                   <div className="aurum-row">
                     <span className="aurum-brand">Twin Birds</span>
-                    <span className="aurum-offer">20% OFF</span>
+                    {/*<span className="aurum-offer">20% OFF</span> */}
                   </div>
                   <div className="aurum-row">
-                    <span className="aurum-cat">Kurti Pant • Cotton</span>
-                    <span className="aurum-price">
+                    <span className="aurum-cat">Anarkali Suits</span>
+                    {/*<span className="aurum-price">
                       <span className="aurum-strike">₹1,499</span> ₹1,199
-                    </span>
+                    </span> */}
                   </div>
                 </div>
               </a>
@@ -433,13 +433,13 @@ export default function Home1() {
                 <div className="aurum-info">
                   <div className="aurum-row">
                     <span className="aurum-brand">Intimacy</span>
-                    <span className="aurum-offer">15% OFF</span>
+                    {/*<span className="aurum-offer">15% OFF</span> */}
                   </div>
                   <div className="aurum-row">
-                    <span className="aurum-cat">Inner Wear</span>
-                    <span className="aurum-price">
+                    <span className="aurum-cat">Half Saree</span>
+                    {/*<span className="aurum-price">
                       <span className="aurum-strike">₹999</span> ₹849
-                    </span>
+                    </span> */}
                   </div>
                 </div>
               </a>
@@ -456,13 +456,13 @@ export default function Home1() {
                 <div className="aurum-info">
                   <div className="aurum-row">
                     <span className="aurum-brand">Naidu Hall</span>
-                    <span className="aurum-offer">35% OFF</span>
+                    {/*<span className="aurum-offer">35% OFF</span> */}
                   </div>
                   <div className="aurum-row">
-                    <span className="aurum-cat">Inner Wear</span>
-                    <span className="aurum-price">
+                    <span className="aurum-cat">Gowns</span>
+                    {/*<span className="aurum-price">
                       <span className="aurum-strike">₹1,399</span> ₹909
-                    </span>
+                    </span> */}
                   </div>
                 </div>
               </a>
@@ -479,13 +479,13 @@ export default function Home1() {
                 <div className="aurum-info">
                   <div className="aurum-row">
                     <span className="aurum-brand">Aswathi</span>
-                    <span className="aurum-offer">22% OFF</span>
+                    {/*<span className="aurum-offer">22% OFF</span> */}
                   </div>
                   <div className="aurum-row">
-                    <span className="aurum-cat">Inner Wear</span>
-                    <span className="aurum-price">
+                    <span className="aurum-cat">Sharara Suits</span>
+                    {/*<span className="aurum-price">
                       <span className="aurum-strike">₹1,199</span> ₹935
-                    </span>
+                    </span> */}
                   </div>
                 </div>
               </a>
@@ -502,13 +502,13 @@ export default function Home1() {
                 <div className="aurum-info">
                   <div className="aurum-row">
                     <span className="aurum-brand">Twin Birds</span>
-                    <span className="aurum-offer">18% OFF</span>
+                    {/*<span className="aurum-offer">18% OFF</span> */}
                   </div>
                   <div className="aurum-row">
-                    <span className="aurum-cat">T-Shirts • Slim Fit</span>
-                    <span className="aurum-price">
+                    <span className="aurum-cat">Lehenga Choli</span>
+                    {/*<span className="aurum-price">
                       <span className="aurum-strike">₹1,099</span> ₹901
-                    </span>
+                    </span> */}
                   </div>
                 </div>
               </a>
@@ -525,13 +525,13 @@ export default function Home1() {
                 <div className="aurum-info">
                   <div className="aurum-row">
                     <span className="aurum-brand">Indian Flower</span>
-                    <span className="aurum-offer">28% OFF</span>
+                    {/*<span className="aurum-offer">28% OFF</span> */}
                   </div>
                   <div className="aurum-row">
-                    <span className="aurum-cat">Lounge Wear • Co-ord</span>
-                    <span className="aurum-price">
+                    <span className="aurum-cat">Palazzo Suits</span>
+                    {/*<span className="aurum-price">
                       <span className="aurum-strike">₹1,899</span> ₹1,367
-                    </span>
+                    </span> */}
                   </div>
                 </div>
               </a>

@@ -177,16 +177,21 @@
 .footer-pay-secure .payments-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 20px;
   flex-wrap: wrap;
 }
 
 .footer-pay-secure img {
-  height: 26px;
+  height: 56px;
   width: auto;
   filter: brightness(0) invert(1);
   opacity: 0.8;
 }
+
+.payment-icon {
+  font-size: 25px;
+}
+
 
 @media (max-width: 768px) {
   .footer-desktop {
