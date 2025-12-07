@@ -1,3 +1,4 @@
+// D:\shopping\src\pages\Wishlist.js
 import React, { useState, useEffect } from 'react';
 import './Wishlist.css';
 import { useNavigate } from 'react-router-dom';
@@ -159,6 +160,14 @@ const Wishlist = () => {
           <div className="hero-content">
             <h1>My Wishlist</h1>
             <p>Save the styles you love and grab them when you’re ready.</p>
+            <div className="hero-meta-row">
+              <span className="hero-badge">
+                Shopping as {userType === 'B2B' ? 'Business' : 'Individual'}
+              </span>
+              <span className="hero-badge soft">
+                {wishlistItems.length} saved {wishlistItems.length === 1 ? 'item' : 'items'}
+              </span>
+            </div>
             <div className="hero-actions">
               <button className="btn primary" onClick={() => navigate('/')}>
                 Continue Shopping
@@ -187,7 +196,7 @@ const Wishlist = () => {
         ) : (
           <div className="wishlist-content">
             <div className="wishlist-toolbar">
-              <span>
+              <span className="wishlist-count">
                 {wishlistItems.length} saved {wishlistItems.length === 1 ? 'item' : 'items'}
               </span>
               <div className="toolbar-actions">
@@ -230,6 +239,9 @@ const Wishlist = () => {
                       >
                         <FaTimes />
                       </span>
+                      {discountPct > 0 && (
+                        <span className="discount-pill">{discountPct}% off</span>
+                      )}
                     </div>
 
                     <div className="card-body">
@@ -244,9 +256,6 @@ const Wishlist = () => {
                       <div className="wishlist-price">
                         <span className="wishlist-offer">₹{fmt(offer)}</span>
                         <span className="wishlist-original">₹{fmt(mrp)}</span>
-                        {discountPct > 0 && (
-                          <span className="wishlist-discount">({discountPct}% OFF)</span>
-                        )}
                       </div>
 
                       <div className="card-actions">
@@ -258,16 +267,7 @@ const Wishlist = () => {
                             navigate('/checkout');
                           }}
                         >
-                          Buy Now
-                        </button>
-                        <button
-                          className="btn subtle"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate('/');
-                          }}
-                        >
-                          Find Similar
+                          Move to Bag
                         </button>
                       </div>
                     </div>

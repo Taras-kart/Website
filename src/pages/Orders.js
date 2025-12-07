@@ -1,4 +1,3 @@
-// src/pages/Orders.js
 import React, { useEffect, useMemo, useState } from 'react'
 import './Orders.css'
 import { useNavigate } from 'react-router-dom'
@@ -181,6 +180,7 @@ const Orders = ({ user }) => {
           <div className="orders-list">
             {filtered.map(order => {
               const st = normalizeStatus(order.status)
+              const statusClass = st.replace(/\s+/g, '-').toLowerCase()
               return (
                 <div key={order.id} className="orders-item">
                   <div className="orders-image" onClick={() => navigate(`/order/${order.id}`)}>
@@ -189,13 +189,11 @@ const Orders = ({ user }) => {
                     ) : (
                       <div className="orders-ph" />
                     )}
+                    <span className={`orders-badge orders-badge--${statusClass}`}>{st}</span>
                   </div>
 
                   <div className="orders-info">
-                    <div className="orders-row">
-                      <h4 className="orders-name">{order.name}</h4>
-                      <span className="orders-badge">{st}</span>
-                    </div>
+                    <h4 className="orders-name">{order.name}</h4>
 
                     <div className="orders-meta">
                       <div className="orders-price">
@@ -206,10 +204,9 @@ const Orders = ({ user }) => {
 
                     <div className="orders-cta">
                       <button className="btn-outline" onClick={() => navigate(`/order/${order.id}`)}>View</button>
-                      <button className="btn-outline" onClick={() => navigate(`/order/${order.id}/tracking`)}>Track Order</button>
-                      <button className="btn-outline" onClick={() => navigate(`/order/${order.id}/cancel`)}>Cancel</button>
+                      <button className="btn-outline" onClick={() => navigate(`/order/${order.id}/tracking`)}>Track</button>
+                      <button className="btn-outline danger" onClick={() => navigate(`/order/${order.id}/cancel`)}>Cancel</button>
                     </div>
-
                   </div>
                 </div>
               )

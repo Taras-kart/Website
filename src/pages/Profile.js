@@ -143,10 +143,7 @@ const Profile = () => {
                   </div>
                   <div className="user-details">
                     <h2>{userInfo.name}</h2>
-                    <div className="user-chips">
-                      <span className="chip">Member</span>
-                      <span className="chip gold">Gold</span>
-                    </div>
+                    <p className="user-subtitle">Your profile details</p>
                   </div>
                 </div>
                 <div className="info-grid">
@@ -158,14 +155,6 @@ const Profile = () => {
                     <div className="info-label">Mobile</div>
                     <div className="info-value">{userInfo.mobile}</div>
                   </div>
-                </div>
-                <div className="cta-row">
-                  <a href="/wishlist" className="glass-cta">
-                    View Wishlist
-                  </a>
-                  <a href="/orders" className="glass-cta">
-                    Track Orders
-                  </a>
                 </div>
               </div>
             )
