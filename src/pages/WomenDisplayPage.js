@@ -123,20 +123,6 @@ export default function WomenDisplayPage({
 }) {
   const [carouselIndex, setCarouselIndex] = useState({})
 
-  useEffect(() => {
-    const saved = sessionStorage.getItem('womenDisplayScrollY')
-    if (saved != null) {
-      const y = parseInt(saved, 10)
-      if (!Number.isNaN(y)) {
-        window.scrollTo(0, y)
-      }
-    }
-    return () => {
-      const y = window.scrollY || window.pageYOffset || 0
-      sessionStorage.setItem('womenDisplayScrollY', String(y))
-    }
-  }, [])
-
   const grouped = useMemo(() => groupProductsByColor(products || []), [products])
 
   useEffect(() => {

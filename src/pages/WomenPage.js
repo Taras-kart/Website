@@ -37,6 +37,25 @@ export default function WomenPage() {
   const userId = sessionStorage.getItem('userId')
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    const saved = sessionStorage.getItem('scroll:women-page')
+    const y = saved != null ? parseInt(saved, 10) : 0
+    if (!Number.isNaN(y)) {
+      window.scrollTo(0, y)
+    } else {
+      window.scrollTo(0, 0)
+    }
+    const handleScroll = () => {
+      const pos = window.scrollY || window.pageYOffset || 0
+      sessionStorage.setItem('scroll:women-page', String(pos))
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
+
+  useEffect(() => {
     setUserType(sessionStorage.getItem('userType'))
   }, [])
 
@@ -148,7 +167,7 @@ export default function WomenPage() {
   }
 
   const handleProductClick = (group) => {
-    const rep = group.variants?.[0] || group.rep
+    const rep = group.variants?.[0] || group.rep || group
     const payload = {
       ...rep,
       ean_code: group.ean_code || rep.ean_code,

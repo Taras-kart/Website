@@ -27,10 +27,17 @@ const Wishlist = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [userType, setUserType] = useState(() => {
     if (typeof window === 'undefined') return 'B2C';
-    return sessionStorage.getItem('userType') || 'B2C';
+    return (
+      sessionStorage.getItem('userType') ||
+      localStorage.getItem('userType') ||
+      'B2C'
+    );
   });
   const navigate = useNavigate();
-  const userId = typeof window !== 'undefined' ? sessionStorage.getItem('userId') : null;
+  const userId =
+    typeof window !== 'undefined'
+      ? sessionStorage.getItem('userId') || localStorage.getItem('userId')
+      : null;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -39,7 +46,10 @@ const Wishlist = () => {
   useEffect(() => {
     const syncUserType = () => {
       if (typeof window === 'undefined') return;
-      const storedType = sessionStorage.getItem('userType') || 'B2C';
+      const storedType =
+        sessionStorage.getItem('userType') ||
+        localStorage.getItem('userType') ||
+        'B2C';
       if (storedType !== userType) setUserType(storedType);
     };
     window.addEventListener('storage', syncUserType);
@@ -80,10 +90,17 @@ const Wishlist = () => {
 
   const confirmRemove = async () => {
     try {
+      const payload = {
+        user_id: userId,
+        product_id: selectedItem.product_id
+      };
+      if (BRANCH_ID) {
+        payload.branch_id = BRANCH_ID;
+      }
       await fetch(`${API_BASE}/api/wishlist`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, product_id: selectedItem.product_id })
+        body: JSON.stringify(payload)
       });
       const updatedWishlist = wishlistItems.filter(
         (item) => String(item.product_id) !== String(selectedItem.product_id)

@@ -60,9 +60,10 @@ const Profile = () => {
     <div className="profile-page">
       <Navbar />
       <div className="profile-bg-orbs"></div>
-      <div className="profile-container">
-        <div className="profile-left">
+      <main className="profile-container">
+        <aside className="profile-left">
           <div className="profile-title">My Account</div>
+
           {isLoggedIn && userInfo && (
             <div className="mini-card">
               <div className="mini-avatar">
@@ -75,6 +76,7 @@ const Profile = () => {
               </div>
             </div>
           )}
+
           <div className="profile-buttons">
             <button
               className={`profile-button ${activeSection === 'Profile' ? 'active' : ''}`}
@@ -111,18 +113,23 @@ const Profile = () => {
               </button>
             )}
           </div>
-        </div>
-        <div key={activeSection} className="profile-right animate-section">
+        </aside>
+
+        <section key={activeSection} className="profile-right animate-section">
           {!isLoggedIn ? (
             <div className="login-signup-panel">
               <div className="welcome-hero">
                 <div className="welcome-ring"></div>
                 <h2>Welcome to TARS KART</h2>
-                <p>Sign in to manage your profile, orders, and more.</p>
+                <p>Sign in to manage your profile, orders, and preferences in one place.</p>
               </div>
               <div className="login-signup-buttons">
-                <button className="login-button" onClick={() => setShowLoginPopup(true)}>Login</button>
-                <button className="signup-button" onClick={() => setShowSignupPopup(true)}>Signup</button>
+                <button className="login-button" onClick={() => setShowLoginPopup(true)}>
+                  Login
+                </button>
+                <button className="signup-button" onClick={() => setShowSignupPopup(true)}>
+                  Signup
+                </button>
               </div>
             </div>
           ) : (
@@ -153,33 +160,41 @@ const Profile = () => {
                   </div>
                 </div>
                 <div className="cta-row">
-                  <a href="/wishlist" className="glass-cta">View Wishlist</a>
-                  <a href="/orders" className="glass-cta">Track Orders</a>
+                  <a href="/wishlist" className="glass-cta">
+                    View Wishlist
+                  </a>
+                  <a href="/orders" className="glass-cta">
+                    Track Orders
+                  </a>
                 </div>
               </div>
             )
           )}
+
           {activeSection === 'Orders' && isLoggedIn && (
             <div className="section-card">
               <Orders user={{ email: userInfo?.email, mobile: userInfo?.mobile }} />
             </div>
           )}
+
           {activeSection === 'Terms' && (
             <div className="section-card">
               <TandC />
             </div>
           )}
+
           {activeSection === 'CustomerCare' && (
             <div className="section-card">
               <CustomerCare />
             </div>
           )}
-        </div>
-      </div>
+        </section>
+      </main>
+
       {showLoginPopup && (
         <LoginPopup
           onClose={() => setShowLoginPopup(false)}
-          onSuccess={(user) => {
+          onSuccess={user => {
             if (user?.id) sessionStorage.setItem('userId', String(user.id));
             if (user?.email) sessionStorage.setItem('userEmail', String(user.email));
             if (user?.name) sessionStorage.setItem('userName', String(user.name));
@@ -188,10 +203,11 @@ const Profile = () => {
           }}
         />
       )}
+
       {showSignupPopup && (
         <SignupPopup
           onClose={() => setShowSignupPopup(false)}
-          onSuccess={(user) => {
+          onSuccess={user => {
             if (user?.id) sessionStorage.setItem('userId', String(user.id));
             if (user?.email) sessionStorage.setItem('userEmail', String(user.email));
             if (user?.name) sessionStorage.setItem('userName', String(user.name));
@@ -200,6 +216,7 @@ const Profile = () => {
           }}
         />
       )}
+
       <Footer />
     </div>
   );

@@ -1,10 +1,12 @@
 :root {
   --navbar-height: 60px;
+  --mobile-filter-bar-height: 64px;
 }
 
 .filterbar-wrap {
   margin-top: 0px;
   position: sticky;
+  top: 0;
   z-index: 999;
   background:
     radial-gradient(900px 320px at 0% -20%, rgba(255, 210, 119, .10), transparent 60%),
@@ -165,6 +167,7 @@
   font-size: 12px;
   letter-spacing: .2px;
   transition: transform .18s ease, box-shadow .22s ease, background .22s ease, color .22s ease;
+  cursor: pointer;
 }
 
 .reset-btn:hover {
@@ -313,6 +316,70 @@
   visibility: visible;
 }
 
+.sort-sheet {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height .28s ease;
+  border-top: 1px solid rgba(255, 255, 255, .06);
+  background: rgba(0, 0, 0, .92);
+  backdrop-filter: blur(4px);
+}
+
+.sort-sheet.open {
+  max-height: 380px;
+}
+
+.sort-header {
+  padding: 10px 14px 2px 14px;
+}
+
+.sort-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: .2px;
+}
+
+.sort-options {
+  list-style: none;
+  margin: 0;
+  padding: 8px 12px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sort-option {
+  width: 100%;
+  text-align: left;
+  border: 1px solid rgba(255, 210, 119, .45);
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, .03);
+  color: rgba(255, 255, 255, .9);
+  font-size: 13px;
+  letter-spacing: .2px;
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease, box-shadow .22s ease, border-color .22s ease;
+}
+
+.sort-option:hover {
+  border-color: rgba(255, 210, 119, .8);
+  box-shadow: 0 10px 22px rgba(255, 210, 119, .14);
+}
+
+.sort-option.active {
+  background: linear-gradient(90deg, #ffd277, #77530a);
+  color: #000;
+  border-color: transparent;
+  box-shadow: 0 10px 26px rgba(255, 210, 119, .24);
+}
+
+.sort-option-label {
+  font-weight: 700;
+}
+
+/* Tablet and up keep original web view */
 @media (max-width: 991px) {
   .filter-bar {
     grid-template-columns: 1fr;
@@ -323,6 +390,110 @@
   }
   .chips {
     padding-bottom: 6px;
+  }
+}
+
+@media (max-width: 767px) {
+  .filterbar-wrap {
+    position: fixed;
+    bottom: 0;
+    top: auto;
+    width: 100%;
+    margin-top: 0;
+    border-top: 1px solid rgba(255, 255, 255, .08);
+    border-bottom: 0;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, .45);
+  }
+
+  .filterbar-wrap.hidden {
+    transform: translateY(0);
+  }
+
+  .filter-bar {
+    margin-top: 0;
+    padding: 8px 14px 10px 14px;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .filter-left,
+  .chips,
+  .filter-actions {
+    display: none;
+  }
+
+  .filter-mobile-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .mobile-control-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 210, 119, .75);
+    background: rgba(0, 0, 0, .9);
+    color: #ffd277;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: .3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, .65);
+    transition: transform .16s ease, box-shadow .2s ease, background .2s ease, color .2s ease, border-color .2s ease;
+  }
+
+  .mobile-control-btn:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(90deg, #ffd277, #77530a);
+    color: #000;
+    border-color: transparent;
+    box-shadow: 0 12px 28px rgba(255, 210, 119, .32);
+  }
+
+  .mobile-control-label {
+    white-space: nowrap;
+  }
+
+  .filter-dropdown {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: var(--mobile-filter-bar-height);
+    max-height: 0;
+    border-top: 1px solid rgba(255, 255, 255, .06);
+    background: rgba(0, 0, 0, .95);
+    backdrop-filter: blur(6px);
+  }
+
+  .filter-dropdown.open {
+    max-height: 70vh;
+  }
+
+  .filter-options.horizontal {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+
+  .sort-sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: var(--mobile-filter-bar-height);
+  }
+}
+
+/* Desktop only: hide mobile-only sort sheet */
+@media (min-width: 768px) {
+  .filter-mobile-controls {
+    display: none;
+  }
+  .sort-sheet {
+    display: none;
   }
 }
 

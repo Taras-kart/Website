@@ -15,6 +15,12 @@ const API_BASE_RAW =
   DEFAULT_API_BASE
 const API_BASE = API_BASE_RAW.replace(/\/+$/, '')
 
+const BRANCH_ID_RAW =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_BRANCH_ID) ||
+  (typeof process !== 'undefined' && process.env && process.env.REACT_APP_BRANCH_ID) ||
+  ''
+const BRANCH_ID = BRANCH_ID_RAW ? String(BRANCH_ID_RAW).trim() : ''
+
 const DEFAULT_IMG_BY_GENDER = {
   WOMEN: '/images/women/women20.jpeg',
   MEN: '/images/men/mens13.jpeg',
@@ -348,8 +354,14 @@ const SearchResults = () => {
   const { gender, queryText, priceMin, priceMax } = parsed
   const filterSummary = useMemo(() => buildFilterSummary(parsed), [parsed])
 
-  const userType = (localStorage.getItem('userType') || 'B2C').toUpperCase()
-  const userId = sessionStorage.getItem('userId')
+  const userType = (
+    localStorage.getItem('userType') ||
+    sessionStorage.getItem('userType') ||
+    'B2C'
+  ).toUpperCase()
+  const userId =
+    (typeof window !== 'undefined' && (sessionStorage.getItem('userId') || localStorage.getItem('userId'))) ||
+    null
 
   const getPriceFields = (item) => {
     const p = item.price_fields || item || {}
@@ -478,24 +490,37 @@ const SearchResults = () => {
   const handleWishlist = async (e, group) => {
     e.stopPropagation()
     const product = group.rep || group
-    const productId = product?.id
+    if (!product) return
+    const productId = product.product_id ?? product.id
     if (!userId || !productId) return
     try {
+      const payload = {
+        user_id: userId,
+        product_id: productId
+      }
+      if (BRANCH_ID) {
+        payload.branch_id = BRANCH_ID
+      }
       const resp = await fetch(`${API_BASE}/api/wishlist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, product_id: productId })
+        body: JSON.stringify(payload)
       })
       if (resp.ok) {
-        addToWishlist(product)
+        addToWishlist({ ...product, product_id: productId })
         navigate('/wishlist')
       }
     } catch {}
   }
 
   const isInWishlist = (group) => {
-    const productId = group.rep?.id || group.id
-    return wishlistItems.some((w) => String(w.id) === String(productId))
+    const product = group.rep || group
+    if (!product) return false
+    const productId = product.product_id ?? product.id
+    if (!productId) return false
+    return wishlistItems.some(
+      (w) => String(w.product_id ?? w.id) === String(productId)
+    )
   }
 
   const handleSearchSubmit = (e) => {

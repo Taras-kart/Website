@@ -27,6 +27,14 @@ const ratingThresholds = [
   { label: '3★ & above', min: 3 }
 ]
 
+const sortOptions = [
+  { key: 'relevance', label: 'Relevance' },
+  { key: 'priceLowHigh', label: 'Price: Low to High' },
+  { key: 'priceHighLow', label: 'Price: High to Low' },
+  { key: 'discountHighLow', label: 'Discount: High to Low' },
+  { key: 'ratingHighLow', label: 'Rating: High to Low' }
+]
+
 const norm = (v) => String(v || '').trim()
 const dedupeSort = (arr) =>
   Array.from(new Set(arr.filter(Boolean).map((x) => norm(x)))).sort((a, b) =>
@@ -39,6 +47,8 @@ const FilterSidebar = ({ source = [], onFilterChange }) => {
   const [pending, setPending] = useState({})
   const [showBar, setShowBar] = useState(true)
   const [facetPool, setFacetPool] = useState([])
+  const [sortOpen, setSortOpen] = useState(false)
+  const [sortOption, setSortOption] = useState('relevance')
   const wrapRef = useRef(null)
   const lastY = useRef(0)
   const ticking = useRef(false)
@@ -97,7 +107,10 @@ const FilterSidebar = ({ source = [], onFilterChange }) => {
 
   useEffect(() => {
     const onClick = (e) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpenSection(null)
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) {
+        setOpenSection(null)
+        setSortOpen(false)
+      }
     }
     document.addEventListener('click', onClick, { passive: true })
     return () => document.removeEventListener('click', onClick)
@@ -209,6 +222,38 @@ const FilterSidebar = ({ source = [], onFilterChange }) => {
     return out
   }
 
+  const applySort = (data, key) => {
+    if (!key || key === 'relevance') return data
+    const out = [...data]
+    if (key === 'priceLowHigh') {
+      out.sort((a, b) => offerPrice(a) - offerPrice(b))
+      return out
+    }
+    if (key === 'priceHighLow') {
+      out.sort((a, b) => offerPrice(b) - offerPrice(a))
+      return out
+    }
+    if (key === 'discountHighLow') {
+      out.sort((a, b) => discountPct(b) - discountPct(a))
+      return out
+    }
+    if (key === 'ratingHighLow') {
+      out.sort((a, b) => {
+        const ra = Number(a.rating ?? a.avgRating ?? 0)
+        const rb = Number(b.rating ?? b.avgRating ?? 0)
+        return rb - ra
+      })
+      return out
+    }
+    return out
+  }
+
+  const runFiltersAndSort = (filters, sortKey) => {
+    const filtered = applyFilters(source, filters || {})
+    const sorted = applySort(filtered, sortKey)
+    onFilterChange(sorted)
+  }
+
   const sectionCount = (k) => (selected[k]?.length ? selected[k].length : 0)
 
   const openAndLoadPending = (key) => {
@@ -216,6 +261,7 @@ const FilterSidebar = ({ source = [], onFilterChange }) => {
     if (next) {
       const deep = JSON.parse(JSON.stringify(selected || {}))
       setPending(deep)
+      setSortOpen(false)
     }
     setOpenSection(next)
   }
@@ -231,8 +277,7 @@ const FilterSidebar = ({ source = [], onFilterChange }) => {
   const applyPending = () => {
     const applied = JSON.parse(JSON.stringify(pending || {}))
     setSelected(applied)
-    const filtered = applyFilters(source, applied)
-    onFilterChange(filtered)
+    runFiltersAndSort(applied, sortOption)
     setOpenSection(null)
   }
 
@@ -245,13 +290,42 @@ const FilterSidebar = ({ source = [], onFilterChange }) => {
   const resetAll = () => {
     setSelected({})
     setPending({})
+    setSortOption('relevance')
     onFilterChange(source)
     setOpenSection(null)
+    setSortOpen(false)
+  }
+
+  const toggleFiltersMobile = () => {
+    if (openSection) {
+      setOpenSection(null)
+    } else {
+      const keys = Object.keys(facets)
+      if (!keys.length) return
+      const deep = JSON.parse(JSON.stringify(selected || {}))
+      setPending(deep)
+      setOpenSection(keys[0])
+    }
+    setSortOpen(false)
+  }
+
+  const toggleSortMobile = () => {
+    setSortOpen((v) => !v)
+    setOpenSection(null)
+  }
+
+  const handleSortSelect = (key) => {
+    setSortOption(key)
+    runFiltersAndSort(selected, key)
+    setSortOpen(false)
   }
 
   return (
     <>
-      <div className={`filterbar-wrap ${showBar ? '' : 'hidden'}`} ref={wrapRef}>
+      <div
+        className={`filterbar-wrap ${showBar ? '' : 'hidden'}`}
+        ref={wrapRef}
+      >
         <div className="filter-bar">
           <div className="filter-left">
             <div className="filter-title-wrap">
@@ -285,6 +359,23 @@ const FilterSidebar = ({ source = [], onFilterChange }) => {
           <div className="filter-actions">
             <button className="reset-btn" onClick={resetAll}>
               Reset
+            </button>
+          </div>
+
+          <div className="filter-mobile-controls">
+            <button
+              type="button"
+              className="mobile-control-btn"
+              onClick={toggleFiltersMobile}
+            >
+              <span className="mobile-control-label">Filters</span>
+            </button>
+            <button
+              type="button"
+              className="mobile-control-btn"
+              onClick={toggleSortMobile}
+            >
+              <span className="mobile-control-label">Sort by</span>
             </button>
           </div>
         </div>
@@ -322,11 +413,39 @@ const FilterSidebar = ({ source = [], onFilterChange }) => {
             </>
           )}
         </div>
+
+        <div className={`sort-sheet ${sortOpen ? 'open' : ''}`}>
+          {sortOpen && (
+            <>
+              <div className="sort-header">
+                <span className="sort-title">Sort by</span>
+              </div>
+              <ul className="sort-options">
+                {sortOptions.map((opt) => (
+                  <li key={opt.key}>
+                    <button
+                      type="button"
+                      className={`sort-option ${
+                        sortOption === opt.key ? 'active' : ''
+                      }`}
+                      onClick={() => handleSortSelect(opt.key)}
+                    >
+                      <span className="sort-option-label">{opt.label}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
       </div>
 
       <div
-        className={`filter-overlay ${openSection ? 'show' : ''}`}
-        onClick={() => setOpenSection(null)}
+        className={`filter-overlay ${openSection || sortOpen ? 'show' : ''}`}
+        onClick={() => {
+          setOpenSection(null)
+          setSortOpen(false)
+        }}
       />
     </>
   )
