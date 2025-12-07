@@ -1,4 +1,3 @@
-/* D:\shopping\src\pages\KidsDisplayPage.css */
 .kids-section4 {
   padding: 40px 16px 56px;
   background: radial-gradient(circle at top left, #ffe8f0 0, #fdf2ff 40%, #f9f9f9 100%);
@@ -360,7 +359,7 @@
 
 @media (max-width: 600px) {
   .kids-section4-grid {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .kids-section4-img img {
     height: 260px;

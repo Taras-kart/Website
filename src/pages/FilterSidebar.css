@@ -2,8 +2,6 @@
   --navbar-height: 60px;
 }
 
-
-
 .filterbar-wrap {
   margin-top: 0px;
   position: sticky;
@@ -86,6 +84,7 @@
 .chips::-webkit-scrollbar {
   height: 6px;
 }
+
 .chips::-webkit-scrollbar-thumb {
   background: linear-gradient(90deg, #ffd277, #77530a);
   border-radius: 999px;
@@ -329,6 +328,6 @@
 
 @media (max-width: 500px){
   .filterbar-wrap {
-    margin-top: 120px;
+    margin-top: 0;
   }
 }

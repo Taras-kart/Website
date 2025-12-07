@@ -240,19 +240,19 @@ const NavbarFinal = () => {
   return (
     <nav className={`navbar-final ${showNav ? '' : 'nav-hidden'}`}>
       <div className="top-row-final">
-        <div className="logo-final">
-          <video autoPlay loop muted playsInline>
-            <source src="/images/logo.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        </div>
-
         <div className="nav-toggle-final" onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}>
           <div className={`dot-grid-final ${isMobileNavOpen ? 'dots-open' : ''}`}>
             {[...Array(9)].map((_, i) => (
               <span key={i}></span>
             ))}
           </div>
+        </div>
+
+        <div className="logo-final">
+          <video autoPlay loop muted playsInline>
+            <source src="/images/logo.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
         </div>
 
         <div className="nav-right-final desktop-tab-only-final">
@@ -342,6 +342,43 @@ const NavbarFinal = () => {
             </Link>
           </div>
         </div>
+
+        <div className="mobile-top-icons">
+          <Link to="/profile" className={`icon-btn ${isActive('/profile') ? 'icon-active-btn' : ''}`}>
+            <div className="icon-circle">
+              {isActive('/profile') ? (
+                <FaUser className="icon icon-filled" />
+              ) : (
+                <FaRegUser className="icon icon-outline" />
+              )}
+              <span className="inner-ring" />
+            </div>
+          </Link>
+
+          <Link to="/wishlist" className={`icon-btn ${isActive('/wishlist') ? 'icon-active-btn' : ''}`}>
+            <div className="icon-circle">
+              {isActive('/wishlist') ? (
+                <FaHeart className="icon icon-filled" />
+              ) : (
+                <FaRegHeart className="icon icon-outline" />
+              )}
+              {wishlistItems.length > 0 && <span className="red-dot1" />}
+              <span className="inner-ring" />
+            </div>
+          </Link>
+
+          <Link to="/cart" className={`icon-btn ${isActive('/cart') ? 'icon-active-btn' : ''}`}>
+            <div className="icon-circle">
+              {isActive('/cart') ? (
+                <FaShoppingBag className="icon icon-filled" />
+              ) : (
+                <FiShoppingBag className="icon icon-outline-stroke" />
+              )}
+              {cartItems.length > 0 && <span className="red-dot1" />}
+              <span className="inner-ring" />
+            </div>
+          </Link>
+        </div>
       </div>
 
       <div className="bottom-row-final mobile-only-final">
@@ -395,43 +432,6 @@ const NavbarFinal = () => {
                 <span>{name}</span>
               </Link>
             ))}
-          </div>
-          <div className="icon-buttons-final mobile-icons">
-            <Link to="/profile" className={`icon-btn ${isActive('/profile') ? 'icon-active-btn' : ''}`}>
-              <div className="icon-circle">
-                {isActive('/profile') ? (
-                  <FaUser className="icon icon-filled" />
-                ) : (
-                  <FaRegUser className="icon icon-outline" />
-                )}
-                <span className="inner-ring" />
-              </div>
-              <span className={`icon-label ${isActive('/profile') ? 'label-active' : ''}`}>Profile</span>
-            </Link>
-            <Link to="/wishlist" className={`icon-btn ${isActive('/wishlist') ? 'icon-active-btn' : ''}`}>
-              <div className="icon-circle">
-                {isActive('/wishlist') ? (
-                  <FaHeart className="icon icon-filled" />
-                ) : (
-                  <FaRegHeart className="icon icon-outline" />
-                )}
-                {wishlistItems.length > 0 && <span className="red-dot1" />}
-                <span className="inner-ring" />
-              </div>
-              <span className={`icon-label ${isActive('/wishlist') ? 'label-active' : ''}`}>Wishlist</span>
-            </Link>
-            <Link to="/cart" className={`icon-btn ${isActive('/cart') ? 'icon-active-btn' : ''}`}>
-              <div className="icon-circle">
-                {isActive('/cart') ? (
-                  <FaShoppingBag className="icon icon-filled" />
-                ) : (
-                  <FiShoppingBag className="icon icon-outline-stroke" />
-                )}
-                {cartItems.length > 0 && <span className="red-dot1" />}
-                <span className="inner-ring" />
-              </div>
-              <span className={`icon-label ${isActive('/cart') ? 'label-active' : ''}`}>Cart</span>
-            </Link>
           </div>
         </div>
       )}

@@ -359,7 +359,7 @@ body {
 .mobile-drawer-final {
   position: fixed;
   top: 0;
-  right: 0;
+  left: 0;
   bottom: 0;
   width: 60vw;
   height: 100vh;
@@ -369,8 +369,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  border-left: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: -16px 0 40px rgba(0, 0, 0, 0.45);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 16px 0 40px rgba(0, 0, 0, 0.45);
   overflow-y: auto;
 }
 
@@ -380,7 +380,7 @@ body {
 
 @keyframes slideIn {
   from {
-    transform: translateX(20px);
+    transform: translateX(-20px);
     opacity: 0;
   }
   to {
@@ -410,6 +410,10 @@ body {
 }
 
 .mobile-only-final {
+  display: none;
+}
+
+.mobile-top-icons {
   display: none;
 }
 
@@ -447,10 +451,6 @@ body {
     flex-direction: column;
     gap: 15px;
   }
-  .mobile-drawer-final .icon-buttons-final {
-    flex-direction: column;
-    gap: 20px;
-  }
   .mobile-drawer-final .nav-link-final {
     font-size: 18px;
     color: white;
@@ -459,14 +459,31 @@ body {
     width: 92%;
     margin: 10px auto;
   }
-  .mobile-icons .icon-circle {
-    width: 52px;
-    height: 52px;
-  }
-  .mobile-icons .icon {
-    font-size: 24px;
-  }
   .close-btn-final {
+    display: none;
+  }
+  .top-row-final {
+    position: relative;
+  }
+  .logo-final {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .mobile-top-icons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-left: auto;
+  }
+  .mobile-top-icons .icon-btn {
+    gap: 0;
+  }
+  .mobile-top-icons .icon-circle {
+    width: 38px;
+    height: 38px;
+  }
+  .mobile-top-icons .icon-label {
     display: none;
   }
 }
