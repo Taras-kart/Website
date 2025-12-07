@@ -207,7 +207,9 @@ const Orders = ({ user }) => {
                     <div className="orders-cta">
                       <button className="btn-outline" onClick={() => navigate(`/order/${order.id}`)}>View</button>
                       <button className="btn-outline" onClick={() => navigate(`/order/${order.id}/tracking`)}>Track Order</button>
+                      <button className="btn-outline" onClick={() => navigate(`/order/${order.id}/cancel`)}>Cancel</button>
                     </div>
+
                   </div>
                 </div>
               )

@@ -21,6 +21,7 @@ import OrderDetails from './pages/OrderDetails'
 import PaymentPage from './pages/PaymentPage'
 import Home1 from './pages/Home1'
 import TrackOrder from './pages/TrackOrder'
+import OrderCancel from './pages/OrderCancel'
 
 function NavigationLoader() {
   const location = useLocation()
@@ -39,7 +40,6 @@ function AppShell() {
       <NavigationLoader />
       <ScrollToTop />
       <Routes>
-        {/*<Route path="/" element={<HomePage />} /> */}
         <Route path="/" element={<Home1 />} />
         <Route path="/men" element={<MenPage />} />
         <Route path="/women" element={<WomenPage />} />
@@ -57,6 +57,7 @@ function AppShell() {
         <Route path="/payment" element={<PaymentPage />} />
         <Route path="/track-order" element={<TrackOrder />} />
         <Route path="/order/:id/tracking" element={<OrderTracking />} />
+        <Route path="/order/:id/cancel" element={<OrderCancel />} />
       </Routes>
     </>
   )
