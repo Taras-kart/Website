@@ -4,7 +4,7 @@ import Footer from './Footer';
 import { useCart } from '../CartContext';
 import { useWishlist } from '../WishlistContext';
 import './Cart.css';
-import { FaTimes, FaCheck, FaTag, FaChevronRight } from 'react-icons/fa';
+import { FaTimes, FaCheck, FaTag } from 'react-icons/fa';
 import Popup from './Popup';
 import { useNavigate } from 'react-router-dom';
 
@@ -66,9 +66,9 @@ const Cart = () => {
     if (userId) fetchCartItems();
   }, [userId]);
 
-  const fmt = (n) => Number(n || 0).toFixed(2);
+  const fmt = n => Number(n || 0).toFixed(2);
 
-  const getItemPricing = (item) => {
+  const getItemPricing = item => {
     if (userType === 'B2B') {
       const mrp = Number(
         item.original_price_b2b ??
@@ -102,7 +102,7 @@ const Cart = () => {
     return { mrp, offer };
   };
 
-  const handleRemoveClick = (item) => {
+  const handleRemoveClick = item => {
     setSelectedItem(item);
     setShowPopup(true);
   };
@@ -130,7 +130,7 @@ const Cart = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, product_id: selectedItem.id })
       });
-      setCartItems((prev) => prev.filter((item) => item.id !== selectedItem.id));
+      setCartItems(prev => prev.filter(item => item.id !== selectedItem.id));
       removeFromCart(selectedItem.id);
       setToast('Item removed');
       setTimeout(() => setToast(''), 1600);
@@ -140,7 +140,7 @@ const Cart = () => {
 
   const handleQuantityChange = async (productId, value) => {
     const quantity = parseInt(value, 10);
-    setQuantities((prev) => ({ ...prev, [productId]: quantity }));
+    setQuantities(prev => ({ ...prev, [productId]: quantity }));
     if (userId) {
       await fetch(`${API_BASE}/api/cart/tarascart`, {
         method: 'PUT',
@@ -171,10 +171,8 @@ const Cart = () => {
   const couponDiscount =
     maxCouponDiscount > 0 ? Math.min(rawCouponDiscount, maxCouponDiscount) : rawCouponDiscount;
   const subTotal = subTotalBeforeCoupon - couponDiscount;
-  const freeShipThreshold = 0;
   const convenience = 0;
   const youPay = subTotal + (giftWrap ? 39 : 0);
-  const toFreeShipping = 0;
   const totalSaving = discountTotal + couponDiscount;
 
   const proceedToCheckout = () => {
@@ -189,7 +187,7 @@ const Cart = () => {
         giftWrap: giftWrap ? 39 : 0,
         payable: youPay
       },
-      items: cartItems.map((item) => {
+      items: cartItems.map(item => {
         const qty = quantities[item.id] || 1;
         const { mrp, offer } = getItemPricing(item);
         return {
@@ -223,22 +221,7 @@ const Cart = () => {
           </div>
         ) : (
           <>
-            {toFreeShipping > 0 ? (
-              <div className="progress-bar">
-                <div
-                  className="progress-fill"
-                  style={{
-                    width: `${Math.min(
-                      100,
-                      ((freeShipThreshold - toFreeShipping) / freeShipThreshold) * 100
-                    )}%`
-                  }}
-                />
-                <span>You're ₹{fmt(toFreeShipping)} away from Free Shipping</span>
-              </div>
-            ) : (
-              <div className="progress-free">You unlocked Free Shipping</div>
-            )}
+            <div className="progress-free">You unlocked Free Shipping</div>
 
             <div className="cart-grid">
               <div className="cart-left">
@@ -247,7 +230,7 @@ const Cart = () => {
                   <span>{cartItems.length} item(s)</span>
                 </div>
 
-                {cartItems.map((item) => {
+                {cartItems.map(item => {
                   const qty = quantities[item.id] || 1;
                   const { mrp, offer } = getItemPricing(item);
                   const discountPct =
@@ -276,7 +259,7 @@ const Cart = () => {
 
                         <div className="card-opts">
                           <div className="opt">
-                            <span>Color</span>
+                            <span className="opt-label">Color</span>
                             <span
                               className="color-dot"
                               style={{
@@ -285,12 +268,12 @@ const Cart = () => {
                             />
                           </div>
                           <div className="opt">
-                            <span>Size</span>
+                            <span className="opt-label">Size</span>
                             <select
                               defaultValue={item.selected_size}
                               className="select"
                             >
-                              {['S', 'M', 'L', 'XL', 'XXL', 'FREE'].map((s) => (
+                              {['S', 'M', 'L', 'XL', 'XXL', 'FREE'].map(s => (
                                 <option key={s} value={s}>
                                   {s}
                                 </option>
@@ -298,11 +281,11 @@ const Cart = () => {
                             </select>
                           </div>
                           <div className="opt">
-                            <span>Qty</span>
+                            <span className="opt-label">Qty</span>
                             <select
                               value={qty}
                               className="select"
-                              onChange={(e) =>
+                              onChange={e =>
                                 handleQuantityChange(item.id, e.target.value)
                               }
                             >
@@ -332,12 +315,6 @@ const Cart = () => {
                           >
                             <FaTag /> Apply Coupon
                           </button>
-                          <a
-                            className="mini link"
-                            href={`/product/${item.product_id}`}
-                          >
-                            View Details <FaChevronRight />
-                          </a>
                         </div>
                       </div>
                     </div>
@@ -371,7 +348,7 @@ const Cart = () => {
                       <input
                         type="checkbox"
                         checked={giftWrap}
-                        onChange={(e) => setGiftWrap(e.target.checked)}
+                        onChange={e => setGiftWrap(e.target.checked)}
                       />
                       <span>Gift Wrap</span>
                     </label>
@@ -419,7 +396,7 @@ const Cart = () => {
             onCancel={() => setShowPopup(false)}
             onWishlist={() => {
               addToWishlist(selectedItem);
-              setCartItems((prev) => prev.filter((i) => i.id !== selectedItem.id));
+              setCartItems(prev => prev.filter(i => i.id !== selectedItem.id));
               setShowPopup(false);
               setToast('Moved to wishlist');
               setTimeout(() => setToast(''), 1500);
@@ -429,7 +406,7 @@ const Cart = () => {
 
         {showCoupon && (
           <div className="modal-wrap" onClick={() => setShowCoupon(false)}>
-            <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal" onClick={e => e.stopPropagation()}>
               <h4>Apply Coupon</h4>
               <div className="preset">
                 <button onClick={() => setCouponInput('GOLD10')}>GOLD10</button>
@@ -437,7 +414,7 @@ const Cart = () => {
               </div>
               <input
                 value={couponInput}
-                onChange={(e) => setCouponInput(e.target.value)}
+                onChange={e => setCouponInput(e.target.value)}
                 placeholder="Enter code"
               />
               <div className="modal-actions">
@@ -459,7 +436,7 @@ const Cart = () => {
           <div className="modal-wrap" onClick={() => setShowSuccess(false)}>
             <div
               className="modal success"
-              onClick={(e) => e.stopPropagation()}
+              onClick={e => e.stopPropagation()}
             >
               <div className="success-head">Order Placed Successfully</div>
               <p className="success-sub">Thank you for shopping with us.</p>
