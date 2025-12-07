@@ -1,4 +1,3 @@
-// src/components/LoginPopup.js
 import React, { useState, useRef, useEffect } from 'react';
 import { FaGoogle } from 'react-icons/fa';
 import { FiX, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
@@ -83,14 +82,32 @@ const LoginPopup = ({ onClose, onSuccess }) => {
       });
       if (!resp.ok) throw new Error('sync failed');
       const data = await resp.json();
-      sessionStorage.setItem('userId', String(data.id));
-      sessionStorage.setItem('userEmail', data.email || u.email || '');
-      sessionStorage.setItem('userName', data.name || u.displayName || u.email?.split('@')[0] || 'User');
-      sessionStorage.setItem('userType', data.type || 'B2C');
+      const user = data.user || data;
+
+      if (data.token) {
+        localStorage.setItem('userToken', data.token);
+        sessionStorage.setItem('userToken', data.token);
+      }
+
+      localStorage.setItem('userId', String(user.id));
+      localStorage.setItem('userEmail', user.email || u.email || '');
+      localStorage.setItem('userName', user.name || u.displayName || u.email?.split('@')[0] || 'User');
+      localStorage.setItem('userType', user.type || 'B2C');
+      localStorage.setItem('firebaseUid', u.uid);
+
+      sessionStorage.setItem('userId', String(user.id));
+      sessionStorage.setItem('userEmail', user.email || u.email || '');
+      sessionStorage.setItem('userName', user.name || u.displayName || u.email?.split('@')[0] || 'User');
+      sessionStorage.setItem('userType', user.type || 'B2C');
       sessionStorage.setItem('firebaseUid', u.uid);
-      return data;
+
+      return user;
     } catch (e) {
+      localStorage.setItem('firebaseUid', u.uid);
       sessionStorage.setItem('firebaseUid', u.uid);
+      if (!localStorage.getItem('userId')) {
+        localStorage.setItem('userId', u.uid);
+      }
       if (!sessionStorage.getItem('userId')) {
         sessionStorage.setItem('userId', u.uid);
       }
@@ -105,6 +122,7 @@ const LoginPopup = ({ onClose, onSuccess }) => {
       const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
       const u = cred.user;
       const token = await u.getIdToken();
+      localStorage.setItem('tk_id_token', token);
       sessionStorage.setItem('tk_id_token', token);
       const backendUser = await syncUserWithBackend(u);
       setPopupMessage('Successfully Logged In!');
@@ -128,18 +146,31 @@ const LoginPopup = ({ onClose, onSuccess }) => {
           });
           const data = await response.json();
           if (response.ok) {
-            sessionStorage.setItem('userId', data.id);
-            sessionStorage.setItem('userEmail', data.email);
-            sessionStorage.setItem('userName', data.name);
-            sessionStorage.setItem('userType', data.type);
+            const user = data.user || data;
+
+            if (data.token) {
+              localStorage.setItem('userToken', data.token);
+              sessionStorage.setItem('userToken', data.token);
+            }
+
+            localStorage.setItem('userId', String(user.id));
+            localStorage.setItem('userEmail', user.email);
+            localStorage.setItem('userName', user.name);
+            localStorage.setItem('userType', user.type);
+
+            sessionStorage.setItem('userId', String(user.id));
+            sessionStorage.setItem('userEmail', user.email);
+            sessionStorage.setItem('userName', user.name);
+            sessionStorage.setItem('userType', user.type);
+
             setPopupMessage('Successfully Logged In!');
             setTimeout(() => {
               onSuccess({
-                id: data.id,
-                name: data.name,
-                email: data.email,
+                id: user.id,
+                name: user.name,
+                email: user.email,
                 profilePic: '/images/profile-pic.png',
-                userType: data.type
+                userType: user.type
               });
               setPopupMessage('');
             }, 1200);
@@ -165,6 +196,7 @@ const LoginPopup = ({ onClose, onSuccess }) => {
       const cred = await signInWithPopup(auth, googleProvider);
       const u = cred.user;
       const token = await u.getIdToken();
+      localStorage.setItem('tk_id_token', token);
       sessionStorage.setItem('tk_id_token', token);
       const backendUser = await syncUserWithBackend(u);
       setPopupMessage('Successfully Logged In!');
