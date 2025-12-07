@@ -469,7 +469,10 @@ const SearchResults = () => {
 
   const handleProductClick = (group) => {
     const product = group.rep || group
-    navigate(`/product/${product.id}`, { state: { product, group } })
+    if (product) {
+      sessionStorage.setItem('selectedProduct', JSON.stringify(product))
+      navigate('/checkout')
+    }
   }
 
   const handleWishlist = async (e, group) => {
@@ -483,7 +486,10 @@ const SearchResults = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, product_id: productId })
       })
-      if (resp.ok) addToWishlist(product)
+      if (resp.ok) {
+        addToWishlist(product)
+        navigate('/wishlist')
+      }
     } catch {}
   }
 

@@ -290,7 +290,7 @@ const CheckoutPage = () => {
         window.scrollTo(0, 0);
         navigate('/cart');
       } else {
-        setPopupMessage('Failed to add to bag');
+        setPopupMessage('Please Loggin and Try again');
         setTimeout(() => setPopupMessage(''), 2000);
       }
     } else {

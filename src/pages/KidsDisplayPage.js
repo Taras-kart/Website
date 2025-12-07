@@ -35,6 +35,20 @@ export default function KidsDisplayPage({
 }) {
   const [carouselIndex, setCarouselIndex] = useState({})
 
+  useEffect(() => {
+    const saved = sessionStorage.getItem('kidsDisplayScrollY')
+    if (saved != null) {
+      const y = parseInt(saved, 10)
+      if (!Number.isNaN(y)) {
+        window.scrollTo(0, y)
+      }
+    }
+    return () => {
+      const y = window.scrollY || window.pageYOffset || 0
+      sessionStorage.setItem('kidsDisplayScrollY', String(y))
+    }
+  }, [])
+
   const grouped = useMemo(() => {
     const byKey = new Map()
     for (const p of products || []) {
