@@ -1,3 +1,4 @@
+// D:\shopping\src\pages\CheckoutPage.js
 import React, { useState, useEffect } from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';

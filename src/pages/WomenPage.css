@@ -725,6 +725,12 @@
 }
 
 @media (max-width: 500px) {
+  .home1-hero-new-home-2{
+    margin-top: 100px;
+  }
+  .home1-hero-frame-new-home-2{
+    margin-top: 90px;
+  }
   .home-section6-title {
     font-size: 1.8rem;
   }

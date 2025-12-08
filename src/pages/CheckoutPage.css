@@ -1,3 +1,4 @@
+/* D:\shopping\src\pages\CheckoutPage.css */
 :root {
   --black: #0a0a0a;
   --black-2: #121212;
@@ -60,7 +61,8 @@
 }
 
 .co-image {
-  width: 400px;
+  width: 100%;
+  max-width: 400px;
   height: 100%;
   object-fit: cover;
   cursor: zoom-in;
@@ -387,6 +389,14 @@
 }
 
 @media (max-width: 768px) {
+  .co-wrap {
+    padding-top: 72px;
+  }
+
+  .co-container {
+    margin: 16px auto 40px;
+  }
+
   .co-image {
     height: 340px;
   }
@@ -401,8 +411,13 @@
 }
 
 @media (max-width: 520px) {
+  .co-wrap {
+    padding-top: 76px;
+  }
+
   .co-image {
-    height: 300px;
+    margin-top: 25px;
+    height: 440px;
   }
 
   .co-thumb {
