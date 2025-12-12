@@ -101,13 +101,13 @@ const Footer = () => {
           </a>
         </>,
         <>
-          <a className="link-btn" href="mailto:support@tarskart.com">
-            <FaEnvelope /> support@tarskart.com
+          <a className="link-btn" href="mailto:taraskartonline@gmail.com">
+            <FaEnvelope /> taraskartonline@gmail.com
           </a>
         </>,
         <>
-          <a className="link-btn" href="tel:+919999999999">
-            <FaPhoneAlt /> +91-XXXXXXXXXX
+          <a className="link-btn" href="tel:+919859871234">
+            <FaPhoneAlt /> +91-9859871234
           </a>
         </>
       ],
@@ -196,8 +196,8 @@ const Footer = () => {
             <li><a className="link-btn" href="https://facebook.com" target="_blank" rel="noreferrer"><FaFacebookF /> Facebook</a></li>
             <li><a className="link-btn" href="https://instagram.com" target="_blank" rel="noreferrer"><FaInstagram /> Instagram</a></li>
             <li><a className="link-btn" href="https://twitter.com" target="_blank" rel="noreferrer"><FaTwitter /> Twitter</a></li>
-            <li><a className="link-btn" href="mailto:support@tarskart.com"><FaEnvelope /> support@tarskart.com</a></li>
-            <li><a className="link-btn" href="tel:+919999999999"><FaPhoneAlt /> +91-XXXXXXXXXX</a></li>
+            <li><a className="link-btn" href="mailto:taraskartonline@gmail.com"><FaEnvelope /> taraskartonline@gmail.com</a></li>
+            <li><a className="link-btn" href="tel:+919859871234"><FaPhoneAlt /> +91-9859871234</a></li>
           </ul>
         </div>
       </div>

@@ -22,6 +22,42 @@ function cloudinaryUrlByEan(ean) {
   return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/f_auto,q_auto/products/${ean}`
 }
 
+const normBool = (v) => {
+  if (v === true || v === false) return v
+  if (v === 1 || v === 0) return Boolean(v)
+  if (typeof v === 'string') {
+    const s = v.trim().toLowerCase()
+    if (s === 'true' || s === '1' || s === 'yes') return true
+    if (s === 'false' || s === '0' || s === 'no') return false
+  }
+  return undefined
+}
+
+const numOrZero = (v) => {
+  const n = Number(v)
+  return Number.isFinite(n) ? n : 0
+}
+
+const computeOutOfStock = (p) => {
+  const explicit = normBool(p.is_out_of_stock)
+  if (explicit !== undefined) return explicit
+
+  const inStock = normBool(p.in_stock)
+  if (inStock !== undefined) return !inStock
+
+  const available = numOrZero(
+    p.available_qty !== undefined ? p.available_qty : p.availableQty !== undefined ? p.availableQty : undefined
+  )
+  if (available > 0) return false
+  if (p.available_qty !== undefined || p.availableQty !== undefined) return true
+
+  const onHand = numOrZero(p.on_hand !== undefined ? p.on_hand : p.onHand !== undefined ? p.onHand : undefined)
+  const reserved = numOrZero(p.reserved !== undefined ? p.reserved : p.reservedQty !== undefined ? p.reservedQty : 0)
+  if (p.on_hand !== undefined || p.onHand !== undefined) return onHand - reserved <= 0
+
+  return false
+}
+
 export default function MenPage() {
   const navigate = useNavigate()
   const { addToWishlist, wishlistItems, setWishlistItems } = useWishlist()
@@ -42,9 +78,7 @@ export default function MenPage() {
   useEffect(() => {
     setLikedKeys(
       new Set(
-        toArray(wishlistItems).map(
-          (it) => String(it.ean_code ?? it.product_id ?? it.id ?? `${it.image_url}`)
-        )
+        toArray(wishlistItems).map((it) => String(it.ean_code ?? it.product_id ?? it.id ?? `${it.image_url}`))
       )
     )
   }, [wishlistItems])
@@ -55,7 +89,7 @@ export default function MenPage() {
       setLoading(true)
       setError('')
       try {
-        const res = await fetch(`${API_BASE}/api/products?gender=MEN&_t=${Date.now()}`, { cache: 'no-store' })
+        const res = await fetch(`${API_BASE}/api/products?gender=MEN&limit=50000&_t=${Date.now()}`, { cache: 'no-store' })
         if (!res.ok) throw new Error('Failed to load products')
         const data = await res.json()
         const isPlaceholder = (url) => {
@@ -63,13 +97,7 @@ export default function MenPage() {
           return /^\/images\//.test(url)
         }
         const arr = toArray(data).map((p, i) => {
-          const ean =
-            p.ean_code ??
-            p.EANCode ??
-            p.ean ??
-            p.barcode ??
-            p.bar_code ??
-            ''
+          const ean = p.ean_code ?? p.EANCode ?? p.ean ?? p.barcode ?? p.bar_code ?? ''
           const apiImage = !isPlaceholder(p.image_url) ? p.image_url : ''
           const candidateCloudinary = ean ? cloudinaryUrlByEan(ean) : ''
           const img = apiImage || candidateCloudinary || DEFAULT_IMG
@@ -81,20 +109,27 @@ export default function MenPage() {
             image_url: img,
             ean_code: ean,
             gender: p.gender ?? 'MEN',
-            color: p.color ?? '',
+            color: p.color ?? p.colour ?? '',
             size: p.size ?? '',
             original_price_b2c: p.original_price_b2c ?? p.mrp ?? p.list_price ?? 0,
             final_price_b2c: p.final_price_b2c ?? p.sale_price ?? p.price ?? p.mrp ?? 0,
             original_price_b2b: p.original_price_b2b ?? p.mrp ?? 0,
-            final_price_b2b: p.final_price_b2b ?? p.sale_price ?? 0
+            final_price_b2b: p.final_price_b2b ?? p.sale_price ?? 0,
+            on_hand: p.on_hand ?? p.onHand,
+            reserved: p.reserved ?? p.reservedQty,
+            available_qty: p.available_qty ?? p.availableQty,
+            in_stock: p.in_stock ?? p.inStock,
+            is_out_of_stock: computeOutOfStock(p)
           }
         })
+
         const uniqMap = new Map()
         for (const x of arr) {
           const key = x.product_id || x.id
           if (!uniqMap.has(key)) uniqMap.set(key, x)
         }
         const uniq = Array.from(uniqMap.values())
+
         if (!cancelled) {
           setAllProducts(uniq)
           setProducts(uniq)
@@ -138,9 +173,7 @@ export default function MenPage() {
           body: JSON.stringify({ user_id: userId, product_id: product.product_id ?? product.id })
         })
         setWishlistItems((prev) =>
-          prev.filter(
-            (w) => String(w.ean_code ?? w.product_id ?? w.id ?? `${w.image_url}`) !== k
-          )
+          prev.filter((w) => String(w.ean_code ?? w.product_id ?? w.id ?? `${w.image_url}`) !== k)
         )
         setLikedKeys((prev) => {
           const n = new Set(prev)

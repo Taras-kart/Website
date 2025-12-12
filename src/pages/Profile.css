@@ -20,6 +20,7 @@
 }
 
 .profile-container {
+  margin-top: 60px !important;
   display: grid;
   grid-template-columns: 320px minmax(0, 1fr);
   gap: 24px;
@@ -410,6 +411,102 @@
   overflow-wrap: anywhere;
 }
 
+.info-value.muted {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.mobile-alert {
+  background: rgba(255, 210, 119, 0.08);
+  border: 1px solid rgba(255, 210, 119, 0.25);
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+.mobile-alert-title {
+  font-weight: 700;
+  font-size: 14px;
+  color: #ffd277;
+}
+
+.mobile-alert-sub {
+  margin-top: 6px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.mobile-row {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.mobile-input {
+  flex: 1;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  padding: 0 12px;
+  outline: none;
+  font-size: 14px;
+}
+
+.mobile-input:focus {
+  border-color: rgba(255, 210, 119, 0.55);
+  box-shadow: 0 0 0 3px rgba(255, 210, 119, 0.14);
+}
+
+.mobile-save-btn {
+  height: 42px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  padding: 0 14px;
+  font-weight: 700;
+  color: #000000;
+  background: linear-gradient(90deg, #ffd277, #ffffff);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  transition: transform 0.18s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  white-space: nowrap;
+}
+
+.mobile-save-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+}
+
+.mobile-save-btn.disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  filter: grayscale(0.2);
+}
+
+.mobile-msg {
+  margin-top: 10px;
+  font-size: 12px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.mobile-msg.ok {
+  border-color: rgba(60, 255, 170, 0.25);
+  color: rgba(210, 255, 235, 0.95);
+}
+
+.mobile-msg.err {
+  border-color: rgba(255, 120, 120, 0.25);
+  color: rgba(255, 220, 220, 0.95);
+}
+
+.mobile-msg.inline {
+  margin-top: 0;
+}
+
 @keyframes ringPulse {
   0%,
   100% {
@@ -489,6 +586,15 @@
 
   .login-signup-panel {
     min-height: 320px;
+  }
+
+  .mobile-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mobile-save-btn {
+    width: 100%;
   }
 }
 

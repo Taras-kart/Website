@@ -69,6 +69,13 @@ const LoginPopup = ({ onClose, onSuccess }) => {
     userType: src.userType || src.type || 'B2C'
   });
 
+  const clearUserIdIfInvalid = () => {
+    const sid = sessionStorage.getItem('userId');
+    const lid = localStorage.getItem('userId');
+    if (sid && !Number.isInteger(Number(sid))) sessionStorage.removeItem('userId');
+    if (lid && !Number.isInteger(Number(lid))) localStorage.removeItem('userId');
+  };
+
   const syncUserWithBackend = async (u) => {
     try {
       const resp = await fetch(`${API_BASE}/api/auth/firebase-login`, {
@@ -101,16 +108,12 @@ const LoginPopup = ({ onClose, onSuccess }) => {
       sessionStorage.setItem('userType', user.type || 'B2C');
       sessionStorage.setItem('firebaseUid', u.uid);
 
+      clearUserIdIfInvalid();
       return user;
     } catch (e) {
       localStorage.setItem('firebaseUid', u.uid);
       sessionStorage.setItem('firebaseUid', u.uid);
-      if (!localStorage.getItem('userId')) {
-        localStorage.setItem('userId', u.uid);
-      }
-      if (!sessionStorage.getItem('userId')) {
-        sessionStorage.setItem('userId', u.uid);
-      }
+      clearUserIdIfInvalid();
       return null;
     }
   };
@@ -162,6 +165,8 @@ const LoginPopup = ({ onClose, onSuccess }) => {
             sessionStorage.setItem('userEmail', user.email);
             sessionStorage.setItem('userName', user.name);
             sessionStorage.setItem('userType', user.type);
+
+            clearUserIdIfInvalid();
 
             setPopupMessage('Successfully Logged In!');
             setTimeout(() => {

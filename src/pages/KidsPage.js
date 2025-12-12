@@ -17,6 +17,42 @@ const API_BASE = API_BASE_RAW.replace(/\/+$/, '')
 const DEFAULT_IMG = '/images/kids/kids-girls-frock.jpg'
 const toArray = (x) => (Array.isArray(x) ? x : [])
 
+const normBool = (v) => {
+  if (v === true || v === false) return v
+  if (v === 1 || v === 0) return Boolean(v)
+  if (typeof v === 'string') {
+    const s = v.trim().toLowerCase()
+    if (s === 'true' || s === '1' || s === 'yes') return true
+    if (s === 'false' || s === '0' || s === 'no') return false
+  }
+  return undefined
+}
+
+const numOrZero = (v) => {
+  const n = Number(v)
+  return Number.isFinite(n) ? n : 0
+}
+
+const computeOutOfStock = (p) => {
+  const explicit = normBool(p.is_out_of_stock)
+  if (explicit !== undefined) return explicit
+
+  const inStock = normBool(p.in_stock)
+  if (inStock !== undefined) return !inStock
+
+  const available = numOrZero(
+    p.available_qty !== undefined ? p.available_qty : p.availableQty !== undefined ? p.availableQty : undefined
+  )
+  if (available > 0) return false
+  if (p.available_qty !== undefined || p.availableQty !== undefined) return true
+
+  const onHand = numOrZero(p.on_hand !== undefined ? p.on_hand : p.onHand !== undefined ? p.onHand : undefined)
+  const reserved = numOrZero(p.reserved !== undefined ? p.reserved : p.reservedQty !== undefined ? p.reservedQty : 0)
+  if (p.on_hand !== undefined || p.onHand !== undefined) return onHand - reserved <= 0
+
+  return false
+}
+
 export default function KidsPage() {
   const [allProducts, setAllProducts] = useState([])
   const [products, setProducts] = useState([])
@@ -37,8 +73,8 @@ export default function KidsPage() {
   useEffect(() => {
     setLikedKeys(
       new Set(
-        toArray(wishlistItems).map(
-          (it) => String(it.ean_code ?? it.product_id ?? it.id ?? `${it.image_url}`)
+        toArray(wishlistItems).map((it) =>
+          String(it.ean_code ?? it.product_id ?? it.id ?? `${it.image_url}`)
         )
       )
     )
@@ -50,7 +86,7 @@ export default function KidsPage() {
       setLoading(true)
       setError('')
       try {
-        const res = await fetch(`${API_BASE}/api/products?gender=KIDS`)
+        const res = await fetch(`${API_BASE}/api/products?gender=KIDS&limit=50000&_t=${Date.now()}`, { cache: 'no-store' })
         if (!res.ok) throw new Error('Failed to load products')
         const data = await res.json()
         const arr = toArray(data).map((p, i) => ({
@@ -66,7 +102,12 @@ export default function KidsPage() {
           original_price_b2c: p.original_price_b2c ?? p.mrp ?? p.list_price ?? 0,
           final_price_b2c: p.final_price_b2c ?? p.sale_price ?? p.price ?? p.mrp ?? 0,
           original_price_b2b: p.original_price_b2b ?? p.mrp ?? 0,
-          final_price_b2b: p.final_price_b2b ?? p.sale_price ?? 0
+          final_price_b2b: p.final_price_b2b ?? p.sale_price ?? 0,
+          on_hand: p.on_hand ?? p.onHand,
+          reserved: p.reserved ?? p.reservedQty,
+          available_qty: p.available_qty ?? p.availableQty,
+          in_stock: p.in_stock ?? p.inStock,
+          is_out_of_stock: computeOutOfStock(p)
         }))
         if (!cancelled) {
           setAllProducts(arr)
@@ -129,9 +170,12 @@ export default function KidsPage() {
     navigate('/checkout')
   }
 
-  const priceForUser = (p) => (userType === 'B2B' ? p.final_price_b2b || p.final_price_b2c : p.final_price_b2c)
+  const priceForUser = (p) =>
+    userType === 'B2B' ? p.final_price_b2b || p.final_price_b2c : p.final_price_b2c
+
   const mrpForUser = (p) =>
     userType === 'B2B' ? p.original_price_b2b || p.original_price_b2c : p.original_price_b2c
+
   const discountPct = (p) => {
     const mrp = Number(mrpForUser(p) || 0)
     const price = Number(priceForUser(p) || 0)

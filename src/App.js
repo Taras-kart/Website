@@ -22,6 +22,7 @@ import PaymentPage from './pages/PaymentPage'
 import Home1 from './pages/Home1'
 import TrackOrder from './pages/TrackOrder'
 import OrderCancel from './pages/OrderCancel'
+import RefundRequest from './pages/RefundRequest'
 
 function NavigationLoader() {
   const location = useLocation()
@@ -58,6 +59,7 @@ function AppShell() {
         <Route path="/track-order" element={<TrackOrder />} />
         <Route path="/order/:id/tracking" element={<OrderTracking />} />
         <Route path="/order/:id/cancel" element={<OrderCancel />} />
+        <Route path="/returns/:id/refund" element={<RefundRequest />} />
       </Routes>
     </>
   )

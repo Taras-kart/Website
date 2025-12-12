@@ -22,7 +22,7 @@
 
 .co-container {
   max-width: 1200px;
-  margin: 24px auto 48px;
+  margin: 65px auto 48px;
   padding: 0 16px;
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;

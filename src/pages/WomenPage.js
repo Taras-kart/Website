@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from './Navbar'
 import './WomenPage.css'
@@ -25,6 +25,50 @@ function cloudinaryUrlByEan(ean) {
   return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/f_auto,q_auto/products/${ean}`
 }
 
+const normBool = (v) => {
+  if (v === true || v === false) return v
+  if (v === 1 || v === 0) return Boolean(v)
+  if (typeof v === 'string') {
+    const s = v.trim().toLowerCase()
+    if (s === 'true' || s === '1' || s === 'yes') return true
+    if (s === 'false' || s === '0' || s === 'no') return false
+  }
+  return undefined
+}
+
+const numOrZero = (v) => {
+  const n = Number(v)
+  return Number.isFinite(n) ? n : 0
+}
+
+const computeOutOfStock = (p) => {
+  const explicit = normBool(p.is_out_of_stock)
+  if (explicit !== undefined) return explicit
+  const inStock = normBool(p.in_stock)
+  if (inStock !== undefined) return !inStock
+
+  const available = numOrZero(
+    p.available_qty !== undefined
+      ? p.available_qty
+      : p.availableQty !== undefined
+      ? p.availableQty
+      : undefined
+  )
+  if (available > 0) return false
+  if (p.available_qty !== undefined || p.availableQty !== undefined) return true
+
+  const onHand = numOrZero(p.on_hand !== undefined ? p.on_hand : p.onHand !== undefined ? p.onHand : undefined)
+  const reserved = numOrZero(p.reserved !== undefined ? p.reserved : p.reservedQty !== undefined ? p.reservedQty : 0)
+  if (p.on_hand !== undefined || p.onHand !== undefined) return onHand - reserved <= 0
+
+  return false
+}
+
+const clampScrollY = (y) => {
+  const max = Math.max(0, (document.documentElement?.scrollHeight || 0) - (window.innerHeight || 0))
+  return Math.min(Math.max(0, y), max)
+}
+
 export default function WomenPage() {
   const [allProducts, setAllProducts] = useState([])
   const [products, setProducts] = useState([])
@@ -34,40 +78,52 @@ export default function WomenPage() {
   const [likedKeys, setLikedKeys] = useState(new Set())
   const navigate = useNavigate()
   const { addToWishlist, wishlistItems, setWishlistItems } = useWishlist()
-  const userId = sessionStorage.getItem('userId')
+
+  const restoreDoneRef = useRef(false)
+  const lastSavedRef = useRef(0)
+  const rafSaveRef = useRef(0)
+
+  const getUserId = () => {
+    if (typeof window === 'undefined') return null
+    const id = sessionStorage.getItem('userId') || localStorage.getItem('userId')
+    if (!id) return null
+    const n = Number(id)
+    if (!Number.isInteger(n)) return null
+    return String(n)
+  }
+
+  const userId = getUserId()
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
-    const saved = sessionStorage.getItem('scroll:women-page')
-    const y = saved != null ? parseInt(saved, 10) : 0
-    if (!Number.isNaN(y)) {
-      window.scrollTo(0, y)
-    } else {
-      window.scrollTo(0, 0)
-    }
-    const handleScroll = () => {
-      const pos = window.scrollY || window.pageYOffset || 0
-      sessionStorage.setItem('scroll:women-page', String(pos))
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-    }
-  }, [])
-
-  useEffect(() => {
-    setUserType(sessionStorage.getItem('userType'))
+    const t = sessionStorage.getItem('userType') || localStorage.getItem('userType')
+    setUserType(t)
   }, [])
 
   useEffect(() => {
     setLikedKeys(
       new Set(
-        toArray(wishlistItems).map(
-          (it) => String(it.ean_code ?? it.product_id ?? it.id ?? `${it.image_url}`)
-        )
+        toArray(wishlistItems).map((it) => String(it.ean_code ?? it.product_id ?? it.id ?? `${it.image_url}`))
       )
     )
   }, [wishlistItems])
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (rafSaveRef.current) return
+      rafSaveRef.current = requestAnimationFrame(() => {
+        rafSaveRef.current = 0
+        const y = window.scrollY || window.pageYOffset || 0
+        lastSavedRef.current = y
+        sessionStorage.setItem('scroll:women-page', String(y))
+      })
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      if (rafSaveRef.current) cancelAnimationFrame(rafSaveRef.current)
+      rafSaveRef.current = 0
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -75,21 +131,12 @@ export default function WomenPage() {
       setLoading(true)
       setError('')
       try {
-        const res = await fetch(`${API_BASE}/api/products?gender=WOMEN&limit=50000`)
+        const res = await fetch(`${API_BASE}/api/products?gender=WOMEN&limit=50000&_t=${Date.now()}`, { cache: 'no-store' })
         if (!res.ok) throw new Error('Failed to load products')
         const data = await res.json()
         const arr = toArray(data).map((p, i) => {
-          const ean =
-            p.ean_code ??
-            p.EANCode ??
-            p.ean ??
-            p.barcode ??
-            p.bar_code ??
-            ''
-          const img =
-            p.image_url ||
-            (ean ? cloudinaryUrlByEan(ean) : '') ||
-            DEFAULT_IMG
+          const ean = p.ean_code ?? p.EANCode ?? p.ean ?? p.barcode ?? p.bar_code ?? ''
+          const img = p.image_url || (ean ? cloudinaryUrlByEan(ean) : '') || DEFAULT_IMG
           return {
             id: p.id ?? p.product_id ?? i + 1,
             product_id: p.product_id ?? p.id ?? i + 1,
@@ -98,12 +145,17 @@ export default function WomenPage() {
             image_url: img,
             ean_code: ean,
             gender: p.gender ?? 'WOMEN',
-            color: p.color ?? '',
+            color: p.color ?? p.colour ?? '',
             size: p.size ?? '',
             original_price_b2c: p.original_price_b2c ?? p.mrp ?? p.list_price ?? 0,
             final_price_b2c: p.final_price_b2c ?? p.sale_price ?? p.price ?? p.mrp ?? 0,
             original_price_b2b: p.original_price_b2b ?? p.mrp ?? 0,
-            final_price_b2b: p.final_price_b2b ?? p.sale_price ?? 0
+            final_price_b2b: p.final_price_b2b ?? p.sale_price ?? 0,
+            on_hand: p.on_hand ?? p.onHand,
+            reserved: p.reserved ?? p.reservedQty,
+            available_qty: p.available_qty ?? p.availableQty,
+            in_stock: p.in_stock ?? p.inStock,
+            is_out_of_stock: computeOutOfStock(p)
           }
         })
         if (!cancelled) {
@@ -126,9 +178,27 @@ export default function WomenPage() {
     }
   }, [])
 
+  useLayoutEffect(() => {
+    if (restoreDoneRef.current) return
+    if (loading) return
+
+    restoreDoneRef.current = true
+    const saved = sessionStorage.getItem('scroll:women-page')
+    const yRaw = saved != null ? parseInt(saved, 10) : 0
+    const y = Number.isFinite(yRaw) ? yRaw : 0
+
+    requestAnimationFrame(() => {
+      window.scrollTo(0, clampScrollY(y))
+      requestAnimationFrame(() => {
+        window.scrollTo(0, clampScrollY(y))
+      })
+    })
+  }, [loading, products.length, error])
+
   const keyFor = (p) => String(p.ean_code || p.product_id || p.id || p.key || `${p.images?.[0]}`)
 
   const toggleLike = async (group) => {
+    if (!userId) return
     const k = keyFor(group)
     const inList = likedKeys.has(k)
     const pid = group.product_id || group.id
@@ -140,10 +210,7 @@ export default function WomenPage() {
           body: JSON.stringify({ user_id: userId, product_id: pid })
         })
         setWishlistItems((prev) =>
-          prev.filter(
-            (item) =>
-              String(item.ean_code ?? item.product_id ?? item.id ?? `${item.image_url}`) !== k
-          )
+          prev.filter((item) => String(item.ean_code ?? item.product_id ?? item.id ?? `${item.image_url}`) !== k)
         )
         setLikedKeys((prev) => {
           const n = new Set(prev)
@@ -206,22 +273,12 @@ export default function WomenPage() {
                   </SwiperSlide>
                   <SwiperSlide>
                     <div className="home1-hero-slide-new-home-2">
-                      <img
-                        src="/images/banners/banner2.jpg"
-                        alt="Women Banner"
-                        loading="lazy"
-                        decoding="async"
-                      />
+                      <img src="/images/banners/banner2.jpg" alt="Women Banner" loading="lazy" decoding="async" />
                     </div>
                   </SwiperSlide>
                   <SwiperSlide>
                     <div className="home1-hero-slide-new-home-2">
-                      <img
-                        src="/images/banners/banner3.jpg"
-                        alt="Women Banner"
-                        loading="lazy"
-                        decoding="async"
-                      />
+                      <img src="/images/banners/banner3.jpg" alt="Women Banner" loading="lazy" decoding="async" />
                     </div>
                   </SwiperSlide>
                 </Swiper>

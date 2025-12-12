@@ -5,6 +5,7 @@
   --white: #ffffff;
   --dark: #0f0f0f;
   --accent: #1c1c1c;
+  --gold: #ffd277;
 }
 
 html,
@@ -98,7 +99,7 @@ body {
 
 .nav-link-final {
   text-decoration: none;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: .2px;
   display: inline-flex;
   align-items: center;
@@ -122,11 +123,11 @@ body {
 .active-final span {
   z-index: 3;
   position: relative;
-  color: #ffd277;
+  color: var(--gold);
 }
 
 .active-final svg {
-  fill: #ffd277 !important;
+  fill: var(--gold) !important;
 }
 
 .active-final {
@@ -142,7 +143,7 @@ body {
   cursor: pointer;
   transition: background-position 1s ease;
   box-shadow: 0 6px 24px rgba(255, 210, 119, 0.18);
-  color: #ffd277;
+  color: var(--gold);
 }
 
 .active-final::before {
@@ -154,7 +155,7 @@ body {
   z-index: 0;
 }
 
-.active-final>* {
+.active-final > * {
   position: relative;
   z-index: 1;
 }
@@ -177,7 +178,7 @@ body {
 }
 
 .search-bar-final:focus-within {
-  border-color: #ffd277;
+  border-color: var(--gold);
   box-shadow: 0 10px 24px rgba(255, 210, 119, 0.18), inset 0 0 0 1px rgba(255, 210, 119, 0.25);
   transform: translateY(-1px);
 }
@@ -199,10 +200,12 @@ body {
   outline: none;
   font-size: clamp(13px, 1.8vw, 16px);
   width: clamp(120px, 16vw, 180px);
+  font-weight: 500;
 }
 
 .search-bar-final input::placeholder {
   color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
 }
 
 .search-bar-final input:focus {
@@ -214,36 +217,77 @@ body {
   left: 0;
   right: 0;
   top: 100%;
-  margin-top: 6px;
-  background: #ffffff;
+  margin-top: 8px;
+  background: #000;
   border-radius: 14px;
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
   max-height: 260px;
   overflow-y: auto;
   z-index: 1200;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 210, 119, 0.28);
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+.nav-suggestions.open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.nav-suggestions::-webkit-scrollbar {
+  width: 10px;
+}
+
+.nav-suggestions::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+}
+
+.nav-suggestions::-webkit-scrollbar-thumb {
+  background: rgba(255, 210, 119, 0.45);
+  border-radius: 999px;
+  border: 2px solid rgba(0, 0, 0, 0.85);
+}
+
+.nav-suggestions {
+  scrollbar-color: rgba(255, 210, 119, 0.45) rgba(255, 255, 255, 0.06);
+  scrollbar-width: thin;
 }
 
 .nav-suggestion-item {
+  width: 100%;
   padding: 10px 14px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
   font-size: 14px;
-  color: #000;
+  color: var(--gold);
+  background: transparent;
+  border: 0;
+  text-align: left;
+  font-weight: 600;
+  transition: background .18s ease, color .18s ease;
 }
 
 .nav-suggestion-item:hover {
-  background: #ffd700;
-  color: #000;
+  background: rgba(255, 210, 119, 0.12);
+  color: var(--gold);
 }
 
 .nav-suggestion-dot {
   width: 6px;
   height: 6px;
   border-radius: 999px;
-  background: #000;
+  background: var(--gold);
+  flex: 0 0 auto;
+}
+
+.nav-suggestion-text {
+  font-weight: 600;
 }
 
 .icon-buttons-final {
@@ -258,6 +302,7 @@ body {
   gap: 6px;
   text-decoration: none;
   color: white;
+  font-weight: 600;
 }
 
 .icon-circle {
@@ -310,7 +355,7 @@ body {
 }
 
 .icon-filled {
-  color: #ffd277;
+  color: var(--gold);
   filter: drop-shadow(0 0 10px rgba(255, 210, 119, 0.45));
 }
 
@@ -324,7 +369,7 @@ body {
 }
 
 .icon-label {
-  font-weight: 700;
+  font-weight: 600;
   font-size: clamp(11px, 1.6vw, 12px);
   letter-spacing: .2px;
   color: rgba(255, 255, 255, 0.85);
@@ -333,7 +378,7 @@ body {
 }
 
 .label-active {
-  color: #ffd277;
+  color: var(--gold);
   text-shadow: 0 0 10px rgba(255, 210, 119, 0.4);
 }
 
@@ -454,6 +499,7 @@ body {
   .mobile-drawer-final .nav-link-final {
     font-size: 18px;
     color: white;
+    font-weight: 600;
   }
   .search-bar-final {
     width: 92%;
@@ -517,13 +563,13 @@ body {
   }
   .active-final {
     height: 35px;
-    color: #ffd277 !important;
+    color: var(--gold) !important;
   }
   .active-final span {
-    color: #ffd277 !important;
+    color: var(--gold) !important;
   }
   .active-final svg {
-    fill: #ffd277 !important;
+    fill: var(--gold) !important;
   }
 }
 
@@ -545,10 +591,10 @@ body {
   .active-final {
     width: 60%;
     height: 40px;
-    text-shadow: 0 0 6px #ffd277;
-    color: #ffd277 !important;
+    text-shadow: 0 0 6px var(--gold);
+    color: var(--gold) !important;
   }
   .active-final span {
-    color: #ffd277 !important;
+    color: var(--gold) !important;
   }
 }

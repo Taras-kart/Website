@@ -27,7 +27,7 @@ export default function Home1() {
           }
         })
         setImageMap(map)
-      } catch (e) {}
+      } catch (e) { }
     }
     run()
   }, [])
@@ -765,34 +765,30 @@ export default function Home1() {
           </div>
 
           <div className="wb4-mag">
-            <div className="wb4-col">
-              <Link to="/women" className="wb4-card">
-                <img src={getImage('/images/women/new/zig-zag1.png')} alt="Tops" />
-                <span className="wb4-label">Tops</span>
-              </Link>
-              <Link to="/women" className="wb4-card">
-                <img src={getImage('/images/women/new/zig-zag2.png')} alt="Leggings" />
-                <span className="wb4-label">Leggings</span>
-              </Link>
-            </div>
+            <Link to="/women" className="wb4-card wb4-card-1">
+              <img src={getImage('/images/women/new/zig-zag1.png')} alt="Tops" />
+              <span className="wb4-label">Tops</span>
+            </Link>
 
-            <div className="wb4-col wb4-col-center">
-              <Link to="/women" className="wb4-card wb4-card-tall">
-                <img src={getImage('/images/women/new/zig-zag3.png')} alt="Kurti Pants" />
-                <span className="wb4-badge">Kurti Pants</span>
-              </Link>
-            </div>
+            <Link to="/women" className="wb4-card wb4-card-2">
+              <img src={getImage('/images/women/new/zig-zag2.png')} alt="Leggings" />
+              <span className="wb4-label">Leggings</span>
+            </Link>
 
-            <div className="wb4-col">
-              <Link to="/women" className="wb4-card">
-                <img src={getImage('/images/women/new/zig-zag4.png')} alt="Lounge Wear" />
-                <span className="wb4-label">Lounge Wear</span>
-              </Link>
-              <Link to="/women" className="wb4-card">
-                <img src={getImage('/images/women/new/zig-zag5.png')} alt="Straight Pants" />
-                <span className="wb4-label">Straight Pants</span>
-              </Link>
-            </div>
+            <Link to="/women" className="wb4-card wb4-card-3 wb4-card-tall">
+              <img src={getImage('/images/women/new/zig-zag3.png')} alt="Kurti Pants" />
+              <span className="wb4-badge">Kurti Pants</span>
+            </Link>
+
+            <Link to="/women" className="wb4-card wb4-card-4">
+              <img src={getImage('/images/women/new/zig-zag4.png')} alt="Lounge Wear" />
+              <span className="wb4-label">Lounge Wear</span>
+            </Link>
+
+            <Link to="/women" className="wb4-card wb4-card-5">
+              <img src={getImage('/images/women/new/zig-zag5.png')} alt="Straight Pants" />
+              <span className="wb4-label">Straight Pants</span>
+            </Link>
           </div>
 
           <div className="wb4-chips">
@@ -810,6 +806,7 @@ export default function Home1() {
             </Link>
           </div>
         </section>
+
 
         <section className="wb5-sec">
           <div className="wb5-head">

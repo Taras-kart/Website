@@ -7,6 +7,7 @@ import TandC from './TandC';
 import CustomerCare from './CustomerCare';
 import LoginPopup from './LoginPopup';
 import SignupPopup from './SignupPopup';
+import ReturnsPage from './ReturnsPage';
 
 const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
 const API_BASE_RAW =
@@ -15,46 +16,174 @@ const API_BASE_RAW =
   DEFAULT_API_BASE;
 const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
 
+const isValidMobile = (v) => /^[6-9]\d{9}$/.test(String(v || '').trim());
+
+const getSessionOrLocal = (k) => {
+  const a = sessionStorage.getItem(k);
+  if (a !== null && a !== undefined && a !== '') return a;
+  const b = localStorage.getItem(k);
+  if (b !== null && b !== undefined && b !== '') return b;
+  return '';
+};
+
+const setSessionAndLocal = (k, v) => {
+  const val = v == null ? '' : String(v);
+  if (val) {
+    sessionStorage.setItem(k, val);
+    localStorage.setItem(k, val);
+  } else {
+    sessionStorage.removeItem(k);
+    localStorage.removeItem(k);
+  }
+};
+
 const Profile = () => {
   const [activeSection, setActiveSection] = useState('Profile');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLoginPopup, setShowLoginPopup] = useState(false);
   const [showSignupPopup, setShowSignupPopup] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
+  const [mobileInput, setMobileInput] = useState('');
+  const [mobileMsg, setMobileMsg] = useState('');
+  const [savingMobile, setSavingMobile] = useState(false);
+
+  const setToast = (m) => {
+    setMobileMsg(m);
+    setTimeout(() => setMobileMsg(''), 2200);
+  };
+
+  const hydrateUser = async () => {
+    const email = getSessionOrLocal('userEmail');
+    const uid = getSessionOrLocal('firebaseUid');
+    const id = getSessionOrLocal('userId');
+    const localName = getSessionOrLocal('userName');
+    const localType = getSessionOrLocal('userType');
+
+    if (!email && !id && !uid) {
+      setIsLoggedIn(false);
+      setUserInfo(null);
+      return;
+    }
+
+    if (!email) {
+      setIsLoggedIn(true);
+      setUserInfo({
+        profilePic: '/images/profile-pic.png',
+        name: localName || 'User',
+        email: '',
+        mobile: ''
+      });
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/user/by-email/${encodeURIComponent(email)}`);
+      const data = await res.json();
+      const name =
+        data?.name ||
+        localName ||
+        (email.includes('@') ? email.split('@')[0] : 'User');
+
+      const mobileRaw = data?.mobile;
+      const mobile = isValidMobile(mobileRaw) ? String(mobileRaw) : '';
+
+      setUserInfo({
+        profilePic: '/images/profile-pic.png',
+        name,
+        email: data?.email || email,
+        mobile
+      });
+
+      setIsLoggedIn(!!(data?.email || email));
+      if (data?.email || email) {
+        setSessionAndLocal('userEmail', data?.email || email);
+        setSessionAndLocal('userName', name);
+        if (localType) setSessionAndLocal('userType', localType);
+      }
+    } catch {
+      setIsLoggedIn(!!(email || id || uid));
+      setUserInfo({
+        profilePic: '/images/profile-pic.png',
+        name: localName || (email ? email.split('@')[0] : 'User'),
+        email: email || '',
+        mobile: ''
+      });
+    }
+  };
 
   useEffect(() => {
-    const email = sessionStorage.getItem('userEmail');
-    if (email) {
-      fetch(`${API_BASE}/api/user/by-email/${encodeURIComponent(email)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data && data.email) {
-            setUserInfo({
-              profilePic: '/images/profile-pic.png',
-              name: data.name,
-              email: data.email,
-              mobile: data.mobile
-            });
-            setIsLoggedIn(true);
-          } else {
-            setIsLoggedIn(!!sessionStorage.getItem('userId'));
-          }
-        })
-        .catch(() => {
-          setIsLoggedIn(!!sessionStorage.getItem('userId'));
-          setUserInfo(null);
-        });
-    } else {
-      setIsLoggedIn(!!sessionStorage.getItem('userId'));
-    }
+    hydrateUser();
   }, []);
+
+  useEffect(() => {
+    const m = userInfo?.mobile && isValidMobile(userInfo.mobile) ? String(userInfo.mobile) : '';
+    setMobileInput(m);
+  }, [userInfo?.mobile]);
 
   const handleLogout = () => {
     sessionStorage.clear();
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userType');
+    localStorage.removeItem('firebaseUid');
+    localStorage.removeItem('userToken');
+    localStorage.removeItem('tk_id_token');
     setUserInfo(null);
     setIsLoggedIn(false);
     window.location.href = '/';
   };
+
+  const handleSaveMobile = async () => {
+    const email = getSessionOrLocal('userEmail');
+    const uid = getSessionOrLocal('firebaseUid');
+
+    if (!email) {
+      setToast('Email not found, please login again');
+      return;
+    }
+
+    const mobile = String(mobileInput || '').replace(/\D/g, '').slice(0, 10);
+    if (!isValidMobile(mobile)) {
+      setToast('Enter a valid 10 digit mobile number');
+      return;
+    }
+
+    setSavingMobile(true);
+    try {
+      const r1 = await fetch(`${API_BASE}/api/user/update-mobile`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, mobile, uid: uid || undefined })
+      });
+
+      if (!r1.ok) {
+        const t = await r1.json().catch(() => null);
+        setToast(t?.message || 'Unable to save mobile number');
+        setSavingMobile(false);
+        return;
+      }
+
+      const out = await r1.json().catch(() => ({}));
+      const savedMobile = out?.mobile || mobile;
+
+      setUserInfo((prev) => ({
+        ...(prev || {}),
+        mobile: savedMobile
+      }));
+
+      setToast('Mobile number saved');
+    } catch {
+      setToast('Unable to save mobile number');
+    } finally {
+      setSavingMobile(false);
+    }
+  };
+
+  const mobileMissing =
+    isLoggedIn &&
+    userInfo &&
+    (!userInfo.mobile || !isValidMobile(userInfo.mobile));
 
   return (
     <div className="profile-page">
@@ -91,6 +220,13 @@ const Profile = () => {
             >
               <span className="btn-shine"></span>
               Orders
+            </button>
+            <button
+              className={`profile-button ${activeSection === 'Returns' ? 'active' : ''}`}
+              onClick={() => setActiveSection('Returns')}
+            >
+              <span className="btn-shine"></span>
+              Returns &amp; Refunds
             </button>
             <button
               className={`profile-button ${activeSection === 'Terms' ? 'active' : ''}`}
@@ -146,16 +282,60 @@ const Profile = () => {
                     <p className="user-subtitle">Your profile details</p>
                   </div>
                 </div>
+
+                {mobileMissing && (
+                  <div className="mobile-alert">
+                    <div className="mobile-alert-title">Add your mobile number</div>
+                    <div className="mobile-alert-sub">
+                      This helps with order updates, delivery, and support.
+                    </div>
+                    <div className="mobile-row">
+                      <input
+                        className="mobile-input"
+                        value={mobileInput}
+                        onChange={(e) => {
+                          const v = String(e.target.value || '').replace(/\D/g, '').slice(0, 10);
+                          setMobileInput(v);
+                        }}
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        placeholder="Enter 10 digit mobile number"
+                        maxLength={10}
+                      />
+                      <button
+                        className={`mobile-save-btn ${savingMobile ? 'disabled' : ''}`}
+                        onClick={handleSaveMobile}
+                        disabled={savingMobile}
+                      >
+                        {savingMobile ? 'Saving...' : 'Save'}
+                      </button>
+                    </div>
+                    {mobileMsg && (
+                      <div className={`mobile-msg ${mobileMsg.toLowerCase().includes('saved') ? 'ok' : 'err'}`}>
+                        {mobileMsg}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <div className="info-grid">
                   <div className="info-item">
                     <div className="info-label">Email</div>
-                    <div className="info-value">{userInfo.email}</div>
+                    <div className="info-value">{userInfo.email || '-'}</div>
                   </div>
                   <div className="info-item">
                     <div className="info-label">Mobile</div>
-                    <div className="info-value">{userInfo.mobile}</div>
+                    <div className={`info-value ${!userInfo.mobile ? 'muted' : ''}`}>
+                      {userInfo.mobile || 'Add the mobile number'}
+                    </div>
                   </div>
                 </div>
+
+                {!mobileMissing && mobileMsg && (
+                  <div className={`mobile-msg inline ${mobileMsg.toLowerCase().includes('saved') ? 'ok' : 'err'}`}>
+                    {mobileMsg}
+                  </div>
+                )}
               </div>
             )
           )}
@@ -163,6 +343,12 @@ const Profile = () => {
           {activeSection === 'Orders' && isLoggedIn && (
             <div className="section-card">
               <Orders user={{ email: userInfo?.email, mobile: userInfo?.mobile }} />
+            </div>
+          )}
+
+          {activeSection === 'Returns' && isLoggedIn && (
+            <div className="section-card">
+              <ReturnsPage embedded user={{ email: userInfo?.email, mobile: userInfo?.mobile }} />
             </div>
           )}
 
@@ -184,11 +370,14 @@ const Profile = () => {
         <LoginPopup
           onClose={() => setShowLoginPopup(false)}
           onSuccess={user => {
-            if (user?.id) sessionStorage.setItem('userId', String(user.id));
-            if (user?.email) sessionStorage.setItem('userEmail', String(user.email));
-            if (user?.name) sessionStorage.setItem('userName', String(user.name));
-            if (user?.userType) sessionStorage.setItem('userType', String(user.userType));
-            window.location.href = '/';
+            if (user?.id) setSessionAndLocal('userId', String(user.id));
+            if (user?.email) setSessionAndLocal('userEmail', String(user.email));
+            if (user?.name) setSessionAndLocal('userName', String(user.name));
+            if (user?.userType) setSessionAndLocal('userType', String(user.userType));
+            setShowLoginPopup(false);
+            setIsLoggedIn(true);
+            hydrateUser();
+            setActiveSection('Profile');
           }}
         />
       )}
@@ -197,11 +386,14 @@ const Profile = () => {
         <SignupPopup
           onClose={() => setShowSignupPopup(false)}
           onSuccess={user => {
-            if (user?.id) sessionStorage.setItem('userId', String(user.id));
-            if (user?.email) sessionStorage.setItem('userEmail', String(user.email));
-            if (user?.name) sessionStorage.setItem('userName', String(user.name));
-            if (user?.userType) sessionStorage.setItem('userType', String(user.userType));
-            window.location.href = '/';
+            if (user?.id) setSessionAndLocal('userId', String(user.id));
+            if (user?.email) setSessionAndLocal('userEmail', String(user.email));
+            if (user?.name) setSessionAndLocal('userName', String(user.name));
+            if (user?.userType) setSessionAndLocal('userType', String(user.userType));
+            setShowSignupPopup(false);
+            setIsLoggedIn(true);
+            hydrateUser();
+            setActiveSection('Profile');
           }}
         />
       )}

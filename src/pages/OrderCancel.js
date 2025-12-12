@@ -88,6 +88,7 @@ export default function OrderCancel() {
     if (isCancelDisabled) return
     setSubmitting(true)
     setError('')
+    setSuccessMessage('')
     try {
       const res = await fetch(`${API_BASE}/api/orders/cancel`, {
         method: 'POST',
@@ -95,13 +96,18 @@ export default function OrderCancel() {
         body: JSON.stringify({
           sale_id: id,
           payment_type: isCOD ? 'COD' : 'PREPAID',
-          reason: effectiveReason
+          reason: effectiveReason,
+          cancellation_source: 'WEB_USER'
         })
       })
-      if (!res.ok) {
-        throw new Error('Unable to submit cancellation request')
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.message || 'Unable to submit cancellation request')
       }
       setSuccessMessage('Your cancellation request has been submitted.')
+      if (isPrepaid) {
+        navigate(`/returns?saleId=${encodeURIComponent(id)}`)
+      }
     } catch (e) {
       setError(e.message || 'Something went wrong while cancelling')
     } finally {

@@ -722,7 +722,7 @@
 
 .wb3-sec {
   background: #000;
-  padding: 28px 16px
+  padding: 28px 16px;
 }
 
 .wb3-head {
@@ -730,17 +730,15 @@
   margin: 0 auto 18px;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
-  align-items: center
+  align-items: center;
 }
 
 .wb3-head h2 {
   grid-column: 2;
   color: #FFD700;
   font-size: 26px;
-  line-height: 1.2;
   font-weight: 500;
   text-align: center;
-  letter-spacing: .3px
 }
 
 .wb3-view {
@@ -749,18 +747,24 @@
   border: 2px solid #FFD700;
   color: #FFD700;
   background: transparent;
-  text-decoration: none;
   padding: 8px 14px;
   border-radius: 999px;
   font-weight: 500;
-  font-size: 14px
+  font-size: 14px;
+  text-decoration: none;
 }
 
 .wb3-belt {
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
-  gap: 14px
+  gap: 14px;
+}
+
+.wb3-marquee-wrap {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
 }
 
 .wb3-track {
@@ -768,26 +772,28 @@
   grid-auto-flow: column;
   grid-auto-columns: minmax(180px, 1fr);
   gap: 12px;
-  overflow: hidden;
-  mask-image: linear-gradient(90deg, transparent 0px, #000 40px, #000 calc(100% - 40px), transparent 100%)
+  animation: wb3-marquee 22s linear infinite;
+}
+
+.wb3-track-rev {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(180px, 1fr);
+  gap: 12px;
+  animation: wb3-marquee-rev 22s linear infinite;
 }
 
 .wb3-item {
-  position: relative;
-  display: block;
   background: #000;
   border: 1px solid #fff;
-  outline: 0
-}
-
-.wb3-item:focus-visible {
-  outline: 2px solid #FFD700
+  position: relative;
+  display: block;
 }
 
 .wb3-item img {
   width: 100%;
   height: 180px;
-  object-fit: cover
+  object-fit: cover;
 }
 
 .wb3-tag {
@@ -799,7 +805,7 @@
   padding: 6px 10px;
   border-radius: 999px;
   font-size: 12px;
-  font-weight: 500
+  font-weight: 500;
 }
 
 .wb3-actions {
@@ -808,103 +814,94 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  justify-content: center
+  justify-content: center;
 }
 
 .wb3-pill {
   border: 2px solid #FFD700;
   color: #FFD700;
   background: transparent;
-  text-decoration: none;
   padding: 8px 12px;
   border-radius: 999px;
   font-weight: 500;
-  font-size: 13px
+  font-size: 13px;
+  text-decoration: none;
 }
 
 @keyframes wb3-marquee {
-  0% {
-    transform: translateX(0)
-  }
-
-  100% {
-    transform: translateX(-50%)
-  }
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 @keyframes wb3-marquee-rev {
-  0% {
-    transform: translateX(0)
-  }
-
-  100% {
-    transform: translateX(50%)
-  }
-}
-
-.wb3-track {
-  animation: wb3-marquee 22s linear infinite
-}
-
-.wb3-track-rev {
-  animation: wb3-marquee-rev 22s linear infinite
+  0% { transform: translateX(0); }
+  100% { transform: translateX(50%); }
 }
 
 .wb3-track:hover,
 .wb3-track-rev:hover {
-  animation-play-state: paused
+  animation-play-state: paused;
 }
 
-@media (min-width:901px) {
-  .wb3-item img {
-    height: 220px
-  }
-}
-
-@media (max-width:900px) {
+@media (max-width: 600px) {
   .wb3-head {
-    grid-template-columns: auto 1fr auto
+    grid-template-columns: 1fr auto;
   }
 
   .wb3-head h2 {
-    font-size: 22px
-  }
-
-  .wb3-track {
-    grid-auto-columns: minmax(160px, 1fr)
-  }
-}
-
-@media (max-width:420px) {
-  .wb3-sec {
-    padding: 22px 12px
-  }
-
-  .wb3-head {
-    grid-template-columns: 1fr auto
-  }
-
-  .wb3-head h2 {
-    grid-column: 1/span 2;
     font-size: 20px;
-    margin-bottom: 8px
+    text-align: left;
   }
 
   .wb3-view {
-    grid-column: 2;
-    justify-self: end;
     font-size: 13px;
-    padding: 6px 12px
+    padding: 6px 12px;
   }
 
-  .wb3-track {
-    grid-auto-columns: 70%
+  .wb3-marquee-wrap {
+    padding-left: 16px;
+  }
+
+  .wb3-track,
+  .wb3-track-rev {
+    grid-auto-columns: 70%;
+    animation-duration: 18s;
   }
 
   .wb3-item img {
-    height: 180px
+    height: 165px;
   }
 }
+
+@media (max-width: 420px) {
+  .wb3-head {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .wb3-head h2 {
+    text-align: center;
+  }
+
+  .wb3-view {
+    justify-self: center;
+  }
+
+  .wb3-marquee-wrap {
+    padding-left: 20px;
+  }
+
+  .wb3-track,
+  .wb3-track-rev {
+    grid-auto-columns: 75%;
+  }
+
+  .wb3-item img {
+    height: 150px;
+  }
+}
+
 
 
 
@@ -962,24 +959,136 @@
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr .9fr 1fr;
   gap: 14px;
 }
 
-.wb4-col {
-  display: grid;
-  gap: 14px;
+/* Desktop: 3 columns with zig-zag layout */
+@media (min-width: 901px) {
+  .wb4-mag {
+    grid-template-columns: 1fr .9fr 1fr;
+    grid-template-rows: auto auto;
+    grid-template-areas:
+      "c1 c3 c4"
+      "c2 c3 c5";
+  }
+
+  .wb4-card-1 { grid-area: c1; }
+  .wb4-card-2 { grid-area: c2; }
+  .wb4-card-3 { grid-area: c3; }
+  .wb4-card-4 { grid-area: c4; }
+  .wb4-card-5 { grid-area: c5; }
+
+  .wb4-card-1 {
+    aspect-ratio: 4 / 5;
+  }
+
+  .wb4-card-2 {
+    aspect-ratio: 4 / 5;
+  }
+
+  .wb4-card-3 {
+    min-height: 480px;
+  }
+
+  .wb4-card-4 {
+    aspect-ratio: 4 / 5;
+  }
+
+  .wb4-card-5 {
+    aspect-ratio: 4 / 5;
+  }
 }
 
-.wb4-col-center {
-  align-content: stretch;
+/* Tablet + large mobile: 2 columns, tall center spanning row */
+@media (max-width: 900px) and (min-width: 421px) {
+  .wb4-head {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .wb4-head h2 {
+    font-size: 22px;
+  }
+
+  .wb4-mag {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "c1 c2"
+      "c3 c3"
+      "c4 c5";
+  }
+
+  .wb4-card-1 { grid-area: c1; }
+  .wb4-card-2 { grid-area: c2; }
+  .wb4-card-3 { grid-area: c3; }
+  .wb4-card-4 { grid-area: c4; }
+  .wb4-card-5 { grid-area: c5; }
+
+  .wb4-card-1,
+  .wb4-card-2,
+  .wb4-card-4,
+  .wb4-card-5 {
+    min-height: 180px;
+  }
+
+  .wb4-card-3 {
+    min-height: 420px;
+  }
+}
+
+/* Small mobile: same 3-row pattern, tuned for 400px and below */
+@media (max-width: 420px) {
+  .wb4-sec {
+    padding: 22px 12px;
+  }
+
+  .wb4-head {
+    grid-template-columns: 1fr auto;
+  }
+
+  .wb4-head h2 {
+    grid-column: 1 / span 2;
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+
+  .wb4-view {
+    grid-column: 2;
+    justify-self: end;
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+
+  .wb4-mag {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "c1 c2"
+      "c3 c3"
+      "c4 c5";
+  }
+
+  .wb4-card-1 { grid-area: c1; }
+  .wb4-card-2 { grid-area: c2; }
+  .wb4-card-3 { grid-area: c3; }
+  .wb4-card-4 { grid-area: c4; }
+  .wb4-card-5 { grid-area: c5; }
+
+  .wb4-card-1,
+  .wb4-card-2,
+  .wb4-card-4,
+  .wb4-card-5 {
+    min-height: 170px;
+  }
+
+  .wb4-card-3 {
+    min-height: 360px;
+  }
 }
 
 .wb4-card {
   position: relative;
   display: block;
   overflow: hidden;
-  border: 0px solid #fff;
+  border: 0 solid #fff;
   background: #000;
   isolation: isolate;
 }
@@ -989,8 +1098,6 @@
   height: 100%;
   object-fit: cover;
 }
-
-
 
 .wb4-card-tall {
   height: 100%;
@@ -1052,87 +1159,6 @@
   border-radius: 999px;
   font-weight: 500;
   font-size: 13px;
-}
-
-@media (min-width:901px) {
-  .wb4-col:first-child .wb4-card:nth-child(1) {
-    aspect-ratio: 4/5;
-  }
-
-  .wb4-col:first-child .wb4-card:nth-child(2) {
-    aspect-ratio: 16/11;
-  }
-
-  .wb4-card-tall {
-    min-height: 480px;
-  }
-
-  .wb4-col:last-child .wb4-card:nth-child(1) {
-    aspect-ratio: 16/11;
-  }
-
-  .wb4-col:last-child .wb4-card:nth-child(2) {
-    aspect-ratio: 4/5;
-  }
-}
-
-@media (max-width:900px) {
-  .wb4-head {
-    grid-template-columns: auto 1fr auto;
-  }
-
-  .wb4-head h2 {
-    font-size: 22px;
-  }
-
-  .wb4-mag {
-    grid-template-columns: 1fr 1fr;
-    grid-auto-rows: minmax(180px, auto);
-  }
-
-  .wb4-col-center {
-    grid-column: span 2;
-  }
-
-  .wb4-card-tall {
-    height: 420px;
-  }
-}
-
-@media (max-width:420px) {
-  .wb4-sec {
-    padding: 22px 12px;
-  }
-
-  .wb4-head {
-    grid-template-columns: 1fr auto;
-  }
-
-  .wb4-head h2 {
-    grid-column: 1/span 2;
-    font-size: 20px;
-    margin-bottom: 8px;
-  }
-
-  .wb4-view {
-    grid-column: 2;
-    justify-self: end;
-    font-size: 13px;
-    padding: 6px 12px;
-  }
-
-  .wb4-mag {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .wb4-col-center {
-    grid-column: auto;
-  }
-
-  .wb4-card-tall {
-    height: 360px;
-  }
 }
 
 

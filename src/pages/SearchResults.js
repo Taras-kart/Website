@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { FaHeart, FaRegHeart } from 'react-icons/fa'
 import Navbar from './Navbar'
@@ -66,10 +66,10 @@ const STOPWORDS = new Set([
 
 const detectGender = (q) => {
   const s = String(q || '').toLowerCase()
-  if (/\b(women|woman|ladies|female)\b/.test(s))
-    return { gender: 'WOMEN', cleaned: s.replace(/\b(women|woman|ladies|female)\b/gi, '').trim() }
-  if (/\b(men|man|male|gents)\b/.test(s))
-    return { gender: 'MEN', cleaned: s.replace(/\b(men|man|male|gents)\b/gi, '').trim() }
+  if (/\b(women|woman|ladies|female|womens)\b/.test(s))
+    return { gender: 'WOMEN', cleaned: s.replace(/\b(women|woman|ladies|female|womens)\b/gi, '').trim() }
+  if (/\b(men|man|male|gents|mens)\b/.test(s))
+    return { gender: 'MEN', cleaned: s.replace(/\b(men|man|male|gents|mens)\b/gi, '').trim() }
   if (/\b(kids|kid|children|child|boys|girls)\b/.test(s))
     return { gender: 'KIDS', cleaned: s.replace(/\b(kids|kid|children|child|boys|girls)\b/gi, '').trim() }
   return { gender: '', cleaned: s.trim() }
@@ -148,7 +148,8 @@ const textMatchesProduct = (tokens, product) => {
     normalizeText(product.brand),
     normalizeText(product.category),
     normalizeText(product.category_slug),
-    normalizeText(product.gender)
+    normalizeText(product.gender),
+    normalizeText(product.color)
   ]
   return tokens.every((t) => fields.some((f) => f && tokenMatchesField(t, f)))
 }
@@ -168,88 +169,6 @@ const buildFilterSummary = ({ gender, priceMin, priceMax }) => {
   else if (priceMax != null) parts.push(`Under ₹${priceMax}`)
   if (!parts.length) return ''
   return parts.join(' • ')
-}
-
-const normalizeSuggestionToken = (str) =>
-  String(str || '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, '')
-    .trim()
-
-const levenshteinDistance = (a, b) => {
-  const s = normalizeSuggestionToken(a)
-  const t = normalizeSuggestionToken(b)
-  if (!s.length) return t.length
-  if (!t.length) return s.length
-  const dp = Array.from({ length: s.length + 1 }, () => new Array(t.length + 1).fill(0))
-  for (let i = 0; i <= s.length; i += 1) dp[i][0] = i
-  for (let j = 0; j <= t.length; j += 1) dp[0][j] = j
-  for (let i = 1; i <= s.length; i += 1) {
-    for (let j = 1; j <= t.length; j += 1) {
-      const cost = s[i - 1] === t[j - 1] ? 0 : 1
-      const del = dp[i - 1][j] + 1
-      const ins = dp[i][j - 1] + 1
-      const sub = dp[i - 1][j - 1] + cost
-      dp[i][j] = Math.min(del, ins, sub)
-    }
-  }
-  return dp[s.length][t.length]
-}
-
-const buildSuggestionTokens = (products) => {
-  const map = new Map()
-  products.forEach((p) => {
-    const name = normalizeText(p.product_name)
-    if (!name) return
-    const parts = name.split(' ')
-    parts.forEach((w) => {
-      const token = w.trim()
-      if (token.length < 3) return
-      if (!map.has(token)) map.set(token, true)
-    })
-  })
-  return Array.from(map.keys())
-}
-
-const toTitleCase = (str) => {
-  if (!str) return ''
-  return str.charAt(0).toUpperCase() + str.slice(1)
-}
-
-const getSuggestions = (input, tokens) => {
-  const q = normalizeSuggestionToken(input)
-  if (!q || q.length < 2) return []
-  const scored = []
-  tokens.forEach((token) => {
-    const norm = normalizeSuggestionToken(token)
-    if (!norm) return
-    let score = 999
-    if (norm.startsWith(q)) {
-      score = 0
-    } else if (norm.includes(q)) {
-      score = 1
-    } else {
-      const d = levenshteinDistance(norm, q)
-      if (d <= 2) score = 2 + d
-      else return
-    }
-    scored.push({ token, score })
-  })
-  scored.sort((a, b) => {
-    if (a.score !== b.score) return a.score - b.score
-    return a.token.length - b.token.length
-  })
-  const unique = []
-  const used = new Set()
-  for (let i = 0; i < scored.length; i += 1) {
-    const key = scored[i].token.toLowerCase()
-    if (!used.has(key)) {
-      used.add(key)
-      unique.push(toTitleCase(scored[i].token))
-      if (unique.length >= 8) break
-    }
-  }
-  return unique
 }
 
 const cloudinaryUrlByEan = (ean) => {
@@ -274,15 +193,8 @@ const groupProductsByColor = (products) => {
   const byKey = new Map()
   for (const p of products || []) {
     if (!p) continue
-    const baseKey = [
-      p.product_name || '',
-      p.brand || '',
-      p.color || '',
-      p.gender || ''
-    ].join('||')
-    const key =
-      baseKey.trim() ||
-      `__fallback__:${p.ean_code || p.product_id || p.id || Math.random()}`
+    const baseKey = [p.product_name || '', p.brand || '', p.color || '', p.gender || ''].join('||')
+    const key = baseKey.trim() || `__fallback__:${p.ean_code || p.product_id || p.id || Math.random()}`
     if (!byKey.has(key)) {
       byKey.set(key, {
         key,
@@ -309,15 +221,9 @@ const groupProductsByColor = (products) => {
   const out = []
   for (const g of byKey.values()) {
     const eans = uniq(g.variants.map((v) => v.ean_code))
-    const imgs = uniq([
-      ...g.variants.map((v) => v.image_url),
-      ...eans.map((ean) => cloudinaryUrlByEan(ean))
-    ])
+    const imgs = uniq([...g.variants.map((v) => v.image_url), ...eans.map((ean) => cloudinaryUrlByEan(ean))])
 
-    const hasStockInfo = g.variants.some(
-      (v) => v.in_stock !== undefined || v.available_qty !== undefined
-    )
-
+    const hasStockInfo = g.variants.some((v) => v.in_stock !== undefined || v.available_qty !== undefined)
     const anyVariantInStock = g.variants.some((v) => {
       const qty = Number(v.available_qty ?? 0)
       if (v.in_stock === true) return true
@@ -348,20 +254,16 @@ const SearchResults = () => {
   const [loading, setLoading] = useState(true)
   const [searchInput, setSearchInput] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [suggestions, setSuggestions] = useState([])
 
   const query = new URLSearchParams(location.search).get('q') || ''
   const parsed = useMemo(() => parseSearchQuery(query), [query])
   const { gender, queryText, priceMin, priceMax } = parsed
   const filterSummary = useMemo(() => buildFilterSummary(parsed), [parsed])
 
-  const userType = (
-    localStorage.getItem('userType') ||
-    sessionStorage.getItem('userType') ||
-    'B2C'
-  ).toUpperCase()
+  const userType = (localStorage.getItem('userType') || sessionStorage.getItem('userType') || 'B2C').toUpperCase()
   const userId =
-    (typeof window !== 'undefined' && (sessionStorage.getItem('userId') || localStorage.getItem('userId'))) ||
-    null
+    (typeof window !== 'undefined' && (sessionStorage.getItem('userId') || localStorage.getItem('userId'))) || null
 
   const getPriceFields = (item) => {
     const p = item.price_fields || item || {}
@@ -370,36 +272,14 @@ const SearchResults = () => {
       return Number.isFinite(n) && n > 0 ? n : 0
     }
     if (userType === 'B2B') {
-      const offerCandidates = [
-        p.final_price_b2b,
-        p.sale_price,
-        p.mrp,
-        p.original_price_b2b,
-        p.original_price_b2c
-      ]
-      const mrpCandidates = [
-        p.mrp,
-        p.original_price_b2b,
-        p.original_price_b2c,
-        p.final_price_b2b,
-        p.sale_price
-      ]
+      const offerCandidates = [p.final_price_b2b, p.sale_price, p.mrp, p.original_price_b2b, p.original_price_b2c]
+      const mrpCandidates = [p.mrp, p.original_price_b2b, p.original_price_b2c, p.final_price_b2b, p.sale_price]
       const offer = offerCandidates.map(num).find((v) => v > 0) || 0
       const mrp = mrpCandidates.map(num).find((v) => v > 0) || offer
       return { offer, mrp }
     }
-    const offerCandidates = [
-      p.final_price_b2c,
-      p.sale_price,
-      p.mrp,
-      p.original_price_b2c
-    ]
-    const mrpCandidates = [
-      p.mrp,
-      p.original_price_b2c,
-      p.final_price_b2c,
-      p.sale_price
-    ]
+    const offerCandidates = [p.final_price_b2c, p.sale_price, p.mrp, p.original_price_b2c]
+    const mrpCandidates = [p.mrp, p.original_price_b2c, p.final_price_b2c, p.sale_price]
     const offer = offerCandidates.map(num).find((v) => v > 0) || 0
     const mrp = mrpCandidates.map(num).find((v) => v > 0) || offer
     return { offer, mrp }
@@ -434,12 +314,6 @@ const SearchResults = () => {
     })
   }
 
-  const suggestionTokens = useMemo(() => buildSuggestionTokens(baseResults), [baseResults])
-  const suggestions = useMemo(
-    () => getSuggestions(searchInput, suggestionTokens),
-    [searchInput, suggestionTokens]
-  )
-
   useEffect(() => {
     setSearchInput(query)
   }, [query])
@@ -450,11 +324,11 @@ const SearchResults = () => {
       setLoading(true)
       try {
         const baseSearchTerm = queryText || query
-        const url = gender
-          ? `${API_BASE}/api/products?gender=${encodeURIComponent(gender)}${
-              baseSearchTerm ? `&q=${encodeURIComponent(baseSearchTerm)}` : ''
-            }`
-          : `${API_BASE}/api/products/search?q=${encodeURIComponent(baseSearchTerm)}`
+        const params = new URLSearchParams()
+        params.set('q', baseSearchTerm || '')
+        if (gender) params.set('gender', gender)
+        if (BRANCH_ID) params.set('branch_id', BRANCH_ID)
+        const url = `${API_BASE}/api/products/search?${params.toString()}`
         const res = await fetch(url)
         const data = await res.json()
         const arr = Array.isArray(data) ? data : []
@@ -479,6 +353,41 @@ const SearchResults = () => {
     }
   }, [gender, query, queryText, priceMin, priceMax])
 
+  const suggestAbortRef = useRef(null)
+  const suggestTimerRef = useRef(null)
+
+  useEffect(() => {
+    if (suggestTimerRef.current) clearTimeout(suggestTimerRef.current)
+    if (suggestAbortRef.current) suggestAbortRef.current.abort()
+
+    const v = searchInput.trim()
+    if (v.length < 2) {
+      setSuggestions([])
+      return
+    }
+
+    suggestTimerRef.current = setTimeout(async () => {
+      const controller = new AbortController()
+      suggestAbortRef.current = controller
+      try {
+        const params = new URLSearchParams()
+        params.set('q', v)
+        if (gender) params.set('gender', gender)
+        if (BRANCH_ID) params.set('branch_id', BRANCH_ID)
+        const resp = await fetch(`${API_BASE}/api/products/suggest?${params.toString()}`, { signal: controller.signal })
+        const data = await resp.json()
+        setSuggestions(Array.isArray(data) ? data : [])
+      } catch {
+        setSuggestions([])
+      }
+    }, 180)
+
+    return () => {
+      if (suggestTimerRef.current) clearTimeout(suggestTimerRef.current)
+      if (suggestAbortRef.current) suggestAbortRef.current.abort()
+    }
+  }, [searchInput, gender])
+
   const handleProductClick = (group) => {
     const product = group.rep || group
     if (product) {
@@ -494,13 +403,8 @@ const SearchResults = () => {
     const productId = product.product_id ?? product.id
     if (!userId || !productId) return
     try {
-      const payload = {
-        user_id: userId,
-        product_id: productId
-      }
-      if (BRANCH_ID) {
-        payload.branch_id = BRANCH_ID
-      }
+      const payload = { user_id: userId, product_id: productId }
+      if (BRANCH_ID) payload.branch_id = BRANCH_ID
       const resp = await fetch(`${API_BASE}/api/wishlist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -518,9 +422,7 @@ const SearchResults = () => {
     if (!product) return false
     const productId = product.product_id ?? product.id
     if (!productId) return false
-    return wishlistItems.some(
-      (w) => String(w.product_id ?? w.id) === String(productId)
-    )
+    return wishlistItems.some((w) => String(w.product_id ?? w.id) === String(productId))
   }
 
   const handleSearchSubmit = (e) => {
@@ -594,9 +496,10 @@ const SearchResults = () => {
                 </div>
               )}
             </div>
-            <p className="sr-search-note">Type a few letters to see matching product names.</p>
+            <p className="sr-search-note">Start typing to see smarter suggestions.</p>
           </form>
         </div>
+
         {loading ? (
           <div className="sr-status-wrap">
             <p className="sr-status">Loading...</p>
@@ -616,6 +519,7 @@ const SearchResults = () => {
               </div>
               <span className="sr-count">{results.length} items</span>
             </div>
+
             <div className="womens-section4-grid">
               {results.map((group) => {
                 const discount = discountPctValue(group)
@@ -633,19 +537,14 @@ const SearchResults = () => {
                           <span>{discount}% OFF</span>
                         </div>
                       )}
-                      {hasVariants && (
-                        <div className="variant-pill">
-                          {group.variants.length} sizes
-                        </div>
-                      )}
+                      {hasVariants && <div className="variant-pill">{group.variants.length} sizes</div>}
                       <img
                         src={getImg(group)}
                         alt={group.product_name}
                         className="fade-image"
                         onError={(e) => {
                           const g = group.gender || group.rep?.gender
-                          const fallback =
-                            DEFAULT_IMG_BY_GENDER[g] || DEFAULT_IMG_BY_GENDER._
+                          const fallback = DEFAULT_IMG_BY_GENDER[g] || DEFAULT_IMG_BY_GENDER._
                           if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback
                         }}
                       />
@@ -654,22 +553,16 @@ const SearchResults = () => {
                           <span>Out of Stock</span>
                         </div>
                       )}
-                      <div
-                        className="love-icon"
-                        onClick={(e) => handleWishlist(e, group)}
-                      >
+                      <div className="love-icon" onClick={(e) => handleWishlist(e, group)}>
                         {isInWishlist(group) ? (
                           <FaHeart style={{ color: 'gold', fontSize: '20px' }} />
                         ) : (
                           <FaRegHeart style={{ color: 'gold', fontSize: '20px' }} />
                         )}
                       </div>
-                      {group.gender && (
-                        <div className="sr-pill">
-                          {GENDER_LABELS[group.gender] || group.gender}
-                        </div>
-                      )}
+                      {group.gender && <div className="sr-pill">{GENDER_LABELS[group.gender] || group.gender}</div>}
                     </div>
+
                     <div className="womens-section4-body">
                       <div className="brand-row">
                         <h4 className="brand-name">{group.brand}</h4>
@@ -677,22 +570,12 @@ const SearchResults = () => {
                       </div>
                       <h5 className="product-name">{group.product_name}</h5>
                       <div className="card-price-row">
-                        <span className="card-offer-price">
-                          ₹{offerPrice(group).toFixed(2)}
-                        </span>
-                        <span className="card-original-price">
-                          ₹{originalPrice(group).toFixed(2)}
-                        </span>
+                        <span className="card-offer-price">₹{offerPrice(group).toFixed(2)}</span>
+                        <span className="card-original-price">₹{originalPrice(group).toFixed(2)}</span>
                       </div>
                       <div className="womens-section4-meta">
-                        <span className="price-type">
-                          {userType === 'B2B'
-                            ? 'Best B2B margin'
-                            : 'Inclusive of all taxes'}
-                        </span>
-                        {discount > 0 && (
-                          <span className="saving-text">You save {discount}%</span>
-                        )}
+                        <span className="price-type">{userType === 'B2B' ? 'Best B2B margin' : 'Inclusive of all taxes'}</span>
+                        {discount > 0 && <span className="saving-text">You save {discount}%</span>}
                       </div>
                     </div>
                   </article>

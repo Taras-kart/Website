@@ -1,216 +1,481 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import './ReturnsPage.css';
+import React, { useEffect, useMemo, useState } from 'react'
+import './ReturnsPage.css'
+import Navbar from './Navbar'
+import Footer from './Footer'
+import { useLocation, useNavigate } from 'react-router-dom'
 
-const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
+const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app'
 const API_BASE_RAW =
   (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
   (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
-  DEFAULT_API_BASE;
-const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
+  DEFAULT_API_BASE
+const API_BASE = API_BASE_RAW.replace(/\/+$/, '')
 
-export default function ReturnsPage() {
-  const [params] = useSearchParams();
-  const initialSaleId = params.get('saleId') || '';
-  const initialType = params.get('type') === 'REPLACE' ? 'REPLACE' : 'RETURN';
+const STATUS_MAP = {
+  delivered: 'Delivered',
+  cancelled: 'Cancelled',
+  'order placed': 'Order Placed',
+  confirmed: 'Confirmed',
+  shipped: 'Shipped',
+  'out for delivery': 'Out For Delivery',
+  rto: 'RTO'
+}
 
-  const [saleId, setSaleId] = useState(initialSaleId);
-  const [type, setType] = useState(initialType);
-  const [eligibility, setEligibility] = useState(null);
-  const [sale, setSale] = useState(null);
-  const [items, setItems] = useState([]);
-  const [reason, setReason] = useState('');
-  const [notes, setNotes] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState('');
-
-  async function fetchSale(id) {
-    if (!id) return;
-    setLoading(true);
-    try {
-      const r = await fetch(`${API_BASE}/api/orders/${encodeURIComponent(id)}`, { cache: 'no-store' });
-      if (!r.ok) throw new Error('Order not found');
-      const data = await r.json();
-      setSale(data);
-      const saleItems = (data?.items || []).map(i => ({
-        variant_id: i.variant_id,
-        name: i?.name || `Variant ${i.variant_id}`,
-        qty: 0,
-        reason_code: '',
-        condition_note: ''
-      }));
-      setItems(saleItems);
-    } catch {
-      setSale(null);
-    } finally {
-      setLoading(false);
-    }
+function normalizeStatus(raw) {
+  if (!raw) return 'Order Placed'
+  const t = String(raw).toLowerCase()
+  for (const key of Object.keys(STATUS_MAP)) {
+    if (t.includes(key)) return STATUS_MAP[key]
   }
+  return 'Order Placed'
+}
 
-  async function checkEligibility(id) {
-    setEligibility(null);
-    if (!id) return;
-    try {
-      const r = await fetch(`${API_BASE}/api/returns/eligibility/${encodeURIComponent(id)}`, { cache: 'no-store' });
-      const data = await r.json();
-      setEligibility(data);
-    } catch {
-      setEligibility({ ok: false, reason: 'Unable to check eligibility' });
-    }
-  }
+function isPrepaidOrder(order) {
+  const pay = String(order.payment_status || order.cancellation_payment_type || '').toUpperCase()
+  if (!pay) return false
+  if (pay.startsWith('PAID')) return true
+  if (pay.startsWith('PENDING')) return true
+  if (pay === 'PREPAID') return true
+  return false
+}
+
+function firstImg(items) {
+  if (!Array.isArray(items) || !items.length) return ''
+  const img = items.find(it => it?.image_url)?.image_url || ''
+  return typeof img === 'string' ? img : ''
+}
+
+function firstName(items) {
+  if (!Array.isArray(items) || !items.length) return ''
+  return items[0]?.product_name || ''
+}
+
+function useQuery() {
+  const location = useLocation()
+  return useMemo(() => new URLSearchParams(location.search), [location.search])
+}
+
+export default function ReturnsPage({ embedded = false, user }) {
+  const query = useQuery()
+  const navigate = useNavigate()
+
+  const [orders, setOrders] = useState([])
+  const [eligibility, setEligibility] = useState({})
+  const [returnRequests, setReturnRequests] = useState({})
+  const [loading, setLoading] = useState(true)
+  const [eligLoading, setEligLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const [loginEmail, setLoginEmail] = useState(sessionStorage.getItem('userEmail') || '')
+  const [loginMobile, setLoginMobile] = useState(sessionStorage.getItem('userMobile') || '')
+
+  const [selectedReturnOrderId, setSelectedReturnOrderId] = useState('')
+
+  const email = user?.email || loginEmail || ''
+  const mobile = user?.phone || user?.mobile || loginMobile || ''
+
+  const saleIdFromCancel = query.get('saleId') || ''
+  const [selectedCancelOrderId, setSelectedCancelOrderId] = useState(saleIdFromCancel || '')
 
   useEffect(() => {
-    if (initialSaleId) {
-      fetchSale(initialSaleId);
-      checkEligibility(initialSaleId);
+    const refreshFromStorage = () => {
+      setLoginEmail(sessionStorage.getItem('userEmail') || '')
+      setLoginMobile(sessionStorage.getItem('userMobile') || '')
     }
-  }, [initialSaleId]);
+    refreshFromStorage()
+    window.addEventListener('focus', refreshFromStorage)
+    return () => window.removeEventListener('focus', refreshFromStorage)
+  }, [])
 
-  const canSubmit = useMemo(() => {
-    const anyQty = items.some(i => Number(i.qty) > 0);
-    return saleId && eligibility?.ok && anyQty && !submitting;
-  }, [saleId, eligibility, items, submitting]);
+  useEffect(() => {
+    if (saleIdFromCancel) {
+      setSelectedCancelOrderId(saleIdFromCancel)
+    }
+  }, [saleIdFromCancel])
 
-  function updateItem(idx, patch) {
-    setItems(prev => prev.map((it, i) => (i === idx ? { ...it, ...patch } : it)));
+  useEffect(() => {
+    const fetchOrders = async () => {
+      if (!email && !mobile) {
+        setLoading(false)
+        setOrders([])
+        return
+      }
+      setLoading(true)
+      setError('')
+      try {
+        const q = new URLSearchParams()
+        if (email) q.set('email', email)
+        if (mobile) q.set('mobile', mobile)
+
+        const res = await fetch(`${API_BASE}/api/sales/web/by-user?${q.toString()}`, {
+          cache: 'no-store'
+        })
+        if (!res.ok) throw new Error('Unable to load orders')
+
+        const data = await res.json()
+        const list = Array.isArray(data) ? data : []
+
+        const mapped = list.map(s => {
+          const img = firstImg(s.items)
+          const pname = firstName(s.items)
+          const itemCount = Array.isArray(s.items) ? s.items.length : 0
+          return {
+            id: s.id,
+            status: s.status || 'PLACED',
+            payment_status: s.payment_status || '',
+            cancellation_payment_type: s.cancellation_payment_type || '',
+            cancellation_reason: s.cancellation_reason || '',
+            cancellation_source: s.cancellation_source || '',
+            cancellation_created_at: s.cancellation_created_at || '',
+            created_at: s.created_at || '',
+            name:
+              pname && itemCount > 1
+                ? `${pname} +${itemCount - 1}`
+                : pname || `Order #${s.id}`,
+            image: img,
+            items: Array.isArray(s.items) ? s.items : [],
+            totals: s.totals || null
+          }
+        })
+        setOrders(mapped)
+      } catch (e) {
+        setError(e.message || 'Could not load your orders')
+        setOrders([])
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchOrders()
+  }, [email, mobile])
+
+  useEffect(() => {
+    const checkEligibility = async () => {
+      if (!orders.length) {
+        setEligibility({})
+        return
+      }
+      setEligLoading(true)
+      const map = {}
+      try {
+        for (const o of orders) {
+          try {
+            const res = await fetch(`${API_BASE}/api/returns/eligibility/${o.id}`, {
+              cache: 'no-store'
+            })
+            if (!res.ok) {
+              const data = await res.json().catch(() => ({}))
+              map[o.id] = data || { ok: false }
+              continue
+            }
+            const data = await res.json()
+            map[o.id] = data
+          } catch {
+            map[o.id] = { ok: false, reason: 'Unable to check eligibility right now' }
+          }
+        }
+        setEligibility(map)
+      } finally {
+        setEligLoading(false)
+      }
+    }
+    checkEligibility()
+  }, [orders])
+
+  async function loadReturnRequestsForSale(saleId) {
+    try {
+      const res = await fetch(`${API_BASE}/api/returns/by-sale/${saleId}`, {
+        cache: 'no-store'
+      })
+      if (!res.ok) return
+      const data = await res.json()
+      const rows = Array.isArray(data.rows) ? data.rows : []
+      setReturnRequests(prev => ({ ...prev, [saleId]: rows }))
+    } catch {
+      // ignore
+    }
   }
 
-  async function onSubmit() {
-    try {
-      setSubmitting(true);
-      setMsg('');
-      const payload = {
-        sale_id: saleId,
-        type,
-        reason,
-        notes,
-        items: items.filter(i => Number(i.qty) > 0).map(i => ({
-          variant_id: i.variant_id,
-          qty: Number(i.qty),
-          reason_code: i.reason_code || null,
-          condition_note: i.condition_note || null
-        }))
-      };
-      const r = await fetch(`${API_BASE}/api/returns`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await r.json();
-      if (!r.ok || !data?.ok) throw new Error(data?.reason || data?.message || 'Failed');
-      setMsg('Request submitted. We’ll update you after review.');
-    } catch (e) {
-      setMsg(e.message || 'Submit failed');
-    } finally {
-      setSubmitting(false);
-    }
+  function formatDate(dt) {
+    if (!dt) return ''
+    return new Date(dt).toLocaleString('en-IN')
+  }
+
+  const cancelledPrepaidOrders = useMemo(
+    () =>
+      orders.filter(o => {
+        const st = normalizeStatus(o.status)
+        return st === 'Cancelled' && isPrepaidOrder(o)
+      }),
+    [orders]
+  )
+
+  const returnEligibleOrders = useMemo(
+    () =>
+      orders.filter(o => {
+        const info = eligibility[o.id]
+        return info && info.ok
+      }),
+    [orders, eligibility]
+  )
+
+  const selectedCancelOrder =
+    cancelledPrepaidOrders.find(o => o.id === selectedCancelOrderId) || null
+
+  const inner = (
+    <div className="returns-container">
+      {!email && !mobile ? (
+        <div className="returns-empty-card">
+          <h2 className="returns-empty-title">Sign in to manage returns & refunds</h2>
+          <p className="returns-empty-subtitle">
+            Use the same email or mobile number that you used at checkout.
+          </p>
+          <button className="btn-outline" onClick={() => navigate('/profile')}>
+            Sign In
+          </button>
+        </div>
+      ) : loading ? (
+        <div className="returns-loading">
+          <div className="returns-spinner" />
+          <p>Loading your eligible orders…</p>
+        </div>
+      ) : orders.length === 0 ? (
+        <div className="returns-empty-card">
+          <h2 className="returns-empty-title">No orders found</h2>
+          <p className="returns-empty-subtitle">
+            Once you place an order, you can manage returns and refunds from here.
+          </p>
+          <button className="btn-outline" onClick={() => navigate('/')}>
+            Start Shopping
+          </button>
+          {error ? <p className="returns-error">{error}</p> : null}
+        </div>
+      ) : (
+        <>
+          <header className="returns-header">
+            <div>
+              <h2>Returns & Refunds</h2>
+              <p>
+                View orders that are eligible for return or refund. Delivered orders are typically
+                returnable within 7 days of delivery.
+              </p>
+            </div>
+            <div className="returns-header-badges">
+              {eligLoading && <span className="returns-pill">Checking eligibility…</span>}
+            </div>
+          </header>
+
+          {/* Cancelled prepaid orders (Refund flow) */}
+          <section className="returns-section">
+            <div className="returns-section-title-row">
+              <h3>Refunds for cancelled orders</h3>
+              <span className="returns-count-badge">{cancelledPrepaidOrders.length}</span>
+            </div>
+            <p className="returns-section-subtitle">
+              These are prepaid orders that were cancelled. Click "Get refund" to upload images and
+              share bank / UPI details on the next screen.
+            </p>
+
+            {cancelledPrepaidOrders.length === 0 ? (
+              <div className="returns-list-empty">
+                <p>No cancelled prepaid orders found.</p>
+              </div>
+            ) : (
+              <div className="returns-list">
+                {cancelledPrepaidOrders.map(order => {
+                  const st = normalizeStatus(order.status)
+                  const isSelected = order.id === selectedCancelOrderId
+                  return (
+                    <div key={order.id} className="returns-card">
+                      <div className="returns-card-main">
+                        <div className="returns-card-image">
+                          {order.image ? (
+                            <img src={order.image} alt={order.name} loading="lazy" />
+                          ) : (
+                            <div className="returns-ph" />
+                          )}
+                        </div>
+                        <div className="returns-card-body">
+                          <div className="returns-card-title-row">
+                            <h4>{order.name}</h4>
+                            <span className="returns-status-pill cancelled">{st}</span>
+                          </div>
+                          <div className="returns-card-meta">
+                            {order.created_at && (
+                              <span>Placed on {formatDate(order.created_at)}</span>
+                            )}
+                            {order.cancellation_created_at && (
+                              <span>Cancelled on {formatDate(order.cancellation_created_at)}</span>
+                            )}
+                          </div>
+                          <div className="returns-card-meta-small">
+                            {order.cancellation_reason && (
+                              <span>Reason: {order.cancellation_reason}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="returns-card-actions">
+                        <button
+                          type="button"
+                          className={`returns-primary-btn ${isSelected ? 'ghost' : ''}`}
+                          onClick={() =>
+                            navigate(`/returns/${order.id}/refund?kind=refund`)
+                          }
+                        >
+                          Get refund
+                        </button>
+                        <button
+                          type="button"
+                          className="returns-secondary-btn"
+                          onClick={() => navigate(`/order/${order.id}`)}
+                        >
+                          View order
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </section>
+
+          {/* Delivered orders (Return / Replace flow) */}
+          <section className="returns-section">
+            <div className="returns-section-title-row">
+              <h3>Return / Replace delivered orders</h3>
+              <span className="returns-count-badge">{returnEligibleOrders.length}</span>
+            </div>
+            <p className="returns-section-subtitle">
+              You can raise a return or replacement request for delivered orders that are within
+              the eligible return window.
+            </p>
+
+            {returnEligibleOrders.length === 0 ? (
+              <div className="returns-list-empty">
+                <p>No delivered orders are currently eligible for return.</p>
+              </div>
+            ) : (
+              <div className="returns-list">
+                {returnEligibleOrders.map(order => {
+                  const st = normalizeStatus(order.status)
+                  const info = eligibility[order.id]
+                  const reqs = returnRequests[order.id] || []
+                  const latestRequest = reqs[0] || null
+                  return (
+                    <div key={order.id} className="returns-card">
+                      <div className="returns-card-main">
+                        <div className="returns-card-image">
+                          {order.image ? (
+                            <img src={order.image} alt={order.name} loading="lazy" />
+                          ) : (
+                            <div className="returns-ph" />
+                          )}
+                        </div>
+                        <div className="returns-card-body">
+                          <div className="returns-card-title-row">
+                            <h4>{order.name}</h4>
+                            <span className="returns-status-pill delivered">{st}</span>
+                          </div>
+                          <div className="returns-card-meta">
+                            {order.created_at && (
+                              <span>Delivered order placed on {formatDate(order.created_at)}</span>
+                            )}
+                            {info && !info.ok && info.reason && (
+                              <span className="returns-meta-warning">{info.reason}</span>
+                            )}
+                          </div>
+                          {latestRequest && (
+                            <div className="returns-card-meta-small">
+                              <span>
+                                Latest return request:{' '}
+                                <strong>{latestRequest.status || 'REQUESTED'}</strong> on{' '}
+                                {formatDate(latestRequest.created_at)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="returns-card-actions">
+                        <button
+                          type="button"
+                          className="returns-primary-btn ghost"
+                          onClick={() =>
+                            navigate(`/returns/${order.id}/refund?kind=return`)
+                          }
+                        >
+                          Return / Replace
+                        </button>
+                        <button
+                          type="button"
+                          className="returns-secondary-btn"
+                          onClick={() => {
+                            loadReturnRequestsForSale(order.id)
+                            setSelectedReturnOrderId(order.id)
+                          }}
+                        >
+                          View return status
+                        </button>
+                        <button
+                          type="button"
+                          className="returns-link-btn"
+                          onClick={() => navigate(`/order/${order.id}`)}
+                        >
+                          View order
+                        </button>
+                      </div>
+
+                      {selectedReturnOrderId === order.id && returnRequests[order.id] && (
+                        <div className="returns-status-timeline">
+                          {returnRequests[order.id].length === 0 ? (
+                            <p>No return requests found for this order yet.</p>
+                          ) : (
+                            <>
+                              <div className="returns-status-title">Return history</div>
+                              <ul className="returns-status-list">
+                                {returnRequests[order.id].map(r => (
+                                  <li
+                                    key={r.id}
+                                    className={`status-${(r.status || '').toLowerCase()}`}
+                                  >
+                                    <div className="status-main">
+                                      <span className="status-pill">{r.status}</span>
+                                      <span className="status-date">
+                                        {formatDate(r.created_at)}
+                                      </span>
+                                    </div>
+                                    {r.reason && (
+                                      <div className="status-reason">Reason: {r.reason}</div>
+                                    )}
+                                    {r.notes && (
+                                      <div className="status-notes">{r.notes}</div>
+                                    )}
+                                  </li>
+                                ))}
+                              </ul>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </section>
+        </>
+      )}
+    </div>
+  )
+
+  if (embedded) {
+    return <div className="returns-embedded">{inner}</div>
   }
 
   return (
-    <div className="returns-wrap">
-      <div className="returns-head">
-        <h1>Returns & Replacements</h1>
-      </div>
-
-      <div className="card">
-        <div className="row">
-          <label>Order ID</label>
-          <div className="row-inline">
-            <input
-              value={saleId}
-              onChange={e => setSaleId(e.target.value)}
-              placeholder="Enter Order ID (UUID)"
-            />
-            <button
-              className="btn solid"
-              onClick={() => {
-                fetchSale(saleId);
-                checkEligibility(saleId);
-              }}
-              disabled={!saleId || loading}
-            >
-              {loading ? 'Loading…' : 'Load Order'}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {eligibility && (
-        <div className={`alert ${eligibility.ok ? 'ok' : 'err'}`}>
-          {eligibility.ok ? 'Eligible for return/replacement' : `Not eligible: ${eligibility.reason || ''}`}
-        </div>
-      )}
-
-      {sale && (
-        <div className="card">
-          <div className="row">
-            <label>Type</label>
-            <select value={type} onChange={e => setType(e.target.value)}>
-              <option value="RETURN">Return</option>
-              <option value="REPLACE">Replace</option>
-            </select>
-          </div>
-
-          <div className="items">
-            <div className="items-head">
-              <h3>Items</h3>
-              <span className="hint">Set quantity for items you want to {type === 'REPLACE' ? 'replace' : 'return'}</span>
-            </div>
-            {(items || []).map((it, idx) => (
-              <div key={it.variant_id} className="item-row">
-                <div className="name">{it.name || `Variant ${it.variant_id}`}</div>
-                <input
-                  className="qty"
-                  type="number"
-                  min="0"
-                  max="10"
-                  value={it.qty}
-                  onChange={e => updateItem(idx, { qty: e.target.value })}
-                />
-                <input
-                  className="reason"
-                  type="text"
-                  placeholder="Reason code (optional)"
-                  value={it.reason_code}
-                  onChange={e => updateItem(idx, { reason_code: e.target.value })}
-                />
-                <input
-                  className="note"
-                  type="text"
-                  placeholder="Condition note (optional)"
-                  value={it.condition_note}
-                  onChange={e => updateItem(idx, { condition_note: e.target.value })}
-                />
-              </div>
-            ))}
-          </div>
-
-          <div className="row">
-            <label>Reason (summary)</label>
-            <input
-              value={reason}
-              onChange={e => setReason(e.target.value)}
-              placeholder="Short reason"
-            />
-          </div>
-          <div className="row">
-            <label>Notes</label>
-            <textarea
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              placeholder="Extra details (optional)"
-            />
-          </div>
-
-          <div className="actions">
-            <button className="btn solid" disabled={!canSubmit} onClick={onSubmit}>
-              {submitting ? 'Submitting…' : type === 'REPLACE' ? 'Request Replacement' : 'Request Return'}
-            </button>
-            {msg ? <div className="hint msg">{msg}</div> : null}
-          </div>
-        </div>
-      )}
+    <div className="returns-page">
+      <Navbar />
+      {inner}
+      <Footer />
     </div>
-  );
+  )
 }

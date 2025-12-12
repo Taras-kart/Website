@@ -15,6 +15,8 @@
 
 .orders-container {
   width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
   padding: 18px 18px 22px;
   box-sizing: border-box;
   color: var(--white);
@@ -156,9 +158,9 @@
 }
 
 .orders-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
 }
 
 .orders-item {
@@ -210,8 +212,8 @@
 
 .orders-badge {
   position: absolute;
-  top: 0.5px;
-  right: 0px;
+  top: 4px;
+  right: 4px;
   display: inline-flex;
   align-items: center;
   padding: 3px 7px;
@@ -373,6 +375,12 @@
 @media (max-width: 900px) {
   .orders-container {
     padding: 16px 14px 20px;
+  }
+
+  .orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 
   .orders-image img,
