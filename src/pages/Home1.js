@@ -58,7 +58,7 @@ export default function Home1() {
               className="home1-hero-swiper-new-home"
               modules={[Autoplay]}
               loop
-              slidesPerView={1}
+              slidesPerView={1}Tara Anarkali
               autoplay={{ delay: 3500, disableOnInteraction: false }}
               speed={900}
             >
@@ -143,18 +143,18 @@ export default function Home1() {
             <div className="wcat-card-home1">
               <Link to="/women" className="wcat-media-home1">
                 <img
-                  src={getImage('/images/banners/women-category-anarkali.png')}
+                  src={getImage('/images/home/twin_birds_ankel_legging.png')}
                   alt="Anarkali"
                   loading="lazy"
                   decoding="async"
                 />
               </Link>
               <div className="wcat-info-home1">
-                <h3 className="wcat-brand-home1">Tara Anarkali</h3>
-                <div className="wcat-price-home1">
+                <h3 className="wcat-brand-home1">Twin Birds</h3>
+                {/*<div className="wcat-price-home1">
                   <span className="wcat-mrp-home1">₹3,499</span>
                   <span className="wcat-off-home1">₹4,499</span>
-                </div>
+                </div> */}
                 <Link to="/women" className="wcat-buy-home1">
                   Buy Now
                 </Link>
@@ -164,18 +164,18 @@ export default function Home1() {
             <div className="wcat-card-home1">
               <Link to="/women" className="wcat-media-home1">
                 <img
-                  src={getImage('/images/banners/women-category-halfsaree.png')}
+                  src={getImage('/images/home/Indian_flower_chudidhar.png')}
                   alt="Half Saree"
                   loading="lazy"
                   decoding="async"
                 />
               </Link>
               <div className="wcat-info-home1">
-                <h3 className="wcat-brand-home1">Tara Half Saree</h3>
-                <div className="wcat-price-home1">
+                <h3 className="wcat-brand-home1">Indian Flower</h3>
+                {/*<div className="wcat-price-home1">
                   <span className="wcat-mrp-home1">₹5,299</span>
                   <span className="wcat-off-home1">₹6,499</span>
-                </div>
+                </div> */}
                 <Link to="/women" className="wcat-buy-home1">
                   Buy Now
                 </Link>
@@ -185,18 +185,18 @@ export default function Home1() {
             <div className="wcat-card-home1">
               <Link to="/women" className="wcat-media-home1">
                 <img
-                  src={getImage('/images/banners/women-category-punjabi.png')}
+                  src={getImage('/images/home/naidu_hall_t-shirt.png')}
                   alt="Punjabi Suit"
                   loading="lazy"
                   decoding="async"
                 />
               </Link>
               <div className="wcat-info-home1">
-                <h3 className="wcat-brand-home1">Tara Punjabi</h3>
-                <div className="wcat-price-home1">
+                <h3 className="wcat-brand-home1">Naidu Hall</h3>
+                {/*<div className="wcat-price-home1">
                   <span className="wcat-mrp-home1">₹2,799</span>
                   <span className="wcat-off-home1">₹3,499</span>
-                </div>
+                </div> */}
                 <Link to="/women" className="wcat-buy-home1">
                   Buy Now
                 </Link>
@@ -206,18 +206,18 @@ export default function Home1() {
             <div className="wcat-card-home1">
               <Link to="/women" className="wcat-media-home1">
                 <img
-                  src={getImage('/images/banners/women-category-saree.png')}
+                  src={getImage('/images/home/aswathi_cotton-kurti.png')}
                   alt="Saree"
                   loading="lazy"
                   decoding="async"
                 />
               </Link>
               <div className="wcat-info-home1">
-                <h3 className="wcat-brand-home1">Tara Saree</h3>
-                <div className="wcat-price-home1">
+                <h3 className="wcat-brand-home1">Aswathi</h3>
+                {/*<div className="wcat-price-home1">
                   <span className="wcat-mrp-home1">₹4,199</span>
                   <span className="wcat-off-home1">₹5,299</span>
-                </div>
+                </div> */}
                 <Link to="/women" className="wcat-buy-home1">
                   Buy Now
                 </Link>
@@ -241,18 +241,18 @@ export default function Home1() {
                 <div className="mosaic4-grid-new-home">
                   <a href="/women" className="mosaic4-promo-new-home">
                     <div className="mosaic4-promo-inner-new-home">
-                      <span className="mosaic4-head-new-home">Tailored Trousers</span>
-                      <span className="mosaic4-sub-new-home">Up to 65% Off</span>
+                      <span className="mosaic4-head-new-home">Ankle Leggings</span>
+                      <span className="mosaic4-sub-new-home">Up to 50% Off</span>
                     </div>
                   </a>
                   <a href="/women" className="mosaic4-card-new-home">
-                    <img src={getImage('/images/women/women11.jpeg')} alt="Women 1" />
+                    <img src={getImage('/images/home/ankle-legging1.png')} alt="Women 1" />
                   </a>
                   <a href="/women" className="mosaic4-card-new-home">
-                    <img src={getImage('/images/women/women12.jpeg')} alt="Women 2" />
+                    <img src={getImage('/images/home/ankle-legging2.png')} alt="Women 2" />
                   </a>
                   <a href="/women" className="mosaic4-card-new-home mosaic4-cta-wrap-new-home">
-                    <img src={getImage('/images/women/women13.jpeg')} alt="Women 3" />
+                    <img src={getImage('/images/home/ankle-legging3.png')} alt="Women 3" />
                     <span className="mosaic4-cta-new-home">Shop Now</span>
                   </a>
                 </div>
@@ -261,19 +261,19 @@ export default function Home1() {
               <div className="mosaic4-block-new-home">
                 <div className="mosaic4-grid-new-home">
                   <a href="/men" className="mosaic4-card-new-home">
-                    <img src={getImage('/images/men/mens1.jpeg')} alt="Men 1" />
+                    <img src={getImage('/images/home/jockey2.webp')} alt="Men 1" />
                   </a>
                   <a href="/men" className="mosaic4-card-new-home">
-                    <img src={getImage('/images/men/mens2.jpeg')} alt="Men 2" />
+                    <img src={getImage('/images/home/jockey3.webp')} alt="Men 2" />
                   </a>
                   <a href="/men" className="mosaic4-promo-new-home">
                     <div className="mosaic4-promo-inner-new-home">
-                      <span className="mosaic4-head-new-home">Classic Polos</span>
+                      <span className="mosaic4-head-new-home">Classic Jockey</span>
                       <span className="mosaic4-sub-new-home">Min 40% Off</span>
                     </div>
                   </a>
                   <a href="/men" className="mosaic4-card-new-home mosaic4-cta-wrap-new-home">
-                    <img src={getImage('/images/men/mens3.jpeg')} alt="Men 3" />
+                    <img src={getImage('/images/home/jockey4.webp')} alt="Men 3" />
                     <span className="mosaic4-cta-new-home">Shop Now</span>
                   </a>
                 </div>
@@ -282,19 +282,19 @@ export default function Home1() {
               <div className="mosaic4-block-new-home">
                 <div className="mosaic4-grid-new-home">
                   <a href="/kids" className="mosaic4-card-new-home">
-                    <img src={getImage('/images/kids/kids-formal.jpg')} alt="Kids 1" />
+                    <img src={getImage('/images/home/cucumber1.webp')} alt="Kids 1" />
                   </a>
                   <a href="/kids" className="mosaic4-promo-new-home">
                     <div className="mosaic4-promo-inner-new-home">
-                      <span className="mosaic4-head-new-home">Sneakers Edit</span>
-                      <span className="mosaic4-sub-new-home">Up to 70% Off</span>
+                      <span className="mosaic4-head-new-home">Cucumber</span>
+                      <span className="mosaic4-sub-new-home">Up to 50% Off</span>
                     </div>
                   </a>
                   <a href="/kids" className="mosaic4-card-new-home">
-                    <img src={getImage('/images/kids/kids16.jpeg')} alt="Kids 2" />
+                    <img src={getImage('/images/home/cucumber2.webp')} alt="Kids 2" />
                   </a>
                   <a href="/kids" className="mosaic4-card-new-home mosaic4-cta-wrap-new-home">
-                    <img src={getImage('/images/kids/kids17.jpeg')} alt="Kids 3" />
+                    <img src={getImage('/images/home/cucumber3.webp')} alt="Kids 3" />
                     <span className="mosaic4-cta-new-home">Shop Now</span>
                   </a>
                 </div>
@@ -827,7 +827,7 @@ export default function Home1() {
           <div className="wb5-grid">
             <Link to="/women" className="wb5-card wb5-tall">
               <div className="wb5-imgwrap">
-                <img src={getImage('/images/women/new/roll1.png')} alt="Intimacy" />
+                <img src={getImage('/images/home/zig-zag1.jpg')} alt="Intimacy" />
               </div>
               <div className="wb5-info">
                 <div className="wb5-row">
@@ -836,16 +836,16 @@ export default function Home1() {
                 </div>
                 <div className="wb5-row">
                   <span className="wb5-tag">Intimates</span>
-                  <span className="wb5-price">
+                  {/*<span className="wb5-price">
                     <span className="wb5-strike">₹1,299</span> ₹1,039
-                  </span>
+                  </span> */}
                 </div>
               </div>
             </Link>
 
             <Link to="/women" className="wb5-card">
               <div className="wb5-imgwrap">
-                <img src={getImage('/images/women/new/roll2.png')} alt="Naidu Hall" />
+                <img src={getImage('/images/home/zig-zag2.png')} alt="Naidu Hall" />
               </div>
               <div className="wb5-info">
                 <div className="wb5-row">
@@ -854,16 +854,16 @@ export default function Home1() {
                 </div>
                 <div className="wb5-row">
                   <span className="wb5-tag">Everyday Comfort</span>
-                  <span className="wb5-price">
+                  {/*<span className="wb5-price">
                     <span className="wb5-strike">₹1,499</span> ₹1,049
-                  </span>
+                  </span> */}
                 </div>
               </div>
             </Link>
 
             <Link to="/women" className="wb5-card">
               <div className="wb5-imgwrap">
-                <img src={getImage('/images/women/new/roll3.png')} alt="Aswathi" />
+                <img src={getImage('/images/home/zig-zag3.png')} alt="Aswathi" />
               </div>
               <div className="wb5-info">
                 <div className="wb5-row">
@@ -872,16 +872,16 @@ export default function Home1() {
                 </div>
                 <div className="wb5-row">
                   <span className="wb5-tag">Soft Touch</span>
-                  <span className="wb5-price">
+                  {/*<span className="wb5-price">
                     <span className="wb5-strike">₹1,199</span> ₹983
-                  </span>
+                  </span> */}
                 </div>
               </div>
             </Link>
 
             <Link to="/women" className="wb5-card">
               <div className="wb5-imgwrap">
-                <img src={getImage('/images/women/new/roll4.png')} alt="Co-ord Sets" />
+                <img src={getImage('/images/home/zig-zag4.png')} alt="Co-ord Sets" />
               </div>
               <div className="wb5-info">
                 <div className="wb5-row">
@@ -890,16 +890,16 @@ export default function Home1() {
                 </div>
                 <div className="wb5-row">
                   <span className="wb5-tag">Co-ord Sets</span>
-                  <span className="wb5-price">
+                  {/*<span className="wb5-price">
                     <span className="wb5-strike">₹1,799</span> ₹1,349
-                  </span>
+                  </span> */}
                 </div>
               </div>
             </Link>
 
             <Link to="/women" className="wb5-card wb5-wide">
               <div className="wb5-imgwrap">
-                <img src={getImage('/images/women/new/main-card.png')} alt="Shapers" />
+                <img src={getImage('/images/home/zig-zag5.png')} alt="Shapers" />
               </div>
               <div className="wb5-info">
                 <div className="wb5-row">
@@ -908,16 +908,16 @@ export default function Home1() {
                 </div>
                 <div className="wb5-row">
                   <span className="wb5-tag">Shapers</span>
-                  <span className="wb5-price">
+                  {/*<span className="wb5-price">
                     <span className="wb5-strike">₹1,999</span> ₹1,439
-                  </span>
+                  </span> */}
                 </div>
               </div>
             </Link>
 
             <Link to="/women" className="wb5-card">
               <div className="wb5-imgwrap">
-                <img src={getImage('/images/women/new/roll5.png')} alt="Comfort" />
+                <img src={getImage('/images/home/zig-zag6.jpg')} alt="Comfort" />
               </div>
               <div className="wb5-info">
                 <div className="wb5-row">
@@ -926,16 +926,16 @@ export default function Home1() {
                 </div>
                 <div className="wb5-row">
                   <span className="wb5-tag">Comfort</span>
-                  <span className="wb5-price">
+                  {/*<span className="wb5-price">
                     <span className="wb5-strike">₹1,099</span> ₹857
-                  </span>
+                  </span> */}
                 </div>
               </div>
             </Link>
 
             <Link to="/women" className="wb5-card">
               <div className="wb5-imgwrap">
-                <img src={getImage('/images/women/new/roll6.png')} alt="Basics" />
+                <img src={getImage('/images/home/zig-zag7.jpg')} alt="Basics" />
               </div>
               <div className="wb5-info">
                 <div className="wb5-row">
@@ -944,16 +944,16 @@ export default function Home1() {
                 </div>
                 <div className="wb5-row">
                   <span className="wb5-tag">Basics</span>
-                  <span className="wb5-price">
+                  {/*<span className="wb5-price">
                     <span className="wb5-strike">₹899</span> ₹764
-                  </span>
+                  </span> */}
                 </div>
               </div>
             </Link>
 
             <Link to="/women" className="wb5-card">
               <div className="wb5-imgwrap">
-                <img src={getImage('/images/women/new/pin1.jpg')} alt="Premium" />
+                <img src={getImage('/images/home/zig-zag8.png')} alt="Premium" />
               </div>
               <div className="wb5-info">
                 <div className="wb5-row">
@@ -962,16 +962,16 @@ export default function Home1() {
                 </div>
                 <div className="wb5-row">
                   <span className="wb5-tag">Premium</span>
-                  <span className="wb5-price">
+                  {/*<span className="wb5-price">
                     <span className="wb5-strike">₹2,199</span> ₹1,495
-                  </span>
+                  </span> */}
                 </div>
               </div>
             </Link>
 
             <Link to="/women" className="wb5-card">
               <div className="wb5-imgwrap">
-                <img src={getImage('/images/women/new/roll8.jpg')} alt="Basics" />
+                <img src={getImage('/images/home/zig-zag9.webp')} alt="Basics" />
               </div>
               <div className="wb5-info">
                 <div className="wb5-row">
@@ -989,7 +989,7 @@ export default function Home1() {
 
             <Link to="/women" className="wb5-card">
               <div className="wb5-imgwrap">
-                <img src={getImage('/images/women/new/roll1.png')} alt="Premium" />
+                <img src={getImage('/images/home/zig-zag10.webp')} alt="Premium" />
               </div>
               <div className="wb5-info">
                 <div className="wb5-row">
@@ -1009,7 +1009,7 @@ export default function Home1() {
 
         <section className="mb1-sec">
           <div className="mb1-head">
-            <h2>Men • Collections</h2>
+            <h2>Men • Jockey Collections</h2>
             <Link to="/men" className="mb1-view">
               View All
             </Link>
@@ -1018,50 +1018,50 @@ export default function Home1() {
           <div className="mb1-circles">
             <Link to="/men" className="mb1-item">
               <span className="mb1-ring"></span>
-              <img src={getImage('/images/men/men-ct-1.png')} alt="Shirts" />
-              <span className="mb1-cap">Shirts</span>
+              <img src={getImage('/images/home/jockey3.webp')} alt="Shirts" />
+              <span className="mb1-cap">Breifs</span>
             </Link>
 
             <Link to="/men" className="mb1-item">
               <span className="mb1-ring"></span>
-              <img src={getImage('/images/men/men-ct-2.png')} alt="T-Shirts" />
+              <img src={getImage('/images/home/jockey2.webp')} alt="T-Shirts" />
               <span className="mb1-cap">T-Shirts</span>
             </Link>
 
             <Link to="/men" className="mb1-item">
               <span className="mb1-ring"></span>
-              <img src={getImage('/images/men/men-ct-3.png')} alt="Trousers" />
-              <span className="mb1-cap">Trousers</span>
+              <img src={getImage('/images/home/jockey4.webp')} alt="Trousers" />
+              <span className="mb1-cap">Vests</span>
             </Link>
 
             <Link to="/men" className="mb1-item">
               <span className="mb1-ring"></span>
-              <img src={getImage('/images/men/men-ct-4.png')} alt="Denim" />
-              <span className="mb1-cap">Denim</span>
+              <img src={getImage('/images/home/jockey5.webp')} alt="Denim" />
+              <span className="mb1-cap">Trunks</span>
             </Link>
 
             <Link to="/men" className="mb1-item">
               <span className="mb1-ring"></span>
-              <img src={getImage('/images/men/men-ct-5.png')} alt="Ethnic Wear" />
-              <span className="mb1-cap">Ethnic Wear</span>
+              <img src={getImage('/images/home/jockey6.webp')} alt="Ethnic Wear" />
+              <span className="mb1-cap">Knit Shirts</span>
             </Link>
 
             <Link to="/men" className="mb1-item">
               <span className="mb1-ring"></span>
-              <img src={getImage('/images/men/men-ct-6.png')} alt="Winter" />
-              <span className="mb1-cap">Winter</span>
+              <img src={getImage('/images/home/jockey7.webp')} alt="Winter" />
+              <span className="mb1-cap">Polos</span>
             </Link>
 
             <Link to="/men" className="mb1-item">
               <span className="mb1-ring"></span>
-              <img src={getImage('/images/men/men-ct-7.png')} alt="Footwear" />
-              <span className="mb1-cap">Footwear</span>
+              <img src={getImage('/images/home/jockey8.webp')} alt="Footwear" />
+              <span className="mb1-cap">Boxer</span>
             </Link>
 
             <Link to="/men" className="mb1-item">
               <span className="mb1-ring"></span>
-              <img src={getImage('/images/men/men-ct-5.png')} alt="Accessories" />
-              <span className="mb1-cap">Accessories</span>
+              <img src={getImage('/images/home/jockey9.webp')} alt="Accessories" />
+              <span className="mb1-cap">Gym Vests</span>
             </Link>
           </div>
         </section>
@@ -1081,31 +1081,31 @@ export default function Home1() {
 
             <div className="mb3-track" id="mb3-track">
               <Link to="/men/jackets" className="mb3-card">
-                <img src={getImage('/images/women/new/roll1.png')} alt="Jackets" />
+                <img src={getImage('/images/home/jockey7.webp')} alt="Jackets" />
                 <span className="mb3-tag">Jackets</span>
               </Link>
               <Link to="/men/shirts" className="mb3-card">
-                <img src={getImage('/images/men/mens1.jpeg')} alt="Shirts" />
+                <img src={getImage('/images/home/jockey6.webp')} alt="Shirts" />
                 <span className="mb3-tag">Shirts</span>
               </Link>
               <Link to="/men/polos" className="mb3-card">
-                <img src={getImage('/images/men/mens2.jpeg')} alt="Polos" />
+                <img src={getImage('/images/home/jockey2.webp')} alt="Polos" />
                 <span className="mb3-tag">Polos</span>
               </Link>
               <Link to="/men/trousers" className="mb3-card">
-                <img src={getImage('/images/men/mens3.jpeg')} alt="Trousers" />
+                <img src={getImage('/images/home/jockey3.webp')} alt="Trousers" />
                 <span className="mb3-tag">Trousers</span>
               </Link>
               <Link to="/men/denim" className="mb3-card">
-                <img src={getImage('/images/women/new/roll2.png')} alt="Denim" />
+                <img src={getImage('/images/home/jockey4.webp')} alt="Denim" />
                 <span className="mb3-tag">Denim</span>
               </Link>
               <Link to="/men/ethnic" className="mb3-card">
-                <img src={getImage('/images/women/new/roll3.png')} alt="Ethnic" />
+                <img src={getImage('/images/home/jockey5.webp')} alt="Ethnic" />
                 <span className="mb3-tag">Ethnic</span>
               </Link>
               <Link to="/men/footwear" className="mb3-card">
-                <img src={getImage('/images/women/new/roll4.png')} alt="Footwear" />
+                <img src={getImage('/images/home/jockey6.webp')} alt="Footwear" />
                 <span className="mb3-tag">Footwear</span>
               </Link>
             </div>
@@ -1157,7 +1157,7 @@ export default function Home1() {
 
         <section className="mb4-sec">
           <div className="mb4-head">
-            <h2>Men • Essentials Grid</h2>
+            <h2>Men • Essentials </h2>
             <Link to="/men" className="mb4-view">
               View All
             </Link>
@@ -1165,37 +1165,37 @@ export default function Home1() {
 
           <div className="mb4-grid">
             <Link to="/men/shirts" className="mb4-tile mb4-a">
-              <img src={getImage('/images/men/mens1.jpeg')} alt="Shirts" />
+              <img src={getImage('/images/home/jockey2.webp')} alt="Shirts" />
               <span className="mb4-tag">Shirts</span>
             </Link>
 
             <Link to="/men/t-shirts" className="mb4-tile mb4-b">
-              <img src={getImage('/images/men/mens2.jpeg')} alt="T-Shirts" />
+              <img src={getImage('/images/home/jockey2.webp')} alt="T-Shirts" />
               <span className="mb4-cap">T-Shirts</span>
             </Link>
 
             <Link to="/men/trousers" className="mb4-tile mb4-c">
-              <img src={getImage('/images/men/mens3.jpeg')} alt="Trousers" />
+              <img src={getImage('/images/home/jockey2.webp')} alt="Trousers" />
               <span className="mb4-cap">Trousers</span>
             </Link>
 
             <Link to="/men/denim" className="mb4-tile mb4-d">
-              <img src={getImage('/images/women/new/roll2.png')} alt="Denim" />
+              <img src={getImage('/images/home/jockey2.webp')} alt="Denim" />
               <span className="mb4-cap">Denim</span>
             </Link>
 
             <Link to="/men/jackets" className="mb4-tile mb4-e">
-              <img src={getImage('/images/women/new/roll1.png')} alt="Jackets" />
+              <img src={getImage('/images/home/jockey2.webp')} alt="Jackets" />
               <span className="mb4-cap">Jackets</span>
             </Link>
 
             <Link to="/men/ethnic" className="mb4-tile mb4-f">
-              <img src={getImage('/images/women/new/roll4.png')} alt="Ethnic" />
+              <img src={getImage('/images/home/jockey2.webp')} alt="Ethnic" />
               <span className="mb4-cap">Ethnic</span>
             </Link>
 
             <Link to="/men/footwear" className="mb4-tile mb4-g">
-              <img src={getImage('/images/women/new/roll5.png')} alt="Footwear" />
+              <img src={getImage('/images/home/jockey2.webp')} alt="Footwear" />
               <span className="mb4-cap">Footwear</span>
             </Link>
           </div>

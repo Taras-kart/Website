@@ -1,6 +1,6 @@
 /* src/pages/Home1.css */
 .spacer-new-home {
-  margin-top: 20px;
+  margin-top: 50px;
 }
 
 .home1-page-new-home {
@@ -8,12 +8,14 @@
   flex-direction: column;
   min-height: 100vh;
   background: #000;
-  color: #fff
+  color: #fff;
+
 }
 
 .home1-hero-new-home {
   width: 100%;
-  background: #000
+  background: #000;
+  margin-top: 40px;
 }
 
 .home1-hero-frame-new-home {
