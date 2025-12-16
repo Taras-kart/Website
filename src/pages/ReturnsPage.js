@@ -41,18 +41,23 @@ function isPrepaidOrder(order) {
 
 function firstImg(items) {
   if (!Array.isArray(items) || !items.length) return ''
-  const img = items.find(it => it?.image_url)?.image_url || ''
+  const img = items.find((it) => it?.image_url)?.image_url || ''
   return typeof img === 'string' ? img : ''
 }
 
 function firstName(items) {
   if (!Array.isArray(items) || !items.length) return ''
-  return items[0]?.product_name || ''
+  return items[0]?.product_name || items[0]?.name || ''
 }
 
 function useQuery() {
   const location = useLocation()
   return useMemo(() => new URLSearchParams(location.search), [location.search])
+}
+
+function isApprovedRefundRow(r) {
+  const s = String(r?.status || '').toLowerCase()
+  return s.includes('approved') || s.includes('accept') || s.includes('processed') || s.includes('success')
 }
 
 export default function ReturnsPage({ embedded = false, user }) {
@@ -71,8 +76,8 @@ export default function ReturnsPage({ embedded = false, user }) {
 
   const [selectedReturnOrderId, setSelectedReturnOrderId] = useState('')
 
-  const email = user?.email || loginEmail || ''
-  const mobile = user?.phone || user?.mobile || loginMobile || ''
+  const email = (user?.email || loginEmail || '').trim()
+  const mobile = (user?.phone || user?.mobile || loginMobile || '').trim()
 
   const saleIdFromCancel = query.get('saleId') || ''
   const [selectedCancelOrderId, setSelectedCancelOrderId] = useState(saleIdFromCancel || '')
@@ -88,9 +93,7 @@ export default function ReturnsPage({ embedded = false, user }) {
   }, [])
 
   useEffect(() => {
-    if (saleIdFromCancel) {
-      setSelectedCancelOrderId(saleIdFromCancel)
-    }
+    if (saleIdFromCancel) setSelectedCancelOrderId(saleIdFromCancel)
   }, [saleIdFromCancel])
 
   useEffect(() => {
@@ -107,15 +110,13 @@ export default function ReturnsPage({ embedded = false, user }) {
         if (email) q.set('email', email)
         if (mobile) q.set('mobile', mobile)
 
-        const res = await fetch(`${API_BASE}/api/sales/web/by-user?${q.toString()}`, {
-          cache: 'no-store'
-        })
+        const res = await fetch(`${API_BASE}/api/sales/web/by-user?${q.toString()}`, { cache: 'no-store' })
         if (!res.ok) throw new Error('Unable to load orders')
 
         const data = await res.json()
         const list = Array.isArray(data) ? data : []
 
-        const mapped = list.map(s => {
+        const mapped = list.map((s) => {
           const img = firstImg(s.items)
           const pname = firstName(s.items)
           const itemCount = Array.isArray(s.items) ? s.items.length : 0
@@ -128,10 +129,7 @@ export default function ReturnsPage({ embedded = false, user }) {
             cancellation_source: s.cancellation_source || '',
             cancellation_created_at: s.cancellation_created_at || '',
             created_at: s.created_at || '',
-            name:
-              pname && itemCount > 1
-                ? `${pname} +${itemCount - 1}`
-                : pname || `Order #${s.id}`,
+            name: pname && itemCount > 1 ? `${pname} +${itemCount - 1}` : pname || `Order #${s.id}`,
             image: img,
             items: Array.isArray(s.items) ? s.items : [],
             totals: s.totals || null
@@ -159,9 +157,7 @@ export default function ReturnsPage({ embedded = false, user }) {
       try {
         for (const o of orders) {
           try {
-            const res = await fetch(`${API_BASE}/api/returns/eligibility/${o.id}`, {
-              cache: 'no-store'
-            })
+            const res = await fetch(`${API_BASE}/api/returns/eligibility/${o.id}`, { cache: 'no-store' })
             if (!res.ok) {
               const data = await res.json().catch(() => ({}))
               map[o.id] = data || { ok: false }
@@ -183,52 +179,56 @@ export default function ReturnsPage({ embedded = false, user }) {
 
   async function loadReturnRequestsForSale(saleId) {
     try {
-      const res = await fetch(`${API_BASE}/api/returns/by-sale/${saleId}`, {
-        cache: 'no-store'
-      })
+      const res = await fetch(`${API_BASE}/api/returns/by-sale/${saleId}`, { cache: 'no-store' })
       if (!res.ok) return
       const data = await res.json()
       const rows = Array.isArray(data.rows) ? data.rows : []
-      setReturnRequests(prev => ({ ...prev, [saleId]: rows }))
-    } catch {
-      // ignore
-    }
+      setReturnRequests((prev) => ({ ...prev, [saleId]: rows }))
+    } catch {}
   }
 
   function formatDate(dt) {
     if (!dt) return ''
-    return new Date(dt).toLocaleString('en-IN')
+    const d = new Date(dt)
+    if (Number.isNaN(d.getTime())) return ''
+    return d.toLocaleString('en-IN')
   }
 
-  const cancelledPrepaidOrders = useMemo(
-    () =>
-      orders.filter(o => {
-        const st = normalizeStatus(o.status)
-        return st === 'Cancelled' && isPrepaidOrder(o)
-      }),
-    [orders]
-  )
+  const cancelledPrepaidOrders = useMemo(() => {
+    return orders.filter((o) => normalizeStatus(o.status) === 'Cancelled' && isPrepaidOrder(o))
+  }, [orders])
 
-  const returnEligibleOrders = useMemo(
-    () =>
-      orders.filter(o => {
-        const info = eligibility[o.id]
-        return info && info.ok
-      }),
-    [orders, eligibility]
-  )
+  const returnEligibleOrders = useMemo(() => {
+    return orders.filter((o) => {
+      const info = eligibility[o.id]
+      return info && info.ok
+    })
+  }, [orders, eligibility])
 
-  const selectedCancelOrder =
-    cancelledPrepaidOrders.find(o => o.id === selectedCancelOrderId) || null
+  useEffect(() => {
+    const seed = async () => {
+      for (const o of cancelledPrepaidOrders) {
+        await loadReturnRequestsForSale(o.id)
+      }
+    }
+    if (cancelledPrepaidOrders.length) seed()
+  }, [cancelledPrepaidOrders])
+
+  const refundApprovedBySale = useMemo(() => {
+    const map = {}
+    for (const saleId of Object.keys(returnRequests)) {
+      const rows = returnRequests[saleId] || []
+      map[saleId] = rows.some((r) => isApprovedRefundRow(r))
+    }
+    return map
+  }, [returnRequests])
 
   const inner = (
     <div className="returns-container">
       {!email && !mobile ? (
         <div className="returns-empty-card">
           <h2 className="returns-empty-title">Sign in to manage returns & refunds</h2>
-          <p className="returns-empty-subtitle">
-            Use the same email or mobile number that you used at checkout.
-          </p>
+          <p className="returns-empty-subtitle">Use the same email or mobile number that you used at checkout.</p>
           <button className="btn-outline" onClick={() => navigate('/profile')}>
             Sign In
           </button>
@@ -241,9 +241,7 @@ export default function ReturnsPage({ embedded = false, user }) {
       ) : orders.length === 0 ? (
         <div className="returns-empty-card">
           <h2 className="returns-empty-title">No orders found</h2>
-          <p className="returns-empty-subtitle">
-            Once you place an order, you can manage returns and refunds from here.
-          </p>
+          <p className="returns-empty-subtitle">Once you place an order, you can manage returns and refunds from here.</p>
           <button className="btn-outline" onClick={() => navigate('/')}>
             Start Shopping
           </button>
@@ -252,27 +250,20 @@ export default function ReturnsPage({ embedded = false, user }) {
       ) : (
         <>
           <header className="returns-header">
-            <div>
+            <div className="returns-header-main">
               <h2>Returns & Refunds</h2>
-              <p>
-                View orders that are eligible for return or refund. Delivered orders are typically
-                returnable within 7 days of delivery.
-              </p>
+              <p>View orders that are eligible for return or refund. Delivered orders are typically returnable within 7 days of delivery.</p>
             </div>
-            <div className="returns-header-badges">
-              {eligLoading && <span className="returns-pill">Checking eligibility…</span>}
-            </div>
+            <div className="returns-header-badges">{eligLoading && <span className="returns-pill">Checking eligibility…</span>}</div>
           </header>
 
-          {/* Cancelled prepaid orders (Refund flow) */}
           <section className="returns-section">
             <div className="returns-section-title-row">
               <h3>Refunds for cancelled orders</h3>
               <span className="returns-count-badge">{cancelledPrepaidOrders.length}</span>
             </div>
             <p className="returns-section-subtitle">
-              These are prepaid orders that were cancelled. Click "Get refund" to upload images and
-              share bank / UPI details on the next screen.
+              These are prepaid orders that were cancelled. If your refund is approved, you can check its status here.
             </p>
 
             {cancelledPrepaidOrders.length === 0 ? (
@@ -280,57 +271,58 @@ export default function ReturnsPage({ embedded = false, user }) {
                 <p>No cancelled prepaid orders found.</p>
               </div>
             ) : (
-              <div className="returns-list">
-                {cancelledPrepaidOrders.map(order => {
+              <div className="returns-grid">
+                {cancelledPrepaidOrders.map((order) => {
                   const st = normalizeStatus(order.status)
-                  const isSelected = order.id === selectedCancelOrderId
+                  const approved = !!refundApprovedBySale[String(order.id)]
+                  const btnText = approved ? 'Check status' : 'Get refund'
                   return (
                     <div key={order.id} className="returns-card">
-                      <div className="returns-card-main">
-                        <div className="returns-card-image">
-                          {order.image ? (
-                            <img src={order.image} alt={order.name} loading="lazy" />
-                          ) : (
-                            <div className="returns-ph" />
-                          )}
-                        </div>
-                        <div className="returns-card-body">
-                          <div className="returns-card-title-row">
-                            <h4>{order.name}</h4>
-                            <span className="returns-status-pill cancelled">{st}</span>
-                          </div>
-                          <div className="returns-card-meta">
-                            {order.created_at && (
-                              <span>Placed on {formatDate(order.created_at)}</span>
-                            )}
-                            {order.cancellation_created_at && (
-                              <span>Cancelled on {formatDate(order.cancellation_created_at)}</span>
-                            )}
-                          </div>
-                          <div className="returns-card-meta-small">
-                            {order.cancellation_reason && (
-                              <span>Reason: {order.cancellation_reason}</span>
-                            )}
-                          </div>
+                      <div className="returns-card-imagewide">
+                        {order.image ? <img src={order.image} alt={order.name} loading="lazy" /> : <div className="returns-ph" />}
+                        <div className="returns-card-badges">
+                          <span className="returns-status-pill cancelled">{st}</span>
+                          {/*<span className="returns-order-pill">#{order.id}</span> */}
                         </div>
                       </div>
-                      <div className="returns-card-actions">
-                        <button
-                          type="button"
-                          className={`returns-primary-btn ${isSelected ? 'ghost' : ''}`}
-                          onClick={() =>
-                            navigate(`/returns/${order.id}/refund?kind=refund`)
-                          }
-                        >
-                          Get refund
-                        </button>
-                        <button
-                          type="button"
-                          className="returns-secondary-btn"
-                          onClick={() => navigate(`/order/${order.id}`)}
-                        >
-                          View order
-                        </button>
+
+                      <div className="returns-card-body">
+                        <div className="returns-card-title">{order.name}</div>
+
+                        <div className="returns-card-meta">
+                          {order.created_at ? <span>Placed {formatDate(order.created_at)}</span> : null}
+                          {order.cancellation_created_at ? <span>Cancelled {formatDate(order.cancellation_created_at)}</span> : null}
+                        </div>
+
+                        {order.cancellation_reason ? <div className="returns-card-note">Reason: {order.cancellation_reason}</div> : null}
+
+                        <div className="returns-card-actions returns-card-actions-two">
+                          <button
+                            type="button"
+                            className="returns-primary-btn"
+                            onClick={() => navigate(`/returns/${order.id}/refund?kind=refund`)}
+                          >
+                            {btnText}
+                          </button>
+                          <button type="button" className="returns-secondary-btn" onClick={() => navigate(`/order/${order.id}`)}>
+                            View order
+                          </button>
+                        </div>
+
+                        {returnRequests[order.id] ? (
+                          <div className="returns-mini-status">
+                            {returnRequests[order.id].length ? (
+                              <>
+                                <span className="returns-mini-label">Latest:</span>
+                                <span className="returns-mini-value">{String(returnRequests[order.id][0]?.status || 'REQUESTED')}</span>
+                                <span className="returns-mini-dot">•</span>
+                                <span className="returns-mini-date">{formatDate(returnRequests[order.id][0]?.created_at)}</span>
+                              </>
+                            ) : (
+                              <span className="returns-mini-muted">No refund requests found yet.</span>
+                            )}
+                          </div>
+                        ) : null}
                       </div>
                     </div>
                   )
@@ -339,15 +331,13 @@ export default function ReturnsPage({ embedded = false, user }) {
             )}
           </section>
 
-          {/* Delivered orders (Return / Replace flow) */}
           <section className="returns-section">
             <div className="returns-section-title-row">
               <h3>Return / Replace delivered orders</h3>
               <span className="returns-count-badge">{returnEligibleOrders.length}</span>
             </div>
             <p className="returns-section-subtitle">
-              You can raise a return or replacement request for delivered orders that are within
-              the eligible return window.
+              You can raise a return or replacement request for delivered orders that are within the eligible return window.
             </p>
 
             {returnEligibleOrders.length === 0 ? (
@@ -355,107 +345,84 @@ export default function ReturnsPage({ embedded = false, user }) {
                 <p>No delivered orders are currently eligible for return.</p>
               </div>
             ) : (
-              <div className="returns-list">
-                {returnEligibleOrders.map(order => {
+              <div className="returns-grid">
+                {returnEligibleOrders.map((order) => {
                   const st = normalizeStatus(order.status)
                   const info = eligibility[order.id]
                   const reqs = returnRequests[order.id] || []
                   const latestRequest = reqs[0] || null
                   return (
                     <div key={order.id} className="returns-card">
-                      <div className="returns-card-main">
-                        <div className="returns-card-image">
-                          {order.image ? (
-                            <img src={order.image} alt={order.name} loading="lazy" />
-                          ) : (
-                            <div className="returns-ph" />
-                          )}
+                      <div className="returns-card-imagewide">
+                        {order.image ? <img src={order.image} alt={order.name} loading="lazy" /> : <div className="returns-ph" />}
+                        <div className="returns-card-badges">
+                          <span className="returns-status-pill delivered">{st}</span>
+                          <span className="returns-order-pill">#{order.id}</span>
                         </div>
-                        <div className="returns-card-body">
-                          <div className="returns-card-title-row">
-                            <h4>{order.name}</h4>
-                            <span className="returns-status-pill delivered">{st}</span>
-                          </div>
-                          <div className="returns-card-meta">
-                            {order.created_at && (
-                              <span>Delivered order placed on {formatDate(order.created_at)}</span>
-                            )}
-                            {info && !info.ok && info.reason && (
-                              <span className="returns-meta-warning">{info.reason}</span>
-                            )}
-                          </div>
-                          {latestRequest && (
-                            <div className="returns-card-meta-small">
-                              <span>
-                                Latest return request:{' '}
-                                <strong>{latestRequest.status || 'REQUESTED'}</strong> on{' '}
-                                {formatDate(latestRequest.created_at)}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <div className="returns-card-actions">
-                        <button
-                          type="button"
-                          className="returns-primary-btn ghost"
-                          onClick={() =>
-                            navigate(`/returns/${order.id}/refund?kind=return`)
-                          }
-                        >
-                          Return / Replace
-                        </button>
-                        <button
-                          type="button"
-                          className="returns-secondary-btn"
-                          onClick={() => {
-                            loadReturnRequestsForSale(order.id)
-                            setSelectedReturnOrderId(order.id)
-                          }}
-                        >
-                          View return status
-                        </button>
-                        <button
-                          type="button"
-                          className="returns-link-btn"
-                          onClick={() => navigate(`/order/${order.id}`)}
-                        >
-                          View order
-                        </button>
                       </div>
 
-                      {selectedReturnOrderId === order.id && returnRequests[order.id] && (
-                        <div className="returns-status-timeline">
-                          {returnRequests[order.id].length === 0 ? (
-                            <p>No return requests found for this order yet.</p>
-                          ) : (
-                            <>
-                              <div className="returns-status-title">Return history</div>
-                              <ul className="returns-status-list">
-                                {returnRequests[order.id].map(r => (
-                                  <li
-                                    key={r.id}
-                                    className={`status-${(r.status || '').toLowerCase()}`}
-                                  >
-                                    <div className="status-main">
-                                      <span className="status-pill">{r.status}</span>
-                                      <span className="status-date">
-                                        {formatDate(r.created_at)}
-                                      </span>
-                                    </div>
-                                    {r.reason && (
-                                      <div className="status-reason">Reason: {r.reason}</div>
-                                    )}
-                                    {r.notes && (
-                                      <div className="status-notes">{r.notes}</div>
-                                    )}
-                                  </li>
-                                ))}
-                              </ul>
-                            </>
-                          )}
+                      <div className="returns-card-body">
+                        <div className="returns-card-title">{order.name}</div>
+
+                        <div className="returns-card-meta">
+                          {order.created_at ? <span>Placed {formatDate(order.created_at)}</span> : null}
+                          {info && !info.ok && info.reason ? <span className="returns-meta-warning">{info.reason}</span> : null}
                         </div>
-                      )}
+
+                        {latestRequest ? (
+                          <div className="returns-card-note">
+                            Latest request: <span className="returns-highlight">{latestRequest.status || 'REQUESTED'}</span> on{' '}
+                            {formatDate(latestRequest.created_at)}
+                          </div>
+                        ) : null}
+
+                        <div className="returns-card-actions">
+                          <button
+                            type="button"
+                            className="returns-primary-btn ghost"
+                            onClick={() => navigate(`/returns/${order.id}/refund?kind=return`)}
+                          >
+                            Return / Replace
+                          </button>
+                          <button
+                            type="button"
+                            className="returns-secondary-btn"
+                            onClick={() => {
+                              loadReturnRequestsForSale(order.id)
+                              setSelectedReturnOrderId(order.id)
+                            }}
+                          >
+                            View status
+                          </button>
+                          <button type="button" className="returns-link-btn" onClick={() => navigate(`/order/${order.id}`)}>
+                            View order
+                          </button>
+                        </div>
+
+                        {selectedReturnOrderId === order.id && returnRequests[order.id] && (
+                          <div className="returns-status-timeline">
+                            {returnRequests[order.id].length === 0 ? (
+                              <p>No return requests found for this order yet.</p>
+                            ) : (
+                              <>
+                                <div className="returns-status-title">Return history</div>
+                                <ul className="returns-status-list">
+                                  {returnRequests[order.id].map((r) => (
+                                    <li key={r.id} className={`status-${(r.status || '').toLowerCase()}`}>
+                                      <div className="status-main">
+                                        <span className="status-pill">{r.status}</span>
+                                        <span className="status-date">{formatDate(r.created_at)}</span>
+                                      </div>
+                                      {r.reason ? <div className="status-reason">Reason: {r.reason}</div> : null}
+                                      {r.notes ? <div className="status-notes">{r.notes}</div> : null}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )
                 })}
@@ -467,9 +434,7 @@ export default function ReturnsPage({ embedded = false, user }) {
     </div>
   )
 
-  if (embedded) {
-    return <div className="returns-embedded">{inner}</div>
-  }
+  if (embedded) return <div className="returns-embedded">{inner}</div>
 
   return (
     <div className="returns-page">
