@@ -1,4 +1,3 @@
-// D:\shopping\src\pages\Orders.js
 import React, { useEffect, useMemo, useState } from 'react'
 import './Orders.css'
 import { useNavigate } from 'react-router-dom'
@@ -15,12 +14,12 @@ const STATUS_ORDER = ['Order Placed', 'Confirmed', 'Shipped', 'Out For Delivery'
 function normalizeStatus(s) {
   if (!s) return 'Order Placed'
   const t = String(s).toLowerCase()
+  if (t.includes('cancel')) return 'Cancelled'
+  if (t.includes('rto')) return 'RTO'
   if (t.includes('deliver')) return 'Delivered'
   if (t.includes('out for')) return 'Out For Delivery'
-  if (t.includes('ship')) return 'Shipped'
-  if (t.includes('confirm')) return 'Confirmed'
-  if (t.includes('rto')) return 'RTO'
-  if (t.includes('cancel')) return 'Cancelled'
+  if (t.includes('ship') || t.includes('dispatch') || t.includes('in transit')) return 'Shipped'
+  if (t.includes('confirm') || t.includes('process') || t.includes('accept')) return 'Confirmed'
   return 'Order Placed'
 }
 
@@ -30,13 +29,13 @@ function byStatusRank(a, b) {
 
 function firstImg(items) {
   if (!Array.isArray(items) || !items.length) return ''
-  const img = items.find(it => it?.image_url)?.image_url || ''
+  const img = items.find((it) => it?.image_url)?.image_url || ''
   return typeof img === 'string' ? img : ''
 }
 
 function firstName(items) {
   if (!Array.isArray(items) || !items.length) return ''
-  return items[0]?.product_name || ''
+  return items[0]?.product_name || items[0]?.name || ''
 }
 
 const Orders = ({ user }) => {
@@ -59,47 +58,54 @@ const Orders = ({ user }) => {
     return () => window.removeEventListener('focus', refreshFromStorage)
   }, [])
 
-  const email = user?.email || loginEmail || ''
-  const mobile = user?.phone || user?.mobile || loginMobile || ''
+  const email = (user?.email || loginEmail || '').trim()
+  const mobile = (user?.phone || user?.mobile || loginMobile || '').trim()
 
-  const formatPrice = v =>
-    typeof v === 'number'
-      ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(v)
-      : v
+  const money = (n) =>
+    new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(Number(n || 0))
 
   useEffect(() => {
     const fetchOrders = async () => {
       setLoading(true)
       setError('')
       try {
-        let list = []
-        if (email || mobile) {
-          const q = new URLSearchParams()
-          if (email) q.set('email', email)
-          if (mobile) q.set('mobile', mobile)
-          const res = await fetch(`${API_BASE}/api/sales/web/by-user?${q.toString()}`, { cache: 'no-store' })
-          if (!res.ok) throw new Error('bad')
-          const data = await res.json()
-          list = Array.isArray(data) ? data : Array.isArray(data.items) ? data.items : []
-        } else {
-          setLoading(false)
+        if (!email && !mobile) {
           setOrders([])
+          setLoading(false)
           return
         }
-        const mapped = list.map(s => {
+
+        const q = new URLSearchParams()
+        if (email) q.set('email', email)
+        if (mobile) q.set('mobile', mobile)
+
+        const res = await fetch(`${API_BASE}/api/sales/web/by-user?${q.toString()}`, { cache: 'no-store' })
+        if (!res.ok) throw new Error('bad')
+        const data = await res.json()
+        const list = Array.isArray(data) ? data : Array.isArray(data.items) ? data.items : []
+
+        const mapped = list.map((s) => {
           const img = firstImg(s.items)
           const pname = firstName(s.items)
           const itemCount = Array.isArray(s.items) ? s.items.length : 0
+          const st = normalizeStatus(s.status || 'PLACED')
           return {
             id: s.id,
-            status: s.status || 'PLACED',
-            date: s.created_at ? new Date(s.created_at).toLocaleString('en-IN') : '',
+            status: st,
+            rawStatus: s.status || '',
+            dateISO: s.created_at || '',
+            dateText: s.created_at ? new Date(s.created_at).toLocaleString('en-IN') : '',
             name: pname && itemCount > 1 ? `${pname} +${itemCount - 1}` : pname || `Order #${s.id}`,
             image: img,
             offerPrice: Number(s?.totals?.payable ?? s?.total ?? 0),
-            originalPrice: null
+            itemsCount: itemCount
           }
         })
+
         setOrders([...mapped].sort(byStatusRank))
       } catch {
         setOrders([])
@@ -108,23 +114,28 @@ const Orders = ({ user }) => {
         setLoading(false)
       }
     }
+
     fetchOrders()
   }, [email, mobile])
 
+  const statusList = ['All', ...STATUS_ORDER]
+
   const filtered = useMemo(() => {
     if (filter === 'All') return orders
-    return orders.filter(o => normalizeStatus(o.status) === filter)
+    return orders.filter((o) => o.status === filter)
   }, [orders, filter])
-
-  const statusList = ['All', ...STATUS_ORDER]
 
   if (!email && !mobile) {
     return (
-      <div className="orders-container">
-        <div className="orders-empty-card">
-          <h2 className="orders-empty-title">Sign in to see your orders</h2>
-          <p className="orders-empty-subtitle">Use the same email or mobile you used at checkout.</p>
-          <button className="btn-outline" onClick={() => navigate('/profile')}>Sign In</button>
+      <div className="orders-page">
+        <div className="orders-container">
+          <div className="orders-empty-card">
+            <h2 className="orders-empty-title">Sign in to see your orders</h2>
+            <p className="orders-empty-subtitle">Use the same email or mobile you used at checkout.</p>
+            <button className="btn-outline" onClick={() => navigate('/profile')}>
+              Sign In
+            </button>
+          </div>
         </div>
       </div>
     )
@@ -132,89 +143,132 @@ const Orders = ({ user }) => {
 
   if (loading) {
     return (
-      <div className="orders-container">
-        <div className="skeleton-list">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div className="skeleton-item" key={i}>
-              <div className="sk-img shimmer" />
-              <div className="sk-body">
-                <div className="sk-line shimmer" />
-                <div className="sk-line short shimmer" />
-                <div className="sk-line tiny shimmer" />
+      <div className="orders-page">
+        <div className="orders-container">
+          <div className="orders-topbar skeleton-top">
+            <div className="sk-h shimmer" />
+            <div className="sk-s shimmer" />
+          </div>
+          <div className="skeleton-list">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div className="skeleton-card" key={i}>
+                <div className="sk-img shimmer" />
+                <div className="sk-body">
+                  <div className="sk-line shimmer" />
+                  <div className="sk-line short shimmer" />
+                  <div className="sk-line tiny shimmer" />
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="orders-container">
-      {filtered.length === 0 ? (
-        <div className="orders-empty-card">
-          <img src="/images/no-order.svg" alt="No Orders" className="orders-empty-img" />
-          <h2 className="orders-empty-title">No orders yet</h2>
-          <p className="orders-empty-subtitle">Place an order and it will appear here.</p>
-          <button className="btn-outline" onClick={() => navigate('/')}>Start Shopping</button>
-          {error ? <p className="orders-error">{error}</p> : null}
-        </div>
-      ) : (
-        <>
-          <div className="orders-topbar">
-            <div className="orders-header">
-              <h3>Your Orders</h3>
-              <span className="orders-count">{filtered.length}</span>
-            </div>
-            <div className="orders-actions">
-              <div className="orders-filter">
-                <label>Status</label>
-                <select value={filter} onChange={e => setFilter(e.target.value)}>
-                  {statusList.map(s => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
+    <div className="orders-page">
+      <div className="orders-container">
+        {filtered.length === 0 ? (
+          <div className="orders-empty-card">
+            <img src="/images/no-order.svg" alt="No Orders" className="orders-empty-img" />
+            <h2 className="orders-empty-title">No orders yet</h2>
+            <p className="orders-empty-subtitle">Place an order and it will appear here.</p>
+            <button className="btn-outline" onClick={() => navigate('/')}>
+              Start Shopping
+            </button>
+            {error ? <p className="orders-error">{error}</p> : null}
+          </div>
+        ) : (
+          <>
+            <div className="orders-topbar">
+              <div className="orders-header">
+                <h3>Your Orders</h3>
+                <span className="orders-count">{filtered.length}</span>
+              </div>
+              <div className="orders-actions">
+                <div className="orders-filter">
+                  <label>Status</label>
+                  <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+                    {statusList.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="orders-list">
-            {filtered.map(order => {
-              const st = normalizeStatus(order.status)
-              const statusClass = st.replace(/\s+/g, '-').toLowerCase()
-              return (
-                <div key={order.id} className="orders-item">
-                  <div className="orders-image" onClick={() => navigate(`/order/${order.id}`)}>
-                    {order.image ? (
-                      <img src={order.image} alt={order.name || 'Item'} loading="lazy" />
-                    ) : (
-                      <div className="orders-ph" />
-                    )}
-                    <span className={`orders-badge orders-badge--${statusClass}`}>{st}</span>
-                  </div>
+            <div className="orders-list">
+              {filtered.map((order) => {
+                const st = order.status
+                const statusClass = st.replace(/\s+/g, '-').toLowerCase()
+                const isCancelled = st === 'Cancelled'
+                return (
+                  <div
+                    key={order.id}
+                    className={`orders-card ${isCancelled ? 'is-cancelled' : ''}`}
+                    onClick={() => navigate(`/order/${order.id}`)}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <div className="orders-media">
+                      {order.image ? (
+                        <img src={order.image} alt={order.name || 'Item'} loading="lazy" />
+                      ) : (
+                        <div className="orders-ph" />
+                      )}
+                      <div className={`orders-badge orders-badge--${statusClass}`}>{st}</div>
+                      <div className="orders-id">#{order.id}</div>
+                    </div>
 
-                  <div className="orders-info">
-                    <h4 className="orders-name">{order.name}</h4>
-
-                    <div className="orders-meta">
-                      <div className="orders-price">
-                        <span className="price-current">{formatPrice(order.offerPrice)}</span>
+                    <div className="orders-body">
+                      <div className="orders-main">
+                        <div className="orders-name">{order.name}</div>
+                        <div className="orders-sub">
+                          <span className="orders-date">{order.dateText || ''}</span>
+                          <span className="orders-dot">•</span>
+                          <span className="orders-items">{order.itemsCount} item{order.itemsCount === 1 ? '' : 's'}</span>
+                        </div>
                       </div>
-                      <p className="orders-date">{order.date}</p>
-                    </div>
 
-                    <div className="orders-cta">
-                      <button className="btn-outline" onClick={() => navigate(`/order/${order.id}`)}>View</button>
-                      <button className="btn-outline" onClick={() => navigate(`/order/${order.id}/tracking`)}>Track</button>
-                      <button className="btn-outline danger" onClick={() => navigate(`/order/${order.id}/cancel`)}>Cancel</button>
+                      <div className="orders-side">
+                        <div className="orders-price">{money(order.offerPrice)}</div>
+                        <div className="orders-mini">{isCancelled ? 'Cancelled' : 'Tap to view'}</div>
+                      </div>
+
+                      <div className="orders-actions-row" onClick={(e) => e.stopPropagation()}>
+                        <button className="btn-outline small" onClick={() => navigate(`/order/${order.id}`)}>
+                          View
+                        </button>
+                        <button className="btn-outline small" onClick={() => navigate(`/order/${order.id}/tracking`)}>
+                          Track
+                        </button>
+                        {!isCancelled ? (
+                          <button className="btn-outline small" onClick={() => navigate(`/order/${order.id}/cancel`)}>
+                            Cancel
+                          </button>
+                        ) : (
+                          <button className="btn-outline small" disabled>
+                            Cancelled
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
-        </>
-      )}
+                )
+              })}
+            </div>
+
+            {error ? (
+              <div className="orders-inline-note">
+                <span>{error}</span>
+              </div>
+            ) : null}
+          </>
+        )}
+      </div>
     </div>
   )
 }

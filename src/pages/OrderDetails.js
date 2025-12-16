@@ -11,6 +11,15 @@ const API_BASE_RAW =
   DEFAULT_API_BASE
 const API_BASE = API_BASE_RAW.replace(/\/+$/, '')
 
+function toUpper(s) {
+  return String(s || '').toUpperCase()
+}
+
+function isCancelledStatus(status) {
+  const s = String(status || '').toLowerCase()
+  return s.includes('cancel')
+}
+
 export default function OrderDetails() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -60,9 +69,7 @@ export default function OrderDetails() {
         const colour = it?.colour || it?.color || d?.colour || d?.color
         const gender = it?.gender || d?.gender
         const image_url =
-          it?.image_url ||
-          d?.image_url ||
-          (Array.isArray(d?.images) ? d.images[0]?.url : undefined)
+          it?.image_url || d?.image_url || (Array.isArray(d?.images) ? d.images[0]?.url : undefined)
         const unitPrice =
           it?.price ??
           it?.final_price_b2c ??
@@ -96,6 +103,7 @@ export default function OrderDetails() {
         fetch(`${API_BASE}/api/returns/eligibility/${encodeURIComponent(orderId)}`),
         fetch(`${API_BASE}/api/returns/by-sale/${encodeURIComponent(orderId)}`)
       ])
+
       const sJson = await sRes.json().catch(() => null)
       const sh = await shRes.json().catch(() => [])
       const el = await elRes.json().catch(() => null)
@@ -120,9 +128,7 @@ export default function OrderDetails() {
 
       const email = (sJson?.sale?.customer_email || sJson?.customer_email || '').trim()
       if (email) {
-        const u = await fetch(
-          `${API_BASE}/api/users/by-email/${encodeURIComponent(email)}`
-        )
+        const u = await fetch(`${API_BASE}/api/users/by-email/${encodeURIComponent(email)}`)
           .then((r) => r.json())
           .catch(() => null)
         if (u && !u.message) setCustomer(u)
@@ -146,43 +152,41 @@ export default function OrderDetails() {
     }).format(Number(n || 0))
 
   const prettyStatus = (s) => {
+    if (isCancelledStatus(s)) return 'Cancelled'
     const v = String(s || '').toLowerCase()
     if (v.includes('deliver')) return 'Delivered'
     if (v.includes('out for')) return 'Out For Delivery'
     if (v.includes('ship')) return 'Shipped'
     if (v.includes('confirm')) return 'Confirmed'
     if (v.includes('rto')) return 'RTO'
-    if (v.includes('cancel')) return 'Cancelled'
     return 'Order Placed'
   }
 
+  const isCancelled = isCancelledStatus(sale?.status)
+
+  const stepsNormal = ['Order Placed', 'Confirmed', 'Shipped', 'Out For Delivery', 'Delivered']
+  const stepsCancelled = ['Order Placed', 'Cancelled']
+
   const statusStepIndex = () => {
+    if (isCancelled) return 1
     const s = prettyStatus(sale?.status)
-    const map = ['Order Placed', 'Confirmed', 'Shipped', 'Out For Delivery', 'Delivered']
-    const i = map.indexOf(s)
+    const i = stepsNormal.indexOf(s)
     return i >= 0 ? i : 0
   }
 
-  const createdAt = sale?.created_at
-    ? new Date(sale.created_at).toLocaleString('en-IN')
-    : '-'
+  const createdAt = sale?.created_at ? new Date(sale.created_at).toLocaleString('en-IN') : '-'
   const totals = sale?.totals || {}
   const payable = sale?.totals?.payable ?? sale?.total ?? 0
   const addr = sale?.shipping_address || {}
-  const addressText = [
-    addr?.name,
-    addr?.line1,
-    addr?.line2,
-    addr?.city,
-    addr?.state,
-    addr?.pincode
-  ]
+  const addressText = [addr?.name, addr?.line1, addr?.line2, addr?.city, addr?.state, addr?.pincode]
     .filter(Boolean)
     .join(', ')
 
-  const paymentMethod = String(sale?.payment_method || '').toUpperCase()
-  const paymentStatus = String(sale?.payment_status || '').toUpperCase()
+  const paymentMethod = toUpper(sale?.payment_method || '')
+  const paymentStatus = toUpper(sale?.payment_status || '')
   const isOnlinePaid = paymentStatus === 'PAID' && paymentMethod !== 'COD'
+
+  const stepLabels = isCancelled ? stepsCancelled : stepsNormal
 
   return (
     <div className="order-details-page">
@@ -194,33 +198,36 @@ export default function OrderDetails() {
               ← Back
             </button>
           </div>
+
           <div className="hdr-mid">
             <div className="title-row1">
               <h1>Order #{orderId}</h1>
-              <span className="pill gold-text">{prettyStatus(sale?.status)}</span>
+              <span className={`pill ${isCancelled ? 'pill-red' : ''}`}>{prettyStatus(sale?.status)}</span>
             </div>
+
             <div className="sub-row">
               <span>Placed on {createdAt}</span>
               <span className="sep">•</span>
-              <span>
-                Payment {String(sale?.payment_status || 'COD').toUpperCase()}
-              </span>
+              <span>Payment {toUpper(sale?.payment_status || 'COD')}</span>
               <span className="sep">•</span>
-              <span>
-                {isOnlinePaid
-                  ? `Total Paid ${money(payable)}`
-                  : `Total Payable ${money(payable)}`}
-              </span>
+              <span>{isOnlinePaid ? `Total Paid ${money(payable)}` : `Total Payable ${money(payable)}`}</span>
             </div>
+
+            {isCancelled && (
+              <div className="cancel-banner">
+                <div className="cancel-title">Order is cancelled</div>
+                <div className="cancel-sub">
+                  If you already paid online, the refund will be processed as per our policy.
+                </div>
+              </div>
+            )}
           </div>
+
           <div className="hdr-right">
             <button className="btn outline" onClick={fetchAll}>
               Refresh
             </button>
-            <button
-              className="btn outline"
-              onClick={() => navigate(`/order/${orderId}/tracking`)}
-            >
+            <button className="btn outline" onClick={() => navigate(`/order/${orderId}/tracking`)}>
               Track Order
             </button>
           </div>
@@ -235,19 +242,17 @@ export default function OrderDetails() {
           <div className="od-empty">Order not found</div>
         ) : (
           <>
-            <div className="progress-card">
-              <div className="steps">
-                {['Order Placed', 'Confirmed', 'Shipped', 'Out For Delivery', 'Delivered'].map(
-                  (label, i) => {
-                    const active = i <= statusStepIndex()
-                    return (
-                      <div className={`step ${active ? 'active' : ''}`} key={label}>
-                        <div className="dot" />
-                        <div className="slabel">{label}</div>
-                      </div>
-                    )
-                  }
-                )}
+            <div className={`progress-card ${isCancelled ? 'progress-cancelled' : ''}`}>
+              <div className={`steps ${isCancelled ? 'steps-2' : ''}`}>
+                {stepLabels.map((label, i) => {
+                  const active = i <= statusStepIndex()
+                  return (
+                    <div className={`step ${active ? 'active' : ''} ${isCancelled && label === 'Cancelled' ? 'cancel' : ''}`} key={label}>
+                      <div className="dot" />
+                      <div className="slabel">{label}</div>
+                    </div>
+                  )
+                })}
               </div>
             </div>
 
@@ -267,16 +272,9 @@ export default function OrderDetails() {
                         const unitPrice = Number(it.unitPrice ?? it.price ?? 0)
                         const lineTotal = unitPrice * qty
                         return (
-                          <div
-                            className="od-item v2"
-                            key={`${it.variant_id || it.product_id || idx}-${idx}`}
-                          >
+                          <div className="od-item v2" key={`${it.variant_id || it.product_id || idx}-${idx}`}>
                             <div className="thumb fixed">
-                              {it.image_url ? (
-                                <img src={it.image_url} alt={name} />
-                              ) : (
-                                <div className="ph" />
-                              )}
+                              {it.image_url ? <img src={it.image_url} alt={name} /> : <div className="ph" />}
                             </div>
                             <div className="detail">
                               <div className="title-block">
@@ -373,29 +371,17 @@ export default function OrderDetails() {
                               </div>
                               <div className="ship-kv">
                                 <span>Status</span>
-                                <strong className="gold">
-                                  {String(sh.status || 'CREATED').toUpperCase()}
-                                </strong>
+                                <strong className="gold">{toUpper(sh.status || 'CREATED')}</strong>
                               </div>
                             </div>
                             <div className="ship-actions">
                               {sh.tracking_url ? (
-                                <a
-                                  className="btn outline"
-                                  href={sh.tracking_url}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                >
+                                <a className="btn outline" href={sh.tracking_url} target="_blank" rel="noreferrer">
                                   Track
                                 </a>
                               ) : null}
                               {sh.label_url ? (
-                                <a
-                                  className="btn outline"
-                                  href={sh.label_url}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                >
+                                <a className="btn outline" href={sh.label_url} target="_blank" rel="noreferrer">
                                   Label
                                 </a>
                               ) : null}
@@ -413,15 +399,11 @@ export default function OrderDetails() {
                   <div className="od-section-title">Customer</div>
                   <div className="kv">
                     <span>Name</span>
-                    <strong>
-                      {sale?.customer_name || customer?.name || 'Customer'}
-                    </strong>
+                    <strong>{sale?.customer_name || customer?.name || 'Customer'}</strong>
                   </div>
                   <div className="kv">
                     <span>Email</span>
-                    <strong className="wrap">
-                      {sale?.customer_email || customer?.email || '-'}
-                    </strong>
+                    <strong className="wrap">{sale?.customer_email || customer?.email || '-'}</strong>
                   </div>
                   <div className="kv">
                     <span>Mobile</span>
@@ -433,11 +415,7 @@ export default function OrderDetails() {
                   </div>
                   <div className="kv">
                     <span>Joined</span>
-                    <strong>
-                      {customer?.created_at
-                        ? new Date(customer.created_at).toLocaleDateString('en-IN')
-                        : '-'}
-                    </strong>
+                    <strong>{customer?.created_at ? new Date(customer.created_at).toLocaleDateString('en-IN') : '-'}</strong>
                   </div>
                 </div>
 
@@ -455,32 +433,23 @@ export default function OrderDetails() {
 
                 <div className="od-card">
                   <div className="od-section-title">Returns & Replacements</div>
-                  {eligibility?.ok ? (
+                  {isCancelled ? (
+                    <div className="od-note">Returns and replacements are not available for cancelled orders.</div>
+                  ) : eligibility?.ok ? (
                     <div className="od-ret-actions">
-                      <a
-                        className="btn outline wide"
-                        href={`/returns?saleId=${encodeURIComponent(
-                          orderId
-                        )}&type=RETURN`}
-                      >
+                      <a className="btn outline wide" href={`/returns?saleId=${encodeURIComponent(orderId)}&type=RETURN`}>
                         Request Return
                       </a>
-                      <a
-                        className="btn outline wide"
-                        href={`/returns?saleId=${encodeURIComponent(
-                          orderId
-                        )}&type=REPLACE`}
-                      >
+                      <a className="btn outline wide" href={`/returns?saleId=${encodeURIComponent(orderId)}&type=REPLACE`}>
                         Request Replacement
                       </a>
                     </div>
                   ) : (
                     <div className="od-note">
-                      {eligibility?.reason
-                        ? `Not eligible: ${eligibility.reason}`
-                        : 'Eligibility not available'}
+                      {eligibility?.reason ? `Not eligible: ${eligibility.reason}` : 'Eligibility not available'}
                     </div>
                   )}
+
                   {Array.isArray(requests) && requests.length ? (
                     <div className="od-rr-list">
                       {requests.map((r) => (
@@ -491,7 +460,7 @@ export default function OrderDetails() {
                           </div>
                           <div className="rr-kv">
                             <span>Status</span>
-                            <strong>{String(r.status || '').toUpperCase()}</strong>
+                            <strong>{toUpper(r.status || '')}</strong>
                           </div>
                           <div className="rr-kv">
                             <span>Reason</span>
@@ -499,11 +468,7 @@ export default function OrderDetails() {
                           </div>
                           <div className="rr-kv">
                             <span>Created</span>
-                            <strong>
-                              {r.created_at
-                                ? new Date(r.created_at).toLocaleString('en-IN')
-                                : '-'}
-                            </strong>
+                            <strong>{r.created_at ? new Date(r.created_at).toLocaleString('en-IN') : '-'}</strong>
                           </div>
                         </div>
                       ))}
