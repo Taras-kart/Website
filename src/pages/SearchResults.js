@@ -1,3 +1,4 @@
+// D:\shopping\src\pages\SearchResults.js
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { FaHeart, FaRegHeart } from 'react-icons/fa'
@@ -63,6 +64,11 @@ const STOPWORDS = new Set([
   'underwear',
   'underware'
 ])
+
+const toInt = (v) => {
+  const n = Number(v)
+  return Number.isInteger(n) && n > 0 ? n : null
+}
 
 const detectGender = (q) => {
   const s = String(q || '').toLowerCase()
@@ -189,19 +195,22 @@ const uniq = (arr) => {
   return out
 }
 
-const groupProductsByColor = (products) => {
-  const byKey = new Map()
+const groupProductsByProductId = (products) => {
+  const byPid = new Map()
+
   for (const p of products || []) {
     if (!p) continue
-    const baseKey = [p.product_name || '', p.brand || '', p.color || '', p.gender || ''].join('||')
-    const key = baseKey.trim() || `__fallback__:${p.ean_code || p.product_id || p.id || Math.random()}`
-    if (!byKey.has(key)) {
-      byKey.set(key, {
-        key,
-        color: p.color,
-        brand: p.brand,
-        product_name: p.product_name,
-        gender: p.gender,
+    const pid = toInt(p.product_id)
+    if (!pid) continue
+
+    if (!byPid.has(pid)) {
+      byPid.set(pid, {
+        key: String(pid),
+        product_id_locked: pid,
+        brand: String(p.brand || '').trim(),
+        product_name: String(p.product_name || '').trim(),
+        gender: String(p.gender || '').trim(),
+        color: String(p.color || p.colour || '').trim(),
         price_fields: {
           original_price_b2c: p.original_price_b2c,
           final_price_b2c: p.final_price_b2c,
@@ -214,12 +223,11 @@ const groupProductsByColor = (products) => {
         variants: []
       })
     }
-    const g = byKey.get(key)
-    g.variants.push(p)
+    byPid.get(pid).variants.push(p)
   }
 
   const out = []
-  for (const g of byKey.values()) {
+  for (const g of byPid.values()) {
     const eans = uniq(g.variants.map((v) => v.ean_code))
     const imgs = uniq([...g.variants.map((v) => v.image_url), ...eans.map((ean) => cloudinaryUrlByEan(ean))])
 
@@ -235,13 +243,12 @@ const groupProductsByColor = (products) => {
       ...g,
       images: imgs,
       ean_code: eans[0] || '',
-      id: g.rep.id,
-      product_id: g.rep.product_id,
-      brand: g.brand || g.rep.brand,
-      product_name: g.product_name || g.rep.product_name,
+      id: g.product_id_locked,
+      product_id: g.product_id_locked,
       is_out_of_stock: hasStockInfo ? !anyVariantInStock : false
     })
   }
+
   return out
 }
 
@@ -334,7 +341,7 @@ const SearchResults = () => {
         const arr = Array.isArray(data) ? data : []
         if (!cancelled) {
           const refinedRows = applyQueryFilters(arr, queryText, priceMin, priceMax)
-          const grouped = groupProductsByColor(refinedRows)
+          const grouped = groupProductsByProductId(refinedRows)
           setBaseResults(grouped)
           setResults(grouped)
         }
@@ -388,6 +395,8 @@ const SearchResults = () => {
     }
   }, [searchInput, gender])
 
+  const productIdForGroup = (group) => toInt(group?.product_id_locked) || toInt(group?.product_id) || null
+
   const handleProductClick = (group) => {
     const product = group.rep || group
     if (product) {
@@ -397,13 +406,14 @@ const SearchResults = () => {
   }
 
   const handleWishlist = async (e, group) => {
+    e.preventDefault()
     e.stopPropagation()
-    const product = group.rep || group
-    if (!product) return
-    const productId = product.product_id ?? product.id
-    if (!userId || !productId) return
+
+    const pid = productIdForGroup(group)
+    if (!userId || !pid) return
+
     try {
-      const payload = { user_id: userId, product_id: productId }
+      const payload = { user_id: userId, product_id: pid }
       if (BRANCH_ID) payload.branch_id = BRANCH_ID
       const resp = await fetch(`${API_BASE}/api/wishlist`, {
         method: 'POST',
@@ -411,18 +421,16 @@ const SearchResults = () => {
         body: JSON.stringify(payload)
       })
       if (resp.ok) {
-        addToWishlist({ ...product, product_id: productId })
-        navigate('/wishlist')
+        const product = group.rep || group
+        addToWishlist({ ...product, product_id: pid, id: pid })
       }
     } catch {}
   }
 
   const isInWishlist = (group) => {
-    const product = group.rep || group
-    if (!product) return false
-    const productId = product.product_id ?? product.id
-    if (!productId) return false
-    return wishlistItems.some((w) => String(w.product_id ?? w.id) === String(productId))
+    const pid = productIdForGroup(group)
+    if (!pid) return false
+    return wishlistItems.some((w) => String(w.product_id ?? w.id) === String(pid))
   }
 
   const handleSearchSubmit = (e) => {
@@ -446,6 +454,7 @@ const SearchResults = () => {
   return (
     <div className="sr-page">
       <Navbar />
+
       <div className="sr-topbar">
         <div className="sr-topbar-inner">
           <FilterSidebar
@@ -456,6 +465,7 @@ const SearchResults = () => {
           />
         </div>
       </div>
+
       <main className="sr-main">
         <div className="sr-search-wrap">
           <form className="sr-search-bar" onSubmit={handleSearchSubmit}>
@@ -475,9 +485,11 @@ const SearchResults = () => {
                   if (searchInput.trim().length > 1) setShowSuggestions(true)
                 }}
               />
+
               <button type="submit" className="sr-search-btn">
                 Search
               </button>
+
               {showSuggestions && suggestions.length > 0 && (
                 <div className="sr-suggestions">
                   {suggestions.map((s) => (
@@ -496,6 +508,7 @@ const SearchResults = () => {
                 </div>
               )}
             </div>
+
             <p className="sr-search-note">Start typing to see smarter suggestions.</p>
           </form>
         </div>
@@ -525,6 +538,7 @@ const SearchResults = () => {
                 const discount = discountPctValue(group)
                 const hasVariants = group.variants && group.variants.length > 1
                 const isOutOfStock = group.is_out_of_stock
+
                 return (
                   <article
                     key={group.key}
@@ -537,7 +551,9 @@ const SearchResults = () => {
                           <span>{discount}% OFF</span>
                         </div>
                       )}
+
                       {hasVariants && <div className="variant-pill">{group.variants.length} sizes</div>}
+
                       <img
                         src={getImg(group)}
                         alt={group.product_name}
@@ -548,18 +564,21 @@ const SearchResults = () => {
                           if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback
                         }}
                       />
+
                       {isOutOfStock && (
                         <div className="out-of-stock-overlay">
                           <span>Out of Stock</span>
                         </div>
                       )}
-                      <div className="love-icon" onClick={(e) => handleWishlist(e, group)}>
+
+                      <div className="love-icon" onClick={(e) => handleWishlist(e, group)} role="button" tabIndex={0}>
                         {isInWishlist(group) ? (
                           <FaHeart style={{ color: 'gold', fontSize: '20px' }} />
                         ) : (
                           <FaRegHeart style={{ color: 'gold', fontSize: '20px' }} />
                         )}
                       </div>
+
                       {group.gender && <div className="sr-pill">{GENDER_LABELS[group.gender] || group.gender}</div>}
                     </div>
 
@@ -568,11 +587,14 @@ const SearchResults = () => {
                         <h4 className="brand-name">{group.brand}</h4>
                         <span className="brand-chip">New in</span>
                       </div>
+
                       <h5 className="product-name">{group.product_name}</h5>
+
                       <div className="card-price-row">
                         <span className="card-offer-price">₹{offerPrice(group).toFixed(2)}</span>
                         <span className="card-original-price">₹{originalPrice(group).toFixed(2)}</span>
                       </div>
+
                       <div className="womens-section4-meta">
                         <span className="price-type">{userType === 'B2B' ? 'Best B2B margin' : 'Inclusive of all taxes'}</span>
                         {discount > 0 && <span className="saving-text">You save {discount}%</span>}
@@ -585,6 +607,7 @@ const SearchResults = () => {
           </section>
         )}
       </main>
+
       <Footer />
     </div>
   )
