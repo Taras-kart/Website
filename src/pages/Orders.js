@@ -27,15 +27,33 @@ function byStatusRank(a, b) {
   return STATUS_ORDER.indexOf(normalizeStatus(a.status)) - STATUS_ORDER.indexOf(normalizeStatus(b.status))
 }
 
+function firstItem(items) {
+  if (!Array.isArray(items) || !items.length) return null
+  return items[0] || null
+}
+
 function firstImg(items) {
   if (!Array.isArray(items) || !items.length) return ''
-  const img = items.find((it) => it?.image_url)?.image_url || ''
+  const img = items.find((it) => it?.image_url)?.image_url || items[0]?.image_url || ''
   return typeof img === 'string' ? img : ''
 }
 
 function firstName(items) {
-  if (!Array.isArray(items) || !items.length) return ''
-  return items[0]?.product_name || items[0]?.name || ''
+  const it = firstItem(items)
+  if (!it) return ''
+  return it?.product_name || it?.name || it?.title || ''
+}
+
+function firstBrand(items) {
+  const it = firstItem(items)
+  if (!it) return ''
+  return it?.brand || it?.brand_name || it?.brandName || ''
+}
+
+function firstColor(items) {
+  const it = firstItem(items)
+  if (!it) return ''
+  return it?.color || it?.colour || it?.variant_color || it?.variantColor || ''
 }
 
 const Orders = ({ user }) => {
@@ -91,15 +109,18 @@ const Orders = ({ user }) => {
         const mapped = list.map((s) => {
           const img = firstImg(s.items)
           const pname = firstName(s.items)
+          const brand = firstBrand(s.items)
+          const color = firstColor(s.items)
           const itemCount = Array.isArray(s.items) ? s.items.length : 0
           const st = normalizeStatus(s.status || 'PLACED')
+
           return {
             id: s.id,
             status: st,
             rawStatus: s.status || '',
-            dateISO: s.created_at || '',
-            dateText: s.created_at ? new Date(s.created_at).toLocaleString('en-IN') : '',
-            name: pname && itemCount > 1 ? `${pname} +${itemCount - 1}` : pname || `Order #${s.id}`,
+            name: pname && itemCount > 1 ? `${pname} +${itemCount - 1}` : pname || 'Order',
+            brand,
+            color,
             image: img,
             offerPrice: Number(s?.totals?.payable ?? s?.total ?? 0),
             itemsCount: itemCount
@@ -220,22 +241,19 @@ const Orders = ({ user }) => {
                         <div className="orders-ph" />
                       )}
                       <div className={`orders-badge orders-badge--${statusClass}`}>{st}</div>
-                      <div className="orders-id">#{order.id}</div>
                     </div>
 
                     <div className="orders-body">
                       <div className="orders-main">
+                        {order.brand ? <div className="orders-brand">{order.brand}</div> : null}
                         <div className="orders-name">{order.name}</div>
-                        <div className="orders-sub">
-                          <span className="orders-date">{order.dateText || ''}</span>
-                          <span className="orders-dot">•</span>
-                          <span className="orders-items">{order.itemsCount} item{order.itemsCount === 1 ? '' : 's'}</span>
-                        </div>
-                      </div>
-
-                      <div className="orders-side">
+                        {order.color ? (
+                          <div className="orders-meta">
+                            <span className="orders-meta-label">Color</span>
+                            <span className="orders-meta-value">{order.color}</span>
+                          </div>
+                        ) : null}
                         <div className="orders-price">{money(order.offerPrice)}</div>
-                        <div className="orders-mini">{isCancelled ? 'Cancelled' : 'Tap to view'}</div>
                       </div>
 
                       <div className="orders-actions-row" onClick={(e) => e.stopPropagation()}>
@@ -245,15 +263,6 @@ const Orders = ({ user }) => {
                         <button className="btn-outline small" onClick={() => navigate(`/order/${order.id}/tracking`)}>
                           Track
                         </button>
-                        {!isCancelled ? (
-                          <button className="btn-outline small" onClick={() => navigate(`/order/${order.id}/cancel`)}>
-                            Cancel
-                          </button>
-                        ) : (
-                          <button className="btn-outline small" disabled>
-                            Cancelled
-                          </button>
-                        )}
                       </div>
                     </div>
                   </div>

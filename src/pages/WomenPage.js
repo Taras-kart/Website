@@ -48,11 +48,7 @@ const computeOutOfStock = (p) => {
   if (inStock !== undefined) return !inStock
 
   const available = numOrZero(
-    p.available_qty !== undefined
-      ? p.available_qty
-      : p.availableQty !== undefined
-      ? p.availableQty
-      : undefined
+    p.available_qty !== undefined ? p.available_qty : p.availableQty !== undefined ? p.availableQty : undefined
   )
   if (available > 0) return false
   if (p.available_qty !== undefined || p.availableQty !== undefined) return true
@@ -69,6 +65,26 @@ const clampScrollY = (y) => {
   return Math.min(Math.max(0, y), max)
 }
 
+const readVariantMap = (userId) => {
+  if (typeof window === 'undefined') return {}
+  if (!userId) return {}
+  try {
+    const raw = localStorage.getItem(`wishlist:variant-map:${userId}`)
+    const obj = raw ? JSON.parse(raw) : {}
+    return obj && typeof obj === 'object' ? obj : {}
+  } catch {
+    return {}
+  }
+}
+
+const writeVariantMap = (userId, map) => {
+  if (typeof window === 'undefined') return
+  if (!userId) return
+  try {
+    localStorage.setItem(`wishlist:variant-map:${userId}`, JSON.stringify(map || {}))
+  } catch {}
+}
+
 export default function WomenPage() {
   const [allProducts, setAllProducts] = useState([])
   const [products, setProducts] = useState([])
@@ -80,7 +96,6 @@ export default function WomenPage() {
   const { addToWishlist, wishlistItems, setWishlistItems } = useWishlist()
 
   const restoreDoneRef = useRef(false)
-  const lastSavedRef = useRef(0)
   const rafSaveRef = useRef(0)
 
   const getUserId = () => {
@@ -99,12 +114,14 @@ export default function WomenPage() {
     setUserType(t)
   }, [])
 
+  const keyFor = (p) => {
+    const pid = p?.product_id ?? p?.id ?? ''
+    const ean = p?.ean_code ?? ''
+    return `${String(pid)}::${String(ean)}`
+  }
+
   useEffect(() => {
-    setLikedKeys(
-      new Set(
-        toArray(wishlistItems).map((it) => String(it.ean_code ?? it.product_id ?? it.id ?? `${it.image_url}`))
-      )
-    )
+    setLikedKeys(new Set(toArray(wishlistItems).map((it) => keyFor(it))))
   }, [wishlistItems])
 
   useEffect(() => {
@@ -113,7 +130,6 @@ export default function WomenPage() {
       rafSaveRef.current = requestAnimationFrame(() => {
         rafSaveRef.current = 0
         const y = window.scrollY || window.pageYOffset || 0
-        lastSavedRef.current = y
         sessionStorage.setItem('scroll:women-page', String(y))
       })
     }
@@ -181,67 +197,83 @@ export default function WomenPage() {
   useLayoutEffect(() => {
     if (restoreDoneRef.current) return
     if (loading) return
-
     restoreDoneRef.current = true
     const saved = sessionStorage.getItem('scroll:women-page')
     const yRaw = saved != null ? parseInt(saved, 10) : 0
     const y = Number.isFinite(yRaw) ? yRaw : 0
-
     requestAnimationFrame(() => {
       window.scrollTo(0, clampScrollY(y))
-      requestAnimationFrame(() => {
-        window.scrollTo(0, clampScrollY(y))
-      })
+      requestAnimationFrame(() => window.scrollTo(0, clampScrollY(y)))
     })
   }, [loading, products.length, error])
 
-  const keyFor = (p) => String(p.ean_code || p.product_id || p.id || p.key || `${p.images?.[0]}`)
-
-  const toggleLike = async (group) => {
+  const toggleLike = async (group, picked) => {
     if (!userId) return
-    const k = keyFor(group)
-    const inList = likedKeys.has(k)
     const pid = group.product_id || group.id
+    const ean_code = String(picked?.ean_code || '')
+    const image_url = String(picked?.image_url || '')
+    const color = String(picked?.color || '')
+
+    if (!ean_code || !image_url) return
+
+    const k = keyFor({ product_id: pid, ean_code })
+    const inList = likedKeys.has(k)
+
     try {
       if (inList) {
         await fetch(`${API_BASE}/api/wishlist`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, product_id: pid })
+          body: JSON.stringify({ user_id: userId, product_id: pid, ean_code })
         })
-        setWishlistItems((prev) =>
-          prev.filter((item) => String(item.ean_code ?? item.product_id ?? item.id ?? `${item.image_url}`) !== k)
-        )
+
+        setWishlistItems((prev) => prev.filter((it) => keyFor(it) !== k))
         setLikedKeys((prev) => {
           const n = new Set(prev)
           n.delete(k)
           return n
         })
+
+        const map = readVariantMap(userId)
+        delete map[k]
+        writeVariantMap(userId, map)
       } else {
         await fetch(`${API_BASE}/api/wishlist`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, product_id: pid })
+          body: JSON.stringify({ user_id: userId, product_id: pid, ean_code, image_url, color })
         })
-        addToWishlist({ ...group, product_id: pid })
+
+        const rep =
+          group.variants?.find((v) => String(v.ean_code || '') === ean_code) ||
+          group.variants?.[0] ||
+          group.rep ||
+          group
+
+        const payload = {
+          ...rep,
+          product_id: pid,
+          ean_code,
+          image_url,
+          color: color || rep.color || rep.colour || ''
+        }
+
+        addToWishlist(payload)
+
         setLikedKeys((prev) => {
           const n = new Set(prev)
           n.add(k)
           return n
         })
+
+        const map = readVariantMap(userId)
+        map[k] = { image_url, ean_code, color: payload.color }
+        writeVariantMap(userId, map)
       }
     } catch {}
   }
 
-  const handleProductClick = (group) => {
-    const rep = group.variants?.[0] || group.rep || group
-    const payload = {
-      ...rep,
-      ean_code: group.ean_code || rep.ean_code,
-      image_url: group.images?.[group.activeIndex || 0] || rep.image_url,
-      variants: group.variants,
-      images: group.images
-    }
+  const handleProductClick = (payload) => {
     sessionStorage.setItem('selectedProduct', JSON.stringify(payload))
     navigate('/checkout')
   }
@@ -250,22 +282,12 @@ export default function WomenPage() {
     <div className="women-page">
       <Navbar />
       <div className="filter-bar-class">
-        <FilterSidebar
-          source={allProducts}
-          onFilterChange={(list) => setProducts(Array.isArray(list) ? list : allProducts)}
-        />
+        <FilterSidebar source={allProducts} onFilterChange={(list) => setProducts(Array.isArray(list) ? list : allProducts)} />
         <div className="women-page-main">
           <div className="women-page-content">
             <section className="home1-hero-new-home-2">
               <div className="home1-hero-frame-new-home-2">
-                <Swiper
-                  className="home1-hero-swiper-new-home-2"
-                  modules={[Autoplay]}
-                  loop
-                  slidesPerView={1}
-                  autoplay={{ delay: 3500, disableOnInteraction: false }}
-                  speed={900}
-                >
+                <Swiper className="home1-hero-swiper-new-home-2" modules={[Autoplay]} loop slidesPerView={1} autoplay={{ delay: 3500, disableOnInteraction: false }} speed={900}>
                   <SwiperSlide>
                     <div className="home1-hero-slide-new-home-2">
                       <img src="/images/banners/banner1.jpg" alt="Women Banner" loading="eager" />

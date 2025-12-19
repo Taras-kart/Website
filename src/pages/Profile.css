@@ -12,8 +12,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background:
-    radial-gradient(900px 320px at 10% -10%, rgba(255, 210, 119, 0.12), transparent 60%),
+  background: radial-gradient(900px 320px at 10% -10%, rgba(255, 210, 119, 0.12), transparent 60%),
     radial-gradient(800px 300px at 90% 110%, rgba(255, 255, 255, 0.08), transparent 60%);
   filter: blur(0.5px);
   z-index: 0;
@@ -42,6 +41,7 @@
   padding: 18px 16px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(12px);
+  height: fit-content;
 }
 
 .profile-title {
@@ -131,10 +131,11 @@
   letter-spacing: 0.3px;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   transition: transform 0.18s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+  width: 100%;
 }
 
 .profile-button::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   border-radius: 12px;
@@ -190,19 +191,25 @@
   background: rgba(10, 10, 10, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 18px;
-  padding: 22px 22px 20px;
+  padding: 0;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(12px);
-  max-height: 700px;
   overflow: hidden;
+  min-height: 520px;
 }
 
 .profile-right:hover {
   box-shadow: 0 16px 60px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
+.profile-right-inner {
+  padding: 22px 22px 20px;
+  min-height: 520px;
+  box-sizing: border-box;
+}
+
 .animate-section {
-  animation: fadeUp 0.4s ease both;
+  animation: fadeUp 0.35s ease both;
 }
 
 .profile-right .section-card {
@@ -225,14 +232,6 @@
 .profile-right .section-card::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #ffd277, #ffffff);
   border-radius: 999px;
-}
-
-.profile-right::-webkit-scrollbar {
-  display: none;
-}
-
-.profile-right {
-  scrollbar-width: none;
 }
 
 .login-signup-panel {
@@ -276,8 +275,7 @@
   height: 120px;
   border-radius: 50%;
   filter: blur(12px);
-  background:
-    radial-gradient(closest-side, rgba(255, 210, 119, 0.4), transparent 65%),
+  background: radial-gradient(closest-side, rgba(255, 210, 119, 0.4), transparent 65%),
     radial-gradient(closest-side, rgba(255, 255, 255, 0.25), transparent 70%);
   z-index: -1;
   animation: glowPulse 2.6s ease-in-out infinite;
@@ -538,6 +536,23 @@
   }
 }
 
+@media (min-width: 1025px) {
+  .profile-container {
+    grid-template-columns: minmax(240px, 25%) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .profile-left {
+    position: sticky;
+    top: 84px;
+    width: 100%;
+  }
+
+  .profile-right {
+    width: 100%;
+  }
+}
+
 @media (max-width: 1200px) {
   .profile-container {
     grid-template-columns: 280px minmax(0, 1fr);
@@ -556,8 +571,12 @@
   }
 
   .profile-right {
-    max-height: none;
     overflow: visible;
+    min-height: auto;
+  }
+
+  .profile-right-inner {
+    min-height: auto;
   }
 }
 
@@ -642,6 +661,10 @@
   .profile-right {
     padding: 10px 2px 16px;
     border-radius: 16px;
+  }
+
+  .profile-right-inner {
+    padding: 10px 2px 16px;
   }
 
   .login-signup-buttons {

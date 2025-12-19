@@ -1,74 +1,63 @@
-import React, { useState, useEffect } from 'react';
-import Navbar from './Navbar';
-import Footer from './Footer';
-import { useCart } from '../CartContext';
-import { useWishlist } from '../WishlistContext';
-import './Cart.css';
-import { FaTimes, FaCheck, FaTag } from 'react-icons/fa';
-import Popup from './Popup';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react'
+import Navbar from './Navbar'
+import Footer from './Footer'
+import { useCart } from '../CartContext'
+import { useWishlist } from '../WishlistContext'
+import './Cart.css'
+import { FaTimes, FaCheck, FaTag } from 'react-icons/fa'
+import Popup from './Popup'
+import { useNavigate } from 'react-router-dom'
 
-const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
+const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app'
 const API_BASE_RAW =
   (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
   (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
-  DEFAULT_API_BASE;
-const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
+  DEFAULT_API_BASE
+const API_BASE = API_BASE_RAW.replace(/\/+$/, '')
 
 const Cart = () => {
-  const navigate = useNavigate();
-  const { addToWishlist } = useWishlist();
-  const { removeFromCart } = useCart();
-  const [cartItems, setCartItems] = useState([]);
-  const [showPopup, setShowPopup] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [quantities, setQuantities] = useState({});
-  const [showCoupon, setShowCoupon] = useState(false);
-  const [couponInput, setCouponInput] = useState('');
-  const [couponDiscountPct, setCouponDiscountPct] = useState(0);
-  const [giftWrap, setGiftWrap] = useState(false);
-  const [toast, setToast] = useState('');
-  const [showSuccess, setShowSuccess] = useState(false);
-  const userId = sessionStorage.getItem('userId');
+  const navigate = useNavigate()
+  const { addToWishlist } = useWishlist()
+  const { removeFromCart } = useCart()
+
+  const [cartItems, setCartItems] = useState([])
+  const [showPopup, setShowPopup] = useState(false)
+  const [selectedItem, setSelectedItem] = useState(null)
+  const [quantities, setQuantities] = useState({})
+  const [showCoupon, setShowCoupon] = useState(false)
+  const [couponInput, setCouponInput] = useState('')
+  const [couponDiscountPct, setCouponDiscountPct] = useState(0)
+  const [giftWrap, setGiftWrap] = useState(false)
+  const [toast, setToast] = useState('')
+  const [showSuccess, setShowSuccess] = useState(false)
+
+  const userId =
+    (typeof window !== 'undefined' ? sessionStorage.getItem('userId') : '') ||
+    (typeof window !== 'undefined' ? localStorage.getItem('userId') : '') ||
+    ''
+
   const [userType, setUserType] = useState(() => {
-    if (typeof window === 'undefined') return 'B2C';
-    return sessionStorage.getItem('userType') || 'B2C';
-  });
+    if (typeof window === 'undefined') return 'B2C'
+    return sessionStorage.getItem('userType') || localStorage.getItem('userType') || 'B2C'
+  })
 
   useEffect(() => {
     const syncUserType = () => {
-      if (typeof window === 'undefined') return;
-      const storedType = sessionStorage.getItem('userType') || 'B2C';
-      if (storedType !== userType) setUserType(storedType);
-    };
-    window.addEventListener('storage', syncUserType);
-    const interval = setInterval(syncUserType, 500);
+      if (typeof window === 'undefined') return
+      const storedType = sessionStorage.getItem('userType') || localStorage.getItem('userType') || 'B2C'
+      if (storedType !== userType) setUserType(storedType)
+    }
+    window.addEventListener('storage', syncUserType)
+    const interval = setInterval(syncUserType, 500)
     return () => {
-      window.removeEventListener('storage', syncUserType);
-      clearInterval(interval);
-    };
-  }, [userType]);
+      window.removeEventListener('storage', syncUserType)
+      clearInterval(interval)
+    }
+  }, [userType])
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    const fetchCartItems = async () => {
-      const response = await fetch(`${API_BASE}/api/cart/${userId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setCartItems(data);
-        const initialQuantities = data.reduce((acc, item) => {
-          acc[item.id] = item.quantity || 1;
-          return acc;
-        }, {});
-        setQuantities(initialQuantities);
-      }
-    };
-    if (userId) fetchCartItems();
-  }, [userId]);
+  const fmt = (n) => Number(n || 0).toFixed(2)
 
-  const fmt = n => Number(n || 0).toFixed(2);
-
-  const getItemPricing = item => {
+  const getItemPricing = (item) => {
     if (userType === 'B2B') {
       const mrp = Number(
         item.original_price_b2b ??
@@ -77,14 +66,9 @@ const Cart = () => {
           item.final_price_b2b ??
           item.final_price_b2c ??
           0
-      );
-      const offer = Number(
-        item.final_price_b2b ??
-          item.final_price_b2c ??
-          item.sale_price ??
-          mrp
-      );
-      return { mrp, offer };
+      )
+      const offer = Number(item.final_price_b2b ?? item.final_price_b2c ?? item.sale_price ?? mrp)
+      return { mrp, offer }
     }
     const mrp = Number(
       item.original_price_b2c ??
@@ -93,90 +77,124 @@ const Cart = () => {
         item.final_price_b2c ??
         item.final_price_b2b ??
         0
-    );
-    const offer = Number(
-      item.final_price_b2c ??
-        item.sale_price ??
-        mrp
-    );
-    return { mrp, offer };
-  };
+    )
+    const offer = Number(item.final_price_b2c ?? item.sale_price ?? mrp)
+    return { mrp, offer }
+  }
 
-  const handleRemoveClick = item => {
-    setSelectedItem(item);
-    setShowPopup(true);
-  };
+  const fetchCartItems = async () => {
+    if (!userId) {
+      setCartItems([])
+      setQuantities({})
+      return
+    }
+    try {
+      const res = await fetch(`${API_BASE}/api/cart/${userId}`, { cache: 'no-store' })
+      if (!res.ok) {
+        setCartItems([])
+        setQuantities({})
+        return
+      }
+      const data = await res.json()
+      const arr = Array.isArray(data) ? data : []
+      setCartItems(arr)
+      const initialQuantities = arr.reduce((acc, item) => {
+        const key = item.id
+        if (key != null) acc[key] = Number(item.quantity || 1)
+        return acc
+      }, {})
+      setQuantities(initialQuantities)
+    } catch {
+      setCartItems([])
+      setQuantities({})
+    }
+  }
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') window.scrollTo(0, 0)
+    fetchCartItems()
+  }, [userId])
+
+  const handleRemoveClick = (item) => {
+    setSelectedItem(item)
+    setShowPopup(true)
+  }
 
   const applyCoupon = () => {
-    const code = couponInput.trim().toUpperCase();
+    const code = couponInput.trim().toUpperCase()
     if (code === 'GOLD10') {
-      setCouponDiscountPct(10);
-      setToast('GOLD10 applied');
+      setCouponDiscountPct(10)
+      setToast('GOLD10 applied')
     } else if (code === 'FREESHIP') {
-      setCouponDiscountPct(0);
-      setToast('FREESHIP applied');
+      setCouponDiscountPct(0)
+      setToast('FREESHIP applied')
     } else {
-      setCouponDiscountPct(0);
-      setToast('Invalid coupon');
+      setCouponDiscountPct(0)
+      setToast('Invalid coupon')
     }
-    setShowCoupon(false);
-    setTimeout(() => setToast(''), 1500);
-  };
+    setShowCoupon(false)
+    setTimeout(() => setToast(''), 1500)
+  }
+
+  const apiVariantId = (item) => Number(item.id || 0)
 
   const handleConfirmRemove = async () => {
     if (selectedItem && userId) {
-      await fetch(`${API_BASE}/api/cart/tarascart`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, product_id: selectedItem.id })
-      });
-      setCartItems(prev => prev.filter(item => item.id !== selectedItem.id));
-      removeFromCart(selectedItem.id);
-      setToast('Item removed');
-      setTimeout(() => setToast(''), 1600);
+      const vid = apiVariantId(selectedItem)
+      if (vid > 0) {
+        await fetch(`${API_BASE}/api/cart/tarascart`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: String(userId), product_id: vid })
+        })
+      }
+      setCartItems((prev) => prev.filter((it) => it.id !== selectedItem.id))
+      removeFromCart(selectedItem.id)
+      setToast('Item removed')
+      setTimeout(() => setToast(''), 1600)
     }
-    setShowPopup(false);
-  };
+    setShowPopup(false)
+  }
 
-  const handleQuantityChange = async (productId, value) => {
-    const quantity = parseInt(value, 10);
-    setQuantities(prev => ({ ...prev, [productId]: quantity }));
-    if (userId) {
-      await fetch(`${API_BASE}/api/cart/tarascart`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, product_id: productId, quantity })
-      });
-      setToast('Quantity updated');
-      setTimeout(() => setToast(''), 1200);
-    }
-  };
+  const handleQuantityChange = async (variantId, value) => {
+    const quantity = parseInt(value, 10)
+    setQuantities((prev) => ({ ...prev, [variantId]: quantity }))
+    if (!userId) return
+    await fetch(`${API_BASE}/api/cart/tarascart`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: String(userId), product_id: Number(variantId), quantity })
+    })
+    setToast('Quantity updated')
+    setTimeout(() => setToast(''), 1200)
+  }
 
   const bagTotal = cartItems.reduce((total, item) => {
-    const qty = quantities[item.id] || 1;
-    const { mrp } = getItemPricing(item);
-    return total + mrp * qty;
-  }, 0);
+    const key = item.id
+    const qty = quantities[key] || 1
+    const { mrp } = getItemPricing(item)
+    return total + mrp * qty
+  }, 0)
 
   const discountTotal = cartItems.reduce((total, item) => {
-    const qty = quantities[item.id] || 1;
-    const { mrp, offer } = getItemPricing(item);
-    if (!mrp || offer >= mrp) return total;
-    return total + (mrp - offer) * qty;
-  }, 0);
+    const key = item.id
+    const qty = quantities[key] || 1
+    const { mrp, offer } = getItemPricing(item)
+    if (!mrp || offer >= mrp) return total
+    return total + (mrp - offer) * qty
+  }, 0)
 
-  const subTotalBeforeCoupon = bagTotal - discountTotal;
-  const rawCouponDiscount = (subTotalBeforeCoupon * couponDiscountPct) / 100;
-  const maxCouponDiscount = 0;
-  const couponDiscount =
-    maxCouponDiscount > 0 ? Math.min(rawCouponDiscount, maxCouponDiscount) : rawCouponDiscount;
-  const subTotal = subTotalBeforeCoupon - couponDiscount;
-  const convenience = 0;
-  const youPay = subTotal + (giftWrap ? 39 : 0);
-  const totalSaving = discountTotal + couponDiscount;
+  const subTotalBeforeCoupon = bagTotal - discountTotal
+  const rawCouponDiscount = (subTotalBeforeCoupon * couponDiscountPct) / 100
+  const maxCouponDiscount = 0
+  const couponDiscount = maxCouponDiscount > 0 ? Math.min(rawCouponDiscount, maxCouponDiscount) : rawCouponDiscount
+  const subTotal = subTotalBeforeCoupon - couponDiscount
+  const convenience = 0
+  const youPay = subTotal + (giftWrap ? 39 : 0)
+  const totalSaving = discountTotal + couponDiscount
 
   const proceedToCheckout = () => {
-    if (!cartItems.length) return;
+    if (!cartItems.length) return
     const payload = {
       totals: {
         bagTotal,
@@ -187,24 +205,25 @@ const Cart = () => {
         giftWrap: giftWrap ? 39 : 0,
         payable: youPay
       },
-      items: cartItems.map(item => {
-        const qty = quantities[item.id] || 1;
-        const { mrp, offer } = getItemPricing(item);
+      items: cartItems.map((item) => {
+        const key = item.id
+        const qty = quantities[key] || 1
+        const { mrp, offer } = getItemPricing(item)
         return {
-          variant_id: item.id,
-          product_id: item.product_id || null,
+          variant_id: item.id ?? null,
+          product_id: item.product_id ?? null,
           qty,
           price: Number(offer),
           mrp: Number(mrp),
-          size: item.selected_size || '',
-          colour: item.selected_color || '',
+          size: item.selected_size || item.size || '',
+          colour: item.selected_color || item.color || '',
           image_url: item.image_url || null
-        };
+        }
       })
-    };
-    sessionStorage.setItem('tk_checkout_payload', JSON.stringify(payload));
-    navigate('/order/checkout');
-  };
+    }
+    sessionStorage.setItem('tk_checkout_payload', JSON.stringify(payload))
+    navigate('/order/checkout')
+  }
 
   return (
     <div className="cart-wrap">
@@ -230,20 +249,15 @@ const Cart = () => {
                   <span>{cartItems.length} item(s)</span>
                 </div>
 
-                {cartItems.map(item => {
-                  const qty = quantities[item.id] || 1;
-                  const { mrp, offer } = getItemPricing(item);
-                  const discountPct =
-                    mrp > 0 && offer < mrp
-                      ? Math.round(((mrp - offer) / mrp) * 100)
-                      : 0;
+                {cartItems.map((item) => {
+                  const key = item.id
+                  const qty = quantities[key] || 1
+                  const { mrp, offer } = getItemPricing(item)
+                  const discountPct = mrp > 0 && offer < mrp ? Math.round(((mrp - offer) / mrp) * 100) : 0
 
                   return (
-                    <div className="cart-card" key={item.id}>
-                      <button
-                        className="card-remove"
-                        onClick={() => handleRemoveClick(item)}
-                      >
+                    <div className="cart-card" key={key}>
+                      <button className="card-remove" onClick={() => handleRemoveClick(item)}>
                         <FaTimes />
                       </button>
 
@@ -260,20 +274,12 @@ const Cart = () => {
                         <div className="card-opts">
                           <div className="opt">
                             <span className="opt-label">Color</span>
-                            <span
-                              className="color-dot"
-                              style={{
-                                backgroundColor: (item.selected_color || '').toLowerCase()
-                              }}
-                            />
+                            <span className="color-dot" style={{ backgroundColor: (item.selected_color || item.color || '').toLowerCase() }} />
                           </div>
                           <div className="opt">
                             <span className="opt-label">Size</span>
-                            <select
-                              defaultValue={item.selected_size}
-                              className="select"
-                            >
-                              {['S', 'M', 'L', 'XL', 'XXL', 'FREE'].map(s => (
+                            <select defaultValue={item.selected_size || item.size} className="select">
+                              {['S', 'M', 'L', 'XL', 'XXL', 'FREE'].map((s) => (
                                 <option key={s} value={s}>
                                   {s}
                                 </option>
@@ -282,13 +288,7 @@ const Cart = () => {
                           </div>
                           <div className="opt">
                             <span className="opt-label">Qty</span>
-                            <select
-                              value={qty}
-                              className="select"
-                              onChange={e =>
-                                handleQuantityChange(item.id, e.target.value)
-                              }
-                            >
+                            <select value={qty} className="select" onChange={(e) => handleQuantityChange(key, e.target.value)}>
                               {[...Array(10)].map((_, i) => (
                                 <option key={i + 1} value={i + 1}>
                                   {i + 1}
@@ -302,23 +302,18 @@ const Cart = () => {
                           <div className="now">₹{fmt(offer * qty)}</div>
                           <div className="was">
                             <span className="mrp">₹{fmt(mrp * qty)}</span>
-                            {discountPct > 0 && (
-                              <span className="off">{discountPct}% OFF</span>
-                            )}
+                            {discountPct > 0 && <span className="off">{discountPct}% OFF</span>}
                           </div>
                         </div>
 
                         <div className="card-actions">
-                          <button
-                            className="mini gold"
-                            onClick={() => setShowCoupon(true)}
-                          >
+                          <button className="mini gold" onClick={() => setShowCoupon(true)}>
                             <FaTag /> Apply Coupon
                           </button>
                         </div>
                       </div>
                     </div>
-                  );
+                  )
                 })}
               </div>
 
@@ -345,11 +340,7 @@ const Cart = () => {
                   )}
                   <div className="sum-row opt-row">
                     <label className="chk">
-                      <input
-                        type="checkbox"
-                        checked={giftWrap}
-                        onChange={e => setGiftWrap(e.target.checked)}
-                      />
+                      <input type="checkbox" checked={giftWrap} onChange={(e) => setGiftWrap(e.target.checked)} />
                       <span>Gift Wrap</span>
                     </label>
                     <span>{giftWrap ? '₹39.00' : '₹0.00'}</span>
@@ -364,9 +355,7 @@ const Cart = () => {
                   </div>
                   <div className="save-note">
                     <FaCheck />
-                    <span>
-                      You are saving ₹{fmt(totalSaving)} on this order
-                    </span>
+                    <span>You are saving ₹{fmt(totalSaving)} on this order</span>
                   </div>
                   <button className="btn-buy" onClick={proceedToCheckout}>
                     Proceed to Buy
@@ -395,33 +384,26 @@ const Cart = () => {
             onConfirm={handleConfirmRemove}
             onCancel={() => setShowPopup(false)}
             onWishlist={() => {
-              addToWishlist(selectedItem);
-              setCartItems(prev => prev.filter(i => i.id !== selectedItem.id));
-              setShowPopup(false);
-              setToast('Moved to wishlist');
-              setTimeout(() => setToast(''), 1500);
+              addToWishlist(selectedItem)
+              setCartItems((prev) => prev.filter((i) => i.id !== selectedItem.id))
+              setShowPopup(false)
+              setToast('Moved to wishlist')
+              setTimeout(() => setToast(''), 1500)
             }}
           />
         )}
 
         {showCoupon && (
           <div className="modal-wrap" onClick={() => setShowCoupon(false)}>
-            <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal" onClick={(e) => e.stopPropagation()}>
               <h4>Apply Coupon</h4>
               <div className="preset">
                 <button onClick={() => setCouponInput('GOLD10')}>GOLD10</button>
                 <button onClick={() => setCouponInput('FREESHIP')}>FREESHIP</button>
               </div>
-              <input
-                value={couponInput}
-                onChange={e => setCouponInput(e.target.value)}
-                placeholder="Enter code"
-              />
+              <input value={couponInput} onChange={(e) => setCouponInput(e.target.value)} placeholder="Enter code" />
               <div className="modal-actions">
-                <button
-                  className="btn ghost"
-                  onClick={() => setShowCoupon(false)}
-                >
+                <button className="btn ghost" onClick={() => setShowCoupon(false)}>
                   Close
                 </button>
                 <button className="btn solid" onClick={applyCoupon}>
@@ -434,17 +416,11 @@ const Cart = () => {
 
         {showSuccess && (
           <div className="modal-wrap" onClick={() => setShowSuccess(false)}>
-            <div
-              className="modal success"
-              onClick={e => e.stopPropagation()}
-            >
+            <div className="modal success" onClick={(e) => e.stopPropagation()}>
               <div className="success-head">Order Placed Successfully</div>
               <p className="success-sub">Thank you for shopping with us.</p>
               <div className="modal-actions">
-                <button
-                  className="btn solid"
-                  onClick={() => setShowSuccess(false)}
-                >
+                <button className="btn solid" onClick={() => setShowSuccess(false)}>
                   Close
                 </button>
               </div>
@@ -456,7 +432,7 @@ const Cart = () => {
       </div>
       <Footer />
     </div>
-  );
-};
+  )
+}
 
-export default Cart;
+export default Cart

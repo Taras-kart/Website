@@ -20,6 +20,41 @@ const BRANCH_ID_RAW =
   ''
 const BRANCH_ID = BRANCH_ID_RAW ? String(BRANCH_ID_RAW).trim() : ''
 
+const readVariantMap = (userId) => {
+  if (typeof window === 'undefined') return {}
+  if (!userId) return {}
+  try {
+    const raw = localStorage.getItem(`wishlist:variant-map:${userId}`)
+    const obj = raw ? JSON.parse(raw) : {}
+    return obj && typeof obj === 'object' ? obj : {}
+  } catch {
+    return {}
+  }
+}
+
+const writeVariantMap = (userId, map) => {
+  if (typeof window === 'undefined') return
+  if (!userId) return
+  try {
+    localStorage.setItem(`wishlist:variant-map:${userId}`, JSON.stringify(map || {}))
+  } catch {}
+}
+
+const keyFor = (item) => {
+  const pid = item?.product_id ?? item?.id ?? ''
+  const ean = item?.ean_code ?? ''
+  return `${String(pid)}::${String(ean)}`
+}
+
+const bestLocalVariantForProduct = (variantMap, productId) => {
+  const pid = String(productId || '')
+  if (!pid) return null
+  const prefix = `${pid}::`
+  const keys = Object.keys(variantMap || {}).filter((k) => k.startsWith(prefix))
+  if (!keys.length) return null
+  return variantMap[keys[keys.length - 1]] || null
+}
+
 const Wishlist = () => {
   const { wishlistItems, setWishlistItems } = useWishlist()
   const [showPopup, setShowPopup] = useState(false)
@@ -31,9 +66,7 @@ const Wishlist = () => {
   })
   const navigate = useNavigate()
   const userId =
-    typeof window !== 'undefined'
-      ? sessionStorage.getItem('userId') || localStorage.getItem('userId')
-      : null
+    typeof window !== 'undefined' ? sessionStorage.getItem('userId') || localStorage.getItem('userId') : null
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -68,7 +101,34 @@ const Wishlist = () => {
         }
         const res = await fetch(url)
         const data = await res.json()
-        setWishlistItems(Array.isArray(data) ? data : [])
+        const arr = Array.isArray(data) ? data : []
+        const variantMap = readVariantMap(userId)
+
+        const merged = arr.map((it) => {
+          const pid = it.product_id ?? it.id
+          const k = keyFor(it)
+          const exact = variantMap[k]
+          if (exact?.image_url) {
+            return {
+              ...it,
+              image_url: exact.image_url,
+              ean_code: it.ean_code || exact.ean_code || '',
+              color: it.color || exact.color || ''
+            }
+          }
+          const fallback = bestLocalVariantForProduct(variantMap, pid)
+          if (fallback?.image_url) {
+            return {
+              ...it,
+              image_url: fallback.image_url,
+              ean_code: it.ean_code || fallback.ean_code || '',
+              color: it.color || fallback.color || ''
+            }
+          }
+          return it
+        })
+
+        setWishlistItems(merged)
       } catch {
       } finally {
         setIsLoading(false)
@@ -84,17 +144,24 @@ const Wishlist = () => {
 
   const confirmRemove = async () => {
     try {
-      const payload = { user_id: userId, product_id: selectedItem.product_id }
+      const payload = { user_id: userId, product_id: selectedItem.product_id, ean_code: selectedItem.ean_code || '' }
       if (BRANCH_ID) payload.branch_id = BRANCH_ID
       await fetch(`${API_BASE}/api/wishlist`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
-      const updatedWishlist = wishlistItems.filter(
-        (item) => String(item.product_id) !== String(selectedItem.product_id)
-      )
+
+      const pid = selectedItem.product_id ?? selectedItem.id
+      const updatedWishlist = wishlistItems.filter((it) => String(it.product_id ?? it.id) !== String(pid))
       setWishlistItems(updatedWishlist)
+
+      const map = readVariantMap(userId)
+      const prefix = `${String(pid)}::`
+      for (const k of Object.keys(map)) {
+        if (k.startsWith(prefix)) delete map[k]
+      }
+      writeVariantMap(userId, map)
     } catch {
     } finally {
       setShowPopup(false)
@@ -106,23 +173,13 @@ const Wishlist = () => {
   const getItemPricing = (item) => {
     if (userType === 'B2B') {
       const mrp = Number(
-        item.original_price_b2b ??
-          item.mrp ??
-          item.original_price_b2c ??
-          item.final_price_b2b ??
-          item.final_price_b2c ??
-          0
+        item.original_price_b2b ?? item.mrp ?? item.original_price_b2c ?? item.final_price_b2b ?? item.final_price_b2c ?? 0
       )
       const offer = Number(item.final_price_b2b ?? item.final_price_b2c ?? item.sale_price ?? mrp)
       return { mrp, offer }
     }
     const mrp = Number(
-      item.original_price_b2c ??
-        item.mrp ??
-        item.original_price_b2b ??
-        item.final_price_b2c ??
-        item.final_price_b2b ??
-        0
+      item.original_price_b2c ?? item.mrp ?? item.original_price_b2b ?? item.final_price_b2c ?? item.final_price_b2b ?? 0
     )
     const offer = Number(item.final_price_b2c ?? item.sale_price ?? mrp)
     return { mrp, offer }
@@ -169,9 +226,7 @@ const Wishlist = () => {
                 <span className="wishlist-count">
                   {wishlistItems.length} {wishlistItems.length === 1 ? 'item' : 'items'}
                 </span>
-                <span className="mode-pill">
-                  {userType === 'B2B' ? 'Business pricing' : 'Retail pricing'}
-          </span>
+                <span className="mode-pill">{userType === 'B2B' ? 'Business pricing' : 'Retail pricing'}</span>
               </div>
 
               <div className="toolbar-actions">
@@ -188,7 +243,7 @@ const Wishlist = () => {
                 const discountPct = mrp > 0 && offer < mrp ? Math.round(((mrp - offer) / mrp) * 100) : 0
 
                 return (
-                  <div key={item.product_id ?? index} className="wishlist-card">
+                  <div key={`${item.product_id ?? index}`} className="wishlist-card">
                     <div
                       className="wishlist-image-container"
                       onClick={() => {
@@ -246,9 +301,7 @@ const Wishlist = () => {
           </div>
         )}
 
-        {showPopup && (
-          <WishlistPopup onConfirm={confirmRemove} onCancel={() => setShowPopup(false)} />
-        )}
+        {showPopup && <WishlistPopup onConfirm={confirmRemove} onCancel={() => setShowPopup(false)} />}
       </div>
 
       <Footer />

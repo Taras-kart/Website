@@ -16,32 +16,31 @@ function cloudinaryUrlByEan(ean) {
   return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/f_auto,q_auto/products/${ean}`
 }
 
-function uniq(arr) {
+function uniqByKey(arr, keyFn) {
   const seen = new Set()
   const out = []
-  for (const x of arr) {
-    const k = String(x || '')
-    if (!seen.has(k) && k) {
-      seen.add(k)
-      out.push(k)
-    }
+  for (const x of arr || []) {
+    const k = keyFn(x)
+    if (!k) continue
+    if (seen.has(k)) continue
+    seen.add(k)
+    out.push(x)
   }
   return out
+}
+
+function isRealRemoteImage(src) {
+  if (!src) return false
+  const s = String(src)
+  return s.startsWith('http://') || s.startsWith('https://')
 }
 
 function groupProductsByColor(products) {
   const byKey = new Map()
   for (const p of products || []) {
     if (!p) continue
-    const baseKey = [
-      p.product_name || '',
-      p.brand || '',
-      p.color || '',
-      p.gender || ''
-    ].join('||')
-    const key =
-      baseKey.trim() ||
-      `__fallback__:${p.ean_code || p.product_id || p.id || Math.random()}`
+    const baseKey = [p.product_name || '', p.brand || '', p.color || '', p.gender || ''].join('||')
+    const key = baseKey.trim() || `__fallback__:${p.ean_code || p.product_id || p.id || Math.random()}`
     if (!byKey.has(key)) {
       byKey.set(key, {
         key,
@@ -61,33 +60,17 @@ function groupProductsByColor(products) {
         variants: []
       })
     }
-    const g = byKey.get(key)
-    g.variants.push(p)
+    byKey.get(key).variants.push(p)
   }
 
   const out = []
   for (const g of byKey.values()) {
-    const eans = uniq(g.variants.map((v) => v.ean_code))
-    const imgs = uniq([
-      ...g.variants.map((v) => v.image_url),
-      ...eans.map((ean) => cloudinaryUrlByEan(ean))
-    ])
-
     const hasStockInfo = g.variants.some(
-      (v) =>
-        v.in_stock !== undefined ||
-        v.available_qty !== undefined ||
-        v.on_hand !== undefined
+      (v) => v.in_stock !== undefined || v.available_qty !== undefined || v.on_hand !== undefined
     )
 
     const allVariantsOutOfStock = g.variants.every((v) => {
-      const qty = Number(
-        v.available_qty !== undefined
-          ? v.available_qty
-          : v.on_hand !== undefined
-          ? v.on_hand
-          : 0
-      )
+      const qty = Number(v.available_qty !== undefined ? v.available_qty : v.on_hand !== undefined ? v.on_hand : 0)
       if (v.is_out_of_stock === true) return true
       if (v.is_out_of_stock === false) return false
       if (v.in_stock === true) return false
@@ -97,10 +80,27 @@ function groupProductsByColor(products) {
 
     const isOutOfStock = hasStockInfo ? allVariantsOutOfStock : false
 
+    const imgsRaw = g.variants.map((v) => {
+      const ean = String(v.ean_code || '')
+      const src = v.image_url || (ean ? cloudinaryUrlByEan(ean) : '') || ''
+      return {
+        src,
+        ean_code: ean,
+        product_id: v.product_id ?? v.id,
+        color: v.color ?? v.colour ?? g.color ?? '',
+        variant: v
+      }
+    })
+
+    const imgs = uniqByKey(
+      imgsRaw.filter((x) => isRealRemoteImage(x.src) && x.ean_code),
+      (x) => `${x.ean_code}::${x.src}`
+    )
+
     out.push({
       ...g,
       images: imgs,
-      ean_code: eans[0] || '',
+      ean_code: imgs[0]?.ean_code || g.variants[0]?.ean_code || '',
       id: g.rep.id,
       product_id: g.rep.product_id,
       brand: g.brand || g.rep.brand,
@@ -127,9 +127,7 @@ export default function WomenDisplayPage({
 
   useEffect(() => {
     const init = {}
-    for (const g of grouped) {
-      init[g.key] = 0
-    }
+    for (const g of grouped) init[g.key] = 0
     setCarouselIndex(init)
   }, [grouped])
 
@@ -140,36 +138,14 @@ export default function WomenDisplayPage({
       return Number.isFinite(n) && n > 0 ? n : 0
     }
     if (userType === 'B2B') {
-      const offerCandidates = [
-        p.final_price_b2b,
-        p.sale_price,
-        p.mrp,
-        p.original_price_b2b,
-        p.original_price_b2c
-      ]
-      const mrpCandidates = [
-        p.mrp,
-        p.original_price_b2b,
-        p.original_price_b2c,
-        p.final_price_b2b,
-        p.sale_price
-      ]
+      const offerCandidates = [p.final_price_b2b, p.sale_price, p.mrp, p.original_price_b2b, p.original_price_b2c]
+      const mrpCandidates = [p.mrp, p.original_price_b2b, p.original_price_b2c, p.final_price_b2b, p.sale_price]
       const offer = offerCandidates.map(num).find((v) => v > 0) || 0
       const mrp = mrpCandidates.map(num).find((v) => v > 0) || offer
       return { offer, mrp }
     }
-    const offerCandidates = [
-      p.final_price_b2c,
-      p.sale_price,
-      p.mrp,
-      p.original_price_b2c
-    ]
-    const mrpCandidates = [
-      p.mrp,
-      p.original_price_b2c,
-      p.final_price_b2c,
-      p.sale_price
-    ]
+    const offerCandidates = [p.final_price_b2c, p.sale_price, p.mrp, p.original_price_b2c]
+    const mrpCandidates = [p.mrp, p.original_price_b2c, p.final_price_b2c, p.sale_price]
     const offer = offerCandidates.map(num).find((v) => v > 0) || 0
     const mrp = mrpCandidates.map(num).find((v) => v > 0) || offer
     return { offer, mrp }
@@ -206,17 +182,29 @@ export default function WomenDisplayPage({
 
   const handleCardClick = (group) => {
     const idx = carouselIndex[group.key] || 0
-    const enriched = { ...group, activeIndex: idx }
-    onProductClick(enriched)
+    const active = group.images?.[idx] || group.images?.[0] || null
+    const rep = active?.variant || group.variants?.[0] || group.rep || group
+    const payload = {
+      ...rep,
+      ean_code: active?.ean_code || rep.ean_code || group.ean_code,
+      image_url: active?.src || rep.image_url,
+      variants: group.variants,
+      images: (group.images || []).map((x) => x.src)
+    }
+    onProductClick(payload)
   }
 
   const userLabel = userType === 'B2B' ? 'B2B view' : 'Retail view'
 
   const getImgForGroup = (group, idx) => {
-    const img = group.images?.[idx]
+    const img = group.images?.[idx]?.src
     if (img) return img
     const gender = group.gender || group.rep?.gender || 'WOMEN'
     return DEFAULT_IMG_BY_GENDER[gender] || DEFAULT_IMG_BY_GENDER._
+  }
+
+  const canLike = (active) => {
+    return !!(active?.ean_code && isRealRemoteImage(active?.src))
   }
 
   return (
@@ -241,13 +229,15 @@ export default function WomenDisplayPage({
       ) : (
         <div className="womens-section4-grid">
           {grouped.map((group, index) => {
-            const liked = likedKeys.has(keyFor(group))
             const idx = carouselIndex[group.key] || 0
+            const active = group.images?.[idx] || group.images?.[0] || null
+            const liked = likedKeys.has(keyFor({ product_id: group.product_id || group.id, ean_code: active?.ean_code || '' }))
             const imgSrc = getImgForGroup(group, idx)
             const total = group.images?.length || 1
             const discount = discountPct(group)
             const hasVariants = group.variants && group.variants.length > 1
             const isOutOfStock = group.is_out_of_stock
+            const likeEnabled = canLike(active)
 
             return (
               <div
@@ -261,19 +251,14 @@ export default function WomenDisplayPage({
                       <span>{discount}% OFF</span>
                     </div>
                   )}
-                  {hasVariants && (
-                    <div className="variant-pill">
-                      {group.variants.length} sizes
-                    </div>
-                  )}
+                  {hasVariants && <div className="variant-pill">{group.variants.length} sizes</div>}
                   <img
                     src={imgSrc}
                     alt={group.product_name}
                     className="fade-image"
                     onError={(e) => {
                       const gender = group.gender || group.rep?.gender || 'WOMEN'
-                      const fallback =
-                        DEFAULT_IMG_BY_GENDER[gender] || DEFAULT_IMG_BY_GENDER._
+                      const fallback = DEFAULT_IMG_BY_GENDER[gender] || DEFAULT_IMG_BY_GENDER._
                       if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback
                     }}
                   />
@@ -284,18 +269,10 @@ export default function WomenDisplayPage({
                   )}
                   {total > 1 && (
                     <>
-                      <button
-                        className="carousel-arrow left"
-                        onClick={(e) => prevImg(group, e)}
-                        aria-label="Previous"
-                      >
+                      <button className="carousel-arrow left" onClick={(e) => prevImg(group, e)} aria-label="Previous">
                         <FaChevronLeft />
                       </button>
-                      <button
-                        className="carousel-arrow right"
-                        onClick={(e) => nextImg(group, e)}
-                        aria-label="Next"
-                      >
+                      <button className="carousel-arrow right" onClick={(e) => nextImg(group, e)} aria-label="Next">
                         <FaChevronRight />
                       </button>
                       <div className="carousel-dots">
@@ -316,10 +293,15 @@ export default function WomenDisplayPage({
                     </>
                   )}
                   <div
-                    className="love-icon"
+                    className={`love-icon${likeEnabled ? '' : ' disabled'}`}
                     onClick={(e) => {
                       e.stopPropagation()
-                      onToggleLike(group)
+                      if (!likeEnabled) return
+                      onToggleLike(group, {
+                        ean_code: active.ean_code,
+                        image_url: active.src,
+                        color: active.color || group.color || ''
+                      })
                     }}
                   >
                     {liked ? (
@@ -337,20 +319,12 @@ export default function WomenDisplayPage({
                   </div>
                   <h5 className="product-name">{group.product_name}</h5>
                   <div className="card-price-row">
-                    <span className="card-offer-price">
-                      ₹{Number(priceForUser(group) || 0).toFixed(2)}
-                    </span>
-                    <span className="card-original-price">
-                      ₹{Number(mrpForUser(group) || 0).toFixed(2)}
-                    </span>
+                    <span className="card-offer-price">₹{Number(priceForUser(group) || 0).toFixed(2)}</span>
+                    <span className="card-original-price">₹{Number(mrpForUser(group) || 0).toFixed(2)}</span>
                   </div>
                   <div className="womens-section4-meta">
-                    <span className="price-type">
-                      {userType === 'B2B' ? 'Best B2B margin' : 'Inclusive of all taxes'}
-                    </span>
-                    {discount > 0 && (
-                      <span className="saving-text">You save {discount}%</span>
-                    )}
+                    <span className="price-type">{userType === 'B2B' ? 'Best B2B margin' : 'Inclusive of all taxes'}</span>
+                    {discount > 0 && <span className="saving-text">You save {discount}%</span>}
                   </div>
                 </div>
               </div>

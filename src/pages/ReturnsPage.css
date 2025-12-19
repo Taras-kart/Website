@@ -506,7 +506,7 @@
 @media (max-width: 768px) {
   .returns-container {
     width: calc(100% - 20px);
-    padding: 12px 0 46px;
+    padding: 0px 0 0px;
   }
 
   .returns-header {
@@ -515,7 +515,7 @@
   }
 
   .returns-section {
-    padding: 12px 10px 14px;
+    padding: 12px 5px 14px;
   }
 
   .returns-card-imagewide {
@@ -549,5 +549,6 @@
 
   .returns-header h2 {
     font-size: 20px;
+    padding: 100px 100px 100px;
   }
 }
