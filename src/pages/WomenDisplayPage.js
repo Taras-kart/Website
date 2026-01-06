@@ -35,6 +35,19 @@ function isRealRemoteImage(src) {
   return s.startsWith('http://') || s.startsWith('https://')
 }
 
+function uniqNonEmptyStrings(list) {
+  const seen = new Set()
+  const out = []
+  for (const v of list || []) {
+    const s = String(v || '').trim()
+    if (!s) continue
+    if (seen.has(s)) continue
+    seen.add(s)
+    out.push(s)
+  }
+  return out
+}
+
 function groupProductsByColor(products) {
   const byKey = new Map()
   for (const p of products || []) {
@@ -81,8 +94,8 @@ function groupProductsByColor(products) {
     const isOutOfStock = hasStockInfo ? allVariantsOutOfStock : false
 
     const imgsRaw = g.variants.map((v) => {
-      const ean = String(v.ean_code || '')
-      const src = v.image_url || (ean ? cloudinaryUrlByEan(ean) : '') || ''
+      const ean = String(v.ean_code || '').trim()
+      const src = (v.image_url || (ean ? cloudinaryUrlByEan(ean) : '') || '').trim()
       return {
         src,
         ean_code: ean,
@@ -97,6 +110,8 @@ function groupProductsByColor(products) {
       (x) => `${x.ean_code}::${x.src}`
     )
 
+    const missingEanLabel = uniqNonEmptyStrings(g.variants.map((v) => v?.ean_code)).join(', ')
+
     out.push({
       ...g,
       images: imgs,
@@ -105,7 +120,9 @@ function groupProductsByColor(products) {
       product_id: g.rep.product_id,
       brand: g.brand || g.rep.brand,
       product_name: g.product_name || g.rep.product_name,
-      is_out_of_stock: isOutOfStock
+      is_out_of_stock: isOutOfStock,
+      has_matching_images: imgs.length > 0,
+      missing_ean_label: missingEanLabel
     })
   }
   return out
@@ -123,7 +140,18 @@ export default function WomenDisplayPage({
 }) {
   const [carouselIndex, setCarouselIndex] = useState({})
 
-  const grouped = useMemo(() => groupProductsByColor(products || []), [products])
+  const groupedRaw = useMemo(() => groupProductsByColor(products || []), [products])
+
+  const grouped = useMemo(() => {
+    const list = [...(groupedRaw || [])]
+    list.sort((a, b) => {
+      const aHas = a?.has_matching_images ? 1 : 0
+      const bHas = b?.has_matching_images ? 1 : 0
+      if (aHas !== bHas) return bHas - aHas
+      return String(a?.product_name || '').localeCompare(String(b?.product_name || ''))
+    })
+    return list
+  }, [groupedRaw])
 
   useEffect(() => {
     const init = {}
@@ -231,13 +259,16 @@ export default function WomenDisplayPage({
           {grouped.map((group, index) => {
             const idx = carouselIndex[group.key] || 0
             const active = group.images?.[idx] || group.images?.[0] || null
-            const liked = likedKeys.has(keyFor({ product_id: group.product_id || group.id, ean_code: active?.ean_code || '' }))
+            const liked = likedKeys.has(
+              keyFor({ product_id: group.product_id || group.id, ean_code: active?.ean_code || '' })
+            )
             const imgSrc = getImgForGroup(group, idx)
             const total = group.images?.length || 1
             const discount = discountPct(group)
             const hasVariants = group.variants && group.variants.length > 1
             const isOutOfStock = group.is_out_of_stock
             const likeEnabled = canLike(active)
+            const showMissingEan = !group.has_matching_images && !!String(group.missing_ean_label || '').trim()
 
             return (
               <div
@@ -246,12 +277,20 @@ export default function WomenDisplayPage({
                 onClick={() => handleCardClick(group)}
               >
                 <div className="womens-section4-img">
+                  {showMissingEan && (
+                    <div className="missing-ean-pill">
+                      <span>Missing image for EAN: {group.missing_ean_label}</span>
+                    </div>
+                  )}
+
                   {discount > 0 && (
                     <div className="discount-ribbon">
                       <span>{discount}% OFF</span>
                     </div>
                   )}
+
                   {hasVariants && <div className="variant-pill">{group.variants.length} sizes</div>}
+
                   <img
                     src={imgSrc}
                     alt={group.product_name}
@@ -262,11 +301,13 @@ export default function WomenDisplayPage({
                       if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback
                     }}
                   />
+
                   {isOutOfStock && (
                     <div className="out-of-stock-overlay">
                       <span>Out of Stock</span>
                     </div>
                   )}
+
                   {total > 1 && (
                     <>
                       <button className="carousel-arrow left" onClick={(e) => prevImg(group, e)} aria-label="Previous">
@@ -292,6 +333,7 @@ export default function WomenDisplayPage({
                       </div>
                     </>
                   )}
+
                   <div
                     className={`love-icon${likeEnabled ? '' : ' disabled'}`}
                     onClick={(e) => {

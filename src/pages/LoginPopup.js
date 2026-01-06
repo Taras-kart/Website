@@ -118,6 +118,37 @@ const LoginPopup = ({ onClose, onSuccess }) => {
     }
   };
 
+  const backendLogin = async () => {
+    const response = await fetch(`${API_BASE}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Invalid email or password');
+
+    const user = data.user || data;
+
+    if (data.token) {
+      localStorage.setItem('userToken', data.token);
+      sessionStorage.setItem('userToken', data.token);
+    }
+
+    localStorage.setItem('userId', String(user.id));
+    localStorage.setItem('userEmail', user.email);
+    localStorage.setItem('userName', user.name);
+    localStorage.setItem('userType', user.type);
+
+    sessionStorage.setItem('userId', String(user.id));
+    sessionStorage.setItem('userEmail', user.email);
+    sessionStorage.setItem('userName', user.name);
+    sessionStorage.setItem('userType', user.type);
+
+    clearUserIdIfInvalid();
+
+    return user;
+  };
+
   const handleLogin = async () => {
     if (!canSubmit) return;
     setLoading(true);
@@ -134,56 +165,40 @@ const LoginPopup = ({ onClose, onSuccess }) => {
         setPopupMessage('');
       }, 900);
     } catch (e) {
-      const code = String(e.code || e.message || '').toLowerCase();
+      const raw = String(e?.message || '');
+      const code = String(e?.code || '').toLowerCase();
+      const isSuspended =
+        raw.toLowerCase().includes('consumer') &&
+        raw.toLowerCase().includes('suspended');
+      const isPermissionDenied =
+        raw.toLowerCase().includes('permission denied') ||
+        raw.toLowerCase().includes('permiss');
+
       const shouldFallback =
+        isSuspended ||
+        isPermissionDenied ||
         code.includes('invalid-credential') ||
         code.includes('user-not-found') ||
         code.includes('operation-not-allowed') ||
-        code.includes('password_login_disabled');
+        code.includes('password_login_disabled') ||
+        code.includes('auth/');
+
       if (shouldFallback) {
         try {
-          const response = await fetch(`${API_BASE}/api/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-          });
-          const data = await response.json();
-          if (response.ok) {
-            const user = data.user || data;
-
-            if (data.token) {
-              localStorage.setItem('userToken', data.token);
-              sessionStorage.setItem('userToken', data.token);
-            }
-
-            localStorage.setItem('userId', String(user.id));
-            localStorage.setItem('userEmail', user.email);
-            localStorage.setItem('userName', user.name);
-            localStorage.setItem('userType', user.type);
-
-            sessionStorage.setItem('userId', String(user.id));
-            sessionStorage.setItem('userEmail', user.email);
-            sessionStorage.setItem('userName', user.name);
-            sessionStorage.setItem('userType', user.type);
-
-            clearUserIdIfInvalid();
-
-            setPopupMessage('Successfully Logged In!');
-            setTimeout(() => {
-              onSuccess({
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                profilePic: '/images/profile-pic.png',
-                userType: user.type
-              });
-              setPopupMessage('');
-            }, 1200);
-          } else {
-            setMsg(data.message || 'Invalid email or password');
-          }
-        } catch {
-          setMsg('Server error');
+          const user = await backendLogin();
+          setPopupMessage('Successfully Logged In!');
+          setTimeout(() => {
+            onSuccess({
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              profilePic: '/images/profile-pic.png',
+              userType: user.type
+            });
+            setPopupMessage('');
+          }, 1200);
+        } catch (err) {
+          setMsg(String(err?.message || 'Invalid email or password'));
         }
       } else if (code.includes('too-many-requests')) setMsg('Too many attempts, try later');
       else if (code.includes('user-disabled')) setMsg('Account disabled');
@@ -210,8 +225,14 @@ const LoginPopup = ({ onClose, onSuccess }) => {
         setPopupMessage('');
       }, 900);
     } catch (e) {
+      const raw = String(e?.message || '');
       const code = String(e.code || '').toLowerCase();
-      if (code.includes('popup-closed-by-user')) setMsg('Popup closed');
+      const isSuspended =
+        raw.toLowerCase().includes('consumer') &&
+        raw.toLowerCase().includes('suspended');
+
+      if (isSuspended) setMsg('Firebase project suspended. Contact admin.');
+      else if (code.includes('popup-closed-by-user')) setMsg('Popup closed');
       else if (code.includes('unauthorized-domain')) setMsg('Domain not authorized in Firebase');
       else if (code.includes('invalid-api-key')) setMsg('Invalid Firebase API key');
       else setMsg('Google sign-in failed');
