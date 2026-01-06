@@ -1,50 +1,50 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
-import Navbar from './Navbar';
-import Footer from './Footer';
-import './PaymentPage.css';
+import React, { useEffect, useMemo, useState } from 'react'
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom'
+import Navbar from './Navbar'
+import Footer from './Footer'
+import './PaymentPage.css'
 
-const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
+const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app'
 const API_BASE_RAW =
   (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
   (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
-  DEFAULT_API_BASE;
-const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
+  DEFAULT_API_BASE
+const API_BASE = API_BASE_RAW.replace(/\/+$/, '')
 
 async function postWithFallback(paths, payload) {
-  let lastErr = null;
+  let lastErr = null
   for (const url of paths) {
     try {
       const r = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-      });
-      if (r.ok) return await r.json();
-      lastErr = new Error((await r.json().catch(() => ({})))?.message || `HTTP ${r.status}`);
+      })
+      if (r.ok) return await r.json()
+      lastErr = new Error((await r.json().catch(() => ({})))?.message || `HTTP ${r.status}`)
     } catch (e) {
-      lastErr = e;
+      lastErr = e
     }
   }
-  throw lastErr || new Error('Request failed');
+  throw lastErr || new Error('Request failed')
 }
 
 export default function PaymentPage() {
-  const [searchParams] = useSearchParams();
-  const location = useLocation();
-  const navigate = useNavigate();
+  const [searchParams] = useSearchParams()
+  const location = useLocation()
+  const navigate = useNavigate()
 
-  const saleIdFromState = location.state?.saleId || null;
-  const saleIdFromQuery = searchParams.get('sale_id') || null;
-  const saleId = saleIdFromState || saleIdFromQuery;
+  const saleIdFromState = location.state?.saleId || null
+  const saleIdFromQuery = searchParams.get('sale_id') || null
+  const saleId = saleIdFromState || saleIdFromQuery
 
-  const [loading, setLoading] = useState(false);
-  const [initializing, setInitializing] = useState(true);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
-  const [successType, setSuccessType] = useState('');
-  const [orderInfo, setOrderInfo] = useState(null);
-  const [activeMethod, setActiveMethod] = useState('ONLINE_UPI');
+  const [loading, setLoading] = useState(false)
+  const [initializing, setInitializing] = useState(true)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
+  const [successType, setSuccessType] = useState('')
+  const [orderInfo, setOrderInfo] = useState(null)
+  const [activeMethod, setActiveMethod] = useState('ONLINE_UPI')
 
   const createOrderPaths = useMemo(
     () => [
@@ -53,7 +53,7 @@ export default function PaymentPage() {
       `${API_BASE}/api/payments/create-order`
     ],
     []
-  );
+  )
 
   const verifyPaths = useMemo(
     () => [
@@ -62,7 +62,7 @@ export default function PaymentPage() {
       `${API_BASE}/api/payments/verify`
     ],
     []
-  );
+  )
 
   const codPaths = useMemo(
     () => [
@@ -70,48 +70,54 @@ export default function PaymentPage() {
       `${API_BASE}/sales/web/set-payment-status`
     ],
     []
-  );
+  )
 
   const loadRazorpay = () =>
     new Promise((resolve, reject) => {
-      if (window.Razorpay) return resolve(true);
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.onload = () => resolve(true);
-      script.onerror = () => reject(new Error('Razorpay SDK failed to load'));
-      document.body.appendChild(script);
-    });
+      if (window.Razorpay) return resolve(true)
+      const script = document.createElement('script')
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+      script.onload = () => resolve(true)
+      script.onerror = () => reject(new Error('Razorpay SDK failed to load'))
+      document.body.appendChild(script)
+    })
 
   const paymentLabel = useMemo(() => {
-    if (activeMethod === 'ONLINE_UPI') return 'UPI';
-    if (activeMethod === 'ONLINE_CARD') return 'Card';
-    if (activeMethod === 'ONLINE_NETBANKING') return 'Netbanking';
-    if (activeMethod === 'COD') return 'Cash on Delivery';
-    return 'Payment';
-  }, [activeMethod]);
+    if (activeMethod === 'ONLINE_UPI') return 'UPI'
+    if (activeMethod === 'ONLINE_CARD') return 'Card'
+    if (activeMethod === 'ONLINE_NETBANKING') return 'Netbanking'
+    if (activeMethod === 'COD') return 'Cash on Delivery'
+    return 'Payment'
+  }, [activeMethod])
 
   useEffect(() => {
     if (!saleId) {
-      setError('Invalid or missing sale reference');
-      setInitializing(false);
-      return;
+      setError('Invalid or missing sale reference')
+      setInitializing(false)
+      return
     }
-    setInitializing(false);
-  }, [saleId]);
+    setInitializing(false)
+  }, [saleId])
+
+  const goToOrders = () => {
+    navigate('/profile', { state: { openSection: 'Orders' } })
+  }
 
   const startOnlinePayment = async () => {
-    setError('');
-    setLoading(true);
+    setError('')
+    setLoading(true)
     try {
-      const info = await postWithFallback(createOrderPaths, { sale_id: saleId });
-      setOrderInfo(info);
-      await loadRazorpay();
+      const info = await postWithFallback(createOrderPaths, { sale_id: saleId })
+      setOrderInfo(info)
+      await loadRazorpay()
+
       const methodConfig =
         activeMethod === 'ONLINE_UPI'
           ? { method: { upi: 1, card: 0, netbanking: 0, wallet: 0 } }
           : activeMethod === 'ONLINE_CARD'
           ? { method: { upi: 0, card: 1, netbanking: 0, wallet: 0 } }
-          : { method: { upi: 0, card: 0, netbanking: 1, wallet: 0 } };
+          : { method: { upi: 0, card: 0, netbanking: 1, wallet: 0 } }
+
       const rz = new window.Razorpay({
         key: info.key_id,
         amount: info.amount,
@@ -128,55 +134,57 @@ export default function PaymentPage() {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature
-            });
+            })
+
             if (res.ok) {
               try {
                 if (saleId) {
                   await postWithFallback(codPaths, {
                     sale_id: saleId,
                     status: 'PAID'
-                  });
+                  })
                 }
               } catch (err2) {
-                console.error('Failed to set sale as PAID', err2);
+                console.error('Failed to set sale as PAID', err2)
               }
-              setSuccessType('ONLINE');
-              setSuccess(true);
+              setSuccessType('ONLINE')
+              setSuccess(true)
             } else {
-              setError('Payment verification failed');
+              setError('Payment verification failed')
             }
           } catch (e) {
-            setError(e.message || 'Verification error');
+            setError(e.message || 'Verification error')
           }
         },
         modal: {
           ondismiss: function () {
-            setError('Payment was cancelled before completion');
+            setError('Payment was cancelled before completion')
           }
         }
-      });
-      rz.open();
+      })
+
+      rz.open()
     } catch (err) {
-      setError(err.message);
+      setError(err.message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const confirmCOD = async () => {
-    setError('');
-    setLoading(true);
+    setError('')
+    setLoading(true)
     try {
-      if (!saleId) throw new Error('Missing sale reference');
-      await postWithFallback(codPaths, { sale_id: saleId, status: 'COD' });
-      setSuccessType('COD');
-      setSuccess(true);
+      if (!saleId) throw new Error('Missing sale reference')
+      await postWithFallback(codPaths, { sale_id: saleId, status: 'COD' })
+      setSuccessType('COD')
+      setSuccess(true)
     } catch (e) {
-      setError(e.message || 'Unable to set COD');
+      setError(e.message || 'Unable to set COD')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   if (initializing) {
     return (
@@ -187,7 +195,7 @@ export default function PaymentPage() {
         </div>
         <Footer />
       </div>
-    );
+    )
   }
 
   return (
@@ -243,7 +251,9 @@ export default function PaymentPage() {
                     <button disabled={loading} className="btn solid" onClick={startOnlinePayment}>
                       {loading ? 'Opening Secure Gateway…' : 'Pay Securely'}
                     </button>
-                    <button className="btn ghost" onClick={() => navigate('/cart')}>Back to Cart</button>
+                    <button className="btn ghost" onClick={() => navigate('/cart')}>
+                      Back to Cart
+                    </button>
                   </div>
                   <div className="trust-note">PCI DSS compliant • 256-bit encryption • Instant confirmation</div>
                 </div>
@@ -253,8 +263,12 @@ export default function PaymentPage() {
                     Choose Cash on Delivery to pay in cash to our delivery partner. Keep the exact amount ready and ensure your phone is reachable.
                   </p>
                   <div className="panel-actions">
-                    <button disabled={loading} className="btn solid" onClick={confirmCOD}>{loading ? 'Confirming…' : 'Confirm COD'}</button>
-                    <button className="btn ghost" onClick={() => navigate('/cart')}>Back to Cart</button>
+                    <button disabled={loading} className="btn solid" onClick={confirmCOD}>
+                      {loading ? 'Confirming…' : 'Confirm COD'}
+                    </button>
+                    <button className="btn ghost" onClick={() => navigate('/cart')}>
+                      Back to Cart
+                    </button>
                   </div>
                   <div className="trust-note">No advance required • Pay only at delivery</div>
                 </div>
@@ -268,8 +282,12 @@ export default function PaymentPage() {
             <h2>We couldn’t complete your request</h2>
             <p>{error}</p>
             <div className="actions">
-              <button className="btn solid" onClick={() => setError('')}>Try Again</button>
-              <button className="btn ghost" onClick={() => navigate('/checkout')}>Back to Checkout</button>
+              <button className="btn solid" onClick={() => setError('')}>
+                Try Again
+              </button>
+              <button className="btn ghost" onClick={() => navigate('/checkout')}>
+                Back to Checkout
+              </button>
             </div>
           </div>
         )}
@@ -280,8 +298,12 @@ export default function PaymentPage() {
             <p>Thank you. Your payment has been received and your order is confirmed.</p>
             {orderInfo?.order_id && <div className="order-id">Razorpay Order ID: {orderInfo.order_id}</div>}
             <div className="actions">
-              <button className="btn solid" onClick={() => navigate('/')}>Continue Shopping</button>
-              <button className="btn ghost" onClick={() => navigate('/orders')}>View Orders</button>
+              <button className="btn solid" onClick={() => navigate('/')}>
+                Continue Shopping
+              </button>
+              <button className="btn ghost" onClick={goToOrders}>
+                View Orders
+              </button>
             </div>
           </div>
         )}
@@ -291,13 +313,17 @@ export default function PaymentPage() {
             <h2>Cash on Delivery Selected</h2>
             <p>Your order has been placed with Cash on Delivery. You will receive delivery updates by SMS or email.</p>
             <div className="actions">
-              <button className="btn solid" onClick={() => navigate('/')}>Continue Shopping</button>
-              <button className="btn ghost" onClick={() => navigate('/orders')}>View Orders</button>
+              <button className="btn solid" onClick={() => navigate('/')}>
+                Continue Shopping
+              </button>
+              <button className="btn ghost" onClick={goToOrders}>
+                View Orders
+              </button>
             </div>
           </div>
         )}
       </div>
       <Footer />
     </div>
-  );
+  )
 }

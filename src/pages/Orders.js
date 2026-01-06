@@ -56,6 +56,16 @@ function firstColor(items) {
   return it?.color || it?.colour || it?.variant_color || it?.variantColor || ''
 }
 
+function normalizePayStatus(s) {
+  const t = String(s || '').toUpperCase().trim()
+  if (!t) return 'PENDING'
+  if (t.includes('PAID')) return 'PAID'
+  if (t.includes('COD')) return 'COD'
+  if (t.includes('FAIL')) return 'FAILED'
+  if (t.includes('PEND')) return 'PENDING'
+  return t
+}
+
 const Orders = ({ user }) => {
   const navigate = useNavigate()
   const [orders, setOrders] = useState([])
@@ -113,11 +123,15 @@ const Orders = ({ user }) => {
           const color = firstColor(s.items)
           const itemCount = Array.isArray(s.items) ? s.items.length : 0
           const st = normalizeStatus(s.status || 'PLACED')
+          const payStatus = normalizePayStatus(s.payment_status)
+          const isPendingOnline = payStatus === 'PENDING' || payStatus === 'FAILED'
 
           return {
             id: s.id,
             status: st,
             rawStatus: s.status || '',
+            paymentStatus: payStatus,
+            isPendingOnline,
             name: pname && itemCount > 1 ? `${pname} +${itemCount - 1}` : pname || 'Order',
             brand,
             color,
@@ -139,10 +153,11 @@ const Orders = ({ user }) => {
     fetchOrders()
   }, [email, mobile])
 
-  const statusList = ['All', ...STATUS_ORDER]
+  const statusList = ['All', ...STATUS_ORDER, 'Payment Pending']
 
   const filtered = useMemo(() => {
     if (filter === 'All') return orders
+    if (filter === 'Payment Pending') return orders.filter((o) => o.isPendingOnline)
     return orders.filter((o) => o.status === filter)
   }, [orders, filter])
 
@@ -150,12 +165,14 @@ const Orders = ({ user }) => {
     return (
       <div className="orders-page">
         <div className="orders-container">
-          <div className="orders-empty-card">
-            <h2 className="orders-empty-title">Sign in to see your orders</h2>
-            <p className="orders-empty-subtitle">Use the same email or mobile you used at checkout.</p>
-            <button className="btn-outline" onClick={() => navigate('/profile')}>
-              Sign In
-            </button>
+          <div className="orders-hero">
+            <div className="orders-hero-inner">
+              <div className="orders-hero-title">Your Orders</div>
+              <div className="orders-hero-sub">Sign in to view purchases, track shipments, and manage returns.</div>
+              <button className="btn-primary" onClick={() => navigate('/profile')}>
+                Sign In
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -166,18 +183,23 @@ const Orders = ({ user }) => {
     return (
       <div className="orders-page">
         <div className="orders-container">
-          <div className="orders-topbar skeleton-top">
-            <div className="sk-h shimmer" />
-            <div className="sk-s shimmer" />
+          <div className="orders-topbar">
+            <div className="sk-title shimmer" />
+            <div className="sk-filter shimmer" />
           </div>
-          <div className="skeleton-list">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div className="skeleton-card" key={i}>
-                <div className="sk-img shimmer" />
-                <div className="sk-body">
+
+          <div className="orders-grid">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div className="order-card skeleton" key={i}>
+                <div className="order-img shimmer" />
+                <div className="order-content">
                   <div className="sk-line shimmer" />
                   <div className="sk-line short shimmer" />
                   <div className="sk-line tiny shimmer" />
+                  <div className="order-actions">
+                    <div className="sk-btn shimmer" />
+                    <div className="sk-btn shimmer" />
+                  </div>
                 </div>
               </div>
             ))}
@@ -191,25 +213,28 @@ const Orders = ({ user }) => {
     <div className="orders-page">
       <div className="orders-container">
         {filtered.length === 0 ? (
-          <div className="orders-empty-card">
-            <img src="/images/no-order.svg" alt="No Orders" className="orders-empty-img" />
-            <h2 className="orders-empty-title">No orders yet</h2>
-            <p className="orders-empty-subtitle">Place an order and it will appear here.</p>
-            <button className="btn-outline" onClick={() => navigate('/')}>
-              Start Shopping
-            </button>
-            {error ? <p className="orders-error">{error}</p> : null}
+          <div className="orders-empty">
+            <div className="orders-empty-card">
+              <img src="/images/no-order.svg" alt="No Orders" className="orders-empty-img" />
+              <div className="orders-empty-title">No orders found</div>
+              <div className="orders-empty-subtitle">Once you place an order, it will show up here.</div>
+              <button className="btn-primary" onClick={() => navigate('/')}>
+                Start Shopping
+              </button>
+              {error ? <div className="orders-inline-error">{error}</div> : null}
+            </div>
           </div>
         ) : (
           <>
             <div className="orders-topbar">
-              <div className="orders-header">
-                <h3>Your Orders</h3>
-                <span className="orders-count">{filtered.length}</span>
+              <div className="orders-title-wrap">
+                <div className="orders-title">Your Orders</div>
+                <div className="orders-pill">{filtered.length}</div>
               </div>
-              <div className="orders-actions">
+
+              <div className="orders-right-tools">
                 <div className="orders-filter">
-                  <label>Status</label>
+                  <div className="orders-filter-label">Filter</div>
                   <select value={filter} onChange={(e) => setFilter(e.target.value)}>
                     {statusList.map((s) => (
                       <option key={s} value={s}>
@@ -221,47 +246,83 @@ const Orders = ({ user }) => {
               </div>
             </div>
 
-            <div className="orders-list">
+            <div className="orders-grid">
               {filtered.map((order) => {
-                const st = order.status
-                const statusClass = st.replace(/\s+/g, '-').toLowerCase()
-                const isCancelled = st === 'Cancelled'
+                const label = order.isPendingOnline ? 'Payment Pending' : order.status
+                const statusClass = label.replace(/\s+/g, '-').toLowerCase()
+                const isCancelled = order.status === 'Cancelled'
+                const blockTracking = order.isPendingOnline
+
                 return (
                   <div
                     key={order.id}
-                    className={`orders-card ${isCancelled ? 'is-cancelled' : ''}`}
+                    className={`order-card ${isCancelled ? 'is-cancelled' : ''}`}
                     onClick={() => navigate(`/order/${order.id}`)}
                     role="button"
                     tabIndex={0}
                   >
-                    <div className="orders-media">
+                    <div className="order-media">
                       {order.image ? (
                         <img src={order.image} alt={order.name || 'Item'} loading="lazy" />
                       ) : (
-                        <div className="orders-ph" />
+                        <div className="order-img-fallback" />
                       )}
-                      <div className={`orders-badge orders-badge--${statusClass}`}>{st}</div>
+                      <div className={`order-badge order-badge--${statusClass}`}>{label}</div>
                     </div>
 
-                    <div className="orders-body">
-                      <div className="orders-main">
-                        {order.brand ? <div className="orders-brand">{order.brand}</div> : null}
-                        <div className="orders-name">{order.name}</div>
-                        {order.color ? (
-                          <div className="orders-meta">
-                            <span className="orders-meta-label">Color</span>
-                            <span className="orders-meta-value">{order.color}</span>
-                          </div>
-                        ) : null}
-                        <div className="orders-price">{money(order.offerPrice)}</div>
+                    <div className="order-content">
+                      <div className="order-row-top">
+                        <div className="order-left">
+                          {order.brand ? <div className="order-brand">{order.brand}</div> : null}
+                          <div className="order-name">{order.name}</div>
+                        </div>
+                        <div className="order-price">{money(order.offerPrice)}</div>
                       </div>
 
-                      <div className="orders-actions-row" onClick={(e) => e.stopPropagation()}>
-                        <button className="btn-outline small" onClick={() => navigate(`/order/${order.id}`)}>
-                          View
-                        </button>
-                        <button className="btn-outline small" onClick={() => navigate(`/order/${order.id}/tracking`)}>
-                          Track
+                      <div className="order-meta">
+                        {order.color ? (
+                          <div className="order-meta-item">
+                            <span className="order-meta-label">Color</span>
+                            <span className="order-meta-value">{order.color}</span>
+                          </div>
+                        ) : null}
+
+                        <div className="order-meta-item">
+                          <span className="order-meta-label">Items</span>
+                          <span className="order-meta-value">{order.itemsCount || 1}</span>
+                        </div>
+
+                        <div className="order-meta-item">
+                          <span className="order-meta-label">Payment</span>
+                          <span className={`order-meta-value ${order.paymentStatus === 'PAID' ? 'ok' : ''}`}>
+                            {order.paymentStatus}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="order-actions" onClick={(e) => e.stopPropagation()}>
+                        {order.isPendingOnline ? (
+                          <button
+                            className="btn-secondary"
+                            onClick={() => navigate(`/payment?sale_id=${encodeURIComponent(order.id)}`)}
+                          >
+                            Continue Payment
+                          </button>
+                        ) : (
+                          <button className="btn-secondary" onClick={() => navigate(`/order/${order.id}`)}>
+                            View Details
+                          </button>
+                        )}
+
+                        <button
+                          className="btn-secondary"
+                          disabled={blockTracking}
+                          onClick={() => {
+                            if (blockTracking) return
+                            navigate(`/order/${order.id}/tracking`)
+                          }}
+                        >
+                          {blockTracking ? 'Tracking Disabled' : 'Track Order'}
                         </button>
                       </div>
                     </div>

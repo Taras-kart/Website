@@ -21,14 +21,16 @@
 .profile-container {
   margin-top: 60px !important;
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-columns: 25% 75%;
   gap: 24px;
   padding: 24px 32px 32px;
   position: relative;
   z-index: 1;
-  max-width: 1180px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
   box-sizing: border-box;
+  align-items: start;
 }
 
 .profile-left {
@@ -42,6 +44,7 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(12px);
   height: fit-content;
+  width: 100%;
 }
 
 .profile-title {
@@ -195,6 +198,7 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(12px);
   overflow: hidden;
+  width: 100%;
   min-height: 520px;
 }
 
@@ -538,14 +542,13 @@
 
 @media (min-width: 1025px) {
   .profile-container {
-    grid-template-columns: minmax(240px, 25%) minmax(0, 1fr);
-    align-items: start;
+    grid-template-columns: 25% 75%;
+    padding: 24px 32px 32px;
   }
 
   .profile-left {
     position: sticky;
     top: 84px;
-    width: 100%;
   }
 
   .profile-right {
@@ -555,14 +558,14 @@
 
 @media (max-width: 1200px) {
   .profile-container {
-    grid-template-columns: 280px minmax(0, 1fr);
+    grid-template-columns: 25% 75%;
     padding: 20px 20px 26px;
   }
 }
 
 @media (max-width: 1024px) {
   .profile-container {
-    grid-template-columns: 240px minmax(0, 1fr);
+    grid-template-columns: 25% 75%;
     padding: 18px 18px 26px;
   }
 
