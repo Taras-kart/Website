@@ -1,3 +1,4 @@
+// D:\shopping\src\pages\Navbar.js
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { FaUser, FaHeart, FaShoppingBag, FaSearch, FaTimes, FaRegUser, FaRegHeart } from 'react-icons/fa'
@@ -113,6 +114,7 @@ const getSuggestions = (input, tokens) => {
 }
 
 const SearchBar = React.memo(function SearchBar({
+  wrapperClassName = '',
   inputRef,
   searchTerm,
   setSearchTerm,
@@ -123,7 +125,7 @@ const SearchBar = React.memo(function SearchBar({
   onPickSuggestion
 }) {
   return (
-    <div className="search-bar-final Btn">
+    <div className={`search-bar-final Btn ${wrapperClassName}`}>
       <FaSearch className="search-icon-final" onMouseDown={(e) => e.preventDefault()} onClick={onSearch} />
       <input
         ref={inputRef}
@@ -186,7 +188,7 @@ const NavbarFinal = () => {
       { name: 'Women', path: '/women' },
       { name: 'Men', path: '/men' },
       { name: 'Kids', path: '/kids' },
-      { name: 'All Brands', path: '/brands' }
+      { name: 'Contact Us', path: '/customer-care' }
     ],
     []
   )
@@ -312,24 +314,76 @@ const NavbarFinal = () => {
 
   return (
     <nav className={`navbar-final ${showNav ? '' : 'nav-hidden'}`}>
-      <div className="top-row-final">
-        <div className="nav-toggle-final" onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}>
-          <div className={`dot-grid-final ${isMobileNavOpen ? 'dots-open' : ''}`}>
-            {[...Array(9)].map((_, i) => (
-              <span key={i} />
-            ))}
+      <div className="desktop-only-final">
+        <div className="desktop-top-row-final">
+          <div className="desktop-left-final">
+            <SearchBar
+              wrapperClassName="search-desktop-light"
+              inputRef={desktopInputRef}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              suggestions={suggestions}
+              showSuggestions={showSuggestions}
+              setShowSuggestions={setShowSuggestions}
+              onSearch={handleSearch}
+              onPickSuggestion={handleSuggestionClick}
+            />
+          </div>
+
+          <div className="desktop-center-final">
+            <div className="logo-final">
+              <video autoPlay loop muted playsInline>
+                <source src="/images/logo.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </div>
+
+          <div className="desktop-right-final">
+            <div className="icon-buttons-final">
+              <Link to="/profile" className={`icon-btn ${isActive('/profile') ? 'icon-active-btn' : ''}`}>
+                <div className="icon-circle">
+                  {isActive('/profile') ? (
+                    <FaUser className="icon icon-filled" />
+                  ) : (
+                    <FaRegUser className="icon icon-outline" />
+                  )}
+                  <span className="inner-ring" />
+                </div>
+                <span className={`icon-label ${isActive('/profile') ? 'label-active' : ''}`}>Profile</span>
+              </Link>
+
+              <Link to="/wishlist" className={`icon-btn ${isActive('/wishlist') ? 'icon-active-btn' : ''}`}>
+                <div className="icon-circle">
+                  {isActive('/wishlist') ? (
+                    <FaHeart className="icon icon-filled" />
+                  ) : (
+                    <FaRegHeart className="icon icon-outline" />
+                  )}
+                  {wishlistItems.length > 0 && <span className="red-dot1" />}
+                  <span className="inner-ring" />
+                </div>
+                <span className={`icon-label ${isActive('/wishlist') ? 'label-active' : ''}`}>Wishlist</span>
+              </Link>
+
+              <Link to="/cart" className={`icon-btn ${isActive('/cart') ? 'icon-active-btn' : ''}`}>
+                <div className="icon-circle">
+                  {isActive('/cart') ? (
+                    <FaShoppingBag className="icon icon-filled" />
+                  ) : (
+                    <FiShoppingBag className="icon icon-outline-stroke" />
+                  )}
+                  {cartItems.length > 0 && <span className="red-dot1" />}
+                  <span className="inner-ring" />
+                </div>
+                <span className={`icon-label ${isActive('/cart') ? 'label-active' : ''}`}>Kart</span>
+              </Link>
+            </div>
           </div>
         </div>
 
-        <div className="logo-final">
-          <video autoPlay loop muted playsInline>
-            <source src="/images/logo.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        </div>
-
-        <div className="nav-right-final desktop-tab-only-final">
-          <div className="nav-links-final">
+        <div className="desktop-bottom-row-final">
+          <div className="nav-links-final nav-links-desktop-final">
             {navLinks.map(({ name, path }) => (
               <Link
                 key={name}
@@ -341,25 +395,32 @@ const NavbarFinal = () => {
               </Link>
             ))}
           </div>
+        </div>
+      </div>
 
-          <SearchBar
-            inputRef={desktopInputRef}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            suggestions={suggestions}
-            showSuggestions={showSuggestions}
-            setShowSuggestions={setShowSuggestions}
-            onSearch={handleSearch}
-            onPickSuggestion={handleSuggestionClick}
-          />
+      <div className="mobile-only-final">
+        <div className="top-row-final">
+          <div className="nav-toggle-final" onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}>
+            <div className={`dot-grid-final ${isMobileNavOpen ? 'dots-open' : ''}`}>
+              {[...Array(9)].map((_, i) => (
+                <span key={i} />
+              ))}
+            </div>
+          </div>
 
-          <div className="icon-buttons-final">
+          <div className="logo-final">
+            <video autoPlay loop muted playsInline>
+              <source src="/images/logo.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+
+          <div className="mobile-top-icons">
             <Link to="/profile" className={`icon-btn ${isActive('/profile') ? 'icon-active-btn' : ''}`}>
               <div className="icon-circle">
                 {isActive('/profile') ? <FaUser className="icon icon-filled" /> : <FaRegUser className="icon icon-outline" />}
                 <span className="inner-ring" />
               </div>
-              <span className={`icon-label ${isActive('/profile') ? 'label-active' : ''}`}>Profile</span>
             </Link>
 
             <Link to="/wishlist" className={`icon-btn ${isActive('/wishlist') ? 'icon-active-btn' : ''}`}>
@@ -368,7 +429,6 @@ const NavbarFinal = () => {
                 {wishlistItems.length > 0 && <span className="red-dot1" />}
                 <span className="inner-ring" />
               </div>
-              <span className={`icon-label ${isActive('/wishlist') ? 'label-active' : ''}`}>Wishlist</span>
             </Link>
 
             <Link to="/cart" className={`icon-btn ${isActive('/cart') ? 'icon-active-btn' : ''}`}>
@@ -377,69 +437,52 @@ const NavbarFinal = () => {
                 {cartItems.length > 0 && <span className="red-dot1" />}
                 <span className="inner-ring" />
               </div>
-              <span className={`icon-label ${isActive('/cart') ? 'label-active' : ''}`}>Kart</span>
             </Link>
           </div>
         </div>
 
-        <div className="mobile-top-icons">
-          <Link to="/profile" className={`icon-btn ${isActive('/profile') ? 'icon-active-btn' : ''}`}>
-            <div className="icon-circle">
-              {isActive('/profile') ? <FaUser className="icon icon-filled" /> : <FaRegUser className="icon icon-outline" />}
-              <span className="inner-ring" />
-            </div>
-          </Link>
-
-          <Link to="/wishlist" className={`icon-btn ${isActive('/wishlist') ? 'icon-active-btn' : ''}`}>
-            <div className="icon-circle">
-              {isActive('/wishlist') ? <FaHeart className="icon icon-filled" /> : <FaRegHeart className="icon icon-outline" />}
-              {wishlistItems.length > 0 && <span className="red-dot1" />}
-              <span className="inner-ring" />
-            </div>
-          </Link>
-
-          <Link to="/cart" className={`icon-btn ${isActive('/cart') ? 'icon-active-btn' : ''}`}>
-            <div className="icon-circle">
-              {isActive('/cart') ? <FaShoppingBag className="icon icon-filled" /> : <FiShoppingBag className="icon icon-outline-stroke" />}
-              {cartItems.length > 0 && <span className="red-dot1" />}
-              <span className="inner-ring" />
-            </div>
-          </Link>
+        <div className="bottom-row-final">
+          <SearchBar
+            inputRef={mobileInputRef}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            suggestions={suggestions}
+            showSuggestions={showSuggestions}
+            setShowSuggestions={setShowSuggestions}
+            onSearch={handleSearch}
+            onPickSuggestion={handleSuggestionClick}
+          />
         </div>
-      </div>
 
-      <div className="bottom-row-final mobile-only-final">
-        <SearchBar
-          inputRef={mobileInputRef}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          suggestions={suggestions}
-          showSuggestions={showSuggestions}
-          setShowSuggestions={setShowSuggestions}
-          onSearch={handleSearch}
-          onPickSuggestion={handleSuggestionClick}
-        />
-      </div>
-
-      {isMobileNavOpen && (
-        <div className="mobile-drawer-final slide-in" ref={mobileNavRef}>
-          <div className="close-btn-final" onClick={() => setIsMobileNavOpen(false)}>
-            <FaTimes />
-          </div>
-          <div className="nav-links-final">
-            {navLinks.map(({ name, path }) => (
+        {isMobileNavOpen && (
+          <div className="mobile-drawer-final slide-in" ref={mobileNavRef}>
+            <div className="close-btn-final" onClick={() => setIsMobileNavOpen(false)}>
+              <FaTimes />
+            </div>
+            <div className="nav-links-final">
+              {navLinks
+                .filter((l) => l.name !== 'Contact Us')
+                .map(({ name, path }) => (
+                  <Link
+                    key={name}
+                    to={path}
+                    onClick={handleNavClick}
+                    className={`nav-link-final Btn ${isActive(path) ? 'active-final' : ''}`}
+                  >
+                    <span>{name}</span>
+                  </Link>
+                ))}
               <Link
-                key={name}
-                to={path}
+                to="/customer-care"
                 onClick={handleNavClick}
-                className={`nav-link-final Btn ${isActive(path) ? 'active-final' : ''}`}
+                className={`nav-link-final Btn ${isActive('/customer-care') ? 'active-final' : ''}`}
               >
-                <span>{name}</span>
+                <span>Contact Us</span>
               </Link>
-            ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </nav>
   )
 }
