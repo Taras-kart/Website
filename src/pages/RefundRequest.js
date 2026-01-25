@@ -67,13 +67,13 @@ function getItemPrice(item) {
   return null
 }
 
-{/*function getItemColor(item) {
-  return item.color || item.colour || item.variant_color || item.color_name || item.colour_name || ''
-}
+//function getItemColor(item) {
+//  return item.color || item.colour || item.variant_color || item.color_name || item.colour_name || ''
+//}
 
-function getItemSize(item) {
-  return item.size || item.size_label || item.variant_size || item.size_name || ''
-} */}
+//function getItemSize(item) {
+//  return item.size || item.size_label || item.variant_size || item.size_name || ''
+//} 
 
 function getItemQty(item) {
   if (item.qty != null) return Number(item.qty)

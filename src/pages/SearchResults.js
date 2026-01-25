@@ -1,5 +1,5 @@
 // D:\shopping\src\pages\SearchResults.js
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { FaHeart, FaRegHeart } from 'react-icons/fa'
 import Navbar from './Navbar'
@@ -256,6 +256,7 @@ const SearchResults = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const { wishlistItems, addToWishlist } = useWishlist()
+
   const [baseResults, setBaseResults] = useState([])
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(true)
@@ -263,7 +264,7 @@ const SearchResults = () => {
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [suggestions, setSuggestions] = useState([])
 
-  const query = new URLSearchParams(location.search).get('q') || ''
+  const query = useMemo(() => new URLSearchParams(location.search).get('q') || '', [location.search])
   const parsed = useMemo(() => parseSearchQuery(query), [query])
   const { gender, queryText, priceMin, priceMax } = parsed
   const filterSummary = useMemo(() => buildFilterSummary(parsed), [parsed])
@@ -272,54 +273,63 @@ const SearchResults = () => {
   const userId =
     (typeof window !== 'undefined' && (sessionStorage.getItem('userId') || localStorage.getItem('userId'))) || null
 
-  const getPriceFields = (item) => {
-    const p = item.price_fields || item || {}
-    const num = (v) => {
-      const n = Number(v)
-      return Number.isFinite(n) && n > 0 ? n : 0
-    }
-    if (userType === 'B2B') {
-      const offerCandidates = [p.final_price_b2b, p.sale_price, p.mrp, p.original_price_b2b, p.original_price_b2c]
-      const mrpCandidates = [p.mrp, p.original_price_b2b, p.original_price_b2c, p.final_price_b2b, p.sale_price]
+  const getPriceFields = useCallback(
+    (item) => {
+      const p = item.price_fields || item || {}
+      const num = (v) => {
+        const n = Number(v)
+        return Number.isFinite(n) && n > 0 ? n : 0
+      }
+      if (userType === 'B2B') {
+        const offerCandidates = [p.final_price_b2b, p.sale_price, p.mrp, p.original_price_b2b, p.original_price_b2c]
+        const mrpCandidates = [p.mrp, p.original_price_b2b, p.original_price_b2c, p.final_price_b2b, p.sale_price]
+        const offer = offerCandidates.map(num).find((v) => v > 0) || 0
+        const mrp = mrpCandidates.map(num).find((v) => v > 0) || offer
+        return { offer, mrp }
+      }
+      const offerCandidates = [p.final_price_b2c, p.sale_price, p.mrp, p.original_price_b2c]
+      const mrpCandidates = [p.mrp, p.original_price_b2c, p.final_price_b2c, p.sale_price]
       const offer = offerCandidates.map(num).find((v) => v > 0) || 0
       const mrp = mrpCandidates.map(num).find((v) => v > 0) || offer
       return { offer, mrp }
-    }
-    const offerCandidates = [p.final_price_b2c, p.sale_price, p.mrp, p.original_price_b2c]
-    const mrpCandidates = [p.mrp, p.original_price_b2c, p.final_price_b2c, p.sale_price]
-    const offer = offerCandidates.map(num).find((v) => v > 0) || 0
-    const mrp = mrpCandidates.map(num).find((v) => v > 0) || offer
-    return { offer, mrp }
-  }
+    },
+    [userType]
+  )
 
-  const offerPrice = (item) => getPriceFields(item).offer
-  const originalPrice = (item) => getPriceFields(item).mrp
+  const offerPrice = useCallback((item) => getPriceFields(item).offer, [getPriceFields])
+  const originalPrice = useCallback((item) => getPriceFields(item).mrp, [getPriceFields])
 
-  const discountPctValue = (item) => {
-    const { offer, mrp } = getPriceFields(item)
-    if (!mrp || mrp <= 0) return 0
-    if (!offer || offer <= 0 || offer >= mrp) return 0
-    const pct = ((mrp - offer) / mrp) * 100
-    return Math.max(0, Math.round(pct))
-  }
+  const discountPctValue = useCallback(
+    (item) => {
+      const { offer, mrp } = getPriceFields(item)
+      if (!mrp || mrp <= 0) return 0
+      if (!offer || offer <= 0 || offer >= mrp) return 0
+      const pct = ((mrp - offer) / mrp) * 100
+      return Math.max(0, Math.round(pct))
+    },
+    [getPriceFields]
+  )
 
-  const getImg = (group) => {
+  const getImg = useCallback((group) => {
     const img = group.images?.[0]
     if (img) return img
     const g = group.gender || group.rep?.gender
     return DEFAULT_IMG_BY_GENDER[g] || DEFAULT_IMG_BY_GENDER._
-  }
+  }, [])
 
-  const applyQueryFilters = (products, currentQueryText, min, max) => {
-    const tokens = buildTokens(currentQueryText)
-    return products.filter((p) => {
-      const price = offerPrice(p)
-      if (min != null && price < min) return false
-      if (max != null && price > max) return false
-      if (!textMatchesProduct(tokens, p)) return false
-      return true
-    })
-  }
+  const applyQueryFilters = useCallback(
+    (products, currentQueryText, min, max) => {
+      const tokens = buildTokens(currentQueryText)
+      return (products || []).filter((p) => {
+        const price = offerPrice(p)
+        if (min != null && price < min) return false
+        if (max != null && price > max) return false
+        if (!textMatchesProduct(tokens, p)) return false
+        return true
+      })
+    },
+    [offerPrice]
+  )
 
   useEffect(() => {
     setSearchInput(query)
@@ -327,6 +337,7 @@ const SearchResults = () => {
 
   useEffect(() => {
     let cancelled = false
+
     const run = async () => {
       setLoading(true)
       try {
@@ -335,10 +346,12 @@ const SearchResults = () => {
         params.set('q', baseSearchTerm || '')
         if (gender) params.set('gender', gender)
         if (BRANCH_ID) params.set('branch_id', BRANCH_ID)
+
         const url = `${API_BASE}/api/products/search?${params.toString()}`
         const res = await fetch(url)
         const data = await res.json()
         const arr = Array.isArray(data) ? data : []
+
         if (!cancelled) {
           const refinedRows = applyQueryFilters(arr, queryText, priceMin, priceMax)
           const grouped = groupProductsByProductId(refinedRows)
@@ -354,11 +367,13 @@ const SearchResults = () => {
         if (!cancelled) setLoading(false)
       }
     }
+
     run()
+
     return () => {
       cancelled = true
     }
-  }, [gender, query, queryText, priceMin, priceMax])
+  }, [applyQueryFilters, gender, priceMax, priceMin, query, queryText])
 
   const suggestAbortRef = useRef(null)
   const suggestTimerRef = useRef(null)
@@ -395,61 +410,76 @@ const SearchResults = () => {
     }
   }, [searchInput, gender])
 
-  const productIdForGroup = (group) => toInt(group?.product_id_locked) || toInt(group?.product_id) || null
+  const productIdForGroup = useCallback((group) => toInt(group?.product_id_locked) || toInt(group?.product_id) || null, [])
 
-  const handleProductClick = (group) => {
-    const product = group.rep || group
-    if (product) {
-      sessionStorage.setItem('selectedProduct', JSON.stringify(product))
-      navigate('/checkout')
-    }
-  }
-
-  const handleWishlist = async (e, group) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    const pid = productIdForGroup(group)
-    if (!userId || !pid) return
-
-    try {
-      const payload = { user_id: userId, product_id: pid }
-      if (BRANCH_ID) payload.branch_id = BRANCH_ID
-      const resp = await fetch(`${API_BASE}/api/wishlist`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-      if (resp.ok) {
-        const product = group.rep || group
-        addToWishlist({ ...product, product_id: pid, id: pid })
+  const handleProductClick = useCallback(
+    (group) => {
+      const product = group.rep || group
+      if (product) {
+        sessionStorage.setItem('selectedProduct', JSON.stringify(product))
+        navigate('/checkout')
       }
-    } catch {}
-  }
+    },
+    [navigate]
+  )
 
-  const isInWishlist = (group) => {
-    const pid = productIdForGroup(group)
-    if (!pid) return false
-    return wishlistItems.some((w) => String(w.product_id ?? w.id) === String(pid))
-  }
+  const handleWishlist = useCallback(
+    async (e, group) => {
+      e.preventDefault()
+      e.stopPropagation()
 
-  const handleSearchSubmit = (e) => {
-    e.preventDefault()
-    const value = searchInput.trim()
-    const params = new URLSearchParams(location.search)
-    if (value) params.set('q', value)
-    else params.delete('q')
-    navigate(`${location.pathname}?${params.toString()}`)
-    setShowSuggestions(false)
-  }
+      const pid = productIdForGroup(group)
+      if (!userId || !pid) return
 
-  const handleSuggestionClick = (value) => {
-    setSearchInput(value)
-    const params = new URLSearchParams(location.search)
-    params.set('q', value)
-    navigate(`${location.pathname}?${params.toString()}`)
-    setShowSuggestions(false)
-  }
+      try {
+        const payload = { user_id: userId, product_id: pid }
+        if (BRANCH_ID) payload.branch_id = BRANCH_ID
+        const resp = await fetch(`${API_BASE}/api/wishlist`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        if (resp.ok) {
+          const product = group.rep || group
+          addToWishlist({ ...product, product_id: pid, id: pid })
+        }
+      } catch {}
+    },
+    [addToWishlist, productIdForGroup, userId]
+  )
+
+  const isInWishlist = useCallback(
+    (group) => {
+      const pid = productIdForGroup(group)
+      if (!pid) return false
+      return wishlistItems.some((w) => String(w.product_id ?? w.id) === String(pid))
+    },
+    [productIdForGroup, wishlistItems]
+  )
+
+  const handleSearchSubmit = useCallback(
+    (e) => {
+      e.preventDefault()
+      const value = searchInput.trim()
+      const params = new URLSearchParams(location.search)
+      if (value) params.set('q', value)
+      else params.delete('q')
+      navigate(`${location.pathname}?${params.toString()}`)
+      setShowSuggestions(false)
+    },
+    [location.pathname, location.search, navigate, searchInput]
+  )
+
+  const handleSuggestionClick = useCallback(
+    (value) => {
+      setSearchInput(value)
+      const params = new URLSearchParams(location.search)
+      params.set('q', value)
+      navigate(`${location.pathname}?${params.toString()}`)
+      setShowSuggestions(false)
+    },
+    [location.pathname, location.search, navigate]
+  )
 
   return (
     <div className="sr-page">
