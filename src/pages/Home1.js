@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom'
 const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://taras-kart-backend.vercel.app'
 
 export default function Home1() {
-  const railRef = useRef(null)
+  //const railRef = useRef(null)
   const [imageMap, setImageMap] = useState({})
 
   useEffect(() => {
@@ -36,17 +36,17 @@ export default function Home1() {
     return imageMap[path] || path
   }
 
-  {/*const scrollLeft = () => {
-    if (railRef.current) {
-      railRef.current.scrollBy({ left: -300, behavior: 'smooth' })
-    }
-  }
+  //const scrollLeft = () => {
+  //  if (railRef.current) {
+  //    railRef.current.scrollBy({ left: -300, behavior: 'smooth' })
+  //  }
+  //}
 
-  const scrollRight = () => {
-    if (railRef.current) {
-      railRef.current.scrollBy({ left: 300, behavior: 'smooth' })
-    }
-  } */}
+  //const scrollRight = () => {
+  //  if (railRef.current) {
+   //   railRef.current.scrollBy({ left: 300, behavior: 'smooth' })
+   // }
+ // } 
 
   return (
     <div className="home1-page-new-home">
@@ -58,7 +58,7 @@ export default function Home1() {
               className="home1-hero-swiper-new-home"
               modules={[Autoplay]}
               loop
-              slidesPerView={1}Tara Anarkali
+              slidesPerView={1}
               autoplay={{ delay: 3500, disableOnInteraction: false }}
               speed={900}
             >

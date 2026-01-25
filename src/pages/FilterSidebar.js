@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FaFilter, FaChevronDown, FaChevronUp } from 'react-icons/fa'
 import './FilterSidebar.css'
 
@@ -41,17 +41,20 @@ export default function FilterSidebar({ source = [], onFilterChange }) {
     return out
   }, [selectedBrands, selectedColors, selectedSizes, onlyInStock])
 
-  const applyFilter = (brandsSet, colorsSet, sizesSet, stockFlag) => {
-    const list = Array.isArray(source) ? source : []
-    const res = list.filter((p) => {
-      const bOk = brandsSet.size === 0 || brandsSet.has(norm(p?.brand))
-      const cOk = colorsSet.size === 0 || colorsSet.has(norm(p?.color))
-      const sOk = sizesSet.size === 0 || sizesSet.has(norm(p?.size))
-      const stockOk = !stockFlag || !p?.is_out_of_stock
-      return bOk && cOk && sOk && stockOk
-    })
-    if (typeof onFilterChange === 'function') onFilterChange(res)
-  }
+  const applyFilter = useCallback(
+    (brandsSet, colorsSet, sizesSet, stockFlag) => {
+      const list = Array.isArray(source) ? source : []
+      const res = list.filter((p) => {
+        const bOk = brandsSet.size === 0 || brandsSet.has(norm(p?.brand))
+        const cOk = colorsSet.size === 0 || colorsSet.has(norm(p?.color))
+        const sOk = sizesSet.size === 0 || sizesSet.has(norm(p?.size))
+        const stockOk = !stockFlag || !p?.is_out_of_stock
+        return bOk && cOk && sOk && stockOk
+      })
+      if (typeof onFilterChange === 'function') onFilterChange(res)
+    },
+    [source, onFilterChange]
+  )
 
   useEffect(() => {
     pendingRef.current = {
@@ -61,7 +64,7 @@ export default function FilterSidebar({ source = [], onFilterChange }) {
       stock: onlyInStock
     }
     applyFilter(selectedBrands, selectedColors, selectedSizes, onlyInStock)
-  }, [selectedBrands, selectedColors, selectedSizes, onlyInStock])
+  }, [selectedBrands, selectedColors, selectedSizes, onlyInStock, applyFilter])
 
   const toggleChip = (key) => {
     if (activeChip === key) {

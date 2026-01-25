@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import Navbar from './Navbar'
 import Footer from './Footer'
 import { useCart } from '../CartContext'
@@ -82,7 +82,9 @@ const Cart = () => {
     return { mrp, offer }
   }
 
-  const fetchCartItems = async () => {
+  // ESLint error was here: fetchCartItems used in useEffect but not listed as dependency.
+  // Fix: wrap fetchCartItems with useCallback and include it in useEffect deps.
+  const fetchCartItems = useCallback(async () => {
     if (!userId) {
       setCartItems([])
       setQuantities({})
@@ -108,12 +110,12 @@ const Cart = () => {
       setCartItems([])
       setQuantities({})
     }
-  }
+  }, [userId])
 
   useEffect(() => {
     if (typeof window !== 'undefined') window.scrollTo(0, 0)
     fetchCartItems()
-  }, [userId])
+  }, [fetchCartItems])
 
   const handleRemoveClick = (item) => {
     setSelectedItem(item)
@@ -274,7 +276,10 @@ const Cart = () => {
                         <div className="card-opts">
                           <div className="opt">
                             <span className="opt-label">Color</span>
-                            <span className="color-dot" style={{ backgroundColor: (item.selected_color || item.color || '').toLowerCase() }} />
+                            <span
+                              className="color-dot"
+                              style={{ backgroundColor: (item.selected_color || item.color || '').toLowerCase() }}
+                            />
                           </div>
                           <div className="opt">
                             <span className="opt-label">Size</span>
