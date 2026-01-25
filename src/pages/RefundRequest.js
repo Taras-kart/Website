@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import './RefundRequest.css'
 import Navbar from './Navbar'
 import Footer from './Footer'
@@ -67,14 +67,6 @@ function getItemPrice(item) {
   return null
 }
 
-//function getItemColor(item) {
-//  return item.color || item.colour || item.variant_color || item.color_name || item.colour_name || ''
-//}
-
-//function getItemSize(item) {
-//  return item.size || item.size_label || item.variant_size || item.size_name || ''
-//} 
-
 function getItemQty(item) {
   if (item.qty != null) return Number(item.qty)
   if (item.quantity != null) return Number(item.quantity)
@@ -89,7 +81,7 @@ export default function RefundRequest() {
   const { id: saleIdParam } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
-  const params = new URLSearchParams(location.search)
+  const params = useMemo(() => new URLSearchParams(location.search), [location.search])
   const kind = params.get('kind') || 'refund'
 
   const isReturnFlow = kind === 'return'
@@ -117,6 +109,54 @@ export default function RefundRequest() {
   const [refreshing, setRefreshing] = useState(false)
   const [loadingRequest, setLoadingRequest] = useState(false)
 
+  const items = useMemo(() => (Array.isArray(sale?.items) ? sale.items : []), [sale?.items])
+  const primaryItem = items[0] || null
+  const displayOrderId = (sale && sale.id) || saleIdParam
+
+  const totalsComputed = useMemo(() => {
+    let totalMrp = 0
+    let totalPrice = 0
+    let totalQty = 0
+
+    for (const it of items) {
+      const mrp = getItemMrp(it)
+      const price = getItemPrice(it)
+      const qty = getItemQty(it)
+      if (mrp != null) totalMrp += mrp * qty
+      if (price != null) totalPrice += price * qty
+      totalQty += qty
+    }
+
+    const totalsObj = parseTotals(sale?.totals)
+    const payableFromTotals = totalsObj && totalsObj.payable ? Number(totalsObj.payable) : null
+    const finalPayable = payableFromTotals != null ? payableFromTotals : totalPrice
+    const totalDiscount = totalMrp > 0 && totalPrice > 0 ? totalMrp - totalPrice : 0
+
+    return { totalMrp, totalPrice, totalQty, finalPayable, totalDiscount }
+  }, [items, sale?.totals])
+
+  const fetchRequestById = useCallback(
+    async (requestId) => {
+      try {
+        setRefreshing(true)
+        const res = await fetch(`${API_BASE}/api/returns/${requestId}`, { cache: 'no-store' })
+        if (!res.ok) return
+        const data = await res.json().catch(() => ({}))
+        if (data && data.ok && data.request) {
+          setCreatedRequest(data.request)
+          const s = String(data.request.status || '').toUpperCase()
+          const r = String(data.request.refund_status || '').toUpperCase()
+          if (s === 'APPROVED' || s === 'REJECTED' || r === 'PENDING_REFUND' || r === 'REFUNDED') {
+            setFormCompleted(true)
+          }
+        }
+      } finally {
+        setRefreshing(false)
+      }
+    },
+    [setCreatedRequest, setFormCompleted]
+  )
+
   useEffect(() => {
     const fetchSale = async () => {
       setLoading(true)
@@ -143,10 +183,10 @@ export default function RefundRequest() {
   }, [saleIdParam])
 
   useEffect(() => {
-    const urls = files.map(f => URL.createObjectURL(f))
+    const urls = files.map((f) => URL.createObjectURL(f))
     setPreviews(urls)
     return () => {
-      urls.forEach(u => URL.revokeObjectURL(u))
+      urls.forEach((u) => URL.revokeObjectURL(u))
     }
   }, [files])
 
@@ -167,13 +207,13 @@ export default function RefundRequest() {
       }
     }
     fetchLatestRequestBySale()
-  }, [saleIdParam])
+  }, [saleIdParam, fetchRequestById])
 
   useEffect(() => {
     if (!createdRequest) return
     const bd = createdRequest.bank_details || createdRequest.bankDetails || null
     if (!bd) return
-    setBankForm(prev => ({
+    setBankForm((prev) => ({
       ...prev,
       accountName: bd.accountName || prev.accountName,
       bankName: bd.bankName || prev.bankName,
@@ -183,12 +223,16 @@ export default function RefundRequest() {
     }))
   }, [createdRequest])
 
-  function handleFileChange(e) {
+  useEffect(() => {
+    setActiveStep(isReturnFlow ? 1 : 2)
+  }, [isReturnFlow])
+
+  const handleFileChange = (e) => {
     const incoming = Array.from(e.target.files || [])
     setFiles(incoming)
   }
 
-  function handleStep1Continue() {
+  const handleStep1Continue = () => {
     if (!files.length) {
       setMessage('Please upload at least one product image before continuing.')
       return
@@ -197,24 +241,7 @@ export default function RefundRequest() {
     setActiveStep(2)
   }
 
-  async function fetchRequestById(requestId) {
-    try {
-      setRefreshing(true)
-      const res = await fetch(`${API_BASE}/api/returns/${requestId}`, { cache: 'no-store' })
-      if (!res.ok) return
-      const data = await res.json().catch(() => ({}))
-      if (data && data.ok && data.request) {
-        setCreatedRequest(data.request)
-        const s = String(data.request.status || '').toUpperCase()
-        const r = String(data.request.refund_status || '').toUpperCase()
-        if (s === 'APPROVED' || s === 'REJECTED' || r === 'PENDING_REFUND' || r === 'REFUNDED') setFormCompleted(true)
-      }
-    } finally {
-      setRefreshing(false)
-    }
-  }
-
-  async function handleSubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!sale || !saleIdParam) {
       setMessage('Unable to submit, missing order information.')
@@ -251,7 +278,7 @@ export default function RefundRequest() {
       if (files.length) {
         const formData = new FormData()
         formData.append('sale_id', sale.id || saleIdParam)
-        files.forEach(f => formData.append('images', f))
+        files.forEach((f) => formData.append('images', f))
 
         const uploadRes = await fetch(`${API_BASE}/api/returns/upload-images`, {
           method: 'POST',
@@ -263,8 +290,7 @@ export default function RefundRequest() {
           if (Array.isArray(uploadData.urls)) imageUrls = uploadData.urls
         }
       }
-    } catch {
-    }
+    } catch {}
 
     const bankNote = `Bank / UPI details:
 Account name: ${bankForm.accountName || 'not provided'}
@@ -273,7 +299,7 @@ Account number: ${bankForm.accountNumber || 'not provided'}
 IFSC: ${bankForm.ifsc || 'not provided'}
 UPI: ${bankForm.upiId || 'not provided'}`
 
-    const imagesNote = imageUrls.length ? `\nImage proofs:\n${imageUrls.map(u => `- ${u}`).join('\n')}` : ''
+    const imagesNote = imageUrls.length ? `\nImage proofs:\n${imageUrls.map((u) => `- ${u}`).join('\n')}` : ''
 
     const contextNote =
       kind === 'return'
@@ -327,32 +353,6 @@ UPI: ${bankForm.upiId || 'not provided'}`
       ? 'Upload clear product images and share your bank or UPI details so we can process your return or replacement.'
       : 'Share your bank or UPI details so we can process your refund for the cancelled order.'
 
-  const items = Array.isArray(sale?.items) ? sale.items : []
-  const primaryItem = items[0] || null
-  const displayOrderId = (sale && sale.id) || saleIdParam
-
-  const totalsComputed = useMemo(() => {
-    let totalMrp = 0
-    let totalPrice = 0
-    let totalQty = 0
-
-    items.forEach(it => {
-      const mrp = getItemMrp(it)
-      const price = getItemPrice(it)
-      const qty = getItemQty(it)
-      if (mrp != null) totalMrp += mrp * qty
-      if (price != null) totalPrice += price * qty
-      totalQty += qty
-    })
-
-    const totalsObj = parseTotals(sale?.totals)
-    const payableFromTotals = totalsObj && totalsObj.payable ? Number(totalsObj.payable) : null
-    const finalPayable = payableFromTotals != null ? payableFromTotals : totalPrice
-    const totalDiscount = totalMrp > 0 && totalPrice > 0 ? totalMrp - totalPrice : 0
-
-    return { totalMrp, totalPrice, totalQty, finalPayable, totalDiscount }
-  }, [items, sale?.totals])
-
   const progressIndex = getProgressIndex(createdRequest && createdRequest.status, createdRequest && createdRequest.refund_status)
   const progressPercent = (progressIndex / 3) * 100
 
@@ -364,10 +364,7 @@ UPI: ${bankForm.upiId || 'not provided'}`
   const statusUpper = String(createdRequest?.status || '').toUpperCase()
   const refundUpper = String(createdRequest?.refund_status || '').toUpperCase()
 
-  const shouldHideBankForever =
-    statusUpper === 'APPROVED' ||
-    refundUpper === 'PENDING_REFUND' ||
-    refundUpper === 'REFUNDED'
+  const shouldHideBankForever = statusUpper === 'APPROVED' || refundUpper === 'PENDING_REFUND' || refundUpper === 'REFUNDED'
 
   const primaryBrand = primaryItem ? getItemBrand(primaryItem) : ''
   const primaryName = primaryItem?.product_name || primaryItem?.name || `Order #${displayOrderId}`
@@ -480,7 +477,12 @@ UPI: ${bankForm.upiId || 'not provided'}`
 
                     <div className="refund-button-row">
                       {createdRequest && (
-                        <button type="button" className="refund-btn-secondary" onClick={() => fetchRequestById(createdRequest.id)} disabled={refreshing}>
+                        <button
+                          type="button"
+                          className="refund-btn-secondary"
+                          onClick={() => fetchRequestById(createdRequest.id)}
+                          disabled={refreshing}
+                        >
                           {refreshing ? 'Refreshing…' : 'Refresh status'}
                         </button>
                       )}
@@ -502,7 +504,11 @@ UPI: ${bankForm.upiId || 'not provided'}`
 
                           <div className="refund-order-meta">
                             {sale.created_at && <span>Placed on {formatDate(sale.created_at)}</span>}
-                            {totalsComputed.finalPayable ? <span>Paid {formatCurrency(totalsComputed.finalPayable)}</span> : sale.totals ? <span>Paid {formatPriceFromTotals(sale.totals)}</span> : null}
+                            {totalsComputed.finalPayable ? (
+                              <span>Paid {formatCurrency(totalsComputed.finalPayable)}</span>
+                            ) : sale.totals ? (
+                              <span>Paid {formatPriceFromTotals(sale.totals)}</span>
+                            ) : null}
                           </div>
 
                           <div className="refund-order-id-row">
@@ -581,27 +587,53 @@ UPI: ${bankForm.upiId || 'not provided'}`
                               <div className="refund-grid">
                                 <div className="refund-field">
                                   <label className="refund-label">Account holder name</label>
-                                  <input type="text" className="refund-input" value={bankForm.accountName} onChange={e => setBankForm({ ...bankForm, accountName: e.target.value })} />
+                                  <input
+                                    type="text"
+                                    className="refund-input"
+                                    value={bankForm.accountName}
+                                    onChange={(e) => setBankForm({ ...bankForm, accountName: e.target.value })}
+                                  />
                                 </div>
 
                                 <div className="refund-field">
                                   <label className="refund-label">Bank name</label>
-                                  <input type="text" className="refund-input" value={bankForm.bankName} onChange={e => setBankForm({ ...bankForm, bankName: e.target.value })} />
+                                  <input
+                                    type="text"
+                                    className="refund-input"
+                                    value={bankForm.bankName}
+                                    onChange={(e) => setBankForm({ ...bankForm, bankName: e.target.value })}
+                                  />
                                 </div>
 
                                 <div className="refund-field">
                                   <label className="refund-label">Account number</label>
-                                  <input type="text" className="refund-input" value={bankForm.accountNumber} onChange={e => setBankForm({ ...bankForm, accountNumber: e.target.value })} />
+                                  <input
+                                    type="text"
+                                    className="refund-input"
+                                    value={bankForm.accountNumber}
+                                    onChange={(e) => setBankForm({ ...bankForm, accountNumber: e.target.value })}
+                                  />
                                 </div>
 
                                 <div className="refund-field">
                                   <label className="refund-label">IFSC code</label>
-                                  <input type="text" className="refund-input" value={bankForm.ifsc} onChange={e => setBankForm({ ...bankForm, ifsc: e.target.value.toUpperCase() })} />
+                                  <input
+                                    type="text"
+                                    className="refund-input"
+                                    value={bankForm.ifsc}
+                                    onChange={(e) => setBankForm({ ...bankForm, ifsc: e.target.value.toUpperCase() })}
+                                  />
                                 </div>
 
                                 <div className="refund-field refund-field-full">
                                   <label className="refund-label">UPI ID (optional)</label>
-                                  <input type="text" className="refund-input" value={bankForm.upiId} onChange={e => setBankForm({ ...bankForm, upiId: e.target.value })} placeholder="example@upi" />
+                                  <input
+                                    type="text"
+                                    className="refund-input"
+                                    value={bankForm.upiId}
+                                    onChange={(e) => setBankForm({ ...bankForm, upiId: e.target.value })}
+                                    placeholder="example@upi"
+                                  />
                                 </div>
                               </div>
                             </div>
@@ -656,7 +688,12 @@ UPI: ${bankForm.upiId || 'not provided'}`
 
                         <div className="refund-button-row">
                           {createdRequest && (
-                            <button type="button" className="refund-btn-secondary" onClick={() => fetchRequestById(createdRequest.id)} disabled={refreshing}>
+                            <button
+                              type="button"
+                              className="refund-btn-secondary"
+                              onClick={() => fetchRequestById(createdRequest.id)}
+                              disabled={refreshing}
+                            >
                               {refreshing ? 'Refreshing…' : 'Refresh status'}
                             </button>
                           )}

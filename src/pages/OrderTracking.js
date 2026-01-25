@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import Navbar from './Navbar'
 import Footer from './Footer'
@@ -113,7 +113,7 @@ export default function OrderTracking() {
   const [trackingRaw, setTrackingRaw] = useState(null)
   const [refreshedAt, setRefreshedAt] = useState('')
 
-  const fetchShiprocketTracking = async (shArray) => {
+  const fetchShiprocketTracking = useCallback(async (shArray) => {
     const arr = Array.isArray(shArray) ? shArray : []
     const latest = arr.length ? arr[arr.length - 1] : null
     const trackOrderId = latest?.shiprocket_order_id || latest?.awb || ''
@@ -129,9 +129,9 @@ export default function OrderTracking() {
     } catch {
       setTrackingRaw(null)
     }
-  }
+  }, [])
 
-  const fetchAll = async () => {
+  const fetchAll = useCallback(async () => {
     if (!orderId) return
     setLoading(true)
     try {
@@ -141,6 +141,7 @@ export default function OrderTracking() {
         fetch(`${API_BASE}/api/returns/eligibility/${encodeURIComponent(orderId)}`),
         fetch(`${API_BASE}/api/returns/by-sale/${encodeURIComponent(orderId)}`)
       ])
+
       const sJson = await sRes.json().catch(() => null)
       const shJson = await shRes.json().catch(() => [])
       const elJson = await elRes.json().catch(() => null)
@@ -153,26 +154,29 @@ export default function OrderTracking() {
       setShipments(nextShipments)
       setEligibility(elJson)
       setRequests(Array.isArray(rrJson?.rows) ? rrJson.rows : [])
-      fetchShiprocketTracking(nextShipments)
+      await fetchShiprocketTracking(nextShipments)
       setRefreshedAt(new Date().toLocaleString('en-IN'))
     } finally {
       setLoading(false)
     }
-  }
+  }, [orderId, fetchShiprocketTracking])
 
   useEffect(() => {
     fetchAll()
     const t = setInterval(fetchAll, 25000)
     return () => clearInterval(t)
-  }, [orderId])
+  }, [fetchAll])
 
-  const money = (n) =>
-    new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(Number(n || 0))
+  const money = useCallback(
+    (n) =>
+      new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(Number(n || 0)),
+    []
+  )
 
   const localStatus = up(sale?.status || 'PLACED')
   const isCancelled = isCancelledStatus(localStatus)
@@ -207,7 +211,7 @@ export default function OrderTracking() {
     if (Number.isNaN(d.getTime())) return null
     d.setDate(d.getDate() + 5)
     return d
-  }, [trackingSnapshot.eddText, latestShipment, sale])
+  }, [trackingSnapshot.eddText, latestShipment?.created_at, sale?.created_at])
 
   const expectedDeliveryText = useMemo(() => {
     if (isCancelled) return '-'
@@ -228,7 +232,7 @@ export default function OrderTracking() {
     const t = new Date(fallbackTime)
     if (Number.isNaN(t.getTime())) return '-'
     return t.toLocaleString('en-IN')
-  }, [trackingSnapshot, latestShipment, sale])
+  }, [trackingSnapshot.lastEventText, latestShipment?.updated_at, latestShipment?.created_at, sale?.updated_at, sale?.created_at])
 
   const statusDisplay = useMemo(() => {
     if (isCancelled) return 'CANCELLED'
