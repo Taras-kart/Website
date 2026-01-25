@@ -285,7 +285,7 @@ export default function WomenPage() {
         <FilterSidebar source={allProducts} onFilterChange={(list) => setProducts(Array.isArray(list) ? list : allProducts)} />
         <div className="women-page-main">
           <div className="women-page-content">
-            <section className="home1-hero-new-home-2">
+            {/*<section className="home1-hero-new-home-2">
               <div className="home1-hero-frame-new-home-2">
                 <Swiper className="home1-hero-swiper-new-home-2" modules={[Autoplay]} loop slidesPerView={1} autoplay={{ delay: 3500, disableOnInteraction: false }} speed={900}>
                   <SwiperSlide>
@@ -305,7 +305,7 @@ export default function WomenPage() {
                   </SwiperSlide>
                 </Swiper>
               </div>
-            </section>
+            </section> */}
 
             <WomenDisplayPage
               products={products}
@@ -318,7 +318,7 @@ export default function WomenPage() {
               onProductClick={handleProductClick}
             />
 
-            <section className="home-section6">
+            {/*<section className="home-section6">
               <h2 className="home-section6-title">Trending Now....</h2>
               <div className="home-section6-grid">
                 <div className="home-section6-item">
@@ -394,7 +394,7 @@ export default function WomenPage() {
                   </div>
                 </div>
               </div>
-            </section>
+            </section> */}
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from './Navbar'
 import './KidsPage.css'
@@ -53,6 +53,11 @@ const computeOutOfStock = (p) => {
   return false
 }
 
+const clampScrollY = (y) => {
+  const max = Math.max(0, (document.documentElement?.scrollHeight || 0) - (window.innerHeight || 0))
+  return Math.min(Math.max(0, y), max)
+}
+
 export default function KidsPage() {
   const [allProducts, setAllProducts] = useState([])
   const [products, setProducts] = useState([])
@@ -62,23 +67,52 @@ export default function KidsPage() {
   const [likedKeys, setLikedKeys] = useState(new Set())
   const navigate = useNavigate()
   const { addToWishlist, wishlistItems, setWishlistItems } = useWishlist()
-  const userId = sessionStorage.getItem('userId')
 
-  const keyFor = (p) => String(p.ean_code ?? p.product_id ?? p.id ?? `${p.image_url}`)
+  const restoreDoneRef = useRef(false)
+  const rafSaveRef = useRef(0)
+
+  const getUserId = () => {
+    if (typeof window === 'undefined') return null
+    const id = sessionStorage.getItem('userId') || localStorage.getItem('userId')
+    if (!id) return null
+    const n = Number(id)
+    if (!Number.isInteger(n)) return null
+    return String(n)
+  }
+
+  const userId = getUserId()
 
   useEffect(() => {
-    setUserType(sessionStorage.getItem('userType'))
+    const t = sessionStorage.getItem('userType') || localStorage.getItem('userType')
+    setUserType(t)
   }, [])
 
+  const keyFor = (p) => {
+    const pid = p?.product_id ?? p?.id ?? ''
+    const ean = p?.ean_code ?? ''
+    return `${String(pid)}::${String(ean)}`
+  }
+
   useEffect(() => {
-    setLikedKeys(
-      new Set(
-        toArray(wishlistItems).map((it) =>
-          String(it.ean_code ?? it.product_id ?? it.id ?? `${it.image_url}`)
-        )
-      )
-    )
+    setLikedKeys(new Set(toArray(wishlistItems).map((it) => keyFor(it))))
   }, [wishlistItems])
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (rafSaveRef.current) return
+      rafSaveRef.current = requestAnimationFrame(() => {
+        rafSaveRef.current = 0
+        const y = window.scrollY || window.pageYOffset || 0
+        sessionStorage.setItem('scroll:kids-page', String(y))
+      })
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      if (rafSaveRef.current) cancelAnimationFrame(rafSaveRef.current)
+      rafSaveRef.current = 0
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -129,21 +163,52 @@ export default function KidsPage() {
     }
   }, [])
 
-  const toggleLike = async (product) => {
-    const k = keyFor(product)
-    const already = likedKeys.has(k)
+  useLayoutEffect(() => {
+    if (restoreDoneRef.current) return
+    if (loading) return
+    restoreDoneRef.current = true
+    const saved = sessionStorage.getItem('scroll:kids-page')
+    const yRaw = saved != null ? parseInt(saved, 10) : 0
+    const y = Number.isFinite(yRaw) ? yRaw : 0
+    requestAnimationFrame(() => {
+      window.scrollTo(0, clampScrollY(y))
+      requestAnimationFrame(() => window.scrollTo(0, clampScrollY(y)))
+    })
+  }, [loading, products.length, error])
+
+  useEffect(() => {
+    const loadWishlist = async () => {
+      if (!userId) return
+      try {
+        const r = await fetch(`${API_BASE}/api/wishlist/${userId}`)
+        const data = await r.json()
+        setWishlistItems(Array.isArray(data) ? data : [])
+      } catch {}
+    }
+    loadWishlist()
+  }, [userId, setWishlistItems])
+
+  const toggleLike = async (group, picked) => {
+    if (!userId) return
+    const pid = group.product_id || group.id
+    const ean_code = String(picked?.ean_code || group?.ean_code || '')
+    const image_url = String(picked?.image_url || group?.image_url || '')
+    const color = String(picked?.color || group?.color || '')
+
+    if (!ean_code) return
+
+    const k = keyFor({ product_id: pid, ean_code })
+    const inList = likedKeys.has(k)
+
     try {
-      if (already) {
+      if (inList) {
         await fetch(`${API_BASE}/api/wishlist`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, product_id: product.product_id ?? product.id })
+          body: JSON.stringify({ user_id: userId, product_id: pid, ean_code })
         })
-        setWishlistItems((prev) =>
-          prev.filter(
-            (item) => String(item.ean_code ?? item.product_id ?? item.id ?? `${item.image_url}`) !== k
-          )
-        )
+
+        setWishlistItems((prev) => prev.filter((it) => keyFor(it) !== k))
         setLikedKeys((prev) => {
           const n = new Set(prev)
           n.delete(k)
@@ -153,9 +218,19 @@ export default function KidsPage() {
         await fetch(`${API_BASE}/api/wishlist`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, product_id: product.product_id ?? product.id })
+          body: JSON.stringify({ user_id: userId, product_id: pid, ean_code, image_url, color })
         })
-        addToWishlist({ ...product, product_id: product.product_id ?? product.id })
+
+        const payload = {
+          ...(picked || group),
+          product_id: pid,
+          ean_code,
+          image_url,
+          color: color || (picked || group)?.color || ''
+        }
+
+        addToWishlist(payload)
+
         setLikedKeys((prev) => {
           const n = new Set(prev)
           n.add(k)
@@ -170,11 +245,8 @@ export default function KidsPage() {
     navigate('/checkout')
   }
 
-  const priceForUser = (p) =>
-    userType === 'B2B' ? p.final_price_b2b || p.final_price_b2c : p.final_price_b2c
-
-  const mrpForUser = (p) =>
-    userType === 'B2B' ? p.original_price_b2b || p.original_price_b2c : p.original_price_b2c
+  const priceForUser = (p) => (userType === 'B2B' ? p.final_price_b2b || p.final_price_b2c : p.final_price_b2c)
+  const mrpForUser = (p) => (userType === 'B2B' ? p.original_price_b2b || p.original_price_b2c : p.original_price_b2c)
 
   const discountPct = (p) => {
     const mrp = Number(mrpForUser(p) || 0)
@@ -187,11 +259,8 @@ export default function KidsPage() {
   return (
     <div className="kids-page">
       <Navbar />
-      <div className="kids-test">
-        <FilterSidebar
-          source={allProducts}
-          onFilterChange={(list) => setProducts(Array.isArray(list) ? list : allProducts)}
-        />
+      <div className="filter-bar-class">
+        <FilterSidebar source={allProducts} onFilterChange={(list) => setProducts(Array.isArray(list) ? list : allProducts)} />
         <div className="kids-page-main">
           <div className="kids-page-content">
             <section className="kids-section1">

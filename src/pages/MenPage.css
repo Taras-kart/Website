@@ -1,22 +1,64 @@
-.men-page {}
-
-.men-page-main {
-  display: flex;
-  width: 100%;
-}
-
-.filter-sidebar {
-  width: 14%;
-  padding: 20px;
-}
-
-.men-page-content {
-  width: 100%;
+:root {
+  --filter-sidebar-width: 320px;
+  --navbar-height: 110px;
 }
 
 .men-page {
   position: relative;
-  overflow: visible;
+  font-family: "Noto Sans", sans-serif;
+}
+
+.filter-bar-class {
+  width: 100%;
+}
+
+@media (min-width: 1025px) {
+  .filter-bar-class {
+    display: grid;
+    grid-template-columns: var(--filter-sidebar-width) 1fr;
+    align-items: start;
+    gap: 0;
+    width: 100%;
+  }
+
+  .filter-bar-class > .filterbar-wrap {
+    position: sticky;
+    top: var(--navbar-height);
+    height: calc(100vh - var(--navbar-height));
+    align-self: start;
+    z-index: 900;
+    border-right: 1px solid rgba(0, 0, 0, 0.10);
+    border-bottom: 0;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .men-page-main {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .men-page-content {
+    width: 100%;
+    padding: 0;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --navbar-height: 60px;
+  }
+
+  .men-page-main {
+    display: flex;
+    width: 100%;
+  }
+
+  .men-page-content {
+    width: 100%;
+    padding: 0;
+  }
 }
 
 .mens-section1 {
@@ -271,6 +313,8 @@
   .mens-section3 {
     flex-direction: column;
     padding: 30px 15px;
+    width: 100%;
+    margin-left: 0;
   }
 
   .mens-section3-left,
@@ -308,7 +352,6 @@
     display: flex;
     flex-direction: column;
     height: auto;
-    color: white;
     align-items: center;
     justify-content: center;
     gap: 20px;

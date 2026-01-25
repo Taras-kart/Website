@@ -1,454 +1,232 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import './FilterSidebar.css'
 import { FaFilter, FaChevronDown, FaChevronUp } from 'react-icons/fa'
+import './FilterSidebar.css'
 
-const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app'
-const API_BASE_RAW =
-  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
-  (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
-  DEFAULT_API_BASE
-const API_BASE = API_BASE_RAW.replace(/\/+$/, '')
+const uniq = (arr) => Array.from(new Set(arr.filter(Boolean).map((x) => String(x).trim()).filter(Boolean)))
+const norm = (v) => String(v ?? '').trim().toLowerCase()
 
-const priceBuckets = [
-  { label: 'Under ₹500', test: (n) => n < 500 },
-  { label: '₹500 - ₹1000', test: (n) => n >= 500 && n <= 1000 },
-  { label: '₹1000 - ₹2000', test: (n) => n > 1000 && n <= 2000 },
-  { label: 'Above ₹2000', test: (n) => n > 2000 }
-]
+export default function FilterSidebar({ source = [], onFilterChange }) {
+  const [activeChip, setActiveChip] = useState('')
+  const [openDropdown, setOpenDropdown] = useState(false)
 
-const discountThresholds = [
-  { label: '10% or more', min: 10 },
-  { label: '30% or more', min: 30 },
-  { label: '50% or more', min: 50 }
-]
+  const [selectedBrands, setSelectedBrands] = useState(new Set())
+  const [selectedColors, setSelectedColors] = useState(new Set())
+  const [selectedSizes, setSelectedSizes] = useState(new Set())
+  const [onlyInStock, setOnlyInStock] = useState(false)
 
-const ratingThresholds = [
-  { label: '4★ & above', min: 4 },
-  { label: '3★ & above', min: 3 }
-]
+  const pendingRef = useRef({ brands: new Set(), colors: new Set(), sizes: new Set(), stock: false })
 
-const sortOptions = [
-  { key: 'relevance', label: 'Relevance' },
-  { key: 'priceLowHigh', label: 'Price: Low to High' },
-  { key: 'priceHighLow', label: 'Price: High to Low' },
-  { key: 'discountHighLow', label: 'Discount: High to Low' },
-  { key: 'ratingHighLow', label: 'Rating: High to Low' }
-]
-
-const norm = (v) => String(v || '').trim()
-const dedupeSort = (arr) =>
-  Array.from(new Set(arr.filter(Boolean).map((x) => norm(x)))).sort((a, b) =>
-    a.localeCompare(b, undefined, { sensitivity: 'base' })
-  )
-
-const FilterSidebar = ({ source = [], onFilterChange }) => {
-  const [openSection, setOpenSection] = useState(null)
-  const [selected, setSelected] = useState({})
-  const [pending, setPending] = useState({})
-  const [showBar, setShowBar] = useState(true)
-  const [facetPool, setFacetPool] = useState([])
-  const [sortOpen, setSortOpen] = useState(false)
-  const [sortOption, setSortOption] = useState('relevance')
-  const wrapRef = useRef(null)
-  const lastY = useRef(0)
-  const ticking = useRef(false)
-  const userType = (localStorage.getItem('userType') || 'B2C').toUpperCase()
-
-  const offerPrice = (p) =>
-    Number(userType === 'B2B' ? p.final_price_b2b : p.final_price_b2c) || 0
-  const originalPrice = (p) =>
-    Number(userType === 'B2B' ? p.original_price_b2b : p.original_price_b2c) || 0
-  const discountPct = (p) => {
-    const o = originalPrice(p)
-    const f = offerPrice(p)
-    if (!o) return 0
-    const pct = ((o - f) / o) * 100
-    return Math.max(0, Math.round(pct))
-  }
-
-  useEffect(() => {
-    let cancelled = false
-    const run = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/api/products?limit=500`)
-        const data = await res.json()
-        if (!cancelled) setFacetPool(Array.isArray(data) ? data : [])
-      } catch {
-        if (!cancelled) setFacetPool([])
-      }
-    }
-    run()
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  useEffect(() => {
-    lastY.current = window.scrollY || window.pageYOffset || 0
-    const threshold = 6
-    const handleScroll = () => {
-      if (ticking.current) return
-      ticking.current = true
-      requestAnimationFrame(() => {
-        const y = window.scrollY || window.pageYOffset || 0
-        const delta = y - lastY.current
-        if (y <= 0) {
-          setShowBar(true)
-        } else if (Math.abs(delta) > threshold) {
-          setShowBar(delta < 0)
-          lastY.current = y
-        }
-        ticking.current = false
-      })
-    }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  useEffect(() => {
-    const onClick = (e) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target)) {
-        setOpenSection(null)
-        setSortOpen(false)
-      }
-    }
-    document.addEventListener('click', onClick, { passive: true })
-    return () => document.removeEventListener('click', onClick)
-  }, [])
-
-  const unionPool = useMemo(() => {
-    if (!Array.isArray(source) || !source.length) return facetPool
-    const ids = new Set()
-    const merged = []
-    ;[...source, ...facetPool].forEach((p) => {
-      const k = `${p.id || ''}-${p.product_id || ''}-${p.size || ''}-${p.color || ''}`
-      if (ids.has(k)) return
-      ids.add(k)
-      merged.push(p)
+  const { brands, colors, sizes } = useMemo(() => {
+    const b = []
+    const c = []
+    const s = []
+    ;(Array.isArray(source) ? source : []).forEach((p) => {
+      b.push(p?.brand)
+      c.push(p?.color)
+      s.push(p?.size)
     })
-    return merged
-  }, [source, facetPool])
-
-  const facets = useMemo(() => {
-    const brands = dedupeSort(unionPool.map((p) => p.brand))
-    const colors = dedupeSort(unionPool.map((p) => p.color))
-    const sizes = dedupeSort(unionPool.map((p) => p.size))
-    const hasRating = unionPool.some(
-      (p) => Number(p.rating ?? p.avgRating ?? 0) > 0
-    )
-    const hasStockFacet = unionPool.some(
-      (p) => p.in_stock !== undefined || p.available_qty !== undefined
-    )
-
-    const map = {}
-
-    if (brands.length) map['brands'] = brands
-    map['price'] = priceBuckets.map((b) => b.label)
-    map['discount'] = discountThresholds.map((d) => d.label)
-    if (colors.length) map['colors'] = colors
-    if (sizes.length) map['size & fit'] = sizes
-    if (hasRating) map['rating'] = ratingThresholds.map((r) => r.label)
-    if (hasStockFacet) map['availability'] = ['In stock only']
-
-    return map
-  }, [unionPool])
-
-  const applyFilters = (data, filters) => {
-    let out = [...data]
-
-    const selBrands = filters.brands || []
-    if (selBrands.length) {
-      const set = new Set(selBrands.map((b) => b.toLowerCase()))
-      out = out.filter((p) => set.has(String(p.brand || '').toLowerCase()))
+    return {
+      brands: uniq(b).sort((a, b1) => a.localeCompare(b1)),
+      colors: uniq(c).sort((a, b1) => a.localeCompare(b1)),
+      sizes: uniq(s).sort((a, b1) => a.localeCompare(b1))
     }
+  }, [source])
 
-    const selColors = filters.colors || []
-    if (selColors.length) {
-      const set = new Set(selColors.map((c) => c.toLowerCase()))
-      out = out.filter((p) => set.has(String(p.color || '').toLowerCase()))
-    }
-
-    const selSizes = filters['size & fit'] || []
-    if (selSizes.length) {
-      const set = new Set(selSizes.map((s) => s.toLowerCase()))
-      out = out.filter((p) => set.has(String(p.size || '').toLowerCase()))
-    }
-
-    const selPriceLabels = filters.price || []
-    if (selPriceLabels.length) {
-      out = out.filter((p) => {
-        const price = offerPrice(p)
-        return selPriceLabels.some((label) => {
-          const b = priceBuckets.find((x) => x.label === label)
-          return b ? b.test(price) : true
-        })
-      })
-    }
-
-    const selDiscLabels = filters.discount || []
-    if (selDiscLabels.length) {
-      const mins = selDiscLabels
-        .map((lab) => discountThresholds.find((x) => x.label === lab)?.min || 0)
-        .filter((n) => n > 0)
-      const need = mins.length ? Math.max(...mins) : 0
-      if (need > 0) out = out.filter((p) => discountPct(p) >= need)
-    }
-
-    const selRatingLabels = filters.rating || []
-    if (selRatingLabels.length) {
-      const mins = selRatingLabels
-        .map((lab) => ratingThresholds.find((x) => x.label === lab)?.min || 0)
-        .filter((n) => n > 0)
-      const need = mins.length ? Math.max(...mins) : 0
-      if (need > 0) {
-        out = out.filter((p) => {
-          const r = Number(p.rating ?? p.avgRating ?? 0)
-          return r >= need
-        })
-      }
-    }
-
-    const selAvailability = filters.availability || []
-    if (selAvailability.includes('In stock only')) {
-      out = out.filter((p) => {
-        const qty = Number(p.available_qty ?? 0)
-        if (p.in_stock === true) return true
-        if (p.in_stock === false) return qty > 0
-        if (!Number.isNaN(qty) && qty > 0) return true
-        return p.in_stock === undefined && p.available_qty === undefined
-      })
-    }
-
+  const counts = useMemo(() => {
+    const out = { brand: 0, color: 0, size: 0, stock: 0 }
+    out.brand = selectedBrands.size
+    out.color = selectedColors.size
+    out.size = selectedSizes.size
+    out.stock = onlyInStock ? 1 : 0
     return out
+  }, [selectedBrands, selectedColors, selectedSizes, onlyInStock])
+
+  const applyFilter = (brandsSet, colorsSet, sizesSet, stockFlag) => {
+    const list = Array.isArray(source) ? source : []
+    const res = list.filter((p) => {
+      const bOk = brandsSet.size === 0 || brandsSet.has(norm(p?.brand))
+      const cOk = colorsSet.size === 0 || colorsSet.has(norm(p?.color))
+      const sOk = sizesSet.size === 0 || sizesSet.has(norm(p?.size))
+      const stockOk = !stockFlag || !p?.is_out_of_stock
+      return bOk && cOk && sOk && stockOk
+    })
+    if (typeof onFilterChange === 'function') onFilterChange(res)
   }
 
-  const applySort = (data, key) => {
-    if (!key || key === 'relevance') return data
-    const out = [...data]
-    if (key === 'priceLowHigh') {
-      out.sort((a, b) => offerPrice(a) - offerPrice(b))
-      return out
+  useEffect(() => {
+    pendingRef.current = {
+      brands: new Set(Array.from(selectedBrands)),
+      colors: new Set(Array.from(selectedColors)),
+      sizes: new Set(Array.from(selectedSizes)),
+      stock: onlyInStock
     }
-    if (key === 'priceHighLow') {
-      out.sort((a, b) => offerPrice(b) - offerPrice(a))
-      return out
+    applyFilter(selectedBrands, selectedColors, selectedSizes, onlyInStock)
+  }, [selectedBrands, selectedColors, selectedSizes, onlyInStock])
+
+  const toggleChip = (key) => {
+    if (activeChip === key) {
+      setOpenDropdown((v) => !v)
+      return
     }
-    if (key === 'discountHighLow') {
-      out.sort((a, b) => discountPct(b) - discountPct(a))
-      return out
-    }
-    if (key === 'ratingHighLow') {
-      out.sort((a, b) => {
-        const ra = Number(a.rating ?? a.avgRating ?? 0)
-        const rb = Number(b.rating ?? b.avgRating ?? 0)
-        return rb - ra
-      })
-      return out
-    }
-    return out
+    setActiveChip(key)
+    setOpenDropdown(true)
   }
 
-  const runFiltersAndSort = (filters, sortKey) => {
-    const filtered = applyFilters(source, filters || {})
-    const sorted = applySort(filtered, sortKey)
-    onFilterChange(sorted)
+  const clearAll = () => {
+    setSelectedBrands(new Set())
+    setSelectedColors(new Set())
+    setSelectedSizes(new Set())
+    setOnlyInStock(false)
+    setActiveChip('')
+    setOpenDropdown(false)
   }
 
-  const sectionCount = (k) => (selected[k]?.length ? selected[k].length : 0)
-
-  const openAndLoadPending = (key) => {
-    const next = openSection === key ? null : key
-    if (next) {
-      const deep = JSON.parse(JSON.stringify(selected || {}))
-      setPending(deep)
-      setSortOpen(false)
-    }
-    setOpenSection(next)
-  }
-
-  const togglePending = (category, value) => {
-    const current = pending[category] || []
-    const updated = current.includes(value)
-      ? current.filter((v) => v !== value)
-      : [...current, value]
-    setPending({ ...pending, [category]: updated })
+  const resetAndClose = () => {
+    clearAll()
+    applyFilter(new Set(), new Set(), new Set(), false)
   }
 
   const applyPending = () => {
-    const applied = JSON.parse(JSON.stringify(pending || {}))
-    setSelected(applied)
-    runFiltersAndSort(applied, sortOption)
-    setOpenSection(null)
+    const p = pendingRef.current
+    setSelectedBrands(new Set(p.brands))
+    setSelectedColors(new Set(p.colors))
+    setSelectedSizes(new Set(p.sizes))
+    setOnlyInStock(!!p.stock)
+    setOpenDropdown(false)
   }
 
-  const clearSection = () => {
-    if (!openSection) return
-    const cleared = { ...pending, [openSection]: [] }
-    setPending(cleared)
-  }
-
-  const resetAll = () => {
-    setSelected({})
-    setPending({})
-    setSortOption('relevance')
-    onFilterChange(source)
-    setOpenSection(null)
-    setSortOpen(false)
-  }
-
-  const toggleFiltersMobile = () => {
-    if (openSection) {
-      setOpenSection(null)
-    } else {
-      const keys = Object.keys(facets)
-      if (!keys.length) return
-      const deep = JSON.parse(JSON.stringify(selected || {}))
-      setPending(deep)
-      setOpenSection(keys[0])
+  const setPendingToggle = (type, value) => {
+    const p = pendingRef.current
+    if (type === 'stock') {
+      p.stock = !p.stock
+      pendingRef.current = p
+      setOnlyInStock(p.stock)
+      return
     }
-    setSortOpen(false)
+
+    const key = norm(value)
+    const setRef = type === 'brand' ? p.brands : type === 'color' ? p.colors : p.sizes
+    if (setRef.has(key)) setRef.delete(key)
+    else setRef.add(key)
+    pendingRef.current = p
+
+    if (type === 'brand') setSelectedBrands(new Set(setRef))
+    if (type === 'color') setSelectedColors(new Set(setRef))
+    if (type === 'size') setSelectedSizes(new Set(setRef))
   }
 
-  const toggleSortMobile = () => {
-    setSortOpen((v) => !v)
-    setOpenSection(null)
+  const optionsFor = (chip) => {
+    if (chip === 'brand') return brands
+    if (chip === 'color') return colors
+    if (chip === 'size') return sizes
+    return []
   }
 
-  const handleSortSelect = (key) => {
-    setSortOption(key)
-    runFiltersAndSort(selected, key)
-    setSortOpen(false)
+  const isChecked = (type, value) => {
+    const key = norm(value)
+    if (type === 'brand') return selectedBrands.has(key)
+    if (type === 'color') return selectedColors.has(key)
+    if (type === 'size') return selectedSizes.has(key)
+    return false
   }
 
   return (
     <>
-      <div
-        className={`filterbar-wrap ${showBar ? '' : 'hidden'}`}
-        ref={wrapRef}
-      >
-        <div className="filter-bar">
-          <div className="filter-left">
-            <div className="filter-title-wrap">
-              <FaFilter className="filter-icon" />
-              <h4 className="filter-title">Filters</h4>
-              <div className="title-glow"></div>
+      <div className="filterbar-wrap">
+        <div className="filterbar-inner">
+          <div className="filter-bar">
+            <div className="filter-left">
+              <div className="filter-title-wrap">
+                <FaFilter className="filter-icon" />
+                <h3 className="filter-title">Filters</h3>
+                <span className="title-glow" />
+              </div>
+            </div>
+
+            <div className="chips" aria-label="Filter chips">
+              <button
+                type="button"
+                className={`filter-chip ${activeChip === 'brand' && openDropdown ? 'active' : ''}`}
+                onClick={() => toggleChip('brand')}
+              >
+                <span className="chip-label">Brand</span>
+                {counts.brand > 0 && <span className="count-badge">{counts.brand}</span>}
+                <span className="chip-chevron">{activeChip === 'brand' && openDropdown ? <FaChevronUp /> : <FaChevronDown />}</span>
+              </button>
+
+              <button
+                type="button"
+                className={`filter-chip ${activeChip === 'color' && openDropdown ? 'active' : ''}`}
+                onClick={() => toggleChip('color')}
+              >
+                <span className="chip-label">Color</span>
+                {counts.color > 0 && <span className="count-badge">{counts.color}</span>}
+                <span className="chip-chevron">{activeChip === 'color' && openDropdown ? <FaChevronUp /> : <FaChevronDown />}</span>
+              </button>
+
+              <button
+                type="button"
+                className={`filter-chip ${activeChip === 'size' && openDropdown ? 'active' : ''}`}
+                onClick={() => toggleChip('size')}
+              >
+                <span className="chip-label">Size</span>
+                {counts.size > 0 && <span className="count-badge">{counts.size}</span>}
+                <span className="chip-chevron">{activeChip === 'size' && openDropdown ? <FaChevronUp /> : <FaChevronDown />}</span>
+              </button>
+
+              <button type="button" className={`filter-chip ${onlyInStock ? 'active' : ''}`} onClick={() => setPendingToggle('stock')}>
+                <span className="chip-label">In Stock</span>
+                {onlyInStock && <span className="count-badge">1</span>}
+              </button>
+            </div>
+
+            <div className="filter-actions">
+              <button type="button" className="reset-btn" onClick={resetAndClose}>
+                Reset
+              </button>
+            </div>
+
+            <div className="filter-mobile-controls">
+              <button type="button" className="mobile-control-btn" onClick={() => toggleChip('brand')}>
+                <span className="mobile-control-label">Filters</span>
+              </button>
+              <button type="button" className="mobile-control-btn" onClick={() => toggleChip('size')}>
+                <span className="mobile-control-label">Sizes</span>
+              </button>
             </div>
           </div>
 
-          <div className="chips" role="tablist">
-            {Object.keys(facets).map((key) => {
-              const active = openSection === key
-              const count = sectionCount(key)
-              return (
-                <button
-                  key={key}
-                  className={`filter-chip ${active ? 'active' : ''}`}
-                  aria-expanded={active}
-                  onClick={() => openAndLoadPending(key)}
-                >
-                  <span className="chip-label">{key}</span>
-                  {count > 0 && <span className="count-badge">{count}</span>}
-                  <span className="chip-chevron">
-                    {active ? <FaChevronUp /> : <FaChevronDown />}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-
-          <div className="filter-actions">
-            <button className="reset-btn" onClick={resetAll}>
-              Reset
-            </button>
-          </div>
-
-          <div className="filter-mobile-controls">
-            <button
-              type="button"
-              className="mobile-control-btn"
-              onClick={toggleFiltersMobile}
-            >
-              <span className="mobile-control-label">Filters</span>
-            </button>
-            <button
-              type="button"
-              className="mobile-control-btn"
-              onClick={toggleSortMobile}
-            >
-              <span className="mobile-control-label">Sort by</span>
-            </button>
-          </div>
-        </div>
-
-        <div className={`filter-dropdown ${openSection ? 'open' : ''}`}>
-          {openSection && (
-            <>
-              <ul className="filter-options horizontal">
-                {facets[openSection].map((item) => {
-                  const checked = (pending[openSection] || []).includes(item)
-                  return (
-                    <li key={item}>
-                      <label className="chk">
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={() => togglePending(openSection, item)}
-                        />
-                        <span className="box" />
-                        <span className="txt">{item}</span>
-                      </label>
-                    </li>
-                  )
-                })}
-              </ul>
-              <div className="apply-row">
-                <button className="clear-btn" onClick={clearSection}>
-                  Clear
-                </button>
-                <div className="spacer" />
-                <button className="apply-btn" onClick={applyPending}>
-                  Apply
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-
-        <div className={`sort-sheet ${sortOpen ? 'open' : ''}`}>
-          {sortOpen && (
-            <>
-              <div className="sort-header">
-                <span className="sort-title">Sort by</span>
-              </div>
-              <ul className="sort-options">
-                {sortOptions.map((opt) => (
-                  <li key={opt.key}>
-                    <button
-                      type="button"
-                      className={`sort-option ${
-                        sortOption === opt.key ? 'active' : ''
-                      }`}
-                      onClick={() => handleSortSelect(opt.key)}
-                    >
-                      <span className="sort-option-label">{opt.label}</span>
-                    </button>
+          <div className={`filter-dropdown ${openDropdown ? 'open' : ''}`}>
+            <ul className={`filter-options ${activeChip === 'brand' || activeChip === 'color' || activeChip === 'size' ? 'horizontal' : ''}`}>
+              {activeChip === 'brand' || activeChip === 'color' || activeChip === 'size' ? (
+                optionsFor(activeChip).map((v) => (
+                  <li key={`${activeChip}:${v}`}>
+                    <label className="chk">
+                      <input type="checkbox" checked={isChecked(activeChip, v)} onChange={() => setPendingToggle(activeChip, v)} />
+                      <span className="box" />
+                      <span className="txt">{v}</span>
+                    </label>
                   </li>
-                ))}
-              </ul>
-            </>
-          )}
+                ))
+              ) : (
+                <li />
+              )}
+            </ul>
+
+            <div className="apply-row">
+              <button type="button" className="clear-btn" onClick={clearAll}>
+                Clear
+              </button>
+              <span className="spacer" />
+              <button type="button" className="apply-btn" onClick={applyPending}>
+                Apply
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div
-        className={`filter-overlay ${openSection || sortOpen ? 'show' : ''}`}
-        onClick={() => {
-          setOpenSection(null)
-          setSortOpen(false)
-        }}
-      />
+      <div className={`filter-overlay ${openDropdown ? 'show' : ''}`} onClick={() => setOpenDropdown(false)} />
     </>
   )
 }
-
-export default FilterSidebar
