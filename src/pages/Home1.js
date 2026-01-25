@@ -1,5 +1,5 @@
 // src/pages/Home1.js
-import { useEffect, useRef, useState } from 'react'
+import { useEffect,  useState } from 'react'
 import './Home1.css'
 import Navbar from './Navbar'
 import Footer from './Footer'
