@@ -79,9 +79,6 @@ export default function ReturnsPage({ embedded = false, user }) {
   const email = (user?.email || loginEmail || '').trim()
   const mobile = (user?.phone || user?.mobile || loginMobile || '').trim()
 
-  const saleIdFromCancel = query.get('saleId') || ''
- // const [selectedCancelOrderId, setSelectedCancelOrderId] = useState(saleIdFromCancel || '')
-
   useEffect(() => {
     const refreshFromStorage = () => {
       setLoginEmail(sessionStorage.getItem('userEmail') || '')
@@ -91,10 +88,6 @@ export default function ReturnsPage({ embedded = false, user }) {
     window.addEventListener('focus', refreshFromStorage)
     return () => window.removeEventListener('focus', refreshFromStorage)
   }, [])
-
-  {/*useEffect(() => {
-    if (saleIdFromCancel) setSelectedCancelOrderId(saleIdFromCancel)
-  }, [saleIdFromCancel]) */}
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -137,7 +130,7 @@ export default function ReturnsPage({ embedded = false, user }) {
         })
         setOrders(mapped)
       } catch (e) {
-        setError(e.message || 'Could not load your orders')
+        setError(e?.message || 'Could not load your orders')
         setOrders([])
       } finally {
         setLoading(false)
@@ -177,7 +170,24 @@ export default function ReturnsPage({ embedded = false, user }) {
     checkEligibility()
   }, [orders])
 
-  async function loadReturnRequestsForSale(saleId) {
+  useEffect(() => {
+    const saleId = query.get('saleId') || ''
+    if (!saleId) return
+
+    const load = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/returns/by-sale/${saleId}`, { cache: 'no-store' })
+        if (!res.ok) return
+        const data = await res.json()
+        const rows = Array.isArray(data.rows) ? data.rows : []
+        setReturnRequests((prev) => ({ ...prev, [saleId]: rows }))
+      } catch {}
+    }
+
+    load()
+  }, [query])
+
+  const loadReturnRequestsForSale = async (saleId) => {
     try {
       const res = await fetch(`${API_BASE}/api/returns/by-sale/${saleId}`, { cache: 'no-store' })
       if (!res.ok) return
@@ -282,7 +292,6 @@ export default function ReturnsPage({ embedded = false, user }) {
                         {order.image ? <img src={order.image} alt={order.name} loading="lazy" /> : <div className="returns-ph" />}
                         <div className="returns-card-badges">
                           <span className="returns-status-pill cancelled">{st}</span>
-                          {/*<span className="returns-order-pill">#{order.id}</span> */}
                         </div>
                       </div>
 
