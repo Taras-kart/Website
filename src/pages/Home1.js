@@ -36,7 +36,7 @@ export default function Home1() {
     return imageMap[path] || path
   }
 
-  const scrollLeft = () => {
+  {/*const scrollLeft = () => {
     if (railRef.current) {
       railRef.current.scrollBy({ left: -300, behavior: 'smooth' })
     }
@@ -46,7 +46,7 @@ export default function Home1() {
     if (railRef.current) {
       railRef.current.scrollBy({ left: 300, behavior: 'smooth' })
     }
-  }
+  } */}
 
   return (
     <div className="home1-page-new-home">

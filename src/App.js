@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import './App.css'
-import HomePage from './pages/HomePage'
+//import HomePage from './pages/HomePage'
 import MenPage from './pages/MenPage'
 import WomenPage from './pages/WomenPage'
 import Profile from './pages/Profile'

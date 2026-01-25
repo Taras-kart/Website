@@ -80,7 +80,7 @@ export default function ReturnsPage({ embedded = false, user }) {
   const mobile = (user?.phone || user?.mobile || loginMobile || '').trim()
 
   const saleIdFromCancel = query.get('saleId') || ''
-  const [selectedCancelOrderId, setSelectedCancelOrderId] = useState(saleIdFromCancel || '')
+  //const [selectedCancelOrderId, setSelectedCancelOrderId] = useState(saleIdFromCancel || '')
 
   useEffect(() => {
     const refreshFromStorage = () => {
