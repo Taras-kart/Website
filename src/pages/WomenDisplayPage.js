@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import './WomenDisplayPage.css'
-import { FaHeart, FaRegHeart, FaChevronLeft, FaChevronRight } from 'react-icons/fa'
+import { FaHeart, FaRegHeart, FaChevronLeft, FaChevronRight, FaEye } from 'react-icons/fa'
+import FullDetailsPopup from './FullDetailsPopup'
 
 const CLOUD_NAME = 'deymt9uyh'
 
@@ -139,6 +140,7 @@ export default function WomenDisplayPage({
   onProductClick
 }) {
   const [carouselIndex, setCarouselIndex] = useState({})
+  const [popupProduct, setPopupProduct] = useState(null)
 
   const groupedRaw = useMemo(() => groupProductsByColor(products || []), [products])
 
@@ -208,6 +210,17 @@ export default function WomenDisplayPage({
     })
   }
 
+  const getImgForGroup = (group, idx) => {
+    const img = group.images?.[idx]?.src
+    if (img) return img
+    const gender = group.gender || group.rep?.gender || 'WOMEN'
+    return DEFAULT_IMG_BY_GENDER[gender] || DEFAULT_IMG_BY_GENDER._
+  }
+
+  const canLike = (active) => {
+    return !!(active?.ean_code && isRealRemoteImage(active?.src))
+  }
+
   const handleCardClick = (group) => {
     const idx = carouselIndex[group.key] || 0
     const active = group.images?.[idx] || group.images?.[0] || null
@@ -222,18 +235,19 @@ export default function WomenDisplayPage({
     onProductClick(payload)
   }
 
+  const openPopup = (group, active) => {
+    const rep = active?.variant || group.variants?.[0] || group.rep || group
+    const payload = {
+      ...rep,
+      ean_code: active?.ean_code || rep.ean_code || group.ean_code,
+      image_url: active?.src || rep.image_url,
+      variants: group.variants,
+      images: (group.images || []).map((x) => x.src)
+    }
+    setPopupProduct(payload)
+  }
+
   const userLabel = userType === 'B2B' ? 'B2B view' : 'Retail view'
-
-  const getImgForGroup = (group, idx) => {
-    const img = group.images?.[idx]?.src
-    if (img) return img
-    const gender = group.gender || group.rep?.gender || 'WOMEN'
-    return DEFAULT_IMG_BY_GENDER[gender] || DEFAULT_IMG_BY_GENDER._
-  }
-
-  const canLike = (active) => {
-    return !!(active?.ean_code && isRealRemoteImage(active?.src))
-  }
 
   return (
     <section className="womens-section4">
@@ -334,23 +348,35 @@ export default function WomenDisplayPage({
                     </>
                   )}
 
-                  <div
-                    className={`love-icon${likeEnabled ? '' : ' disabled'}`}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      if (!likeEnabled) return
-                      onToggleLike(group, {
-                        ean_code: active.ean_code,
-                        image_url: active.src,
-                        color: active.color || group.color || ''
-                      })
-                    }}
-                  >
-                    {liked ? (
-                      <FaHeart style={{ color: 'gold', fontSize: '20px' }} />
-                    ) : (
-                      <FaRegHeart style={{ color: 'gold', fontSize: '20px' }} />
-                    )}
+                  <div className="action-icons">
+                    <div
+                      className={`action-icon${likeEnabled ? '' : ' disabled'}`}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (!likeEnabled) return
+                        onToggleLike(group, {
+                          ean_code: active.ean_code,
+                          image_url: active.src,
+                          color: active.color || group.color || ''
+                        })
+                      }}
+                    >
+                      {liked ? (
+                        <FaHeart style={{ color: 'gold', fontSize: '20px' }} />
+                      ) : (
+                        <FaRegHeart style={{ color: 'gold', fontSize: '20px' }} />
+                      )}
+                    </div>
+
+                    <div
+                      className="action-icon"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        openPopup(group, active)
+                      }}
+                    >
+                      <FaEye style={{ color: 'gold', fontSize: '20px' }} />
+                    </div>
                   </div>
                 </div>
 
@@ -374,6 +400,8 @@ export default function WomenDisplayPage({
           })}
         </div>
       )}
+
+      {popupProduct && <FullDetailsPopup product={popupProduct} onClose={() => setPopupProduct(null)} />}
     </section>
   )
 }

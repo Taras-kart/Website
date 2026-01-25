@@ -128,29 +128,6 @@
   transform: scale(1.02);
 }
 
-.love-icon {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: rgba(15, 23, 42, 0.7);
-  padding: 7px;
-  border-radius: 999px;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  transition: transform 0.15s ease, background 0.15s ease;
-}
-
-.love-icon:hover {
-  transform: scale(1.08);
-  background-color: rgba(15, 23, 42, 0.9);
-}
-
-.love-icon.disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
 .discount-ribbon {
   position: absolute;
   top: 12px;
@@ -164,10 +141,7 @@
   letter-spacing: 0.06em;
   transform: rotate(-35deg);
   box-shadow: 0 6px 16px rgba(248, 113, 22, 0.5);
-}
-
-.discount-ribbon span {
-  display: inline-block;
+  z-index: 20;
 }
 
 .variant-pill {
@@ -179,6 +153,7 @@
   border-radius: 999px;
   background: rgba(15, 23, 42, 0.8);
   color: #e5e7eb;
+  z-index: 20;
 }
 
 .missing-ean-pill {
@@ -197,18 +172,43 @@
   pointer-events: none;
 }
 
-.variant-pill {
-  z-index: 20;
-}
-
-.discount-ribbon {
-  z-index: 20;
-}
-
-.love-icon {
+.action-icons {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   z-index: 30;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
+.womens-section4-img:hover .action-icons {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.action-icon {
+  background-color: rgba(15, 23, 42, 0.7);
+  padding: 7px;
+  border-radius: 999px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.action-icon:hover {
+  transform: scale(1.08);
+  background-color: rgba(15, 23, 42, 0.9);
+}
+
+.action-icon.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
 
 .brand-row {
   display: flex;
