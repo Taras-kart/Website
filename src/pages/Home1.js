@@ -1,5 +1,5 @@
 // src/pages/Home1.js
-import { useEffect,  useState } from 'react'
+import { useEffect, useState } from 'react'
 import './Home1.css'
 import Navbar from './Navbar'
 import Footer from './Footer'
@@ -7,6 +7,7 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 import { Autoplay } from 'swiper'
 import 'swiper/css'
 import { Link } from 'react-router-dom'
+import Divider from './Divider'
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://taras-kart-backend.vercel.app'
 
@@ -44,9 +45,9 @@ export default function Home1() {
 
   //const scrollRight = () => {
   //  if (railRef.current) {
-   //   railRef.current.scrollBy({ left: 300, behavior: 'smooth' })
-   // }
- // } 
+  //   railRef.current.scrollBy({ left: 300, behavior: 'smooth' })
+  // }
+  // } 
 
   return (
     <div className="home1-page-new-home">
@@ -54,42 +55,12 @@ export default function Home1() {
       <div className="spacer-new-home">
         <section className="home1-hero-new-home">
           <div className="home1-hero-frame-new-home">
-            <Swiper
-              className="home1-hero-swiper-new-home"
-              modules={[Autoplay]}
-              loop
-              slidesPerView={1}
-              autoplay={{ delay: 3500, disableOnInteraction: false }}
-              speed={900}
-            >
-              <SwiperSlide>
-                <div className="home1-hero-slide-new-home">
-                  <img src={getImage('/images/banners/main-banner2.jpg')} alt="Main Banner" loading="eager" />
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="home1-hero-slide-new-home">
-                  <img
-                    src={getImage('/images/banners/mens-slide3.jpg')}
-                    alt="Men Banner"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="home1-hero-slide-new-home">
-                  <img
-                    src={getImage('/images/banners/womens-slide3.jpg')}
-                    alt="Women Banner"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-              </SwiperSlide>
-            </Swiper>
+            <img src={getImage('/images/home-screen-main.png')} alt="Home Banner" loading="eager" />
           </div>
         </section>
+
+        <Divider label="Women" direction="ltr" />
+
 
         <section className="cat-section-new-home">
           <div className="cat-inner-new-home">
@@ -128,6 +99,9 @@ export default function Home1() {
             </div>
           </div>
         </section>
+
+
+        <Divider label="Women" direction="ltr" />
 
         <section className="wcat-home1">
           <div className="wcat-head-home1">

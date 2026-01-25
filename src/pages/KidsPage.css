@@ -14,6 +14,7 @@
 
 @media (min-width: 1025px) {
   .filter-bar-class {
+    margin-top: 30px;
     display: grid;
     grid-template-columns: var(--filter-sidebar-width) 1fr;
     align-items: start;
