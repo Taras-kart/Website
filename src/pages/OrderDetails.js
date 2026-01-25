@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Navbar from './Navbar'
 import Footer from './Footer'
@@ -34,7 +34,7 @@ export default function OrderDetails() {
   const [loading, setLoading] = useState(true)
   const [refreshedAt, setRefreshedAt] = useState('')
 
-  const fetchProductViaEAN = async (ean) => {
+  const fetchProductViaEAN = useCallback(async (ean) => {
     try {
       const r = await fetch(`${API_BASE}/api/products/by-ean/${encodeURIComponent(ean)}`)
       if (!r.ok) return null
@@ -42,9 +42,9 @@ export default function OrderDetails() {
     } catch {
       return null
     }
-  }
+  }, [])
 
-  const fetchProductViaId = async (pid) => {
+  const fetchProductViaId = useCallback(async (pid) => {
     try {
       const r = await fetch(`${API_BASE}/api/products/${encodeURIComponent(pid)}`)
       if (!r.ok) return null
@@ -52,48 +52,53 @@ export default function OrderDetails() {
     } catch {
       return null
     }
-  }
+  }, [])
 
-  const enrichItems = async (items) => {
-    const list = Array.isArray(items) ? items : []
-    const enriched = await Promise.all(
-      list.map(async (it) => {
-        const ean = it?.ean_code || it?.ean || it?.barcode
-        const pid = it?.variant_id || it?.product_id
-        let d = null
-        if (ean) d = await fetchProductViaEAN(ean)
-        if (!d && pid) d = await fetchProductViaId(pid)
-        const name = it?.product_name || it?.name || d?.product_name || d?.name
-        const brand = it?.brand_name || it?.brand || d?.brand_name || d?.brand
-        const size = it?.size || it?.selected_size || d?.size
-        const colour = it?.colour || it?.color || d?.colour || d?.color
-        const gender = it?.gender || d?.gender
-        const image_url =
-          it?.image_url || d?.image_url || (Array.isArray(d?.images) ? d.images[0]?.url : undefined)
-        const unitPrice =
-          it?.price ??
-          it?.final_price_b2c ??
-          it?.sale_price ??
-          d?.final_price_b2c ??
-          d?.sale_price ??
-          d?.price ??
-          d?.mrp
-        return {
-          ...it,
-          product_name: name,
-          brand_name: brand,
-          size,
-          colour,
-          gender,
-          image_url,
-          unitPrice
-        }
-      })
-    )
-    return enriched
-  }
+  const enrichItems = useCallback(
+    async (items) => {
+      const list = Array.isArray(items) ? items : []
+      const enriched = await Promise.all(
+        list.map(async (it) => {
+          const ean = it?.ean_code || it?.ean || it?.barcode
+          const pid = it?.variant_id || it?.product_id
+          let d = null
+          if (ean) d = await fetchProductViaEAN(ean)
+          if (!d && pid) d = await fetchProductViaId(pid)
 
-  const fetchAll = async () => {
+          const name = it?.product_name || it?.name || d?.product_name || d?.name
+          const brand = it?.brand_name || it?.brand || d?.brand_name || d?.brand
+          const size = it?.size || it?.selected_size || d?.size
+          const colour = it?.colour || it?.color || d?.colour || d?.color
+          const gender = it?.gender || d?.gender
+          const image_url =
+            it?.image_url || d?.image_url || (Array.isArray(d?.images) ? d.images[0]?.url : undefined)
+          const unitPrice =
+            it?.price ??
+            it?.final_price_b2c ??
+            it?.sale_price ??
+            d?.final_price_b2c ??
+            d?.sale_price ??
+            d?.price ??
+            d?.mrp
+
+          return {
+            ...it,
+            product_name: name,
+            brand_name: brand,
+            size,
+            colour,
+            gender,
+            image_url,
+            unitPrice
+          }
+        })
+      )
+      return enriched
+    },
+    [fetchProductViaEAN, fetchProductViaId]
+  )
+
+  const fetchAll = useCallback(async () => {
     if (!orderId) return
     setLoading(true)
     try {
@@ -109,13 +114,12 @@ export default function OrderDetails() {
       const el = await elRes.json().catch(() => null)
       const rr = await rrRes.json().catch(() => ({ rows: [] }))
 
-      if (sJson && sJson.sale) {
-        setSale(sJson.sale)
-        const enriched = await enrichItems(Array.isArray(sJson.items) ? sJson.items : [])
-        setSaleItems(enriched)
-      } else if (sJson) {
-        setSale(sJson)
-        const enriched = await enrichItems(Array.isArray(sJson.items) ? sJson.items : [])
+      const baseSale = sJson && sJson.sale ? sJson.sale : sJson
+
+      if (baseSale) {
+        setSale(baseSale)
+        const rawItems = Array.isArray(sJson?.items) ? sJson.items : Array.isArray(baseSale?.items) ? baseSale.items : []
+        const enriched = await enrichItems(rawItems)
         setSaleItems(enriched)
       } else {
         setSale(null)
@@ -126,22 +130,25 @@ export default function OrderDetails() {
       setEligibility(el)
       setRequests(Array.isArray(rr?.rows) ? rr.rows : [])
 
-      const email = (sJson?.sale?.customer_email || sJson?.customer_email || '').trim()
+      const email = (sJson?.sale?.customer_email || baseSale?.customer_email || '').trim()
       if (email) {
         const u = await fetch(`${API_BASE}/api/users/by-email/${encodeURIComponent(email)}`)
           .then((r) => r.json())
           .catch(() => null)
         if (u && !u.message) setCustomer(u)
+      } else {
+        setCustomer(null)
       }
+
       setRefreshedAt(new Date().toLocaleString('en-IN'))
     } finally {
       setLoading(false)
     }
-  }
+  }, [orderId, enrichItems])
 
   useEffect(() => {
     fetchAll()
-  }, [orderId])
+  }, [fetchAll])
 
   const money = (n) =>
     new Intl.NumberFormat('en-IN', {
@@ -216,9 +223,7 @@ export default function OrderDetails() {
             {isCancelled && (
               <div className="cancel-banner">
                 <div className="cancel-title">Order is cancelled</div>
-                <div className="cancel-sub">
-                  If you already paid online, the refund will be processed as per our policy.
-                </div>
+                <div className="cancel-sub">If you already paid online, the refund will be processed as per our policy.</div>
               </div>
             )}
           </div>
@@ -247,7 +252,10 @@ export default function OrderDetails() {
                 {stepLabels.map((label, i) => {
                   const active = i <= statusStepIndex()
                   return (
-                    <div className={`step ${active ? 'active' : ''} ${isCancelled && label === 'Cancelled' ? 'cancel' : ''}`} key={label}>
+                    <div
+                      className={`step ${active ? 'active' : ''} ${isCancelled && label === 'Cancelled' ? 'cancel' : ''}`}
+                      key={label}
+                    >
                       <div className="dot" />
                       <div className="slabel">{label}</div>
                     </div>
@@ -445,9 +453,7 @@ export default function OrderDetails() {
                       </a>
                     </div>
                   ) : (
-                    <div className="od-note">
-                      {eligibility?.reason ? `Not eligible: ${eligibility.reason}` : 'Eligibility not available'}
-                    </div>
+                    <div className="od-note">{eligibility?.reason ? `Not eligible: ${eligibility.reason}` : 'Eligibility not available'}</div>
                   )}
 
                   {Array.isArray(requests) && requests.length ? (
