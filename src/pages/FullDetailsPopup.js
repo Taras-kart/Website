@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import './FullDetailsPopup.css'
 import { FaTimes, FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 
@@ -117,7 +117,14 @@ export default function FullDetailsPopup({ product, onClose, userType = 'B2C' })
       const idx = images.findIndex((s) => s === target)
       if (idx >= 0) setActiveIndex(idx)
     }
-  }, [selectedSize])
+  }, [selectedSize, variants, product, images])
+
+  const closeSafe = useCallback(() => {
+    onClose?.()
+  }, [onClose])
+
+  const next = useCallback(() => setActiveIndex((i) => (i + 1) % images.length), [images.length])
+  const prev = useCallback(() => setActiveIndex((i) => (i - 1 + images.length) % images.length), [images.length])
 
   if (!product) return null
 
@@ -149,13 +156,10 @@ export default function FullDetailsPopup({ product, onClose, userType = 'B2C' })
   const pct = discountPct(selectedVariant || product || {}, userType)
   const saved = mrp > offer ? Math.max(0, mrp - offer) : 0
 
-  const next = () => setActiveIndex((i) => (i + 1) % images.length)
-  const prev = () => setActiveIndex((i) => (i - 1 + images.length) % images.length)
-
   return (
-    <div className="fdp-overlay" onMouseDown={onClose}>
+    <div className="fdp-overlay" onMouseDown={closeSafe}>
       <div className="fdp-modal" onMouseDown={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
-        <button className="fdp-close" onClick={onClose} aria-label="Close">
+        <button className="fdp-close" onClick={closeSafe} aria-label="Close">
           <FaTimes />
         </button>
 
@@ -279,17 +283,14 @@ export default function FullDetailsPopup({ product, onClose, userType = 'B2C' })
                 {colors.length > 1 ? (
                   <div className="fdp-hItem">
                     <div className="fdp-hLabel">More colors</div>
-                    <div className="fdp-hValue">{colors.slice(0, 3).join(', ')}{colors.length > 3 ? '…' : ''}</div>
+                    <div className="fdp-hValue">
+                      {colors.slice(0, 3).join(', ')}
+                      {colors.length > 3 ? '…' : ''}
+                    </div>
                   </div>
                 ) : null}
               </div>
             </div>
-
-           {/* <div className="fdp-footer">
-              <button className="fdp-primary" onClick={onClose}>
-                Continue shopping
-              </button>
-            </div> */}
           </div>
         </div>
       </div>
