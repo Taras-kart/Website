@@ -1,12 +1,24 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { FaFilter, FaChevronDown, FaChevronUp } from 'react-icons/fa'
+import { FaFilter, FaChevronDown, FaChevronUp, FaSortAmountDown } from 'react-icons/fa'
 import './FilterSidebar.css'
 
 const uniq = (arr) => Array.from(new Set(arr.filter(Boolean).map((x) => String(x).trim()).filter(Boolean)))
 const norm = (v) => String(v ?? '').trim().toLowerCase()
 
-export default function FilterSidebar({ source = [], onFilterChange }) {
+export default function FilterSidebar({
+  source = [],
+  onFilterChange,
+  sortOptions = [
+    { value: 'featured', label: 'Featured' },
+    { value: 'new', label: 'New Arrivals' },
+    { value: 'price_low', label: 'Price: Low to High' },
+    { value: 'price_high', label: 'Price: High to Low' }
+  ],
+  sortValue = 'featured',
+  onSortChange
+}) {
   const [activeChip, setActiveChip] = useState('')
+  const [mobilePanel, setMobilePanel] = useState('')
   const [selectedBrands, setSelectedBrands] = useState(new Set())
   const [selectedColors, setSelectedColors] = useState(new Set())
   const [selectedSizes, setSelectedSizes] = useState(new Set())
@@ -63,6 +75,15 @@ export default function FilterSidebar({ source = [], onFilterChange }) {
     }
     applyFilter(selectedBrands, selectedColors, selectedSizes, onlyInStock)
   }, [selectedBrands, selectedColors, selectedSizes, onlyInStock, applyFilter])
+
+  useEffect(() => {
+    if (!mobilePanel) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [mobilePanel])
 
   const toggleSection = (key) => {
     setActiveChip((prev) => (prev === key ? '' : key))
@@ -163,10 +184,100 @@ export default function FilterSidebar({ source = [], onFilterChange }) {
     )
   }
 
+  const MobileFilters = () => (
+    <div className="m-sheet" role="dialog" aria-modal="true">
+      <div className="m-head">
+        <div className="m-title">
+          <span className="m-dot" />
+          <span>Filters</span>
+        </div>
+        <button type="button" className="m-x" onClick={() => setMobilePanel('')}>
+          Close
+        </button>
+      </div>
+
+      <div className="m-body">
+        <Chip k="brand" label="Brands" count={counts.brand} />
+        <Chip k="color" label="Colors" count={counts.color} />
+        <Chip k="size" label="Sizes" count={counts.size} />
+
+        <div className={`fs-chip ${onlyInStock ? 'open' : ''}`}>
+          <button type="button" className="fs-chip-btn" onClick={() => setPendingToggle('stock')}>
+            <span className="fs-chip-left">
+              <span className="fs-chip-label">In Stock</span>
+              {onlyInStock && <span className="fs-badge">1</span>}
+            </span>
+            <span className="fs-chip-right">
+              <span className={`fs-pill ${onlyInStock ? 'on' : ''}`}>{onlyInStock ? 'ON' : 'OFF'}</span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div className="m-foot">
+        <button
+          type="button"
+          className="m-ghost"
+          onClick={() => {
+            clearAll()
+            applyFilter(new Set(), new Set(), new Set(), false)
+          }}
+        >
+          Clear All
+        </button>
+        <button type="button" className="m-primary" onClick={() => setMobilePanel('')}>
+          Done
+        </button>
+      </div>
+    </div>
+  )
+
+  const MobileSort = () => (
+    <div className="m-sheet" role="dialog" aria-modal="true">
+      <div className="m-head">
+        <div className="m-title">
+          <span className="m-dot" />
+          <span>Sort By</span>
+        </div>
+        <button type="button" className="m-x" onClick={() => setMobilePanel('')}>
+          Close
+        </button>
+      </div>
+
+      <div className="m-body">
+        <div className="m-sort-list">
+          {sortOptions.map((opt) => {
+            const active = opt.value === sortValue
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                className={`m-sort-item ${active ? 'active' : ''}`}
+                onClick={() => {
+                  if (typeof onSortChange === 'function') onSortChange(opt.value)
+                  setMobilePanel('')
+                }}
+              >
+                <span className="m-sort-label">{opt.label}</span>
+                <span className="m-sort-mark">{active ? '●' : '○'}</span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      <div className="m-foot">
+        <button type="button" className="m-primary" onClick={() => setMobilePanel('')}>
+          Done
+        </button>
+      </div>
+    </div>
+  )
+
   return (
     <div className="filterbar-wrap">
       <div className="filterbar-inner">
-        <div className="fs-head">
+        <div className="fs-head fs-head-desktop">
           <div className="fs-title">
             <span className="fs-ico">
               <FaFilter />
@@ -186,7 +297,7 @@ export default function FilterSidebar({ source = [], onFilterChange }) {
           </button>
         </div>
 
-        <div className="fs-body">
+        <div className="fs-body fs-body-desktop">
           <Chip k="brand" label="Brands" count={counts.brand} />
           <Chip k="color" label="Colors" count={counts.color} />
           <Chip k="size" label="Sizes" count={counts.size} />
@@ -204,7 +315,7 @@ export default function FilterSidebar({ source = [], onFilterChange }) {
           </div>
         </div>
 
-        <div className="fs-footer">
+        <div className="fs-footer fs-footer-desktop">
           <div className="fs-foot-left">
             <span className="fs-foot-k">Selected</span>
             <span className="fs-foot-v">{counts.brand + counts.color + counts.size + counts.stock}</span>
@@ -221,6 +332,43 @@ export default function FilterSidebar({ source = [], onFilterChange }) {
           </button>
         </div>
       </div>
+
+      <div className="m-bar">
+        <button
+          type="button"
+          className="m-bar-btn"
+          onClick={() => {
+            setActiveChip('')
+            setMobilePanel((v) => (v === 'filters' ? '' : 'filters'))
+          }}
+        >
+          <span className="m-ico">
+            <FaFilter />
+          </span>
+          <span>Filters</span>
+          <span className="m-badge">{counts.brand + counts.color + counts.size + counts.stock}</span>
+        </button>
+
+        <button
+          type="button"
+          className="m-bar-btn"
+          onClick={() => {
+            setActiveChip('')
+            setMobilePanel((v) => (v === 'sort' ? '' : 'sort'))
+          }}
+        >
+          <span className="m-ico">
+            <FaSortAmountDown />
+          </span>
+          <span>Sort By</span>
+          <span className="m-mini">{sortOptions.find((x) => x.value === sortValue)?.label || 'Featured'}</span>
+        </button>
+      </div>
+
+      <div className={`m-overlay ${mobilePanel ? 'show' : ''}`} onClick={() => setMobilePanel('')} />
+
+      {mobilePanel === 'filters' ? <MobileFilters /> : null}
+      {mobilePanel === 'sort' ? <MobileSort /> : null}
     </div>
   )
 }
