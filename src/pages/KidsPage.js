@@ -265,13 +265,13 @@ export default function KidsPage() {
           <div className="kids-page-content">
             <section className="kids-section1">
               <div className="kids-section1-bg">
-                <img src="/images/kids-bg.jpg" alt="Kids Fashion Background" />
-                <div className="kids-section1-overlay">
+                <img src="/images/coming-soon.jpg" alt="Kids Fashion Background" />
+                {/*<div className="kids-section1-overlay">
                   <div className="kids-section1-text">
                     <h1>Kids</h1>
                     <h1>Fashion</h1>
                   </div>
-                </div>
+                </div> */}
               </div>
             </section>
 
