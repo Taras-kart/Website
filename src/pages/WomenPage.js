@@ -212,7 +212,7 @@ export default function WomenPage() {
     const image_url = String(picked?.image_url || '')
     const color = String(picked?.color || '')
 
-    if (!ean_code || !image_url) return
+    if (!ean_code) return
 
     const k = keyFor({ product_id: pid, ean_code })
     const inList = likedKeys.has(k)
@@ -279,14 +279,9 @@ export default function WomenPage() {
   return (
     <div className="women-page">
       <Navbar />
-
       <div className="women-layout">
         <div className="catalog-row">
-          <FilterSidebar
-            source={allProducts}
-            onFilterChange={(list) => setProducts(Array.isArray(list) ? list : allProducts)}
-          />
-
+          <FilterSidebar source={allProducts} onFilterChange={(list) => setProducts(Array.isArray(list) ? list : allProducts)} />
           <div className="women-page-main">
             <div className="women-page-content">
               <WomenDisplayPage
@@ -302,7 +297,6 @@ export default function WomenPage() {
             </div>
           </div>
         </div>
-
         <Footer />
       </div>
     </div>

@@ -300,7 +300,7 @@ export default function MenPage() {
               onProductClick={handleProductClick}
             />
 
-            <section className="mens-section2">
+            {/*<section className="mens-section2">
               <div className="mens-section2-bg">
                 <img src="/images/mens-bg1.jpg" alt="Mens Style Background" />
                 <div className="mens-section2-overlay">
@@ -329,7 +329,7 @@ export default function MenPage() {
               <div className="mens-section3-right">
                 <img src="/images/mens-part2.jpg" alt="Right Fashion" />
               </div>
-            </section>
+            </section> */}
           </div>
         </div>
       </div>

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import './App.css'
-//import HomePage from './pages/HomePage'
 import MenPage from './pages/MenPage'
 import WomenPage from './pages/WomenPage'
 import Profile from './pages/Profile'
@@ -23,6 +22,8 @@ import Home1 from './pages/Home1'
 import TrackOrder from './pages/TrackOrder'
 import OrderCancel from './pages/OrderCancel'
 import RefundRequest from './pages/RefundRequest'
+import NavbarFinal from './pages/Navbar'
+import Contactus from './pages/Contactus'
 
 function NavigationLoader() {
   const location = useLocation()
@@ -40,6 +41,7 @@ function AppShell() {
     <>
       <NavigationLoader />
       <ScrollToTop />
+      <NavbarFinal />
       <Routes>
         <Route path="/" element={<Home1 />} />
         <Route path="/men" element={<MenPage />} />
@@ -60,6 +62,7 @@ function AppShell() {
         <Route path="/order/:id/tracking" element={<OrderTracking />} />
         <Route path="/order/:id/cancel" element={<OrderCancel />} />
         <Route path="/returns/:id/refund" element={<RefundRequest />} />
+        <Route path="/customer-care" element={<Contactus />} />
       </Routes>
     </>
   )

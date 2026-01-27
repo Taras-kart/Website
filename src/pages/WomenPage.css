@@ -23,37 +23,27 @@
     grid-template-columns: var(--filter-sidebar-width) 1fr;
     align-items: start;
     width: 100%;
-  }
-
-  .catalog-row > .filterbar-wrap {
-    position: sticky !important;
-    top: var(--navbar-height);
-    height: calc(100vh - var(--navbar-height));
-    overflow-y: auto;
-    overflow-x: hidden;
-    border-right: 1px solid rgba(0, 0, 0, 0.08);
-    background: #fff;
-    align-self: start;
-    z-index: 2;
+    position: relative;
+    z-index: 0;
   }
 
   .women-page-main {
-    width: 100%;
+    position: relative;
+    z-index: 1;
     min-width: 0;
+    overflow: visible;
   }
 
   .women-page-content {
     width: 100%;
     min-width: 0;
     padding: 0;
+    position: relative;
+    z-index: 1;
   }
 }
 
 @media (max-width: 1024px) {
-  .women-layout {
-    margin-top: var(--navbar-height);
-  }
-
   .catalog-row {
     width: 100%;
   }
@@ -111,6 +101,8 @@
   gap: 18px;
   max-width: 1200px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
 .womens-section4-card {
@@ -206,6 +198,7 @@
   .womens-section4-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
   .womens-section4-img img {
     height: 280px;
   }
@@ -215,6 +208,7 @@
   .womens-section4-grid {
     grid-template-columns: 1fr;
   }
+
   .womens-section4-img img {
     height: 260px;
   }

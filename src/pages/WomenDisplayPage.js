@@ -79,9 +79,7 @@ function groupProductsByColor(products) {
 
   const out = []
   for (const g of byKey.values()) {
-    const hasStockInfo = g.variants.some(
-      (v) => v.in_stock !== undefined || v.available_qty !== undefined || v.on_hand !== undefined
-    )
+    const hasStockInfo = g.variants.some((v) => v.in_stock !== undefined || v.available_qty !== undefined || v.on_hand !== undefined)
 
     const allVariantsOutOfStock = g.variants.every((v) => {
       const qty = Number(v.available_qty !== undefined ? v.available_qty : v.on_hand !== undefined ? v.on_hand : 0)
@@ -129,16 +127,7 @@ function groupProductsByColor(products) {
   return out
 }
 
-export default function WomenDisplayPage({
-  products,
-  userType,
-  loading,
-  error,
-  likedKeys,
-  keyFor,
-  onToggleLike,
-  onProductClick
-}) {
+export default function WomenDisplayPage({ products, userType, loading, error, likedKeys, keyFor, onToggleLike, onProductClick }) {
   const [carouselIndex, setCarouselIndex] = useState({})
   const [popupProduct, setPopupProduct] = useState(null)
 
@@ -217,8 +206,9 @@ export default function WomenDisplayPage({
     return DEFAULT_IMG_BY_GENDER[gender] || DEFAULT_IMG_BY_GENDER._
   }
 
-  const canLike = (active) => {
-    return !!(active?.ean_code && isRealRemoteImage(active?.src))
+  const canLike = (active, group) => {
+    const ean = active?.ean_code || group?.ean_code || group?.rep?.ean_code || ''
+    return !!String(ean).trim()
   }
 
   const handleCardClick = (group) => {
@@ -228,7 +218,7 @@ export default function WomenDisplayPage({
     const payload = {
       ...rep,
       ean_code: active?.ean_code || rep.ean_code || group.ean_code,
-      image_url: active?.src || rep.image_url,
+      image_url: active?.src || rep.image_url || getImgForGroup(group, idx),
       variants: group.variants,
       images: (group.images || []).map((x) => x.src)
     }
@@ -240,7 +230,7 @@ export default function WomenDisplayPage({
     const payload = {
       ...rep,
       ean_code: active?.ean_code || rep.ean_code || group.ean_code,
-      image_url: active?.src || rep.image_url,
+      image_url: active?.src || rep.image_url || getImgForGroup(group, carouselIndex[group.key] || 0),
       variants: group.variants,
       images: (group.images || []).map((x) => x.src)
     }
@@ -273,23 +263,18 @@ export default function WomenDisplayPage({
           {grouped.map((group, index) => {
             const idx = carouselIndex[group.key] || 0
             const active = group.images?.[idx] || group.images?.[0] || null
-            const liked = likedKeys.has(
-              keyFor({ product_id: group.product_id || group.id, ean_code: active?.ean_code || '' })
-            )
-            const imgSrc = getImgForGroup(group, idx)
-            const total = group.images?.length || 1
             const discount = discountPct(group)
             const hasVariants = group.variants && group.variants.length > 1
             const isOutOfStock = group.is_out_of_stock
-            const likeEnabled = canLike(active)
+            const likeEnabled = canLike(active, group)
+            const imgSrc = getImgForGroup(group, idx)
+            const total = group.images?.length || 1
+            const liked = likedKeys.has(keyFor({ product_id: group.product_id || group.id, ean_code: String(active?.ean_code || group.ean_code || group.rep?.ean_code || '') }))
+
             const showMissingEan = !group.has_matching_images && !!String(group.missing_ean_label || '').trim()
 
             return (
-              <div
-                key={group.key || index}
-                className={`womens-section4-card${isOutOfStock ? ' out-of-stock' : ''}`}
-                onClick={() => handleCardClick(group)}
-              >
+              <div key={group.key || index} className={`womens-section4-card${isOutOfStock ? ' out-of-stock' : ''}`} onClick={() => handleCardClick(group)}>
                 <div className="womens-section4-img">
                   {showMissingEan && (
                     <div className="missing-ean-pill">
@@ -355,17 +340,13 @@ export default function WomenDisplayPage({
                         e.stopPropagation()
                         if (!likeEnabled) return
                         onToggleLike(group, {
-                          ean_code: active.ean_code,
-                          image_url: active.src,
-                          color: active.color || group.color || ''
+                          ean_code: String(active?.ean_code || group.ean_code || group.rep?.ean_code || ''),
+                          image_url: String(active?.src || imgSrc || ''),
+                          color: String(active?.color || group.color || '')
                         })
                       }}
                     >
-                      {liked ? (
-                        <FaHeart style={{ color: 'gold', fontSize: '20px' }} />
-                      ) : (
-                        <FaRegHeart style={{ color: 'gold', fontSize: '20px' }} />
-                      )}
+                      {liked ? <FaHeart style={{ color: 'gold', fontSize: '20px' }} /> : <FaRegHeart style={{ color: 'gold', fontSize: '20px' }} />}
                     </div>
 
                     <div

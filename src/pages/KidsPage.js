@@ -289,7 +289,7 @@ export default function KidsPage() {
               discountPct={discountPct}
             />
 
-            <section className="kids-section2">
+            {/*<section className="kids-section2">
               <div className="kids-section2-bg">
                 <img src="/images/mens-bg1.jpg" alt="Kids Style Background" />
                 <div className="kids-section2-overlay">
@@ -318,7 +318,7 @@ export default function KidsPage() {
               <div className="kids-section3-right">
                 <img src="/images/mens-part2.jpg" alt="Right Fashion" />
               </div>
-            </section>
+            </section> */}
           </div>
         </div>
       </div>
