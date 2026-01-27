@@ -5,6 +5,8 @@ import './WomenPage.css'
 import Footer from './Footer'
 import FilterSidebar from './FilterSidebar'
 import { useWishlist } from '../WishlistContext'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Autoplay } from 'swiper'
 import 'swiper/css'
 import WomenDisplayPage from './WomenDisplayPage'
 
@@ -212,7 +214,7 @@ export default function WomenPage() {
     const image_url = String(picked?.image_url || '')
     const color = String(picked?.color || '')
 
-    if (!ean_code) return
+    if (!ean_code || !image_url) return
 
     const k = keyFor({ product_id: pid, ean_code })
     const inList = likedKeys.has(k)
@@ -279,26 +281,124 @@ export default function WomenPage() {
   return (
     <div className="women-page">
       <Navbar />
-      <div className="women-layout">
-        <div className="catalog-row">
-          <FilterSidebar source={allProducts} onFilterChange={(list) => setProducts(Array.isArray(list) ? list : allProducts)} />
-          <div className="women-page-main">
-            <div className="women-page-content">
-              <WomenDisplayPage
-                products={products}
-                userType={userType}
-                loading={loading}
-                error={error}
-                likedKeys={likedKeys}
-                keyFor={keyFor}
-                onToggleLike={toggleLike}
-                onProductClick={handleProductClick}
-              />
-            </div>
+      <div className="filter-bar-class">
+        <FilterSidebar source={allProducts} onFilterChange={(list) => setProducts(Array.isArray(list) ? list : allProducts)} />
+        <div className="women-page-main">
+          <div className="women-page-content">
+            {/*<section className="home1-hero-new-home-2">
+              <div className="home1-hero-frame-new-home-2">
+                <Swiper className="home1-hero-swiper-new-home-2" modules={[Autoplay]} loop slidesPerView={1} autoplay={{ delay: 3500, disableOnInteraction: false }} speed={900}>
+                  <SwiperSlide>
+                    <div className="home1-hero-slide-new-home-2">
+                      <img src="/images/banners/banner1.jpg" alt="Women Banner" loading="eager" />
+                    </div>
+                  </SwiperSlide>
+                  <SwiperSlide>
+                    <div className="home1-hero-slide-new-home-2">
+                      <img src="/images/banners/banner2.jpg" alt="Women Banner" loading="lazy" decoding="async" />
+                    </div>
+                  </SwiperSlide>
+                  <SwiperSlide>
+                    <div className="home1-hero-slide-new-home-2">
+                      <img src="/images/banners/banner3.jpg" alt="Women Banner" loading="lazy" decoding="async" />
+                    </div>
+                  </SwiperSlide>
+                </Swiper>
+              </div>
+            </section> */}
+
+            <WomenDisplayPage
+              products={products}
+              userType={userType}
+              loading={loading}
+              error={error}
+              likedKeys={likedKeys}
+              keyFor={keyFor}
+              onToggleLike={toggleLike}
+              onProductClick={handleProductClick}
+            />
+
+            {/*<section className="home-section6">
+              <h2 className="home-section6-title">Trending Now....</h2>
+              <div className="home-section6-grid">
+                <div className="home-section6-item">
+                  <div className="home-section6-left">
+                    <img src="/images/trending-part1-big1.jpeg" alt="Printed Sarees" />
+                  </div>
+                  <div className="home-section6-right">
+                    <h3>Printed Sarees...</h3>
+                    <div className="home-section6-small-images">
+                      <img src="/images/trending-part1-small1.jpeg" alt="Saree 1" />
+                      <img src="/images/trending-part1-small2.jpeg" alt="Saree 2" />
+                    </div>
+                  </div>
+                </div>
+                <div className="home-section6-item">
+                  <div className="home-section6-left">
+                    <img src="/images/trending-part2-big1.jpeg" alt="Lehanga" />
+                  </div>
+                  <div className="home-section6-right">
+                    <h3> Printed Lehanga...</h3>
+                    <div className="home-section6-small-images">
+                      <img src="/images/trending-part2-small1.jpeg" alt="Lehanga 1" />
+                      <img src="/images/trending-part2-small2.jpeg" alt="Lehanga 2" />
+                    </div>
+                  </div>
+                </div>
+                <div className="home-section6-item">
+                  <div className="home-section6-left">
+                    <img src="/images/trending-part3-big1.jpeg" alt="Wedding Sarees" />
+                  </div>
+                  <div className="home-section6-right">
+                    <h3>Wedding Sarees...</h3>
+                    <div className="home-section6-small-images">
+                      <img src="/images/trending-part3-small1.jpeg" alt="Saree 1" />
+                      <img src="/images/trending-part3-small2.jpeg" alt="Saree 2" />
+                    </div>
+                  </div>
+                </div>
+                <div className="home-section6-item">
+                  <div className="home-section6-left">
+                    <img src="/images/trending-part4-big1.jpeg" alt="Printed Sarees" />
+                  </div>
+                  <div className="home-section6-right">
+                    <h3>Printed Chudidars...</h3>
+                    <div className="home-section6-small-images">
+                      <img src="/images/trending-part4-small1.jpeg" alt="Saree 1" />
+                      <img src="/images/trending-part4-small2.jpeg" alt="Saree 2" />
+                    </div>
+                  </div>
+                </div>
+                <div className="home-section6-item">
+                  <div className="home-section6-left">
+                    <img src="/images/trending-part5-big1.jpeg" alt="Lehanga" />
+                  </div>
+                  <div className="home-section6-right">
+                    <h3> Printed Gowns...</h3>
+                    <div className="home-section6-small-images">
+                      <img src="/images/trending-part5-small1.jpeg" alt="Lehanga 1" />
+                      <img src="/images/trending-part5-small2.jpeg" alt="Lehanga 2" />
+                    </div>
+                  </div>
+                </div>
+                <div className="home-section6-item">
+                  <div className="home-section6-left">
+                    <img src="/images/trending-part6-big1.jpeg" alt="Wedding Sarees" />
+                  </div>
+                  <div className="home-section6-right">
+                    <h3>Half Sarees...</h3>
+                    <div className="home-section6-small-images">
+                      <img src="/images/trending-part6-small1.jpeg" alt="Saree 1" />
+                      <img src="/images/trending-part6-small2.jpeg" alt="Saree 2" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section> */}
           </div>
         </div>
-        <Footer />
       </div>
+      <Footer />
     </div>
   )
 }

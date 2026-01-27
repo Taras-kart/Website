@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from './Navbar'
 import './MenPage.css'
@@ -41,6 +41,7 @@ const numOrZero = (v) => {
 const computeOutOfStock = (p) => {
   const explicit = normBool(p.is_out_of_stock)
   if (explicit !== undefined) return explicit
+
   const inStock = normBool(p.in_stock)
   if (inStock !== undefined) return !inStock
 
@@ -57,67 +58,30 @@ const computeOutOfStock = (p) => {
   return false
 }
 
-const clampScrollY = (y) => {
-  const max = Math.max(0, (document.documentElement?.scrollHeight || 0) - (window.innerHeight || 0))
-  return Math.min(Math.max(0, y), max)
-}
-
 export default function MenPage() {
   const navigate = useNavigate()
   const { addToWishlist, wishlistItems, setWishlistItems } = useWishlist()
-
   const [allProducts, setAllProducts] = useState([])
   const [products, setProducts] = useState([])
   const [userType, setUserType] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [likedKeys, setLikedKeys] = useState(new Set())
+  const userId = sessionStorage.getItem('userId')
 
-  const restoreDoneRef = useRef(false)
-  const rafSaveRef = useRef(0)
-
-  const getUserId = () => {
-    if (typeof window === 'undefined') return null
-    const id = sessionStorage.getItem('userId') || localStorage.getItem('userId')
-    if (!id) return null
-    const n = Number(id)
-    if (!Number.isInteger(n)) return null
-    return String(n)
-  }
-
-  const userId = getUserId()
+  const keyFor = (p) => String(p.ean_code ?? p.product_id ?? p.id ?? `${p.image_url}`)
 
   useEffect(() => {
-    const t = sessionStorage.getItem('userType') || localStorage.getItem('userType')
-    setUserType(t)
+    setUserType(sessionStorage.getItem('userType'))
   }, [])
 
-  const keyFor = (p) => {
-    const pid = p?.product_id ?? p?.id ?? ''
-    const ean = p?.ean_code ?? ''
-    return `${String(pid)}::${String(ean)}`
-  }
-
   useEffect(() => {
-    setLikedKeys(new Set(toArray(wishlistItems).map((it) => keyFor(it))))
+    setLikedKeys(
+      new Set(
+        toArray(wishlistItems).map((it) => String(it.ean_code ?? it.product_id ?? it.id ?? `${it.image_url}`))
+      )
+    )
   }, [wishlistItems])
-
-  useEffect(() => {
-    const onScroll = () => {
-      if (rafSaveRef.current) return
-      rafSaveRef.current = requestAnimationFrame(() => {
-        rafSaveRef.current = 0
-        const y = window.scrollY || window.pageYOffset || 0
-        sessionStorage.setItem('scroll:men-page', String(y))
-      })
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => {
-      window.removeEventListener('scroll', onScroll)
-      if (rafSaveRef.current) cancelAnimationFrame(rafSaveRef.current)
-      rafSaveRef.current = 0
-    }
-  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -128,19 +92,17 @@ export default function MenPage() {
         const res = await fetch(`${API_BASE}/api/products?gender=MEN&limit=50000&_t=${Date.now()}`, { cache: 'no-store' })
         if (!res.ok) throw new Error('Failed to load products')
         const data = await res.json()
-
         const isPlaceholder = (url) => {
           if (!url) return true
           return /^\/images\//.test(url)
         }
-
         const arr = toArray(data).map((p, i) => {
           const ean = p.ean_code ?? p.EANCode ?? p.ean ?? p.barcode ?? p.bar_code ?? ''
           const apiImage = !isPlaceholder(p.image_url) ? p.image_url : ''
           const candidateCloudinary = ean ? cloudinaryUrlByEan(ean) : ''
           const img = apiImage || candidateCloudinary || DEFAULT_IMG
           return {
-            id: p.id ?? p.product_id ?? i + 1,
+            id: p.id ?? i + 1,
             product_id: p.product_id ?? p.pid ?? p.id ?? i + 1,
             brand: p.brand ?? p.brand_name ?? '',
             product_name: p.product_name ?? p.name ?? '',
@@ -163,8 +125,8 @@ export default function MenPage() {
 
         const uniqMap = new Map()
         for (const x of arr) {
-          const k = x.product_id || x.id
-          if (!uniqMap.has(k)) uniqMap.set(k, x)
+          const key = x.product_id || x.id
+          if (!uniqMap.has(key)) uniqMap.set(key, x)
         }
         const uniq = Array.from(uniqMap.values())
 
@@ -188,19 +150,6 @@ export default function MenPage() {
     }
   }, [])
 
-  useLayoutEffect(() => {
-    if (restoreDoneRef.current) return
-    if (loading) return
-    restoreDoneRef.current = true
-    const saved = sessionStorage.getItem('scroll:men-page')
-    const yRaw = saved != null ? parseInt(saved, 10) : 0
-    const y = Number.isFinite(yRaw) ? yRaw : 0
-    requestAnimationFrame(() => {
-      window.scrollTo(0, clampScrollY(y))
-      requestAnimationFrame(() => window.scrollTo(0, clampScrollY(y)))
-    })
-  }, [loading, products.length, error])
-
   useEffect(() => {
     const loadWishlist = async () => {
       if (!userId) return
@@ -213,27 +162,19 @@ export default function MenPage() {
     loadWishlist()
   }, [userId, setWishlistItems])
 
-  const toggleLike = async (group, picked) => {
-    if (!userId) return
-    const pid = group.product_id || group.id
-    const ean_code = String(picked?.ean_code || group?.ean_code || '')
-    const image_url = String(picked?.image_url || group?.image_url || '')
-    const color = String(picked?.color || group?.color || '')
-
-    if (!ean_code) return
-
-    const k = keyFor({ product_id: pid, ean_code })
-    const inList = likedKeys.has(k)
-
+  const toggleLike = async (product) => {
+    const k = keyFor(product)
+    const already = likedKeys.has(k)
     try {
-      if (inList) {
+      if (already) {
         await fetch(`${API_BASE}/api/wishlist`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, product_id: pid, ean_code })
+          body: JSON.stringify({ user_id: userId, product_id: product.product_id ?? product.id })
         })
-
-        setWishlistItems((prev) => prev.filter((it) => keyFor(it) !== k))
+        setWishlistItems((prev) =>
+          prev.filter((w) => String(w.ean_code ?? w.product_id ?? w.id ?? `${w.image_url}`) !== k)
+        )
         setLikedKeys((prev) => {
           const n = new Set(prev)
           n.delete(k)
@@ -243,19 +184,9 @@ export default function MenPage() {
         await fetch(`${API_BASE}/api/wishlist`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, product_id: pid, ean_code, image_url, color })
+          body: JSON.stringify({ user_id: userId, product_id: product.product_id ?? product.id })
         })
-
-        const payload = {
-          ...(picked || group),
-          product_id: pid,
-          ean_code,
-          image_url,
-          color: color || (picked || group)?.color || ''
-        }
-
-        addToWishlist(payload)
-
+        addToWishlist({ ...product, product_id: product.product_id ?? product.id })
         setLikedKeys((prev) => {
           const n = new Set(prev)
           n.add(k)
@@ -273,8 +204,11 @@ export default function MenPage() {
   return (
     <div className="men-page">
       <Navbar />
-      <div className="filter-bar-class">
-        <FilterSidebar source={allProducts} onFilterChange={(list) => setProducts(Array.isArray(list) ? list : allProducts)} />
+      <div className="test">
+        <FilterSidebar
+          source={allProducts}
+          onFilterChange={(list) => setProducts(Array.isArray(list) ? list : allProducts)}
+        />
         <div className="men-page-main">
           <div className="men-page-content">
             <section className="mens-section1">

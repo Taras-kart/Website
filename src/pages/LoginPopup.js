@@ -12,7 +12,7 @@ const API_BASE_RAW =
   (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
   (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
   DEFAULT_API_BASE
-const API_BASE = API_BASE_RAW.replace(/\/+$/, '')
+const API_BASE = String(API_BASE_RAW || DEFAULT_API_BASE).replace(/\/+$/, '')
 
 const env =
   typeof import.meta !== 'undefined' && import.meta.env
@@ -47,6 +47,7 @@ const googleProvider = new GoogleAuthProvider()
 const LoginPopup = ({ onClose, onSuccess }) => {
   const popupRef = useRef(null)
   const emailRef = useRef(null)
+  const passwordRef = useRef(null)
   const msgTimerRef = useRef(null)
 
   const [email, setEmail] = useState('')
@@ -68,11 +69,11 @@ const LoginPopup = ({ onClose, onSuccess }) => {
 
   const toUserShape = useCallback((src) => {
     return {
-      id: src.id || src.uid,
-      name: src.name || src.displayName || src.email?.split('@')[0] || 'User',
-      email: src.email || '',
-      profilePic: src.profilePic || src.photoURL || '/images/profile-pic.png',
-      userType: src.userType || src.type || 'B2C'
+      id: src?.id || src?.uid,
+      name: src?.name || src?.displayName || src?.email?.split('@')[0] || 'User',
+      email: src?.email || '',
+      profilePic: src?.profilePic || src?.photoURL || '/images/profile-pic.png',
+      userType: src?.userType || src?.type || 'B2C'
     }
   }, [])
 
@@ -134,8 +135,8 @@ const LoginPopup = ({ onClose, onSuccess }) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     })
-    const data = await response.json()
-    if (!response.ok) throw new Error(data.message || 'Invalid email or password')
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) throw new Error(data?.message || 'Invalid email or password')
 
     const user = data.user || data
 
@@ -145,14 +146,14 @@ const LoginPopup = ({ onClose, onSuccess }) => {
     }
 
     localStorage.setItem('userId', String(user.id))
-    localStorage.setItem('userEmail', user.email)
-    localStorage.setItem('userName', user.name)
-    localStorage.setItem('userType', user.type)
+    localStorage.setItem('userEmail', user.email || '')
+    localStorage.setItem('userName', user.name || '')
+    localStorage.setItem('userType', user.type || 'B2C')
 
     sessionStorage.setItem('userId', String(user.id))
-    sessionStorage.setItem('userEmail', user.email)
-    sessionStorage.setItem('userName', user.name)
-    sessionStorage.setItem('userType', user.type)
+    sessionStorage.setItem('userEmail', user.email || '')
+    sessionStorage.setItem('userName', user.name || '')
+    sessionStorage.setItem('userType', user.type || 'B2C')
 
     clearUserIdIfInvalid()
     return user
@@ -167,11 +168,12 @@ const LoginPopup = ({ onClose, onSuccess }) => {
       const token = await u.getIdToken()
       localStorage.setItem('tk_id_token', token)
       sessionStorage.setItem('tk_id_token', token)
+
       const backendUser = await syncUserWithBackend(u)
 
       setPopupMessage('Successfully Logged In!')
       setTimeout(() => {
-        onSuccess(toUserShape(backendUser || u))
+        onSuccess && onSuccess(toUserShape(backendUser || u))
         setPopupMessage('')
       }, 900)
     } catch (e) {
@@ -196,13 +198,14 @@ const LoginPopup = ({ onClose, onSuccess }) => {
           const user = await backendLogin()
           setPopupMessage('Successfully Logged In!')
           setTimeout(() => {
-            onSuccess({
-              id: user.id,
-              name: user.name,
-              email: user.email,
-              profilePic: '/images/profile-pic.png',
-              userType: user.type
-            })
+            onSuccess &&
+              onSuccess({
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                profilePic: '/images/profile-pic.png',
+                userType: user.type
+              })
             setPopupMessage('')
           }, 1200)
         } catch (err) {
@@ -218,6 +221,11 @@ const LoginPopup = ({ onClose, onSuccess }) => {
     }
   }, [canSubmit, email, password, backendLogin, onSuccess, setMsg, syncUserWithBackend, toUserShape])
 
+  const handleLoginRef = useRef(handleLogin)
+  useEffect(() => {
+    handleLoginRef.current = handleLogin
+  }, [handleLogin])
+
   const loginWithGoogle = useCallback(async () => {
     try {
       setLoading(true)
@@ -226,11 +234,12 @@ const LoginPopup = ({ onClose, onSuccess }) => {
       const token = await u.getIdToken()
       localStorage.setItem('tk_id_token', token)
       sessionStorage.setItem('tk_id_token', token)
+
       const backendUser = await syncUserWithBackend(u)
 
       setPopupMessage('Successfully Logged In!')
       setTimeout(() => {
-        onSuccess(toUserShape(backendUser || u))
+        onSuccess && onSuccess(toUserShape(backendUser || u))
         setPopupMessage('')
       }, 900)
     } catch (e) {
@@ -250,34 +259,49 @@ const LoginPopup = ({ onClose, onSuccess }) => {
   }, [onSuccess, setMsg, syncUserWithBackend, toUserShape])
 
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (showForgot || showSignup) return
-      if (popupRef.current && !popupRef.current.contains(e.target)) onClose()
-    }
-
-    const onKey = (e) => {
-      if (showForgot || showSignup) return
-      if (e.key === 'Escape') onClose()
-      if (e.key === 'Enter') handleLogin()
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    document.addEventListener('keydown', onKey)
     document.body.style.overflow = 'hidden'
     emailRef.current?.focus()
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-      document.removeEventListener('keydown', onKey)
       document.body.style.overflow = ''
-    }
-  }, [showForgot, showSignup, onClose, handleLogin])
-
-  useEffect(() => {
-    return () => {
       if (msgTimerRef.current) clearTimeout(msgTimerRef.current)
     }
   }, [])
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (showForgot || showSignup) return
+      if (popupRef.current && !popupRef.current.contains(e.target)) onClose && onClose()
+    }
+
+    const onKey = (e) => {
+      if (showForgot || showSignup) return
+      if (e.key === 'Escape') onClose && onClose()
+      if (e.key === 'Enter') handleLoginRef.current && handleLoginRef.current()
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', onKey)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [showForgot, showSignup, onClose])
+
+  const onEmailKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      passwordRef.current?.focus()
+    }
+  }
+
+  const onPasswordKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleLoginRef.current && handleLoginRef.current()
+    }
+  }
 
   return (
     <>
@@ -302,8 +326,10 @@ const LoginPopup = ({ onClose, onSuccess }) => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={onEmailKeyDown}
                 placeholder="Email"
                 autoComplete="email"
+                inputMode="email"
               />
             </div>
 
@@ -312,13 +338,22 @@ const LoginPopup = ({ onClose, onSuccess }) => {
                 <FiLock />
               </span>
               <input
+                ref={passwordRef}
                 type={showPwd ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={onPasswordKeyDown}
+                onFocus={(e) => e.target.setSelectionRange(e.target.value.length, e.target.value.length)}
                 placeholder="Password"
                 autoComplete="current-password"
               />
-              <button type="button" className="eye-login" onClick={() => setShowPwd((v) => !v)}>
+              <button
+                type="button"
+                className="eye-login"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => setShowPwd((v) => !v)}
+                aria-label="Toggle password visibility"
+              >
                 {showPwd ? <FiEyeOff /> : <FiEye />}
               </button>
             </div>
@@ -347,14 +382,14 @@ const LoginPopup = ({ onClose, onSuccess }) => {
           </div>
 
           <div className="social-grid-login">
-            <button className="btn-google-login" onClick={loginWithGoogle}>
+            <button className="btn-google-login" onClick={loginWithGoogle} type="button">
               <FaGoogle /> Google
             </button>
           </div>
 
           <p className="signup-login">
             Don’t have an account{' '}
-            <button className="signup-link-login" onClick={() => setShowSignup(true)}>
+            <button className="signup-link-login" onClick={() => setShowSignup(true)} type="button">
               Sign up
             </button>
           </p>

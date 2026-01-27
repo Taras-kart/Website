@@ -1,65 +1,20 @@
-:root {
-  --filter-sidebar-width: 320px;
-  --navbar-height: 110px;
+.kids-page-main {
+  display: flex;
+  width: 100%;
+}
+
+.filter-sidebar {
+  width: 14%;
+  padding: 20px;
+}
+
+.kids-page-content {
+  width: 100%;
 }
 
 .kids-page {
   position: relative;
-  font-family: "Noto Sans", sans-serif;
-}
-
-.filter-bar-class {
-  width: 100%;
-}
-
-@media (min-width: 1025px) {
-  .filter-bar-class {
-    margin-top: 30px;
-    display: grid;
-    grid-template-columns: var(--filter-sidebar-width) 1fr;
-    align-items: start;
-    gap: 0;
-    width: 100%;
-  }
-
-  .filter-bar-class > .filterbar-wrap {
-    position: sticky;
-    top: var(--navbar-height);
-    height: calc(100vh - var(--navbar-height));
-    align-self: start;
-    z-index: 900;
-    border-right: 1px solid rgba(0, 0, 0, 0.10);
-    border-bottom: 0;
-    overflow: hidden;
-    background: #fff;
-  }
-
-  .kids-page-main {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .kids-page-content {
-    width: 100%;
-    padding: 0;
-    min-width: 0;
-  }
-}
-
-@media (max-width: 1024px) {
-  :root {
-    --navbar-height: 60px;
-  }
-
-  .kids-page-main {
-    display: flex;
-    width: 100%;
-  }
-
-  .kids-page-content {
-    width: 100%;
-    padding: 0;
-  }
+  overflow: visible;
 }
 
 .kids-section1 {
@@ -221,8 +176,6 @@
   .kids-section2-bg img {
     width: 100%;
     height: 400px;
-    object-fit: cover;
-    display: block;
   }
 
   .kids-section2-overlay {
@@ -244,6 +197,7 @@
   display: flex;
   width: 96%;
   height: auto;
+  color: white;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
@@ -313,8 +267,6 @@
   .kids-section3 {
     flex-direction: column;
     padding: 30px 15px;
-    width: 100%;
-    margin-left: 0;
   }
 
   .kids-section3-left,
@@ -337,6 +289,7 @@
   .kids-section3-right {
     width: 90%;
     margin: 0 auto;
+    margin-left: 10px;
   }
 
   .kids-section3-discount h1 {
@@ -350,18 +303,18 @@
   .kids-section3 {
     margin-top: 100px;
     display: flex;
-    flex-direction: column;
+    width: 100%;
     height: auto;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    margin: 0 auto;
+    color: white;
+    align-items: left;
+    justify-content: space-between;
+    gap: 0;
   }
 
   .kids-section3-left img,
   .kids-section3-right img {
     width: 100%;
-    height: 450px;
+    height: 550px;
     border-radius: 10px;
     object-fit: cover;
   }

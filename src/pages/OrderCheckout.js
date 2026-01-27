@@ -126,27 +126,42 @@ export default function OrderCheckout() {
     const shipping_address = {
       line1: form.address_line1,
       line2: form.address_line2,
-      city: form.city,
-      state: form.state,
-      pincode: form.pincode
+      city: String(form.city || '').trim(),
+      state: String(form.state || '').trim(),
+      pincode: String(form.pincode || '').trim()
     };
+
+    const normalizedItems = Array.isArray(payload?.items)
+      ? payload.items.map((it) => ({
+          variant_id: Number(it.variant_id),
+          product_id: it.product_id != null ? Number(it.product_id) : null,
+          qty: Number(it.qty || 1) || 1,
+          price: Number(it.price || 0) || 0,
+          mrp: Number(it.mrp ?? it.price ?? 0) || 0,
+          size: it.size != null ? String(it.size) : null,
+          colour: it.colour != null ? String(it.colour) : null,
+          image_url: it.image_url != null ? String(it.image_url) : null
+        }))
+      : [];
+
     const body = {
       customer_email: form.email || null,
       customer_name: form.name || null,
       customer_mobile: form.mobile || null,
       shipping_address,
       totals: payload.totals,
-      items: payload.items,
-      branch_id: null,
+      items: normalizedItems,
       payment_status: statusForBackend,
       login_email: loginEmail,
       payment_method: paymentMethod
     };
+
     const resp = await fetch(`${API_BASE}/api/sales/web/place`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
+
     if (!resp.ok) {
       let m = 'Failed';
       try {
@@ -155,6 +170,7 @@ export default function OrderCheckout() {
       } catch {}
       throw new Error(m);
     }
+
     const data = await resp.json();
     const saleId = data?.id || null;
     if (!saleId) throw new Error('No sale id');
@@ -212,20 +228,13 @@ export default function OrderCheckout() {
                   placeholder="Email"
                   value={form.email}
                   onChange={(e) => setF('email', e.target.value)}
-                  className={
-                    form.email && !isValidEmail(form.email) ? 'err' : ''
-                  }
+                  className={form.email && !isValidEmail(form.email) ? 'err' : ''}
                 />
               </div>
               <input
                 placeholder="Mobile* (10 digits)"
                 value={form.mobile}
-                onChange={(e) =>
-                  setF(
-                    'mobile',
-                    e.target.value.replace(/\D/g, '').slice(0, 10)
-                  )
-                }
+                onChange={(e) => setF('mobile', e.target.value.replace(/\D/g, '').slice(0, 10))}
                 className={!isValidMobile(form.mobile) ? 'err' : ''}
               />
             </div>
@@ -259,12 +268,7 @@ export default function OrderCheckout() {
               <input
                 placeholder="Pincode* (6 digits)"
                 value={form.pincode}
-                onChange={(e) =>
-                  setF(
-                    'pincode',
-                    e.target.value.replace(/\D/g, '').slice(0, 6)
-                  )
-                }
+                onChange={(e) => setF('pincode', e.target.value.replace(/\D/g, '').slice(0, 6))}
                 className={!isValidPincode(form.pincode) ? 'err' : ''}
               />
               <div className="inline-actions">
@@ -273,10 +277,7 @@ export default function OrderCheckout() {
                 </a>
                 <button
                   onClick={() => {
-                    localStorage.setItem(
-                      'tk_checkout_address',
-                      JSON.stringify(form)
-                    );
+                    localStorage.setItem('tk_checkout_address', JSON.stringify(form));
                     showToast('Address saved', 1200);
                   }}
                   className="ghost"
@@ -290,9 +291,7 @@ export default function OrderCheckout() {
               <div className="pay-grid">
                 <button
                   type="button"
-                  className={`pay-option ${
-                    paymentMethod === 'COD' ? 'active' : ''
-                  }`}
+                  className={`pay-option ${paymentMethod === 'COD' ? 'active' : ''}`}
                   onClick={() => setPaymentMethod('COD')}
                 >
                   <span className="pay-title">Cash on Delivery</span>
@@ -300,9 +299,7 @@ export default function OrderCheckout() {
                 </button>
                 <button
                   type="button"
-                  className={`pay-option ${
-                    paymentMethod === 'ONLINE' ? 'active' : ''
-                  }`}
+                  className={`pay-option ${paymentMethod === 'ONLINE' ? 'active' : ''}`}
                   onClick={() => setPaymentMethod('ONLINE')}
                 >
                   <span className="pay-title">UPI / Card / Netbanking</span>
@@ -354,17 +351,9 @@ export default function OrderCheckout() {
                   <span>₹{fmt(payload?.totals?.payable)}</span>
                 </div>
               </div>
-              <button
-                onClick={placeOrder}
-                disabled={!canPlace}
-                className="cta"
-              >
+              <button onClick={placeOrder} disabled={!canPlace} className="cta">
                 {placing ? <span className="spinner" /> : null}
-                {placing
-                  ? 'Processing…'
-                  : paymentMethod === 'COD'
-                  ? 'Place Order (COD)'
-                  : 'Pay Now'}
+                {placing ? 'Processing…' : paymentMethod === 'COD' ? 'Place Order (COD)' : 'Pay Now'}
               </button>
               <div className="note">Secure checkout • No extra fees</div>
             </div>
@@ -372,9 +361,7 @@ export default function OrderCheckout() {
               <h4>Need Help?</h4>
               <p>
                 Questions about delivery or payment? Write to{' '}
-                <a href="mailto:taraskartonline@gmail.com">
-                  taraskartonline@gmail.com
-                </a>
+                <a href="mailto:taraskartonline@gmail.com">taraskartonline@gmail.com</a>
               </p>
             </div>
           </div>
@@ -385,17 +372,12 @@ export default function OrderCheckout() {
               <div className="success-icon">✓</div>
               <h2>Order Placed</h2>
               <p>Thank you for shopping with us.</p>
-              {orderId ? (
-                <div className="order-id">Order ID: #{orderId}</div>
-              ) : null}
+              {orderId ? <div className="order-id">Order ID: #{orderId}</div> : null}
               <div className="modal-actions">
                 <a className="btn ghost" href="/">
                   Continue Shopping
                 </a>
-                <button
-                  className="btn solid"
-                  onClick={() => setSuccess(false)}
-                >
+                <button className="btn solid" onClick={() => setSuccess(false)}>
                   Close
                 </button>
               </div>

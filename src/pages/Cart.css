@@ -27,9 +27,10 @@
 
 .cart-container {
   max-width: 1200px;
-  margin: 24px auto 96px;
+  margin: 60px auto 0;
   padding: 0 16px;
 }
+
 
 .cart-empty {
   text-align: center;

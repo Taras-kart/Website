@@ -402,3 +402,37 @@
     border-radius: 16px;
   }
 }
+
+
+
+.womens-section4 {
+  position: relative;
+  z-index: 1;
+}
+
+.womens-section4-grid {
+  position: relative;
+  z-index: 1;
+}
+
+.womens-section4-card {
+  position: relative;
+  z-index: 1;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+
+.womens-section4-card:hover {
+  z-index: 2;
+  transform: translate3d(0, -4px, 0) scale(1.01);
+}
+
+
+.womens-section4-card {
+  position: relative;
+  z-index: 0;
+}
+
+.womens-section4-card:hover {
+  z-index: 1;
+}
