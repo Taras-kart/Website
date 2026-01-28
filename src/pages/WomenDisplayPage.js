@@ -1,6 +1,6 @@
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useMemo, useState } from 'react'
 import './WomenDisplayPage.css'
-import { FaHeart, FaRegHeart, FaChevronLeft, FaChevronRight, FaEye } from 'react-icons/fa'
+import { FaHeart, FaRegHeart, FaEye } from 'react-icons/fa'
 import FullDetailsPopup from './FullDetailsPopup'
 
 const CLOUD_NAME = 'deymt9uyh'
@@ -127,8 +127,16 @@ function groupProductsByColor(products) {
   return out
 }
 
-export default function WomenDisplayPage({ products, userType, loading, error, likedKeys, keyFor, onToggleLike, onProductClick }) {
-  const [carouselIndex, setCarouselIndex] = useState({})
+export default function WomenDisplayPage({
+  products,
+  userType,
+  loading,
+  error,
+  likedKeys,
+  keyFor,
+  onToggleLike,
+  onProductClick
+}) {
   const [popupProduct, setPopupProduct] = useState(null)
 
   const groupedRaw = useMemo(() => groupProductsByColor(products || []), [products])
@@ -143,12 +151,6 @@ export default function WomenDisplayPage({ products, userType, loading, error, l
     })
     return list
   }, [groupedRaw])
-
-  useEffect(() => {
-    const init = {}
-    for (const g of grouped) init[g.key] = 0
-    setCarouselIndex(init)
-  }, [grouped])
 
   const getPriceFields = (g) => {
     const p = g.price_fields || g || {}
@@ -181,56 +183,38 @@ export default function WomenDisplayPage({ products, userType, loading, error, l
     return Math.max(0, Math.round(pct))
   }
 
-  const nextImg = (group, e) => {
-    e?.stopPropagation?.()
-    setCarouselIndex((prev) => {
-      const i = prev[group.key] || 0
-      const n = group.images?.length || 1
-      return { ...prev, [group.key]: (i + 1) % n }
-    })
-  }
-
-  const prevImg = (group, e) => {
-    e?.stopPropagation?.()
-    setCarouselIndex((prev) => {
-      const i = prev[group.key] || 0
-      const n = group.images?.length || 1
-      return { ...prev, [group.key]: (i - 1 + n) % n }
-    })
-  }
-
-  const getImgForGroup = (group, idx) => {
-    const img = group.images?.[idx]?.src
+  const getImgForGroup = (group) => {
+    const img = group.images?.[0]?.src
     if (img) return img
     const gender = group.gender || group.rep?.gender || 'WOMEN'
     return DEFAULT_IMG_BY_GENDER[gender] || DEFAULT_IMG_BY_GENDER._
   }
 
-  const canLike = (active, group) => {
-    const ean = active?.ean_code || group?.ean_code || group?.rep?.ean_code || ''
+  const canLike = (group) => {
+    const ean = group?.ean_code || group?.rep?.ean_code || ''
     return !!String(ean).trim()
   }
 
   const handleCardClick = (group) => {
-    const idx = carouselIndex[group.key] || 0
-    const active = group.images?.[idx] || group.images?.[0] || null
+    const active = group.images?.[0] || null
     const rep = active?.variant || group.variants?.[0] || group.rep || group
     const payload = {
       ...rep,
       ean_code: active?.ean_code || rep.ean_code || group.ean_code,
-      image_url: active?.src || rep.image_url || getImgForGroup(group, idx),
+      image_url: active?.src || rep.image_url || getImgForGroup(group),
       variants: group.variants,
       images: (group.images || []).map((x) => x.src)
     }
     onProductClick(payload)
   }
 
-  const openPopup = (group, active) => {
+  const openPopup = (group) => {
+    const active = group.images?.[0] || null
     const rep = active?.variant || group.variants?.[0] || group.rep || group
     const payload = {
       ...rep,
       ean_code: active?.ean_code || rep.ean_code || group.ean_code,
-      image_url: active?.src || rep.image_url || getImgForGroup(group, carouselIndex[group.key] || 0),
+      image_url: active?.src || rep.image_url || getImgForGroup(group),
       variants: group.variants,
       images: (group.images || []).map((x) => x.src)
     }
@@ -261,20 +245,27 @@ export default function WomenDisplayPage({ products, userType, loading, error, l
       ) : (
         <div className="womens-section4-grid">
           {grouped.map((group, index) => {
-            const idx = carouselIndex[group.key] || 0
-            const active = group.images?.[idx] || group.images?.[0] || null
+            const active = group.images?.[0] || null
             const discount = discountPct(group)
             const hasVariants = group.variants && group.variants.length > 1
             const isOutOfStock = group.is_out_of_stock
-            const likeEnabled = canLike(active, group)
-            const imgSrc = getImgForGroup(group, idx)
-            const total = group.images?.length || 1
-            const liked = likedKeys.has(keyFor({ product_id: group.product_id || group.id, ean_code: String(active?.ean_code || group.ean_code || group.rep?.ean_code || '') }))
+            const likeEnabled = canLike(group)
+            const imgSrc = getImgForGroup(group)
+            const liked = likedKeys.has(
+              keyFor({
+                product_id: group.product_id || group.id,
+                ean_code: String(active?.ean_code || group.ean_code || group.rep?.ean_code || '')
+              })
+            )
 
             const showMissingEan = !group.has_matching_images && !!String(group.missing_ean_label || '').trim()
 
             return (
-              <div key={group.key || index} className={`womens-section4-card${isOutOfStock ? ' out-of-stock' : ''}`} onClick={() => handleCardClick(group)}>
+              <div
+                key={group.key || index}
+                className={`womens-section4-card${isOutOfStock ? ' out-of-stock' : ''}`}
+                onClick={() => handleCardClick(group)}
+              >
                 <div className="womens-section4-img">
                   {showMissingEan && (
                     <div className="missing-ean-pill">
@@ -307,32 +298,6 @@ export default function WomenDisplayPage({ products, userType, loading, error, l
                     </div>
                   )}
 
-                  {total > 1 && (
-                    <>
-                      <button className="carousel-arrow left" onClick={(e) => prevImg(group, e)} aria-label="Previous">
-                        <FaChevronLeft />
-                      </button>
-                      <button className="carousel-arrow right" onClick={(e) => nextImg(group, e)} aria-label="Next">
-                        <FaChevronRight />
-                      </button>
-                      <div className="carousel-dots">
-                        {group.images.map((_, i) => (
-                          <span
-                            key={i}
-                            className={i === idx ? 'dot active' : 'dot'}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setCarouselIndex((prev) => ({ ...prev, [group.key]: i }))
-                            }}
-                          />
-                        ))}
-                      </div>
-                      <div className="carousel-count">
-                        {idx + 1}/{total}
-                      </div>
-                    </>
-                  )}
-
                   <div className="action-icons">
                     <div
                       className={`action-icon${likeEnabled ? '' : ' disabled'}`}
@@ -340,20 +305,24 @@ export default function WomenDisplayPage({ products, userType, loading, error, l
                         e.stopPropagation()
                         if (!likeEnabled) return
                         onToggleLike(group, {
-                          ean_code: String(active?.ean_code || group.ean_code || group.rep?.ean_code || ''),
+                          ean_code: String(group.ean_code || group.rep?.ean_code || ''),
                           image_url: String(active?.src || imgSrc || ''),
-                          color: String(active?.color || group.color || '')
+                          color: String(group.color || '')
                         })
                       }}
                     >
-                      {liked ? <FaHeart style={{ color: 'gold', fontSize: '20px' }} /> : <FaRegHeart style={{ color: 'gold', fontSize: '20px' }} />}
+                      {liked ? (
+                        <FaHeart style={{ color: 'gold', fontSize: '20px' }} />
+                      ) : (
+                        <FaRegHeart style={{ color: 'gold', fontSize: '20px' }} />
+                      )}
                     </div>
 
                     <div
                       className="action-icon"
                       onClick={(e) => {
                         e.stopPropagation()
-                        openPopup(group, active)
+                        openPopup(group)
                       }}
                     >
                       <FaEye style={{ color: 'gold', fontSize: '20px' }} />

@@ -287,70 +287,6 @@
   font-weight: 600;
 }
 
-.carousel-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  border: none;
-  background: rgba(15, 23, 42, 0.72);
-  color: #fff;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease;
-}
-
-.carousel-arrow:hover {
-  background: rgba(15, 23, 42, 0.9);
-  transform: translateY(-50%) scale(1.05);
-}
-
-.carousel-arrow.left {
-  left: 10px;
-}
-
-.carousel-arrow.right {
-  right: 10px;
-}
-
-.carousel-dots {
-  position: absolute;
-  left: 50%;
-  bottom: 8px;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 6px;
-  padding: 4px 8px;
-  border-radius: 999px;
-  background: rgba(15, 23, 42, 0.6);
-}
-
-.carousel-dots .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.6);
-  cursor: pointer;
-}
-
-.carousel-dots .dot.active {
-  background: #facc15;
-}
-
-.carousel-count {
-  position: absolute;
-  left: 10px;
-  bottom: 8px;
-  font-size: 11px;
-  color: #f9fafb;
-  background: rgba(15, 23, 42, 0.7);
-  padding: 2px 8px;
-  border-radius: 999px;
-}
-
 .out-of-stock-overlay {
   position: absolute;
   inset: 0;
@@ -403,8 +339,6 @@
   }
 }
 
-
-
 .womens-section4 {
   position: relative;
   z-index: 1;
@@ -426,7 +360,6 @@
   z-index: 2;
   transform: translate3d(0, -4px, 0) scale(1.01);
 }
-
 
 .womens-section4-card {
   position: relative;
