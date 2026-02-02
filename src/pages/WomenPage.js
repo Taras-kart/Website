@@ -1,14 +1,10 @@
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState, useEffect, useRef, useLayoutEffect, useMemo } from 'react'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import Navbar from './Navbar'
 import './WomenPage.css'
 import Footer from './Footer'
-import FilterSidebar from './FilterSidebar'
-import { useWishlist } from '../WishlistContext'
-//import { Swiper, SwiperSlide } from 'swiper/react'
-//import { Autoplay } from 'swiper'
-//import 'swiper/css'
 import WomenDisplayPage from './WomenDisplayPage'
+import { useWishlist } from '../WishlistContext'
 
 const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app'
 const API_BASE_RAW =
@@ -16,9 +12,11 @@ const API_BASE_RAW =
   (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
   DEFAULT_API_BASE
 const API_BASE = API_BASE_RAW.replace(/\/+$/, '')
+
 const CLOUD_NAME = 'deymt9uyh'
 const DEFAULT_IMG = '/images/women/women20.jpeg'
 const toArray = (x) => (Array.isArray(x) ? x : [])
+const niceTitle = (s) => String(s || '').trim()
 
 function cloudinaryUrlByEan(ean) {
   if (!ean) return ''
@@ -85,6 +83,147 @@ const writeVariantMap = (userId, map) => {
   } catch {}
 }
 
+const buildBrandImage = (brand) => {
+  const map = {
+    'Twin Birds': '/images/updated/category-kurti-pant.webp',
+    'Indian Flower': '/images/updated/category-leggin.webp',
+    Intimacy: '/images/updated/category-metallic-pant.webp',
+    'Naidu Hall': '/images/updated/category-plazzo-pant.webp',
+    Aswathi: '/images/updated/category-saree-shaper.webp',
+    Jockey: '/images/home/jockey3.webp'
+  }
+  return map[brand] || '/images/women/women20.jpeg'
+}
+
+const normalizeKey = (s) => String(s || '').trim().toLowerCase()
+
+const deriveCategory = (p) => {
+  const name = String(p?.product_name || '').trim()
+  if (!name) return 'Others'
+  const cleaned = name
+    .replace(/\s+/g, ' ')
+    .replace(/[-_]+/g, ' ')
+    .replace(/[()]/g, ' ')
+    .trim()
+  const parts = cleaned.split(' ').filter(Boolean)
+  const top = parts.slice(0, 3).join(' ')
+  return top || 'Others'
+}
+
+const pickImageForProduct = (p) => {
+  const ean = String(p?.ean_code || '').trim()
+  const src = String(p?.image_url || '').trim()
+  if (src) return src
+  if (ean) return cloudinaryUrlByEan(ean)
+  return DEFAULT_IMG
+}
+
+function BrowseBlocks({
+  brand,
+  blocks,
+  currentCategory,
+  onPickCategory
+}) {
+  const list = blocks || []
+  return (
+    <div className="women-browse">
+      <div className="women-browse-head">
+        <div className="women-browse-title">
+          <span className="women-browse-badge">{brand || 'Women'}</span>
+          <h3 className="women-browse-h">{brand ? 'Pick a category' : 'Browse by category'}</h3>
+          {/*<p className="women-browse-sub">Tap a card to filter products for that category.</p> */}
+          <span className="women-browse-badge">{brand || 'Women'}</span>
+        </div>
+
+        <div className="women-browse-actions">
+          {currentCategory ? (
+            <button type="button" className="women-browse-btn" onClick={() => onPickCategory('')}>
+              Clear Category
+            </button>
+          ) : null}
+          <Link to="/women" className="women-browse-btn primary">
+            View All Brands
+          </Link>
+        </div>
+      </div>
+
+      <div className="women-browse-grid">
+        {list.map((b) => (
+          <button
+            key={b.key}
+            type="button"
+            className={`women-mini-card${normalizeKey(currentCategory) === normalizeKey(b.title) ? ' active' : ''}`}
+            onClick={() => onPickCategory(b.title)}
+            title={b.title}
+          >
+            <div className="women-mini-media">
+              <img
+                src={b.image || DEFAULT_IMG}
+                alt={b.title}
+                loading="lazy"
+                decoding="async"
+                onError={(e) => {
+                  if (e.currentTarget.src !== DEFAULT_IMG) e.currentTarget.src = DEFAULT_IMG
+                }}
+              />
+              <div className="women-mini-overlay" />
+              <div className="women-mini-title">{b.title}</div>
+            </div>
+            <div className="women-mini-meta">
+              <span className="women-mini-count">{b.count} items</span>
+              <span className="women-mini-cta">Shop</span>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function EmptyState({ brand }) {
+  const brands = ['Twin Birds', 'Naidu Hall', 'Intimacy', 'Aswathi', 'Indian Flower', 'Jockey']
+  return (
+    <div className="women-empty-wrap">
+      <div className="women-empty-card">
+        <div className="women-empty-top">
+          <div className="women-empty-badge">No products found</div>
+          <h3 className="women-empty-title">
+            {brand ? (
+              <>
+                We couldn’t find items for <span className="women-empty-accent">{brand}</span>
+              </>
+            ) : (
+              <>We couldn’t find items right now</>
+            )}
+          </h3>
+          <p className="women-empty-sub">Try one of our popular brands, or explore the full women’s store.</p>
+        </div>
+
+        <div className="women-empty-actions">
+          <Link to="/women" className="women-empty-btn primary">
+            Explore Women’s Store
+          </Link>
+          <Link to="/" className="women-empty-btn">
+            Back to Home
+          </Link>
+        </div>
+
+        <div className="women-empty-grid">
+          {brands.map((b) => (
+            <Link key={b} to={`/women?brand=${encodeURIComponent(b)}`} className="women-empty-brand">
+              <div className="women-empty-brandMedia">
+                <img src={buildBrandImage(b)} alt={b} loading="lazy" decoding="async" />
+                <div className="women-empty-brandOverlay" />
+                <div className="women-empty-brandName">{b}</div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function WomenPage() {
   const [allProducts, setAllProducts] = useState([])
   const [products, setProducts] = useState([])
@@ -92,11 +231,24 @@ export default function WomenPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [likedKeys, setLikedKeys] = useState(new Set())
+  const [activeCategory, setActiveCategory] = useState('')
   const navigate = useNavigate()
+  const location = useLocation()
   const { addToWishlist, wishlistItems, setWishlistItems } = useWishlist()
 
   const restoreDoneRef = useRef(false)
   const rafSaveRef = useRef(0)
+
+  const params = useMemo(() => new URLSearchParams(location.search), [location.search])
+  const selectedBrand = niceTitle(params.get('brand'))
+  const selectedCategory = niceTitle(params.get('category'))
+
+  useEffect(() => {
+    setActiveCategory(selectedCategory)
+  }, [selectedCategory])
+
+  const headerTitle = selectedBrand ? `${selectedBrand} • Women` : "Women’s Collection"
+  const headerSub = selectedBrand ? `Explore categories and latest picks from ${selectedBrand}` : 'Soft fabrics, sharp fits, all-day comfort'
 
   const getUserId = () => {
     if (typeof window === 'undefined') return null
@@ -150,6 +302,7 @@ export default function WomenPage() {
         const res = await fetch(`${API_BASE}/api/products?gender=WOMEN&limit=50000&_t=${Date.now()}`, { cache: 'no-store' })
         if (!res.ok) throw new Error('Failed to load products')
         const data = await res.json()
+
         const arr = toArray(data).map((p, i) => {
           const ean = p.ean_code ?? p.EANCode ?? p.ean ?? p.barcode ?? p.bar_code ?? ''
           const img = p.image_url || (ean ? cloudinaryUrlByEan(ean) : '') || DEFAULT_IMG
@@ -174,9 +327,14 @@ export default function WomenPage() {
             is_out_of_stock: computeOutOfStock(p)
           }
         })
+
+        let filtered = arr
+        if (selectedBrand) {
+          filtered = filtered.filter((x) => normalizeKey(x.brand) === normalizeKey(selectedBrand))
+        }
+
         if (!cancelled) {
-          setAllProducts(arr)
-          setProducts(arr)
+          setAllProducts(filtered)
         }
       } catch {
         if (!cancelled) {
@@ -192,7 +350,33 @@ export default function WomenPage() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [selectedBrand])
+
+  const categoryBlocks = useMemo(() => {
+    const base = allProducts || []
+    const map = new Map()
+    for (const p of base) {
+      const cat = deriveCategory(p)
+      const key = normalizeKey(cat)
+      if (!map.has(key)) {
+        map.set(key, { key, title: cat, count: 0, image: pickImageForProduct(p) })
+      }
+      const obj = map.get(key)
+      obj.count += 1
+      if (!obj.image && p) obj.image = pickImageForProduct(p)
+    }
+    const list = Array.from(map.values())
+      .filter((x) => x.count > 0)
+      .sort((a, b) => b.count - a.count || a.title.localeCompare(b.title))
+    return list
+  }, [allProducts])
+
+  useEffect(() => {
+    const base = allProducts || []
+    const cat = niceTitle(activeCategory)
+    const next = cat ? base.filter((p) => normalizeKey(deriveCategory(p)) === normalizeKey(cat)) : base
+    setProducts(next)
+  }, [allProducts, activeCategory])
 
   useLayoutEffect(() => {
     if (restoreDoneRef.current) return
@@ -278,126 +462,100 @@ export default function WomenPage() {
     navigate('/checkout')
   }
 
+  const pickCategory = (cat) => {
+    const next = niceTitle(cat)
+    setActiveCategory(next)
+    const qs = new URLSearchParams(location.search)
+    if (next) qs.set('category', next)
+    else qs.delete('category')
+    navigate({ pathname: '/women', search: qs.toString() ? `?${qs.toString()}` : '' }, { replace: true })
+    const el = document.getElementById('products')
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   return (
     <div className="women-page">
       <Navbar />
-      <div className="filter-bar-class">
-        <FilterSidebar source={allProducts} onFilterChange={(list) => setProducts(Array.isArray(list) ? list : allProducts)} />
-        <div className="women-page-main">
-          <div className="women-page-content">
-            {/*<section className="home1-hero-new-home-2">
-              <div className="home1-hero-frame-new-home-2">
-                <Swiper className="home1-hero-swiper-new-home-2" modules={[Autoplay]} loop slidesPerView={1} autoplay={{ delay: 3500, disableOnInteraction: false }} speed={900}>
-                  <SwiperSlide>
-                    <div className="home1-hero-slide-new-home-2">
-                      <img src="/images/banners/banner1.jpg" alt="Women Banner" loading="eager" />
-                    </div>
-                  </SwiperSlide>
-                  <SwiperSlide>
-                    <div className="home1-hero-slide-new-home-2">
-                      <img src="/images/banners/banner2.jpg" alt="Women Banner" loading="lazy" decoding="async" />
-                    </div>
-                  </SwiperSlide>
-                  <SwiperSlide>
-                    <div className="home1-hero-slide-new-home-2">
-                      <img src="/images/banners/banner3.jpg" alt="Women Banner" loading="lazy" decoding="async" />
-                    </div>
-                  </SwiperSlide>
-                </Swiper>
-              </div>
-            </section> */}
 
-            <WomenDisplayPage
-              products={products}
-              userType={userType}
-              loading={loading}
-              error={error}
-              likedKeys={likedKeys}
-              keyFor={keyFor}
-              onToggleLike={toggleLike}
-              onProductClick={handleProductClick}
-            />
+      <div className="women-top-spacer" />
 
-            {/*<section className="home-section6">
-              <h2 className="home-section6-title">Trending Now....</h2>
-              <div className="home-section6-grid">
-                <div className="home-section6-item">
-                  <div className="home-section6-left">
-                    <img src="/images/trending-part1-big1.jpeg" alt="Printed Sarees" />
-                  </div>
-                  <div className="home-section6-right">
-                    <h3>Printed Sarees...</h3>
-                    <div className="home-section6-small-images">
-                      <img src="/images/trending-part1-small1.jpeg" alt="Saree 1" />
-                      <img src="/images/trending-part1-small2.jpeg" alt="Saree 2" />
-                    </div>
-                  </div>
-                </div>
-                <div className="home-section6-item">
-                  <div className="home-section6-left">
-                    <img src="/images/trending-part2-big1.jpeg" alt="Lehanga" />
-                  </div>
-                  <div className="home-section6-right">
-                    <h3> Printed Lehanga...</h3>
-                    <div className="home-section6-small-images">
-                      <img src="/images/trending-part2-small1.jpeg" alt="Lehanga 1" />
-                      <img src="/images/trending-part2-small2.jpeg" alt="Lehanga 2" />
-                    </div>
-                  </div>
-                </div>
-                <div className="home-section6-item">
-                  <div className="home-section6-left">
-                    <img src="/images/trending-part3-big1.jpeg" alt="Wedding Sarees" />
-                  </div>
-                  <div className="home-section6-right">
-                    <h3>Wedding Sarees...</h3>
-                    <div className="home-section6-small-images">
-                      <img src="/images/trending-part3-small1.jpeg" alt="Saree 1" />
-                      <img src="/images/trending-part3-small2.jpeg" alt="Saree 2" />
-                    </div>
-                  </div>
-                </div>
-                <div className="home-section6-item">
-                  <div className="home-section6-left">
-                    <img src="/images/trending-part4-big1.jpeg" alt="Printed Sarees" />
-                  </div>
-                  <div className="home-section6-right">
-                    <h3>Printed Chudidars...</h3>
-                    <div className="home-section6-small-images">
-                      <img src="/images/trending-part4-small1.jpeg" alt="Saree 1" />
-                      <img src="/images/trending-part4-small2.jpeg" alt="Saree 2" />
-                    </div>
-                  </div>
-                </div>
-                <div className="home-section6-item">
-                  <div className="home-section6-left">
-                    <img src="/images/trending-part5-big1.jpeg" alt="Lehanga" />
-                  </div>
-                  <div className="home-section6-right">
-                    <h3> Printed Gowns...</h3>
-                    <div className="home-section6-small-images">
-                      <img src="/images/trending-part5-small1.jpeg" alt="Lehanga 1" />
-                      <img src="/images/trending-part5-small2.jpeg" alt="Lehanga 2" />
-                    </div>
-                  </div>
-                </div>
-                <div className="home-section6-item">
-                  <div className="home-section6-left">
-                    <img src="/images/trending-part6-big1.jpeg" alt="Wedding Sarees" />
-                  </div>
-                  <div className="home-section6-right">
-                    <h3>Half Sarees...</h3>
-                    <div className="home-section6-small-images">
-                      <img src="/images/trending-part6-small1.jpeg" alt="Saree 1" />
-                      <img src="/images/trending-part6-small2.jpeg" alt="Saree 2" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section> */}
+      {/*<div className="women-hero">
+        <div className="women-hero-inner">
+          <div className="women-hero-left">
+            <div className="women-hero-kicker">Women</div>
+            <h1 className="women-hero-title">{headerTitle}</h1>
+            <p className="women-hero-sub">{headerSub}</p>
+
+            <div className="women-hero-actions">
+              {selectedBrand ? (
+                <>
+                  <Link to="/women" className="women-hero-btn">
+                    View All Brands
+                  </Link>
+                  <a href="#products" className="women-hero-btn primary">
+                    Shop Now
+                  </a>
+                </>
+              ) : (
+                <a href="#products" className="women-hero-btn primary">
+                  Browse Products
+                </a>
+              )}
+            </div>
+          </div>
+
+          <div className="women-hero-right" aria-hidden="true">
+            <div className="women-hero-card">
+              <img
+                src={selectedBrand ? buildBrandImage(selectedBrand) : '/images/home-screen-main.png'}
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
+              <div className="women-hero-glass" />
+            </div>
           </div>
         </div>
+      </div> */}
+
+      <div id="products" className="women-page-main">
+        <div className="women-page-content">
+          {loading ? (
+            <div className="women-state-card">Loading products…</div>
+          ) : error ? (
+            <div className="women-state-card error">{error}</div>
+          ) : !allProducts.length ? (
+            <EmptyState brand={selectedBrand} />
+          ) : (
+            <>
+              <BrowseBlocks
+                brand={selectedBrand}
+                blocks={categoryBlocks}
+                currentCategory={activeCategory}
+                onPickCategory={pickCategory}
+              />
+
+              {!products.length ? (
+                <div className="women-state-card">
+                  No items match <b>{activeCategory}</b>. Try another category above.
+                </div>
+              ) : (
+                <WomenDisplayPage
+                  products={products}
+                  userType={userType}
+                  loading={loading}
+                  error={error}
+                  likedKeys={likedKeys}
+                  keyFor={keyFor}
+                  onToggleLike={toggleLike}
+                  onProductClick={handleProductClick}
+                />
+              )}
+            </>
+          )}
+        </div>
       </div>
+
       <Footer />
     </div>
   )

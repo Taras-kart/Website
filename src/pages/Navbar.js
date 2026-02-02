@@ -314,22 +314,8 @@ const NavbarFinal = () => {
   return (
     <nav className={`navbar-final ${showNav ? '' : 'nav-hidden'}`}>
       <div className="desktop-only-final">
-        <div className="desktop-top-row-final">
-          <div className="desktop-left-final">
-            <SearchBar
-              wrapperClassName="search-desktop-light"
-              inputRef={desktopInputRef}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              suggestions={suggestions}
-              showSuggestions={showSuggestions}
-              setShowSuggestions={setShowSuggestions}
-              onSearch={handleSearch}
-              onPickSuggestion={handleSuggestionClick}
-            />
-          </div>
-
-          <div className="desktop-center-final">
+        <div className="desktop-top-row-final desktop-top-row-updated">
+          <div className="desktop-brand-left">
             <div className="logo-final">
               <video autoPlay loop muted playsInline>
                 <source src="/images/logo.mp4" type="video/mp4" />
@@ -338,7 +324,11 @@ const NavbarFinal = () => {
             </div>
           </div>
 
-          <div className="desktop-right-final">
+          <div className="desktop-title-center">
+            <div className="taras-title">TARAS KART</div>
+          </div>
+
+          <div className="desktop-icons-right">
             <div className="icon-buttons-final">
               <Link to="/profile" className={`icon-btn ${isActive('/profile') ? 'icon-active-btn' : ''}`}>
                 <div className="icon-circle">
@@ -381,19 +371,37 @@ const NavbarFinal = () => {
           </div>
         </div>
 
-        <div className="desktop-bottom-row-final">
-          <div className="nav-links-final nav-links-desktop-final">
-            {navLinks.map(({ name, path }) => (
-              <Link
-                key={name}
-                to={path}
-                onClick={handleNavClick}
-                className={`nav-link-final Btn ${isActive(path) ? 'active-final' : ''}`}
-              >
-                <span>{name}</span>
-              </Link>
-            ))}
+        <div className="desktop-bottom-row-final desktop-bottom-row-updated">
+          <div className="desktop-search-left">
+            <SearchBar
+              wrapperClassName="search-desktop-light"
+              inputRef={desktopInputRef}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              suggestions={suggestions}
+              showSuggestions={showSuggestions}
+              setShowSuggestions={setShowSuggestions}
+              onSearch={handleSearch}
+              onPickSuggestion={handleSuggestionClick}
+            />
           </div>
+
+          <div className="desktop-links-center">
+            <div className="nav-links-final nav-links-desktop-final">
+              {navLinks.map(({ name, path }) => (
+                <Link
+                  key={name}
+                  to={path}
+                  onClick={handleNavClick}
+                  className={`nav-link-final Btn ${isActive(path) ? 'active-final' : ''}`}
+                >
+                  <span>{name}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="desktop-bottom-spacer" />
         </div>
       </div>
 

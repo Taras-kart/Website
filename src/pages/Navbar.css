@@ -56,28 +56,38 @@ body {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-.desktop-left-final {
-  flex: 1;
+.desktop-top-row-updated {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.desktop-brand-left {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   min-width: 260px;
 }
 
-.desktop-center-final {
-  flex: 1;
+.desktop-title-center {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   pointer-events: none;
 }
 
-.desktop-center-final .logo-final {
+.taras-title {
+  color: #725440;
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-size: clamp(18px, 2.1vw, 28px);
+  text-transform: uppercase;
   pointer-events: auto;
+  user-select: none;
 }
 
-.desktop-right-final {
-  flex: 1;
+.desktop-icons-right {
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -91,6 +101,30 @@ body {
   padding: 10px clamp(12px, 4vw, 30px);
   background: #000000;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.desktop-bottom-row-updated {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+}
+
+.desktop-search-left {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 260px;
+}
+
+.desktop-links-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.desktop-bottom-spacer {
+  min-width: 260px;
 }
 
 .nav-links-desktop-final {
@@ -266,7 +300,7 @@ body {
   outline: none;
   font-size: clamp(13px, 1.8vw, 16px);
   width: clamp(120px, 16vw, 180px);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .search-desktop-light input {
@@ -512,7 +546,31 @@ body {
   pointer-events: none;
   transform: translate(0, 0);
 }
+.search-desktop-light {
+  background: #000000;
+  border: 1.6px solid gold;
+  box-shadow: none;
+}
 
+.search-desktop-light .search-icon-final {
+  color: gold !important;
+  opacity: 1 !important;
+}
+
+.search-desktop-light input {
+  background: transparent;
+  color: gold !important;
+  caret-color: gold !important;
+  width: clamp(140px, 18vw, 220px);
+}
+
+.search-desktop-light input::placeholder {
+  color: rgba(255, 215, 0, 0.7) !important;
+}
+
+.search-bar-final:focus-within input {
+  width: clamp(170px, 22vw, 260px);
+}
 .bottom-row-final {
   margin-top: 10px;
   display: none;

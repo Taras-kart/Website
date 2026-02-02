@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react'
 import './WomenDisplayPage.css'
 import { FaHeart, FaRegHeart, FaEye } from 'react-icons/fa'
 import FullDetailsPopup from './FullDetailsPopup'
+import { Link } from 'react-router-dom'
 
 const CLOUD_NAME = 'deymt9uyh'
 
@@ -127,6 +128,56 @@ function groupProductsByColor(products) {
   return out
 }
 
+const buildBrandImage = (brand) => {
+  const map = {
+    'Twin Birds': '/images/updated/category-kurti-pant.webp',
+    'Indian Flower': '/images/updated/category-leggin.webp',
+    Intimacy: '/images/updated/category-metallic-pant.webp',
+    'Naidu Hall': '/images/updated/category-plazzo-pant.webp',
+    Aswathi: '/images/updated/category-saree-shaper.webp',
+    Jockey: '/images/home/jockey3.webp'
+  }
+  return map[brand] || '/images/women/women20.jpeg'
+}
+
+function EmptyState() {
+  const brands = ['Twin Birds', 'Naidu Hall', 'Intimacy', 'Aswathi', 'Indian Flower', 'Jockey']
+  return (
+    <div className="wds-empty">
+      <div className="wds-empty-card">
+        <div className="wds-empty-top">
+          <span className="wds-empty-badge">No products found</span>
+          <h3 className="wds-empty-title">Try our popular brands</h3>
+          <p className="wds-empty-sub">Pick a brand below, or reset your filters and browse everything.</p>
+        </div>
+
+        <div className="wds-empty-actions">
+          <Link to="/women" className="wds-empty-btn primary">Explore Women’s Store</Link>
+          <button
+            type="button"
+            className="wds-empty-btn"
+            onClick={() => window.location.assign('/women')}
+          >
+            Reset
+          </button>
+        </div>
+
+        <div className="wds-empty-grid">
+          {brands.map((b) => (
+            <Link key={b} to={`/women?brand=${encodeURIComponent(b)}`} className="wds-empty-brand">
+              <div className="wds-empty-media">
+                <img src={buildBrandImage(b)} alt={b} loading="lazy" decoding="async" />
+                <div className="wds-empty-overlay" />
+                <div className="wds-empty-name">{b}</div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function WomenDisplayPage({
   products,
   userType,
@@ -172,8 +223,11 @@ export default function WomenDisplayPage({
     return { offer, mrp }
   }
 
-  const priceForUser = (g) => getPriceFields(g).offer
-  const mrpForUser = (g) => getPriceFields(g).mrp
+  const fmtMoney = (v) => {
+    const n = Number(v)
+    const safe = Number.isFinite(n) ? n : 0
+    return `₹${safe.toFixed(2)}`
+  }
 
   const discountPct = (g) => {
     const { offer, mrp } = getPriceFields(g)
@@ -195,31 +249,20 @@ export default function WomenDisplayPage({
     return !!String(ean).trim()
   }
 
-  const handleCardClick = (group) => {
+  const toPayload = (group) => {
     const active = group.images?.[0] || null
     const rep = active?.variant || group.variants?.[0] || group.rep || group
-    const payload = {
+    return {
       ...rep,
       ean_code: active?.ean_code || rep.ean_code || group.ean_code,
       image_url: active?.src || rep.image_url || getImgForGroup(group),
       variants: group.variants,
       images: (group.images || []).map((x) => x.src)
     }
-    onProductClick(payload)
   }
 
-  const openPopup = (group) => {
-    const active = group.images?.[0] || null
-    const rep = active?.variant || group.variants?.[0] || group.rep || group
-    const payload = {
-      ...rep,
-      ean_code: active?.ean_code || rep.ean_code || group.ean_code,
-      image_url: active?.src || rep.image_url || getImgForGroup(group),
-      variants: group.variants,
-      images: (group.images || []).map((x) => x.src)
-    }
-    setPopupProduct(payload)
-  }
+  const handleCardClick = (group) => onProductClick(toPayload(group))
+  const openPopup = (group) => setPopupProduct(toPayload(group))
 
   const userLabel = userType === 'B2B' ? 'B2B view' : 'Retail view'
 
@@ -237,34 +280,53 @@ export default function WomenDisplayPage({
       </div>
 
       {loading ? (
-        <div className="state-card">Loading products…</div>
+        <div className="wds-skeleton-grid">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div className="wds-skeleton-card" key={i}>
+              <div className="wds-skeleton-img" />
+              <div className="wds-skeleton-lines">
+                <div className="wds-skeleton-line" />
+                <div className="wds-skeleton-line short" />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : error ? (
         <div className="state-card error-state">{error}</div>
       ) : !grouped.length ? (
-        <div className="state-card">No products found</div>
+        <EmptyState />
       ) : (
         <div className="womens-section4-grid">
           {grouped.map((group, index) => {
             const active = group.images?.[0] || null
+            const { offer, mrp } = getPriceFields(group)
             const discount = discountPct(group)
             const hasVariants = group.variants && group.variants.length > 1
             const isOutOfStock = group.is_out_of_stock
             const likeEnabled = canLike(group)
             const imgSrc = getImgForGroup(group)
+
+            const activeEan = String(active?.ean_code || group.ean_code || group.rep?.ean_code || '')
             const liked = likedKeys.has(
               keyFor({
                 product_id: group.product_id || group.id,
-                ean_code: String(active?.ean_code || group.ean_code || group.rep?.ean_code || '')
+                ean_code: activeEan
               })
             )
 
             const showMissingEan = !group.has_matching_images && !!String(group.missing_ean_label || '').trim()
+            const showMrp = mrp > offer && offer > 0 && mrp > 0
 
             return (
               <div
                 key={group.key || index}
                 className={`womens-section4-card${isOutOfStock ? ' out-of-stock' : ''}`}
                 onClick={() => handleCardClick(group)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleCardClick(group)
+                }}
               >
                 <div className="womens-section4-img">
                   {showMissingEan && (
@@ -285,6 +347,8 @@ export default function WomenDisplayPage({
                     src={imgSrc}
                     alt={group.product_name}
                     className="fade-image"
+                    loading="lazy"
+                    decoding="async"
                     onError={(e) => {
                       const gender = group.gender || group.rep?.gender || 'WOMEN'
                       const fallback = DEFAULT_IMG_BY_GENDER[gender] || DEFAULT_IMG_BY_GENDER._
@@ -299,7 +363,8 @@ export default function WomenDisplayPage({
                   )}
 
                   <div className="action-icons">
-                    <div
+                    <button
+                      type="button"
                       className={`action-icon${likeEnabled ? '' : ' disabled'}`}
                       onClick={(e) => {
                         e.stopPropagation()
@@ -310,39 +375,46 @@ export default function WomenDisplayPage({
                           color: String(group.color || '')
                         })
                       }}
+                      aria-label="Add to wishlist"
                     >
                       {liked ? (
-                        <FaHeart style={{ color: 'gold', fontSize: '20px' }} />
+                        <FaHeart style={{ color: 'gold', fontSize: '18px' }} />
                       ) : (
-                        <FaRegHeart style={{ color: 'gold', fontSize: '20px' }} />
+                        <FaRegHeart style={{ color: 'gold', fontSize: '18px' }} />
                       )}
-                    </div>
+                    </button>
 
-                    <div
+                    <button
+                      type="button"
                       className="action-icon"
                       onClick={(e) => {
                         e.stopPropagation()
                         openPopup(group)
                       }}
+                      aria-label="Quick view"
                     >
-                      <FaEye style={{ color: 'gold', fontSize: '20px' }} />
-                    </div>
+                      <FaEye style={{ color: 'gold', fontSize: '18px' }} />
+                    </button>
                   </div>
                 </div>
 
                 <div className="womens-section4-body">
                   <div className="brand-row">
                     <h4 className="brand-name">{group.brand}</h4>
-                    <span className="brand-chip">New in</span>
+                    <span className="brand-chip">Popular</span>
                   </div>
+
                   <h5 className="product-name">{group.product_name}</h5>
+
                   <div className="card-price-row">
-                    <span className="card-offer-price">₹{Number(priceForUser(group) || 0).toFixed(2)}</span>
-                    <span className="card-original-price">₹{Number(mrpForUser(group) || 0).toFixed(2)}</span>
+                    <span className="card-offer-price">{fmtMoney(offer)}</span>
+                    {showMrp && <span className="card-original-price">{fmtMoney(mrp)}</span>}
+                    {discount > 0 && <span className="card-discount-chip">{discount}% off</span>}
                   </div>
+
                   <div className="womens-section4-meta">
-                    <span className="price-type">{userType === 'B2B' ? 'Best B2B margin' : 'Inclusive of all taxes'}</span>
-                    {discount > 0 && <span className="saving-text">You save {discount}%</span>}
+                    <span className="price-type">{userType === 'B2B' ? 'Best B2B price' : 'Inclusive of all taxes'}</span>
+                    {discount > 0 && <span className="saving-text">Save more today</span>}
                   </div>
                 </div>
               </div>

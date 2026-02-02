@@ -98,51 +98,52 @@ export default function Home1() {
             </div>
 
             <div className="fc-grid">
-              <Link to="/women" className="fc-card">
+              <Link to="/women?brand=Twin%20Birds" className="fc-card">
                 <div className="fc-media">
                   <img src={getImage('/images/updated/category-kurti-pant.webp')} alt="Kurti Pant" />
-                  <div className="fc-badge">Kurti Pant</div>
+                  <div className="fc-badge">Twin Birds</div>
                 </div>
               </Link>
 
-              <Link to="/women" className="fc-card">
+              <Link to="/women?brand=Indian%20Flower" className="fc-card">
                 <div className="fc-media">
                   <img src={getImage('/images/updated/category-leggin.webp')} alt="Leggin" />
-                  <div className="fc-badge">Leggin</div>
+                  <div className="fc-badge">Indian Flower</div>
                 </div>
               </Link>
 
-              <Link to="/women" className="fc-card">
+              <Link to="/women?brand=Intimacy" className="fc-card">
                 <div className="fc-media">
                   <img src={getImage('/images/updated/category-metallic-pant.webp')} alt="Metallic Pant" />
-                  <div className="fc-badge">Metallic Pant</div>
+                  <div className="fc-badge">Intimacy</div>
                 </div>
               </Link>
 
-              <Link to="/women" className="fc-card">
+              <Link to="/women?brand=Naidu%20Hall" className="fc-card">
                 <div className="fc-media">
                   <img src={getImage('/images/updated/category-plazzo-pant.webp')} alt="Plazzo Pant" />
-                  <div className="fc-badge">Plazzo Pant</div>
+                  <div className="fc-badge">Naidu Hall</div>
                 </div>
               </Link>
 
-              <Link to="/women" className="fc-card">
+              <Link to="/women?brand=Aswathi" className="fc-card">
                 <div className="fc-media">
                   <img src={getImage('/images/updated/category-saree-shaper.webp')} alt="Saree Shaper" />
-                  <div className="fc-badge">Saree Shaper</div>
+                  <div className="fc-badge">Aswathi</div>
                 </div>
               </Link>
 
-              <Link to="/women" className="fc-card">
-                <div className="fc-media">
-                  <img src={getImage('/images/updated/category-shimmer-legging.webp')} alt="Shimmer Legging" />
-                  <div className="fc-badge">Shimmer Legging</div>
+              <Link to="/women" className="fc-card fc-viewall">
+                <div className="fc-media fc-viewall-media">
+                  <div className="fc-viewall-content">
+                    <span className="fc-viewall-title">View All</span>
+                    <span className="fc-viewall-sub">Women’s Collection</span>
+                  </div>
                 </div>
               </Link>
             </div>
           </div>
         </section>
-
         <Divider label="Women" direction="ltr" />
 
         <section className="home-part-grid">
@@ -611,7 +612,6 @@ export default function Home1() {
                 <img src={getImage('/images/women/new/zig-zag3.png')} alt="Kurti Pants" />
                 <div className="wb4n-overlay"></div>
                 <div className="wb4n-meta">
-                  <span className="wb4n-kicker">Trending</span>
                   <span className="wb4n-name">Kurti Pants</span>
                   <span className="wb4n-sub">Effortless everyday comfort</span>
                 </div>
@@ -651,7 +651,6 @@ export default function Home1() {
             </div>
           </div>
         </section>
-
 
         <Divider label="Women" direction="ltr" />
 

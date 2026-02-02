@@ -52,6 +52,35 @@ const isIntId = (v) => {
   return Number.isInteger(n) && n > 0
 }
 
+const Stars = () => {
+  const stars = [
+    { top: '10%', left: '8%', size: 10, d: 0.18 },
+    { top: '18%', left: '86%', size: 14, d: 0.28 },
+    { top: '34%', left: '12%', size: 12, d: 0.22 },
+    { top: '48%', left: '92%', size: 10, d: 0.18 },
+    { top: '70%', left: '6%', size: 16, d: 0.26 },
+    { top: '78%', left: '84%', size: 12, d: 0.22 }
+  ]
+  return (
+    <div className="co-stars" aria-hidden="true">
+      {stars.map((s, i) => (
+        <svg
+          key={i}
+          className="co-star"
+          style={{ top: s.top, left: s.left, width: s.size, height: s.size, animationDelay: `${s.d}s` }}
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <path
+            d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2z"
+            className="co-star-path"
+          />
+        </svg>
+      ))}
+    </div>
+  )
+}
+
 const CheckoutPage = () => {
   const navigate = useNavigate()
   const { addToCart } = useCart()
@@ -434,7 +463,9 @@ const CheckoutPage = () => {
 
       if (data.serviceable) {
         setPincodeStatus('ok')
-        setPincodeMessage(data.est_delivery ? `Delivery available. Estimated delivery: ${data.est_delivery}` : 'Delivery available to this pincode')
+        setPincodeMessage(
+          data.est_delivery ? `Delivery available. Estimated delivery: ${data.est_delivery}` : 'Delivery available to this pincode'
+        )
       } else {
         setPincodeStatus('unserviceable')
         setPincodeMessage('Sorry, we currently do not deliver to this pincode')
@@ -453,7 +484,9 @@ const CheckoutPage = () => {
   return (
     <div className="co-wrap">
       <Navbar />
-      <div className="co-spacer">
+      <div className="co-spacer" />
+      <Stars />
+
       <div className="co-container">
         <div className="co-left">
           <div className="co-media">
@@ -461,12 +494,17 @@ const CheckoutPage = () => {
               {product && <img src={mainImage()} alt={product.product_name} className="co-image" />}
               {isHovering && product && (
                 <>
-                  <div className="co-lens" style={{ width: `${lens.w}px`, height: `${lens.h}px`, top: `${lens.y}px`, left: `${lens.x}px` }} />
+                  <div
+                    className="co-lens"
+                    style={{ width: `${lens.w}px`, height: `${lens.h}px`, top: `${lens.y}px`, left: `${lens.x}px` }}
+                  />
                   <div
                     className="co-zoomed"
                     style={{
                       top: window.innerWidth > 1024 ? 0 : `${lens.h * zoomFactor}px`,
-                      left: zoomStyles.zoomLeft ? `-${window.innerWidth > 1024 ? 320 : lens.w * zoomFactor}px` : `${window.innerWidth > 1024 ? lens.w * zoomFactor : 0}px`
+                      left: zoomStyles.zoomLeft
+                        ? `-${window.innerWidth > 1024 ? 320 : lens.w * zoomFactor}px`
+                        : `${window.innerWidth > 1024 ? lens.w * zoomFactor : 0}px`
                     }}
                   >
                     <img
@@ -525,8 +563,16 @@ const CheckoutPage = () => {
             </div>
           ) : (
             <>
-              <h1 className="co-brand">{product?.brand}</h1>
-              <h2 className="co-name">{product?.product_name}</h2>
+              <div className="co-top">
+                <div>
+                  <h1 className="co-brand">{product?.brand}</h1>
+                  <h2 className="co-name">{product?.product_name}</h2>
+                </div>
+                <div className="co-trust">
+                  <span className="co-trust-pill">Free returns</span>
+                  <span className="co-trust-pill">Secure payments</span>
+                </div>
+              </div>
 
               <div className="co-price-row">
                 <span className="co-price">₹{Number(pricing.offer || pricing.mrp || 0).toFixed(2)}</span>
@@ -587,13 +633,21 @@ const CheckoutPage = () => {
                 <h3>Delivery</h3>
                 <p className="co-sub">Enter your pincode to check delivery options</p>
                 <div className="co-pin">
-                  <input type="text" maxLength="6" value={pincode} onChange={handlePincodeChange} placeholder="Enter Pincode" />
+                  <input type="text" maxLength="6" value={pincode} onChange={handlePincodeChange} placeholder="Enter Pincode" className="enter" />
                   <button className="btn black" onClick={handlePincodeApply} disabled={isCheckingPin}>
                     {isCheckingPin ? 'Checking…' : 'Apply'}
                   </button>
                 </div>
                 {pincodeMessage && (
-                  <p className={pincodeStatus === 'ok' ? 'co-pin-msg success' : pincodeStatus === 'unserviceable' ? 'co-pin-msg warn' : 'co-pin-msg error'}>
+                  <p
+                    className={
+                      pincodeStatus === 'ok'
+                        ? 'co-pin-msg success'
+                        : pincodeStatus === 'unserviceable'
+                        ? 'co-pin-msg warn'
+                        : 'co-pin-msg error'
+                    }
+                  >
                     {pincodeMessage}
                   </p>
                 )}
@@ -601,7 +655,6 @@ const CheckoutPage = () => {
             </>
           )}
         </div>
-      </div>
       </div>
 
       {popupMessage && <div className="co-popup">{popupMessage}</div>}
