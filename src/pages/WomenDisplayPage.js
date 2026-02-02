@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import './WomenDisplayPage.css'
 import { FaHeart, FaRegHeart, FaEye } from 'react-icons/fa'
 import FullDetailsPopup from './FullDetailsPopup'
@@ -152,12 +152,10 @@ function EmptyState() {
         </div>
 
         <div className="wds-empty-actions">
-          <Link to="/women" className="wds-empty-btn primary">Explore Women’s Store</Link>
-          <button
-            type="button"
-            className="wds-empty-btn"
-            onClick={() => window.location.assign('/women')}
-          >
+          <Link to="/women" className="wds-empty-btn primary">
+            Explore Women’s Store
+          </Link>
+          <button type="button" className="wds-empty-btn" onClick={() => window.location.assign('/women')}>
             Reset
           </button>
         </div>
@@ -189,6 +187,7 @@ export default function WomenDisplayPage({
   onProductClick
 }) {
   const [popupProduct, setPopupProduct] = useState(null)
+  const sectionRef = useRef(null)
 
   const groupedRaw = useMemo(() => groupProductsByColor(products || []), [products])
 
@@ -202,6 +201,14 @@ export default function WomenDisplayPage({
     })
     return list
   }, [groupedRaw])
+
+  useEffect(() => {
+    if (loading) return
+    if (!grouped.length) return
+    const el = sectionRef.current
+    if (!el) return
+    requestAnimationFrame(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+  }, [loading, grouped.length])
 
   const getPriceFields = (g) => {
     const p = g.price_fields || g || {}
@@ -264,14 +271,14 @@ export default function WomenDisplayPage({
   const handleCardClick = (group) => onProductClick(toPayload(group))
   const openPopup = (group) => setPopupProduct(toPayload(group))
 
-  const userLabel = userType === 'B2B' ? 'B2B view' : 'Retail view'
+  const userLabel = userType === 'B2B' ? 'B2B prices' : 'Retail prices'
 
   return (
-    <section className="womens-section4">
+    <section ref={sectionRef} className="womens-section4" id="women-display">
       <div className="section-head">
         <div className="section-head-left">
           <h2>Women’s Collection</h2>
-          <p className="section-sub">Soft fabrics, sharp fits, all-day comfort</p>
+          <p className="section-sub">Fresh picks, clean fits, everyday comfort</p>
         </div>
         <div className="section-head-right">
           <span className="count">{grouped.length} items</span>
@@ -370,18 +377,14 @@ export default function WomenDisplayPage({
                         e.stopPropagation()
                         if (!likeEnabled) return
                         onToggleLike(group, {
-                          ean_code: String(group.ean_code || group.rep?.ean_code || ''),
+                          ean_code: activeEan,
                           image_url: String(active?.src || imgSrc || ''),
                           color: String(group.color || '')
                         })
                       }}
                       aria-label="Add to wishlist"
                     >
-                      {liked ? (
-                        <FaHeart style={{ color: 'gold', fontSize: '18px' }} />
-                      ) : (
-                        <FaRegHeart style={{ color: 'gold', fontSize: '18px' }} />
-                      )}
+                      {liked ? <FaHeart className="gold-ico" /> : <FaRegHeart className="gold-ico" />}
                     </button>
 
                     <button
@@ -393,7 +396,7 @@ export default function WomenDisplayPage({
                       }}
                       aria-label="Quick view"
                     >
-                      <FaEye style={{ color: 'gold', fontSize: '18px' }} />
+                      <FaEye className="gold-ico" />
                     </button>
                   </div>
                 </div>
@@ -401,7 +404,7 @@ export default function WomenDisplayPage({
                 <div className="womens-section4-body">
                   <div className="brand-row">
                     <h4 className="brand-name">{group.brand}</h4>
-                    <span className="brand-chip">Popular</span>
+                    <span className="brand-chip">Top pick</span>
                   </div>
 
                   <h5 className="product-name">{group.product_name}</h5>
