@@ -37,6 +37,35 @@ export default function Home1() {
     return imageMap[path] || path
   }
 
+  const [coolTab, setCoolTab] = useState('plazzo')
+
+  const coolImages = {
+    plazzo: [
+      '/images/updated/plazzo1.webp',
+      '/images/updated/plazzo2.webp',
+      '/images/updated/plazzo3.webp',
+      '/images/updated/plazzo4.webp'
+    ],
+    jeggings: [
+      '/images/updated/jeggings1.webp',
+      '/images/updated/jeggings2.webp',
+      '/images/updated/jeggings3.webp',
+      '/images/updated/jeggings4.webp'
+    ],
+    nightPants: [
+      '/images/updated/night-pants1.webp',
+      '/images/updated/night-pants4.webp',
+      '/images/updated/night-pants4.webp',
+      '/images/updated/night-pants4.webp'
+    ],
+    tshirts: [
+      '/images/updated/t-shirt1.webp',
+      '/images/updated/t-shirt2.webp',
+      '/images/updated/t-shirt3.webp',
+      '/images/updated/t-shirt4.webp'
+    ]
+  }
+
   //const scrollLeft = () => {
   //  if (railRef.current) {
   //    railRef.current.scrollBy({ left: -300, behavior: 'smooth' })
@@ -62,220 +91,162 @@ export default function Home1() {
         <Divider label="Women" direction="ltr" />
 
 
-        <section className="cat-section-new-home">
-          <div className="cat-inner-new-home">
-            <div className="cat-head-new-home">
-              <h2 className="cat-title-new-home">Category</h2>
-              {/*<Link to="/women" className="cat-view-new-home">
-                View All
-              </Link> */}
+        <section className="fc-section">
+          <div className="fc-inner">
+            <div className="fc-head">
+              <h2 className="fc-title">Featured Collections</h2>
             </div>
-            <div className="cat-row-new-home">
-              <Link to="/women" className="cat-card-new-home">
-                <div className="cat-media-new-home">
-                  <img src={getImage('/images/banners/category1.avif')} alt="Category 1" />
+
+            <div className="fc-grid">
+              <Link to="/women" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/updated/category-kurti-pant.webp')} alt="Kurti Pant" />
+                  <div className="fc-badge">Kurti Pant</div>
                 </div>
               </Link>
-              <Link to="/men" className="cat-card-new-home">
-                <div className="cat-media-new-home">
-                  <img src={getImage('/images/banners/category2.avif')} alt="Category 2" />
+
+              <Link to="/women" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/updated/category-leggin.webp')} alt="Leggin" />
+                  <div className="fc-badge">Leggin</div>
                 </div>
               </Link>
-              <Link to="/women" className="cat-card-new-home">
-                <div className="cat-media-new-home">
-                  <img src={getImage('/images/banners/category3.avif')} alt="Category 3" />
+
+              <Link to="/women" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/updated/category-metallic-pant.webp')} alt="Metallic Pant" />
+                  <div className="fc-badge">Metallic Pant</div>
                 </div>
               </Link>
-              <Link to="/women" className="cat-card-new-home">
-                <div className="cat-media-new-home">
-                  <img src={getImage('/images/banners/category4.avif')} alt="Category 4" />
+
+              <Link to="/women" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/updated/category-plazzo-pant.webp')} alt="Plazzo Pant" />
+                  <div className="fc-badge">Plazzo Pant</div>
                 </div>
               </Link>
-              <Link to="/kids" className="cat-card-new-home">
-                <div className="cat-media-new-home">
-                  <img src={getImage('/images/banners/category5.avif')} alt="Category 5" />
+
+              <Link to="/women" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/updated/category-saree-shaper.webp')} alt="Saree Shaper" />
+                  <div className="fc-badge">Saree Shaper</div>
+                </div>
+              </Link>
+
+              <Link to="/women" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/updated/category-shimmer-legging.webp')} alt="Shimmer Legging" />
+                  <div className="fc-badge">Shimmer Legging</div>
                 </div>
               </Link>
             </div>
           </div>
         </section>
-
 
         <Divider label="Women" direction="ltr" />
 
-        <section className="wcat-home1">
-          <div className="wcat-head-home1">
-            <h2 className="wcat-title-home1">Shop by Category</h2>
-            <div className="wcat-underline-home1">
-              <span className="wl-home1 w1-home1"></span>
-              <span className="wl-home1 w2-home1"></span>
-              <span className="wl-home1 w3-home1"></span>
-            </div>
-          </div>
-
-          <div className="wcat-grid-home1">
-            <div className="wcat-card-home1">
-              <Link to="/women" className="wcat-media-home1">
-                <img
-                  src={getImage('/images/home/twin_birds_ankel_legging.png')}
-                  alt="Anarkali"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </Link>
-              <div className="wcat-info-home1">
-                <h3 className="wcat-brand-home1">Twin Birds</h3>
-                {/*<div className="wcat-price-home1">
-                  <span className="wcat-mrp-home1">₹3,499</span>
-                  <span className="wcat-off-home1">₹4,499</span>
-                </div> */}
-                <Link to="/women" className="wcat-buy-home1">
-                  Buy Now
-                </Link>
-              </div>
+        <section className="home-part-grid">
+          <div className="home-part-inner">
+            <div className="home-part-card">
+              <img src={getImage('/images/updated/grid1.jpg')} alt="Women Tops" className="home-part-img" />
             </div>
 
-            <div className="wcat-card-home1">
-              <Link to="/women" className="wcat-media-home1">
-                <img
-                  src={getImage('/images/home/Indian_flower_chudidhar.png')}
-                  alt="Half Saree"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </Link>
-              <div className="wcat-info-home1">
-                <h3 className="wcat-brand-home1">Indian Flower</h3>
-                {/*<div className="wcat-price-home1">
-                  <span className="wcat-mrp-home1">₹5,299</span>
-                  <span className="wcat-off-home1">₹6,499</span>
-                </div> */}
-                <Link to="/women" className="wcat-buy-home1">
-                  Buy Now
-                </Link>
-              </div>
+            <div className="home-part-text">
+              <h3 className="home-part-title">Women Tops</h3>
+              <p className="home-part-sub">Fresh fits for everyday styling</p>
+              <Link to="/women" className="home-part-btn">Shop Now →</Link>
             </div>
 
-            <div className="wcat-card-home1">
-              <Link to="/women" className="wcat-media-home1">
-                <img
-                  src={getImage('/images/home/naidu_hall_t-shirt.png')}
-                  alt="Punjabi Suit"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </Link>
-              <div className="wcat-info-home1">
-                <h3 className="wcat-brand-home1">Naidu Hall</h3>
-                {/*<div className="wcat-price-home1">
-                  <span className="wcat-mrp-home1">₹2,799</span>
-                  <span className="wcat-off-home1">₹3,499</span>
-                </div> */}
-                <Link to="/women" className="wcat-buy-home1">
-                  Buy Now
-                </Link>
-              </div>
+            <div className="home-part-card">
+              <img src={getImage('/images/updated/grid2.jpg')} alt="Plazzo Pants" className="home-part-img" />
             </div>
 
-            <div className="wcat-card-home1">
-              <Link to="/women" className="wcat-media-home1">
-                <img
-                  src={getImage('/images/home/aswathi_cotton-kurti.png')}
-                  alt="Saree"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </Link>
-              <div className="wcat-info-home1">
-                <h3 className="wcat-brand-home1">Aswathi</h3>
-                {/*<div className="wcat-price-home1">
-                  <span className="wcat-mrp-home1">₹4,199</span>
-                  <span className="wcat-off-home1">₹5,299</span>
-                </div> */}
-                <Link to="/women" className="wcat-buy-home1">
-                  Buy Now
-                </Link>
-              </div>
+            <div className="home-part-text">
+              <h3 className="home-part-title">Plazzo Pants</h3>
+              <p className="home-part-sub">Flowy comfort, clean look</p>
+              <Link to="/women" className="home-part-btn">Explore →</Link>
             </div>
-          </div>
 
-          <div className="wcat-more-home1">
-            <Link to="/women" className="wcat-view-home1">
-              View More
-            </Link>
-          </div>
-        </section>
+            <div className="home-part-text">
+              <h3 className="home-part-title">Kurtis</h3>
+              <p className="home-part-sub">Classic prints and easy silhouettes</p>
+              <Link to="/women" className="home-part-btn">View Styles →</Link>
+            </div>
 
-        <section className="mosaic4-new-home">
-          <div className="mosaic4-shell-new-home">
-            <h2 className="mosaic4-title-new-home">Trending Now</h2>
+            <div className="home-part-card">
+              <img src={getImage('/images/updated/grid3.jpg')} alt="Women Kurtis" className="home-part-img" />
+            </div>
 
-            <div className="mosaic4-row-new-home">
-              <div className="mosaic4-block-new-home">
-                <div className="mosaic4-grid-new-home">
-                  <a href="/women" className="mosaic4-promo-new-home">
-                    <div className="mosaic4-promo-inner-new-home">
-                      <span className="mosaic4-head-new-home">Ankle Leggings</span>
-                      <span className="mosaic4-sub-new-home">Up to 50% Off</span>
-                    </div>
-                  </a>
-                  <a href="/women" className="mosaic4-card-new-home">
-                    <img src={getImage('/images/home/ankle-legging1.png')} alt="Women 1" />
-                  </a>
-                  <a href="/women" className="mosaic4-card-new-home">
-                    <img src={getImage('/images/home/ankle-legging2.png')} alt="Women 2" />
-                  </a>
-                  <a href="/women" className="mosaic4-card-new-home mosaic4-cta-wrap-new-home">
-                    <img src={getImage('/images/home/ankle-legging3.png')} alt="Women 3" />
-                    <span className="mosaic4-cta-new-home">Shop Now</span>
-                  </a>
-                </div>
-              </div>
+            <div className="home-part-text">
+              <h3 className="home-part-title">Leggings</h3>
+              <p className="home-part-sub">Stretch, support, all day comfort</p>
+              <Link to="/women" className="home-part-btn">Shop Leggings →</Link>
+            </div>
 
-              <div className="mosaic4-block-new-home">
-                <div className="mosaic4-grid-new-home">
-                  <a href="/men" className="mosaic4-card-new-home">
-                    <img src={getImage('/images/home/jockey2.webp')} alt="Men 1" />
-                  </a>
-                  <a href="/men" className="mosaic4-card-new-home">
-                    <img src={getImage('/images/home/jockey3.webp')} alt="Men 2" />
-                  </a>
-                  <a href="/men" className="mosaic4-promo-new-home">
-                    <div className="mosaic4-promo-inner-new-home">
-                      <span className="mosaic4-head-new-home">Classic Jockey</span>
-                      <span className="mosaic4-sub-new-home">Min 40% Off</span>
-                    </div>
-                  </a>
-                  <a href="/men" className="mosaic4-card-new-home mosaic4-cta-wrap-new-home">
-                    <img src={getImage('/images/home/jockey4.webp')} alt="Men 3" />
-                    <span className="mosaic4-cta-new-home">Shop Now</span>
-                  </a>
-                </div>
-              </div>
-
-              <div className="mosaic4-block-new-home">
-                <div className="mosaic4-grid-new-home">
-                  <a href="/kids" className="mosaic4-card-new-home">
-                    <img src={getImage('/images/home/cucumber1.webp')} alt="Kids 1" />
-                  </a>
-                  <a href="/kids" className="mosaic4-promo-new-home">
-                    <div className="mosaic4-promo-inner-new-home">
-                      <span className="mosaic4-head-new-home">Cucumber</span>
-                      <span className="mosaic4-sub-new-home">Up to 50% Off</span>
-                    </div>
-                  </a>
-                  <a href="/kids" className="mosaic4-card-new-home">
-                    <img src={getImage('/images/home/cucumber2.webp')} alt="Kids 2" />
-                  </a>
-                  <a href="/kids" className="mosaic4-card-new-home mosaic4-cta-wrap-new-home">
-                    <img src={getImage('/images/home/cucumber3.webp')} alt="Kids 3" />
-                    <span className="mosaic4-cta-new-home">Shop Now</span>
-                  </a>
-                </div>
-              </div>
+            <div className="home-part-card">
+              <img src={getImage('/images/updated/grid4.jpg')} alt="Women Leggings" className="home-part-img" />
             </div>
           </div>
         </section>
+
+        <Divider label="Women" direction="ltr" />
+
+        <section className="cool4-sec">
+          <div className="cool4-shell">
+            <h2 className="cool4-title">Stay Cool in Style</h2>
+
+            <div className="cool4-tabs" role="tablist" aria-label="Stay Cool in Style">
+              <button
+                type="button"
+                className={`cool4-tab ${coolTab === 'plazzo' ? 'is-active' : ''}`}
+                onClick={() => setCoolTab('plazzo')}
+                role="tab"
+                aria-selected={coolTab === 'plazzo'}
+              >
+                Plazzo
+              </button>
+              <button
+                type="button"
+                className={`cool4-tab ${coolTab === 'jeggings' ? 'is-active' : ''}`}
+                onClick={() => setCoolTab('jeggings')}
+                role="tab"
+                aria-selected={coolTab === 'jeggings'}
+              >
+                Jeggings
+              </button>
+              <button
+                type="button"
+                className={`cool4-tab ${coolTab === 'nightPants' ? 'is-active' : ''}`}
+                onClick={() => setCoolTab('nightPants')}
+                role="tab"
+                aria-selected={coolTab === 'nightPants'}
+              >
+                Night Pants
+              </button>
+              <button
+                type="button"
+                className={`cool4-tab ${coolTab === 'tshirts' ? 'is-active' : ''}`}
+                onClick={() => setCoolTab('tshirts')}
+                role="tab"
+                aria-selected={coolTab === 'tshirts'}
+              >
+                T-Shirts
+              </button>
+            </div>
+
+            <div className="cool4-grid" role="tabpanel">
+              {coolImages[coolTab].map((src, idx) => (
+                <Link to="/women" className="cool4-card" key={`${coolTab}-${idx}`}>
+                  <div className="cool4-media">
+                    <img src={getImage(src)} alt="" loading="lazy" decoding="async" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <Divider label="Women" direction="ltr" />
 
         <section className="home1-hero-new-home-2">
           <div className="home1-hero-frame-new-home-2">
@@ -316,300 +287,107 @@ export default function Home1() {
           </div>
         </section>
 
-        <section className="aurum-women">
-          <div className="aurum-shell">
-            <div className="aurum-head">
-              <h2 className="aurum-title">Women’s Categories</h2>
-              <a className="aurum-viewall" href="/women">
-                View all
-              </a>
+        <section className="aurum2-sec">
+          <div className="aurum2-shell">
+            <div className="aurum2-head">
+              <div className="aurum2-kicker">Explore</div>
+              <h2 className="aurum2-title">Women’s Categories</h2>
+              <p className="aurum2-sub">Handpicked picks to refresh your wardrobe, in one glance.</p>
+              <a className="aurum2-view" href="/women">View all</a>
             </div>
 
-            <div className="aurum-grid">
-              <a href="/women" className="aurum-card">
-                <div className="aurum-imgwrap">
-                  <img
-                    src={getImage('/images/women/new/category12.png')}
-                    alt="Twin Birds Leggings"
-                    loading="lazy"
-                    decoding="async"
-                  />
+            <div className="aurum2-grid">
+              <a href="/women" className="aurum2-card">
+                <div className="aurum2-media">
+                  <img src={getImage('/images/women/new/category12.png')} alt="Twin Birds Leggings" loading="lazy" decoding="async" />
+                  <div className="aurum2-badge">Twin Birds</div>
                 </div>
-                <div className="aurum-info">
-                  <div className="aurum-row">
-                    <span className="aurum-brand">Twin Birds</span>
-                    {/*<span className="aurum-offer">25% OFF</span> */}
-                  </div>
-                  <div className="aurum-row">
-                    <span className="aurum-cat">salwar Kameez</span>
-                    {/*<span className="aurum-price">
-                      <span className="aurum-strike">₹1,299</span> ₹999
-                    </span> */}
-                  </div>
+                <div className="aurum2-meta">
+                  <div className="aurum2-cat">Salwar Kameez</div>
+                  <div className="aurum2-cta">Shop</div>
                 </div>
               </a>
 
-              <a href="/women" className="aurum-card">
-                <div className="aurum-imgwrap">
-                  <img
-                    src={getImage('/images/women/new/category9.png')}
-                    alt="Indian Flower Tops"
-                    loading="lazy"
-                    decoding="async"
-                  />
+              <a href="/women" className="aurum2-card">
+                <div className="aurum2-media">
+                  <img src={getImage('/images/women/new/category9.png')} alt="Indian Flower Tops" loading="lazy" decoding="async" />
+                  <div className="aurum2-badge">Indian Flower</div>
                 </div>
-                <div className="aurum-info">
-                  <div className="aurum-row">
-                    <span className="aurum-brand">Indian Flower</span>
-                    {/*<span className="aurum-offer">30% OFF</span> */}
-                  </div>
-                  <div className="aurum-row">
-                    <span className="aurum-cat">Punjabi Suits</span>
-                    {/*<span className="aurum-price">
-                      <span className="aurum-strike">₹1,799</span> ₹1,259
-                    </span> */}
-                  </div>
+                <div className="aurum2-meta">
+                  <div className="aurum2-cat">Punjabi Suits</div>
+                  <div className="aurum2-cta">Shop</div>
                 </div>
               </a>
 
-              <a href="/women" className="aurum-card">
-                <div className="aurum-imgwrap">
-                  <img
-                    src={getImage('/images/women/new/category10.png')}
-                    alt="Twin Birds Kurti Pant"
-                    loading="lazy"
-                    decoding="async"
-                  />
+              <a href="/women" className="aurum2-card">
+                <div className="aurum2-media">
+                  <img src={getImage('/images/women/new/category10.png')} alt="Twin Birds Kurti Pant" loading="lazy" decoding="async" />
+                  <div className="aurum2-badge">Twin Birds</div>
                 </div>
-                <div className="aurum-info">
-                  <div className="aurum-row">
-                    <span className="aurum-brand">Twin Birds</span>
-                    {/*<span className="aurum-offer">20% OFF</span> */}
-                  </div>
-                  <div className="aurum-row">
-                    <span className="aurum-cat">Anarkali Suits</span>
-                    {/*<span className="aurum-price">
-                      <span className="aurum-strike">₹1,499</span> ₹1,199
-                    </span> */}
-                  </div>
+                <div className="aurum2-meta">
+                  <div className="aurum2-cat">Anarkali Suits</div>
+                  <div className="aurum2-cta">Shop</div>
                 </div>
               </a>
 
-              <a href="/women" className="aurum-card">
-                <div className="aurum-imgwrap">
-                  <img
-                    src={getImage('/images/women/new/category11.png')}
-                    alt="Intimacy Inner Wear"
-                    loading="lazy"
-                    decoding="async"
-                  />
+              <a href="/women" className="aurum2-card">
+                <div className="aurum2-media">
+                  <img src={getImage('/images/women/new/category11.png')} alt="Intimacy Inner Wear" loading="lazy" decoding="async" />
+                  <div className="aurum2-badge">Intimacy</div>
                 </div>
-                <div className="aurum-info">
-                  <div className="aurum-row">
-                    <span className="aurum-brand">Intimacy</span>
-                    {/*<span className="aurum-offer">15% OFF</span> */}
-                  </div>
-                  <div className="aurum-row">
-                    <span className="aurum-cat">Half Saree</span>
-                    {/*<span className="aurum-price">
-                      <span className="aurum-strike">₹999</span> ₹849
-                    </span> */}
-                  </div>
+                <div className="aurum2-meta">
+                  <div className="aurum2-cat">Half Saree</div>
+                  <div className="aurum2-cta">Shop</div>
                 </div>
               </a>
 
-              <a href="/women" className="aurum-card">
-                <div className="aurum-imgwrap">
-                  <img
-                    src={getImage('/images/women/new/category13.png')}
-                    alt="Naidu Hall Inner Wear"
-                    loading="lazy"
-                    decoding="async"
-                  />
+              <a href="/women" className="aurum2-card">
+                <div className="aurum2-media">
+                  <img src={getImage('/images/women/new/category13.png')} alt="Naidu Hall Inner Wear" loading="lazy" decoding="async" />
+                  <div className="aurum2-badge">Naidu Hall</div>
                 </div>
-                <div className="aurum-info">
-                  <div className="aurum-row">
-                    <span className="aurum-brand">Naidu Hall</span>
-                    {/*<span className="aurum-offer">35% OFF</span> */}
-                  </div>
-                  <div className="aurum-row">
-                    <span className="aurum-cat">Gowns</span>
-                    {/*<span className="aurum-price">
-                      <span className="aurum-strike">₹1,399</span> ₹909
-                    </span> */}
-                  </div>
+                <div className="aurum2-meta">
+                  <div className="aurum2-cat">Gowns</div>
+                  <div className="aurum2-cta">Shop</div>
                 </div>
               </a>
 
-              <a href="/women" className="aurum-card">
-                <div className="aurum-imgwrap">
-                  <img
-                    src={getImage('/images/women/new/category14.png')}
-                    alt="Aswathi Inner Wear"
-                    loading="lazy"
-                    decoding="async"
-                  />
+              <a href="/women" className="aurum2-card">
+                <div className="aurum2-media">
+                  <img src={getImage('/images/women/new/category14.png')} alt="Aswathi Inner Wear" loading="lazy" decoding="async" />
+                  <div className="aurum2-badge">Aswathi</div>
                 </div>
-                <div className="aurum-info">
-                  <div className="aurum-row">
-                    <span className="aurum-brand">Aswathi</span>
-                    {/*<span className="aurum-offer">22% OFF</span> */}
-                  </div>
-                  <div className="aurum-row">
-                    <span className="aurum-cat">Sharara Suits</span>
-                    {/*<span className="aurum-price">
-                      <span className="aurum-strike">₹1,199</span> ₹935
-                    </span> */}
-                  </div>
+                <div className="aurum2-meta">
+                  <div className="aurum2-cat">Sharara Suits</div>
+                  <div className="aurum2-cta">Shop</div>
                 </div>
               </a>
 
-              <a href="/women" className="aurum-card">
-                <div className="aurum-imgwrap">
-                  <img
-                    src={getImage('/images/women/new/category15.png')}
-                    alt="Twin Birds T-shirts"
-                    loading="lazy"
-                    decoding="async"
-                  />
+              <a href="/women" className="aurum2-card">
+                <div className="aurum2-media">
+                  <img src={getImage('/images/women/new/category15.png')} alt="Twin Birds T-shirts" loading="lazy" decoding="async" />
+                  <div className="aurum2-badge">Twin Birds</div>
                 </div>
-                <div className="aurum-info">
-                  <div className="aurum-row">
-                    <span className="aurum-brand">Twin Birds</span>
-                    {/*<span className="aurum-offer">18% OFF</span> */}
-                  </div>
-                  <div className="aurum-row">
-                    <span className="aurum-cat">Lehenga Choli</span>
-                    {/*<span className="aurum-price">
-                      <span className="aurum-strike">₹1,099</span> ₹901
-                    </span> */}
-                  </div>
+                <div className="aurum2-meta">
+                  <div className="aurum2-cat">Lehenga Choli</div>
+                  <div className="aurum2-cta">Shop</div>
                 </div>
               </a>
 
-              <a href="/women" className="aurum-card">
-                <div className="aurum-imgwrap">
-                  <img
-                    src={getImage('/images/women/new/category16.png')}
-                    alt="Indian Flower Lounge Wear"
-                    loading="lazy"
-                    decoding="async"
-                  />
+              <a href="/women" className="aurum2-card">
+                <div className="aurum2-media">
+                  <img src={getImage('/images/women/new/category16.png')} alt="Indian Flower Lounge Wear" loading="lazy" decoding="async" />
+                  <div className="aurum2-badge">Indian Flower</div>
                 </div>
-                <div className="aurum-info">
-                  <div className="aurum-row">
-                    <span className="aurum-brand">Indian Flower</span>
-                    {/*<span className="aurum-offer">28% OFF</span> */}
-                  </div>
-                  <div className="aurum-row">
-                    <span className="aurum-cat">Palazzo Suits</span>
-                    {/*<span className="aurum-price">
-                      <span className="aurum-strike">₹1,899</span> ₹1,367
-                    </span> */}
-                  </div>
+                <div className="aurum2-meta">
+                  <div className="aurum2-cat">Palazzo Suits</div>
+                  <div className="aurum2-cta">Shop</div>
                 </div>
               </a>
             </div>
           </div>
         </section>
 
-        <section className="wb2-sec-home1">
-          <div className="wb2-head-home1">
-            <h2 className="wb2-title-home1">Women • Twin Birds</h2>
-            <Link to="/women?brand=Twin%20Birds" className="wb2-view-home1">
-              View All
-            </Link>
-          </div>
-
-          <div className="wb2-grid-home1">
-            <Link to="/women" className="wb2-card-home1">
-              <img
-                src={getImage('/images/women/new/category-1.png')}
-                alt="Kurti Pants"
-                className="wb2-img-home1"
-              />
-              <span className="wb2-tag-home1">Kurti Pants</span>
-            </Link>
-
-            <Link to="/women" className="wb2-card-home1">
-              <img
-                src={getImage('/images/women/new/category-2.png')}
-                alt="Leggings"
-                className="wb2-img-home1"
-              />
-              <span className="wb2-tag-home1">Leggings</span>
-            </Link>
-
-            <Link to="/women" className="wb2-card-home1">
-              <img
-                src={getImage('/images/women/new/category-3.png')}
-                alt="Lounge Wear"
-                className="wb2-img-home1"
-              />
-              <span className="wb2-tag-home1">Lounge Wear</span>
-            </Link>
-
-            <Link to="/women" className="wb2-card-home1">
-              <img
-                src={getImage('/images/women/new/category-4.png')}
-                alt="Shapers"
-                className="wb2-img-home1"
-              />
-              <span className="wb2-tag-home1">Shapers</span>
-            </Link>
-
-            <Link to="/women" className="wb2-card-home1">
-              <img
-                src={getImage('/images/women/new/category-5.png')}
-                alt="Straight Pants"
-                className="wb2-img-home1"
-              />
-              <span className="wb2-tag-home1">Straight Pants</span>
-            </Link>
-
-            <Link to="/women" className="wb2-card-home1">
-              <img
-                src={getImage('/images/women/new/category-6.png')}
-                alt="T-Shirts"
-                className="wb2-img-home1"
-              />
-              <span className="wb2-tag-home1">T-Shirts</span>
-            </Link>
-
-            <Link to="/women" className="wb2-card-home1">
-              <img
-                src={getImage('/images/women/new/category-7.png')}
-                alt="Tops"
-                className="wb2-img-home1"
-              />
-              <span className="wb2-tag-home1">Tops</span>
-            </Link>
-
-            <Link to="/women" className="wb2-card-home1">
-              <img
-                src={getImage('/images/women/new/category-8.png')}
-                alt="Kids"
-                className="wb2-img-home1"
-              />
-              <span className="wb2-tag-home1">Kids</span>
-            </Link>
-          </div>
-
-          <div className="wb2-pills-home1">
-            <Link to="/women" className="wb2-pill-home1">
-              Cotton Kurti
-            </Link>
-            <Link to="/women" className="wb2-pill-home1">
-              Flexi Kurti Pant
-            </Link>
-            <Link to="/women" className="wb2-pill-home1">
-              Sleek Kurti Pant
-            </Link>
-            <Link to="/women" className="wb2-pill-home1">
-              Viscose Kurti Pant
-            </Link>
-          </div>
-        </section>
 
         <section className="wb3-sec">
           <div className="wb3-head">
@@ -691,6 +469,62 @@ export default function Home1() {
           </div>
         </section>
 
+        <Divider label="Women" direction="ltr" />
+
+        <section className="wb3x-sec">
+          <div className="wb3x-shell">
+            <div className="wb3x-head">
+              <h2 className="wb3x-title">Our Popular Brands</h2>
+            </div>
+
+            <div className="wb3x-body">
+              <div className="wb3x-left">
+                <div className="wb3x-leftTop">
+                  <div className="wb3x-kicker">Shop by brand</div>
+                  <div className="wb3x-note">Pick a brand and explore women’s collections.</div>
+                </div>
+
+                <div className="wb3x-brandGrid">
+                  <Link to="/women?brand=Twin%20Birds" className="wb3x-brand">Twin Birds</Link>
+                  <Link to="/women?brand=Naidu%20Hall" className="wb3x-brand">Naidu Hall</Link>
+                  <Link to="/women?brand=Intimacy" className="wb3x-brand">Intimacy</Link>
+                  <Link to="/women?brand=Aswathi" className="wb3x-brand">Aswathi</Link>
+                  <Link to="/women?brand=Indian%20Flower" className="wb3x-brand">Indian Flower</Link>
+                  <Link to="/women?brand=Jockey" className="wb3x-brand">Jockey</Link>
+                  <Link to="/women?brand=Enamor" className="wb3x-brand">Enamor</Link>
+                  <Link to="/women?brand=Amante" className="wb3x-brand">Amante</Link>
+                  <Link to="/women?brand=Triumph" className="wb3x-brand">Triumph</Link>
+                  <Link to="/women?brand=Lovable" className="wb3x-brand">Lovable</Link>
+
+                  <Link to="/women?brand=Zivame" className="wb3x-brand">Zivame</Link>
+                  <Link to="/women?brand=Clovia" className="wb3x-brand">Clovia</Link>
+                  <Link to="/women?brand=PrettySecrets" className="wb3x-brand">PrettySecrets</Link>
+                  <Link to="/women?brand=Van%20Heusen" className="wb3x-brand">Van Heusen</Link>
+                  <Link to="/women?brand=Hanes" className="wb3x-brand">Hanes</Link>
+                  <Link to="/women?brand=Rupa" className="wb3x-brand">Rupa</Link>
+                  <Link to="/women?brand=Dixcy%20Scott" className="wb3x-brand">Dixcy Scott</Link>
+                  <Link to="/women?brand=Lux" className="wb3x-brand">Lux</Link>
+                  <Link to="/women?brand=Dollar" className="wb3x-brand">Dollar</Link>
+                  <Link to="/women?brand=VIP" className="wb3x-brand">VIP</Link>
+                </div>
+
+                <div className="wb3x-actions">
+                  <Link to="/women" className="wb3x-cta">Explore Women’s Store</Link>
+                </div>
+              </div>
+
+              <div className="wb3x-right" aria-hidden="true">
+                <div className="wb3x-photo">
+                  <img src={getImage('/images/contact-side.jpg')} alt="" loading="lazy" decoding="async" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <Divider label="Women" direction="ltr" />
+
+
         <section className="home1-hero-new-home-2">
           <div className="home1-hero-frame-new-home-2">
             <Swiper
@@ -729,364 +563,312 @@ export default function Home1() {
             </Swiper>
           </div>
         </section>
+        <Divider label="Women" direction="ltr" />
 
-        <section className="wb4-sec">
-          <div className="wb4-head">
-            <h2>Women • Indian Flower</h2>
-            <Link to="/women" className="wb4-view">
-              View All
-            </Link>
-          </div>
+        <section className="three-clock-section">
+          <div className="three-clock-grid">
+            <div className="three-clock-card">
+              <img src={getImage('/images/updated/left.jpg')} alt="Women styling collection" className="three-clock-img" />
+              <div className="three-clock-overlay" />
+              <div className="three-clock-content">
+                <h3 className="three-clock-title">Everyday Essentials</h3>
+                <p className="three-clock-desc">
+                  Clean, comfortable picks for workdays and weekends, made to keep you looking sharp with zero effort.
+                </p>
+                <Link to="/women" className="three-clock-btn">Shop Women →</Link>
+              </div>
+            </div>
 
-          <div className="wb4-mag">
-            <Link to="/women" className="wb4-card wb4-card-1">
-              <img src={getImage('/images/women/new/zig-zag1.png')} alt="Tops" />
-              <span className="wb4-label">Tops</span>
-            </Link>
+            <div className="three-clock-card three-clock-center">
+              <img src={getImage('/images/updated/center.jpg')} alt="New arrivals highlight" className="three-clock-img" />
+              <div className="three-clock-overlay" />
+            </div>
 
-            <Link to="/women" className="wb4-card wb4-card-2">
-              <img src={getImage('/images/women/new/zig-zag2.png')} alt="Leggings" />
-              <span className="wb4-label">Leggings</span>
-            </Link>
-
-            <Link to="/women" className="wb4-card wb4-card-3 wb4-card-tall">
-              <img src={getImage('/images/women/new/zig-zag3.png')} alt="Kurti Pants" />
-              <span className="wb4-badge">Kurti Pants</span>
-            </Link>
-
-            <Link to="/women" className="wb4-card wb4-card-4">
-              <img src={getImage('/images/women/new/zig-zag4.png')} alt="Lounge Wear" />
-              <span className="wb4-label">Lounge Wear</span>
-            </Link>
-
-            <Link to="/women" className="wb4-card wb4-card-5">
-              <img src={getImage('/images/women/new/zig-zag5.png')} alt="Straight Pants" />
-              <span className="wb4-label">Straight Pants</span>
-            </Link>
-          </div>
-
-          <div className="wb4-chips">
-            <Link to="/women" className="wb4-chip">
-              T-Shirts
-            </Link>
-            <Link to="/women" className="wb4-chip">
-              Casual Shirt
-            </Link>
-            <Link to="/women" className="wb4-chip">
-              Viscose Leggings
-            </Link>
-            <Link to="/women" className="wb4-chip">
-              Cotton Kurti
-            </Link>
+            <div className="three-clock-card">
+              <img src={getImage('/images/updated/right.jpg')} alt="Women seasonal edits" className="three-clock-img" />
+              <div className="three-clock-overlay" />
+              <div className="three-clock-content">
+                <h3 className="three-clock-title">Dress Up Edit</h3>
+                <p className="three-clock-desc">
+                  Polished styles for outings and occasions, with standout fits that instantly elevate your look.
+                </p>
+                <Link to="/women" className="three-clock-btn">Explore Looks →</Link>
+              </div>
+            </div>
           </div>
         </section>
 
 
-        <section className="wb5-sec">
-          <div className="wb5-head">
-            <h2 className="wb5-title">Women • Innerwear</h2>
-            <Link to="/women" className="wb5-view">
-              View All
-            </Link>
-          </div>
+        <section className="wb4n-sec">
+          <div className="wb4n-shell">
+            <div className="wb4n-head">
+              <h2 className="wb4n-title">Indian Flower Picks</h2>
+              <Link to="/women" className="wb4n-view">View All</Link>
+            </div>
 
-          <div className="wb5-legend">
-            <span className="wb5-chip">Intimacy</span>
-            <span className="wb5-dot"></span>
-            <span className="wb5-chip">Naidu Hall</span>
-            <span className="wb5-dot"></span>
-            <span className="wb5-chip">Aswathi</span>
-          </div>
-
-          <div className="wb5-grid">
-            <Link to="/women" className="wb5-card wb5-tall">
-              <div className="wb5-imgwrap">
-                <img src={getImage('/images/home/zig-zag1.jpg')} alt="Intimacy" />
-              </div>
-              <div className="wb5-info">
-                <div className="wb5-row">
-                  <span className="wb5-brand">Intimacy</span>
-                  <span className="wb5-offer">20% OFF</span>
+            <div className="wb4n-grid">
+              <Link to="/women" className="wb4n-card wb4n-hero">
+                <img src={getImage('/images/women/new/zig-zag3.png')} alt="Kurti Pants" />
+                <div className="wb4n-overlay"></div>
+                <div className="wb4n-meta">
+                  <span className="wb4n-kicker">Trending</span>
+                  <span className="wb4n-name">Kurti Pants</span>
+                  <span className="wb4n-sub">Effortless everyday comfort</span>
                 </div>
-                <div className="wb5-row">
-                  <span className="wb5-tag">Intimates</span>
-                  {/*<span className="wb5-price">
-                    <span className="wb5-strike">₹1,299</span> ₹1,039
-                  </span> */}
-                </div>
-              </div>
-            </Link>
-
-            <Link to="/women" className="wb5-card">
-              <div className="wb5-imgwrap">
-                <img src={getImage('/images/home/zig-zag2.png')} alt="Naidu Hall" />
-              </div>
-              <div className="wb5-info">
-                <div className="wb5-row">
-                  <span className="wb5-brand">Naidu Hall</span>
-                  <span className="wb5-offer">30% OFF</span>
-                </div>
-                <div className="wb5-row">
-                  <span className="wb5-tag">Everyday Comfort</span>
-                  {/*<span className="wb5-price">
-                    <span className="wb5-strike">₹1,499</span> ₹1,049
-                  </span> */}
-                </div>
-              </div>
-            </Link>
-
-            <Link to="/women" className="wb5-card">
-              <div className="wb5-imgwrap">
-                <img src={getImage('/images/home/zig-zag3.png')} alt="Aswathi" />
-              </div>
-              <div className="wb5-info">
-                <div className="wb5-row">
-                  <span className="wb5-brand">Aswathi</span>
-                  <span className="wb5-offer">18% OFF</span>
-                </div>
-                <div className="wb5-row">
-                  <span className="wb5-tag">Soft Touch</span>
-                  {/*<span className="wb5-price">
-                    <span className="wb5-strike">₹1,199</span> ₹983
-                  </span> */}
-                </div>
-              </div>
-            </Link>
-
-            <Link to="/women" className="wb5-card">
-              <div className="wb5-imgwrap">
-                <img src={getImage('/images/home/zig-zag4.png')} alt="Co-ord Sets" />
-              </div>
-              <div className="wb5-info">
-                <div className="wb5-row">
-                  <span className="wb5-brand">Intimacy</span>
-                  <span className="wb5-offer">25% OFF</span>
-                </div>
-                <div className="wb5-row">
-                  <span className="wb5-tag">Co-ord Sets</span>
-                  {/*<span className="wb5-price">
-                    <span className="wb5-strike">₹1,799</span> ₹1,349
-                  </span> */}
-                </div>
-              </div>
-            </Link>
-
-            <Link to="/women" className="wb5-card wb5-wide">
-              <div className="wb5-imgwrap">
-                <img src={getImage('/images/home/zig-zag5.png')} alt="Shapers" />
-              </div>
-              <div className="wb5-info">
-                <div className="wb5-row">
-                  <span className="wb5-brand">Naidu Hall</span>
-                  <span className="wb5-offer">28% OFF</span>
-                </div>
-                <div className="wb5-row">
-                  <span className="wb5-tag">Shapers</span>
-                  {/*<span className="wb5-price">
-                    <span className="wb5-strike">₹1,999</span> ₹1,439
-                  </span> */}
-                </div>
-              </div>
-            </Link>
-
-            <Link to="/women" className="wb5-card">
-              <div className="wb5-imgwrap">
-                <img src={getImage('/images/home/zig-zag6.jpg')} alt="Comfort" />
-              </div>
-              <div className="wb5-info">
-                <div className="wb5-row">
-                  <span className="wb5-brand">Aswathi</span>
-                  <span className="wb5-offer">22% OFF</span>
-                </div>
-                <div className="wb5-row">
-                  <span className="wb5-tag">Comfort</span>
-                  {/*<span className="wb5-price">
-                    <span className="wb5-strike">₹1,099</span> ₹857
-                  </span> */}
-                </div>
-              </div>
-            </Link>
-
-            <Link to="/women" className="wb5-card">
-              <div className="wb5-imgwrap">
-                <img src={getImage('/images/home/zig-zag7.jpg')} alt="Basics" />
-              </div>
-              <div className="wb5-info">
-                <div className="wb5-row">
-                  <span className="wb5-brand">Intimacy</span>
-                  <span className="wb5-offer">15% OFF</span>
-                </div>
-                <div className="wb5-row">
-                  <span className="wb5-tag">Basics</span>
-                  {/*<span className="wb5-price">
-                    <span className="wb5-strike">₹899</span> ₹764
-                  </span> */}
-                </div>
-              </div>
-            </Link>
-
-            <Link to="/women" className="wb5-card">
-              <div className="wb5-imgwrap">
-                <img src={getImage('/images/home/zig-zag8.png')} alt="Premium" />
-              </div>
-              <div className="wb5-info">
-                <div className="wb5-row">
-                  <span className="wb5-brand">Naidu Hall</span>
-                  <span className="wb5-offer">32% OFF</span>
-                </div>
-                <div className="wb5-row">
-                  <span className="wb5-tag">Premium</span>
-                  {/*<span className="wb5-price">
-                    <span className="wb5-strike">₹2,199</span> ₹1,495
-                  </span> */}
-                </div>
-              </div>
-            </Link>
-
-            <Link to="/women" className="wb5-card">
-              <div className="wb5-imgwrap">
-                <img src={getImage('/images/home/zig-zag9.webp')} alt="Basics" />
-              </div>
-              <div className="wb5-info">
-                <div className="wb5-row">
-                  <span className="wb5-brand">Intimacy</span>
-                  <span className="wb5-offer">15% OFF</span>
-                </div>
-                <div className="wb5-row">
-                  <span className="wb5-tag">Basics</span>
-                  <span className="wb5-price">
-                    <span className="wb5-strike">₹899</span> ₹764
-                  </span>
-                </div>
-              </div>
-            </Link>
-
-            <Link to="/women" className="wb5-card">
-              <div className="wb5-imgwrap">
-                <img src={getImage('/images/home/zig-zag10.webp')} alt="Premium" />
-              </div>
-              <div className="wb5-info">
-                <div className="wb5-row">
-                  <span className="wb5-brand">Naidu Hall</span>
-                  <span className="wb5-offer">32% OFF</span>
-                </div>
-                <div className="wb5-row">
-                  <span className="wb5-tag">Premium</span>
-                  <span className="wb5-price">
-                    <span className="wb5-strike">₹2,199</span> ₹1,495
-                  </span>
-                </div>
-              </div>
-            </Link>
-          </div>
-        </section>
-
-        <section className="mb1-sec">
-          <div className="mb1-head">
-            <h2>Men • Jockey Collections</h2>
-            <Link to="/men" className="mb1-view">
-              View All
-            </Link>
-          </div>
-
-          <div className="mb1-circles">
-            <Link to="/men" className="mb1-item">
-              <span className="mb1-ring"></span>
-              <img src={getImage('/images/home/jockey3.webp')} alt="Shirts" />
-              <span className="mb1-cap">Breifs</span>
-            </Link>
-
-            <Link to="/men" className="mb1-item">
-              <span className="mb1-ring"></span>
-              <img src={getImage('/images/home/jockey2.webp')} alt="T-Shirts" />
-              <span className="mb1-cap">T-Shirts</span>
-            </Link>
-
-            <Link to="/men" className="mb1-item">
-              <span className="mb1-ring"></span>
-              <img src={getImage('/images/home/jockey4.webp')} alt="Trousers" />
-              <span className="mb1-cap">Vests</span>
-            </Link>
-
-            <Link to="/men" className="mb1-item">
-              <span className="mb1-ring"></span>
-              <img src={getImage('/images/home/jockey5.webp')} alt="Denim" />
-              <span className="mb1-cap">Trunks</span>
-            </Link>
-
-            <Link to="/men" className="mb1-item">
-              <span className="mb1-ring"></span>
-              <img src={getImage('/images/home/jockey6.webp')} alt="Ethnic Wear" />
-              <span className="mb1-cap">Knit Shirts</span>
-            </Link>
-
-            <Link to="/men" className="mb1-item">
-              <span className="mb1-ring"></span>
-              <img src={getImage('/images/home/jockey7.webp')} alt="Winter" />
-              <span className="mb1-cap">Polos</span>
-            </Link>
-
-            <Link to="/men" className="mb1-item">
-              <span className="mb1-ring"></span>
-              <img src={getImage('/images/home/jockey8.webp')} alt="Footwear" />
-              <span className="mb1-cap">Boxer</span>
-            </Link>
-
-            <Link to="/men" className="mb1-item">
-              <span className="mb1-ring"></span>
-              <img src={getImage('/images/home/jockey9.webp')} alt="Accessories" />
-              <span className="mb1-cap">Gym Vests</span>
-            </Link>
-          </div>
-        </section>
-
-        <section className="mb3-sec">
-          <div className="mb3-head">
-            <h2>Men • Featured Styles</h2>
-            <Link to="/men" className="mb3-view">
-              View All
-            </Link>
-          </div>
-
-          <div className="mb3-carousel">
-            <button className="mb3-arrow left" id="mb3-left">
-              ‹
-            </button>
-
-            <div className="mb3-track" id="mb3-track">
-              <Link to="/men/jackets" className="mb3-card">
-                <img src={getImage('/images/home/jockey7.webp')} alt="Jackets" />
-                <span className="mb3-tag">Jackets</span>
+                <span className="wb4n-cta">Shop</span>
               </Link>
-              <Link to="/men/shirts" className="mb3-card">
-                <img src={getImage('/images/home/jockey6.webp')} alt="Shirts" />
-                <span className="mb3-tag">Shirts</span>
+
+              <Link to="/women" className="wb4n-card">
+                <img src={getImage('/images/women/new/zig-zag1.png')} alt="Tops" />
+                <div className="wb4n-overlay"></div>
+                <div className="wb4n-mini">Tops</div>
               </Link>
-              <Link to="/men/polos" className="mb3-card">
-                <img src={getImage('/images/home/jockey2.webp')} alt="Polos" />
-                <span className="mb3-tag">Polos</span>
+
+              <Link to="/women" className="wb4n-card">
+                <img src={getImage('/images/women/new/zig-zag2.png')} alt="Leggings" />
+                <div className="wb4n-overlay"></div>
+                <div className="wb4n-mini">Leggings</div>
               </Link>
-              <Link to="/men/trousers" className="mb3-card">
-                <img src={getImage('/images/home/jockey3.webp')} alt="Trousers" />
-                <span className="mb3-tag">Trousers</span>
+
+              <Link to="/women" className="wb4n-card">
+                <img src={getImage('/images/women/new/zig-zag4.png')} alt="Lounge Wear" />
+                <div className="wb4n-overlay"></div>
+                <div className="wb4n-mini">Lounge Wear</div>
               </Link>
-              <Link to="/men/denim" className="mb3-card">
-                <img src={getImage('/images/home/jockey4.webp')} alt="Denim" />
-                <span className="mb3-tag">Denim</span>
-              </Link>
-              <Link to="/men/ethnic" className="mb3-card">
-                <img src={getImage('/images/home/jockey5.webp')} alt="Ethnic" />
-                <span className="mb3-tag">Ethnic</span>
-              </Link>
-              <Link to="/men/footwear" className="mb3-card">
-                <img src={getImage('/images/home/jockey6.webp')} alt="Footwear" />
-                <span className="mb3-tag">Footwear</span>
+
+              <Link to="/women" className="wb4n-card">
+                <img src={getImage('/images/women/new/zig-zag5.png')} alt="Straight Pants" />
+                <div className="wb4n-overlay"></div>
+                <div className="wb4n-mini">Straight Pants</div>
               </Link>
             </div>
 
-            <button className="mb3-arrow right" id="mb3-right">
-              ›
-            </button>
+            <div className="wb4n-chips">
+              <Link to="/women" className="wb4n-chip">T-Shirts</Link>
+              <Link to="/women" className="wb4n-chip">Casual Shirt</Link>
+              <Link to="/women" className="wb4n-chip">Viscose Leggings</Link>
+              <Link to="/women" className="wb4n-chip">Cotton Kurti</Link>
+            </div>
+          </div>
+        </section>
+
+
+        <Divider label="Women" direction="ltr" />
+
+
+
+
+
+
+        <section className="iwx-sec">
+          <div className="iwx-shell">
+            <div className="iwx-head">
+              <div>
+                <h2 className="iwx-title">Innerwear Essentials</h2>
+                <p className="iwx-sub">Comfort-first picks for everyday wear</p>
+              </div>
+              <Link to="/women" className="iwx-view">View All</Link>
+            </div>
+
+            <div className="iwx-grid">
+              <Link to="/women" className="iwx-card iwx-card-hero">
+                <img src={getImage('/images/updated/inner1.jpg')} alt="Saree Shaper" className="iwx-img" />
+                <div className="iwx-shade" />
+                <div className="iwx-meta">
+                  <span className="iwx-kicker">Shape & Support</span>
+                  <h3 className="iwx-name">Saree Shaper</h3>
+                  <span className="iwx-cta">Shop Now →</span>
+                </div>
+              </Link>
+
+              <Link to="/women" className="iwx-card">
+                <img src={getImage('/images/updated/inner2.jpg')} alt="Underwear" className="iwx-img" />
+                <div className="iwx-shade" />
+                <div className="iwx-meta">
+                  <span className="iwx-kicker">Everyday Basics</span>
+                  <h3 className="iwx-name">Underwear</h3>
+                  <span className="iwx-cta">Explore →</span>
+                </div>
+              </Link>
+
+              <Link to="/women" className="iwx-card">
+                <img src={getImage('/images/updated/inner3.jpg')} alt="Bras" className="iwx-img" />
+                <div className="iwx-shade" />
+                <div className="iwx-meta">
+                  <span className="iwx-kicker">Fit Matters</span>
+                  <h3 className="iwx-name">Bras</h3>
+                  <span className="iwx-cta">View Styles →</span>
+                </div>
+              </Link>
+
+              <Link to="/women" className="iwx-card iwx-card-wide">
+                <img src={getImage('/images/updated/inner5.jpg')} alt="Shorts" className="iwx-img" />
+                <div className="iwx-shade" />
+                <div className="iwx-meta">
+                  <span className="iwx-kicker">Soft & Easy</span>
+                  <h3 className="iwx-name">Shorts</h3>
+                  <span className="iwx-cta">Shop Comfort →</span>
+                </div>
+              </Link>
+            </div>
+
+            <div className="iwx-tags">
+              <Link to="/women" className="iwx-pill">Daily Wear</Link>
+              <Link to="/women" className="iwx-pill">Seamless</Link>
+              <Link to="/women" className="iwx-pill">Breathable Cotton</Link>
+              <Link to="/women" className="iwx-pill">Shapewear</Link>
+            </div>
+          </div>
+        </section>
+        <Divider label="Women" direction="ltr" />
+
+        <section className="mb1x-sec">
+          <div className="mb1x-shell">
+            <div className="mb1x-head">
+              <h2 className="mb1x-title">Men’s Essentials</h2>
+              <Link to="/men" className="mb1x-view">View All</Link>
+            </div>
+
+            <div className="mb1x-circles">
+              <Link to="/men" className="mb1x-item">
+                <div className="mb1x-photo">
+                  <img src={getImage('/images/home/jockey3.webp')} alt="Briefs" />
+                </div>
+                <span className="mb1x-cap">Briefs</span>
+              </Link>
+
+              <Link to="/men" className="mb1x-item">
+                <div className="mb1x-photo">
+                  <img src={getImage('/images/home/jockey2.webp')} alt="T-Shirts" />
+                </div>
+                <span className="mb1x-cap">T-Shirts</span>
+              </Link>
+
+              <Link to="/men" className="mb1x-item">
+                <div className="mb1x-photo">
+                  <img src={getImage('/images/home/jockey4.webp')} alt="Vests" />
+                </div>
+                <span className="mb1x-cap">Vests</span>
+              </Link>
+
+              <Link to="/men" className="mb1x-item">
+                <div className="mb1x-photo">
+                  <img src={getImage('/images/home/jockey5.webp')} alt="Trunks" />
+                </div>
+                <span className="mb1x-cap">Trunks</span>
+              </Link>
+
+              <Link to="/men" className="mb1x-item">
+                <div className="mb1x-photo">
+                  <img src={getImage('/images/home/jockey6.webp')} alt="Knit Shirts" />
+                </div>
+                <span className="mb1x-cap">Knit Shirts</span>
+              </Link>
+
+              <Link to="/men" className="mb1x-item">
+                <div className="mb1x-photo">
+                  <img src={getImage('/images/home/jockey7.webp')} alt="Polos" />
+                </div>
+                <span className="mb1x-cap">Polos</span>
+              </Link>
+
+              <Link to="/men" className="mb1x-item">
+                <div className="mb1x-photo">
+                  <img src={getImage('/images/home/jockey8.webp')} alt="Boxers" />
+                </div>
+                <span className="mb1x-cap">Boxers</span>
+              </Link>
+
+              <Link to="/men" className="mb1x-item">
+                <div className="mb1x-photo">
+                  <img src={getImage('/images/home/jockey9.webp')} alt="Gym Vests" />
+                </div>
+                <span className="mb1x-cap">Gym Vests</span>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <Divider label="Women" direction="ltr" />
+
+        <section className="mb3x-sec">
+          <div className="mb3x-shell">
+            <div className="mb3x-head">
+              <h2 className="mb3x-title">Men’s Picks</h2>
+              <Link to="/men" className="mb3x-view">View All</Link>
+            </div>
+
+            <div className="mb3x-row">
+              <Link to="/men/jackets" className="mb3x-card">
+                <div className="mb3x-media">
+                  <img src={getImage('/images/home/jockey7.webp')} alt="Jackets" />
+                </div>
+                <div className="mb3x-meta">
+                  <div className="mb3x-name">Jackets</div>
+                  <div className="mb3x-sub">Layer up in style</div>
+                </div>
+              </Link>
+
+              <Link to="/men/shirts" className="mb3x-card">
+                <div className="mb3x-media">
+                  <img src={getImage('/images/home/jockey6.webp')} alt="Shirts" />
+                </div>
+                <div className="mb3x-meta">
+                  <div className="mb3x-name">Shirts</div>
+                  <div className="mb3x-sub">Everyday essentials</div>
+                </div>
+              </Link>
+
+              <Link to="/men/polos" className="mb3x-card">
+                <div className="mb3x-media">
+                  <img src={getImage('/images/home/jockey2.webp')} alt="Polos" />
+                </div>
+                <div className="mb3x-meta">
+                  <div className="mb3x-name">Polos</div>
+                  <div className="mb3x-sub">Smart and casual</div>
+                </div>
+              </Link>
+
+              <Link to="/men/trousers" className="mb3x-card">
+                <div className="mb3x-media">
+                  <img src={getImage('/images/home/jockey3.webp')} alt="Trousers" />
+                </div>
+                <div className="mb3x-meta">
+                  <div className="mb3x-name">Trousers</div>
+                  <div className="mb3x-sub">Clean fits</div>
+                </div>
+              </Link>
+
+              <Link to="/men/denim" className="mb3x-card">
+                <div className="mb3x-media">
+                  <img src={getImage('/images/home/jockey4.webp')} alt="Denim" />
+                </div>
+                <div className="mb3x-meta">
+                  <div className="mb3x-name">Denim</div>
+                  <div className="mb3x-sub">Classic looks</div>
+                </div>
+              </Link>
+
+              <Link to="/men/ethnic" className="mb3x-card">
+                <div className="mb3x-media">
+                  <img src={getImage('/images/home/jockey5.webp')} alt="Ethnic" />
+                </div>
+                <div className="mb3x-meta">
+                  <div className="mb3x-name">Ethnic</div>
+                  <div className="mb3x-sub">Festive ready</div>
+                </div>
+              </Link>
+
+              <Link to="/men/footwear" className="mb3x-card">
+                <div className="mb3x-media">
+                  <img src={getImage('/images/home/jockey6.webp')} alt="Footwear" />
+                </div>
+                <div className="mb3x-meta">
+                  <div className="mb3x-name">Footwear</div>
+                  <div className="mb3x-sub">Finish the fit</div>
+                </div>
+              </Link>
+            </div>
           </div>
         </section>
 
@@ -1129,64 +911,94 @@ export default function Home1() {
           </div>
         </section>
 
-        <section className="mb4-sec">
-          <div className="mb4-head">
-            <h2>Men • Essentials </h2>
-            <Link to="/men" className="mb4-view">
-              View All
-            </Link>
-          </div>
+        <section className="mb4x-sec">
+          <div className="mb4x-shell">
+            <div className="mb4x-head">
+              <h2 className="mb4x-title">Men’s Daily Essentials</h2>
+              <Link to="/men" className="mb4x-view">View All</Link>
+            </div>
 
-          <div className="mb4-grid">
-            <Link to="/men/shirts" className="mb4-tile mb4-a">
-              <img src={getImage('/images/home/jockey2.webp')} alt="Shirts" />
-              <span className="mb4-tag">Shirts</span>
-            </Link>
+            <div className="mb4x-layout">
+              <Link to="/men/shirts" className="mb4x-hero">
+                <img src={getImage('/images/updated/men1.jpg')} alt="Shirts" />
+                <div className="mb4x-heroOverlay" />
+                <div className="mb4x-heroContent">
+                  <div className="mb4x-heroKicker">Featured</div>
+                  <div className="mb4x-heroTitle">Shirts</div>
+                  <div className="mb4x-heroSub">Sharp fits for work and weekends</div>
+                  <span className="mb4x-heroCta">Shop Now</span>
+                </div>
+              </Link>
 
-            <Link to="/men/t-shirts" className="mb4-tile mb4-b">
-              <img src={getImage('/images/home/jockey2.webp')} alt="T-Shirts" />
-              <span className="mb4-cap">T-Shirts</span>
-            </Link>
+              <div className="mb4x-grid">
+                <Link to="/men/t-shirts" className="mb4x-card">
+                  <div className="mb4x-media">
+                    <img src={getImage('/images/updated/men2.jpg')} alt="T-Shirts" />
+                  </div>
+                  <div className="mb4x-meta">
+                    <div className="mb4x-name">T-Shirts</div>
+                    <div className="mb4x-sub">Everyday comfort</div>
+                  </div>
+                </Link>
 
-            <Link to="/men/trousers" className="mb4-tile mb4-c">
-              <img src={getImage('/images/home/jockey2.webp')} alt="Trousers" />
-              <span className="mb4-cap">Trousers</span>
-            </Link>
+                <Link to="/men/trousers" className="mb4x-card">
+                  <div className="mb4x-media">
+                    <img src={getImage('/images/updated/men3.jpg')} alt="Trousers" />
+                  </div>
+                  <div className="mb4x-meta">
+                    <div className="mb4x-name">Trousers</div>
+                    <div className="mb4x-sub">Clean silhouettes</div>
+                  </div>
+                </Link>
 
-            <Link to="/men/denim" className="mb4-tile mb4-d">
-              <img src={getImage('/images/home/jockey2.webp')} alt="Denim" />
-              <span className="mb4-cap">Denim</span>
-            </Link>
+                <Link to="/men/denim" className="mb4x-card">
+                  <div className="mb4x-media">
+                    <img src={getImage('/images/updated/men4.jpg')} alt="Denim" />
+                  </div>
+                  <div className="mb4x-meta">
+                    <div className="mb4x-name">Denim</div>
+                    <div className="mb4x-sub">Classic staples</div>
+                  </div>
+                </Link>
 
-            <Link to="/men/jackets" className="mb4-tile mb4-e">
-              <img src={getImage('/images/home/jockey2.webp')} alt="Jackets" />
-              <span className="mb4-cap">Jackets</span>
-            </Link>
+                <Link to="/men/jackets" className="mb4x-card">
+                  <div className="mb4x-media">
+                    <img src={getImage('/images/updated/men5.jpg')} alt="Jackets" />
+                  </div>
+                  <div className="mb4x-meta">
+                    <div className="mb4x-name">Jackets</div>
+                    <div className="mb4x-sub">Layer in style</div>
+                  </div>
+                </Link>
 
-            <Link to="/men/ethnic" className="mb4-tile mb4-f">
-              <img src={getImage('/images/home/jockey2.webp')} alt="Ethnic" />
-              <span className="mb4-cap">Ethnic</span>
-            </Link>
+                <Link to="/men/ethnic" className="mb4x-card">
+                  <div className="mb4x-media">
+                    <img src={getImage('/images/updated/men6.jpg')} alt="Ethnic" />
+                  </div>
+                  <div className="mb4x-meta">
+                    <div className="mb4x-name">Ethnic</div>
+                    <div className="mb4x-sub">Festive ready</div>
+                  </div>
+                </Link>
 
-            <Link to="/men/footwear" className="mb4-tile mb4-g">
-              <img src={getImage('/images/home/jockey2.webp')} alt="Footwear" />
-              <span className="mb4-cap">Footwear</span>
-            </Link>
-          </div>
+                <Link to="/men/footwear" className="mb4x-card">
+                  <div className="mb4x-media">
+                    <img src={getImage('/images/updated/men7.jpg')} alt="Footwear" />
+                  </div>
+                  <div className="mb4x-meta">
+                    <div className="mb4x-name">Footwear</div>
+                    <div className="mb4x-sub">Finish your look</div>
+                  </div>
+                </Link>
+              </div>
+            </div>
 
-          <div className="mb4-pills">
-            <Link to="/men/shirts/formal" className="mb4-pill">
-              Formal
-            </Link>
-            <Link to="/men/t-shirts/slim-fit" className="mb4-pill">
-              Slim Fit
-            </Link>
-            <Link to="/men/denim/straight" className="mb4-pill">
-              Straight Denim
-            </Link>
-            <Link to="/men/jackets/winter" className="mb4-pill">
-              Winter Layer
-            </Link>
+            <div className="mb4x-pills">
+              <Link to="/men/shirts/formal" className="mb4x-pill">Formal</Link>
+              <Link to="/men/t-shirts/slim-fit" className="mb4x-pill">Slim Fit</Link>
+              <Link to="/men/denim/straight" className="mb4x-pill">Straight Denim</Link>
+              <Link to="/men/jackets/winter" className="mb4x-pill">Winter Layer</Link>
+            </div>
           </div>
         </section>
       </div>

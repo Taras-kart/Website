@@ -9,120 +9,83 @@ export default function Divider({ direction = 'ltr', height = 40, speed = 18 }) 
       <div className="dv2-marquee">
         <div className="dv2-strip">
           <div className="dv2-set">
-            <img src="/images/divider/icons8-flowers-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-slip-dress-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-dress-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-polo-shirt-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-t-shirt-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-trousers-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-cart-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-cart-100 (1).png" alt="" className="dv2-ic" />
+            <img src="/images/updated/scrolling1.avif" alt="" className="dv2-ic" />
           </div>
 
           <div className="dv2-set" aria-hidden="true">
-            <img src="/images/divider/icons8-flowers-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-slip-dress-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-dress-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-polo-shirt-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-t-shirt-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-trousers-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-cart-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-cart-100 (1).png" alt="" className="dv2-ic" />
+            <img src="/images/updated/scrolling1.avif" alt="" className="dv2-ic" />
           </div>
 
           <div className="dv2-set" aria-hidden="true">
-            <img src="/images/divider/icons8-flowers-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-slip-dress-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-dress-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-polo-shirt-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-t-shirt-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-trousers-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-cart-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-cart-100 (1).png" alt="" className="dv2-ic" />
+            <img src="/images/updated/scrolling1.avif" alt="" className="dv2-ic" />
           </div>
 
           <div className="dv2-set" aria-hidden="true">
-            <img src="/images/divider/icons8-flowers-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-slip-dress-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-dress-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-polo-shirt-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-t-shirt-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-trousers-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-cart-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-cart-100 (1).png" alt="" className="dv2-ic" />
+            <img src="/images/updated/scrolling1.avif" alt="" className="dv2-ic" />
           </div>
 
           <div className="dv2-set" aria-hidden="true">
-            <img src="/images/divider/icons8-flowers-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-slip-dress-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-dress-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-polo-shirt-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-t-shirt-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-trousers-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-cart-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-cart-100 (1).png" alt="" className="dv2-ic" />
+            <img src="/images/updated/scrolling1.avif" alt="" className="dv2-ic" />
           </div>
 
-
           <div className="dv2-set" aria-hidden="true">
-            <img src="/images/divider/icons8-flowers-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-slip-dress-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-dress-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-polo-shirt-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-t-shirt-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-trousers-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-cart-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-cart-100 (1).png" alt="" className="dv2-ic" />
+            <img src="/images/updated/scrolling1.avif" alt="" className="dv2-ic" />
           </div>
 
-
-
           <div className="dv2-set" aria-hidden="true">
-            <img src="/images/divider/icons8-flowers-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-slip-dress-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-dress-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-polo-shirt-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-t-shirt-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-trousers-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-cart-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-cart-100 (1).png" alt="" className="dv2-ic" />
+            <img src="/images/updated/scrolling1.avif" alt="" className="dv2-ic" />
           </div>
 
-
           <div className="dv2-set" aria-hidden="true">
-            <img src="/images/divider/icons8-flowers-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-slip-dress-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-dress-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-polo-shirt-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-t-shirt-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-trousers-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-cart-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-cart-100 (1).png" alt="" className="dv2-ic" />
+            <img src="/images/updated/scrolling1.avif" alt="" className="dv2-ic" />
           </div>
 
-
-
           <div className="dv2-set" aria-hidden="true">
-            <img src="/images/divider/icons8-flowers-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-slip-dress-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-dress-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-polo-shirt-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-t-shirt-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-trousers-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-cart-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-cart-100 (1).png" alt="" className="dv2-ic" />
+            <img src="/images/updated/scrolling1.avif" alt="" className="dv2-ic" />
           </div>
 
+          <div className="dv2-set" aria-hidden="true">
+            <img src="/images/updated/scrolling1.avif" alt="" className="dv2-ic" />
+          </div>
+
+          <div className="dv2-set">
+            <img src="/images/updated/scrolling1.avif" alt="" className="dv2-ic" />
+          </div>
 
           <div className="dv2-set" aria-hidden="true">
-            <img src="/images/divider/icons8-flowers-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-slip-dress-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-dress-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-polo-shirt-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-t-shirt-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-trousers-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-cart-100.png" alt="" className="dv2-ic" />
-            <img src="/images/divider/icons8-cart-100 (1).png" alt="" className="dv2-ic" />
+            <img src="/images/updated/scrolling1.avif" alt="" className="dv2-ic" />
+          </div>
+
+          <div className="dv2-set" aria-hidden="true">
+            <img src="/images/updated/scrolling1.avif" alt="" className="dv2-ic" />
+          </div>
+
+          <div className="dv2-set" aria-hidden="true">
+            <img src="/images/updated/scrolling1.avif" alt="" className="dv2-ic" />
+          </div>
+
+          <div className="dv2-set" aria-hidden="true">
+            <img src="/images/updated/scrolling1.avif" alt="" className="dv2-ic" />
+          </div>
+
+          <div className="dv2-set" aria-hidden="true">
+            <img src="/images/updated/scrolling1.avif" alt="" className="dv2-ic" />
+          </div>
+
+          <div className="dv2-set" aria-hidden="true">
+            <img src="/images/updated/scrolling1.avif" alt="" className="dv2-ic" />
+          </div>
+
+          <div className="dv2-set" aria-hidden="true">
+            <img src="/images/updated/scrolling1.avif" alt="" className="dv2-ic" />
+          </div>
+
+          <div className="dv2-set" aria-hidden="true">
+            <img src="/images/updated/scrolling1.avif" alt="" className="dv2-ic" />
+          </div>
+
+          <div className="dv2-set" aria-hidden="true">
+            <img src="/images/updated/scrolling1.avif" alt="" className="dv2-ic" />
           </div>
         </div>
       </div>
