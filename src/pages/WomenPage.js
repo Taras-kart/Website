@@ -118,12 +118,7 @@ const pickImageForProduct = (p) => {
   return DEFAULT_IMG
 }
 
-function BrowseBlocks({
-  brand,
-  blocks,
-  currentCategory,
-  onPickCategory
-}) {
+function BrowseBlocks({ brand, blocks, currentCategory, onPickCategory }) {
   const list = blocks || []
   return (
     <div className="women-browse">
@@ -131,8 +126,7 @@ function BrowseBlocks({
         <div className="women-browse-title">
           <span className="women-browse-badge">{brand || 'Women'}</span>
           <h3 className="women-browse-h">{brand ? 'Pick a category' : 'Browse by category'}</h3>
-          {/*<p className="women-browse-sub">Tap a card to filter products for that category.</p> */}
-          <span className="women-browse-badge">{brand || 'Women'}</span>
+          <p className="women-browse-sub">Choose a category to see matching products.</p>
         </div>
 
         <div className="women-browse-actions">
@@ -247,9 +241,6 @@ export default function WomenPage() {
     setActiveCategory(selectedCategory)
   }, [selectedCategory])
 
-  const headerTitle = selectedBrand ? `${selectedBrand} • Women` : "Women’s Collection"
-  const headerSub = selectedBrand ? `Explore categories and latest picks from ${selectedBrand}` : 'Soft fabrics, sharp fits, all-day comfort'
-
   const getUserId = () => {
     if (typeof window === 'undefined') return null
     const id = sessionStorage.getItem('userId') || localStorage.getItem('userId')
@@ -329,13 +320,9 @@ export default function WomenPage() {
         })
 
         let filtered = arr
-        if (selectedBrand) {
-          filtered = filtered.filter((x) => normalizeKey(x.brand) === normalizeKey(selectedBrand))
-        }
+        if (selectedBrand) filtered = filtered.filter((x) => normalizeKey(x.brand) === normalizeKey(selectedBrand))
 
-        if (!cancelled) {
-          setAllProducts(filtered)
-        }
+        if (!cancelled) setAllProducts(filtered)
       } catch {
         if (!cancelled) {
           setAllProducts([])
@@ -358,17 +345,14 @@ export default function WomenPage() {
     for (const p of base) {
       const cat = deriveCategory(p)
       const key = normalizeKey(cat)
-      if (!map.has(key)) {
-        map.set(key, { key, title: cat, count: 0, image: pickImageForProduct(p) })
-      }
+      if (!map.has(key)) map.set(key, { key, title: cat, count: 0, image: pickImageForProduct(p) })
       const obj = map.get(key)
       obj.count += 1
       if (!obj.image && p) obj.image = pickImageForProduct(p)
     }
-    const list = Array.from(map.values())
+    return Array.from(map.values())
       .filter((x) => x.count > 0)
       .sort((a, b) => b.count - a.count || a.title.localeCompare(b.title))
-    return list
   }, [allProducts])
 
   useEffect(() => {
@@ -479,45 +463,6 @@ export default function WomenPage() {
 
       <div className="women-top-spacer" />
 
-      {/*<div className="women-hero">
-        <div className="women-hero-inner">
-          <div className="women-hero-left">
-            <div className="women-hero-kicker">Women</div>
-            <h1 className="women-hero-title">{headerTitle}</h1>
-            <p className="women-hero-sub">{headerSub}</p>
-
-            <div className="women-hero-actions">
-              {selectedBrand ? (
-                <>
-                  <Link to="/women" className="women-hero-btn">
-                    View All Brands
-                  </Link>
-                  <a href="#products" className="women-hero-btn primary">
-                    Shop Now
-                  </a>
-                </>
-              ) : (
-                <a href="#products" className="women-hero-btn primary">
-                  Browse Products
-                </a>
-              )}
-            </div>
-          </div>
-
-          <div className="women-hero-right" aria-hidden="true">
-            <div className="women-hero-card">
-              <img
-                src={selectedBrand ? buildBrandImage(selectedBrand) : '/images/home-screen-main.png'}
-                alt=""
-                loading="lazy"
-                decoding="async"
-              />
-              <div className="women-hero-glass" />
-            </div>
-          </div>
-        </div>
-      </div> */}
-
       <div id="products" className="women-page-main">
         <div className="women-page-content">
           {loading ? (
@@ -528,12 +473,7 @@ export default function WomenPage() {
             <EmptyState brand={selectedBrand} />
           ) : (
             <>
-              <BrowseBlocks
-                brand={selectedBrand}
-                blocks={categoryBlocks}
-                currentCategory={activeCategory}
-                onPickCategory={pickCategory}
-              />
+              <BrowseBlocks brand={selectedBrand} blocks={categoryBlocks} currentCategory={activeCategory} onPickCategory={pickCategory} />
 
               {!products.length ? (
                 <div className="women-state-card">
