@@ -335,12 +335,6 @@ export default function WomenPage() {
     navigate('/checkout')
   }
 
-  const clearCategory = () => {
-    const qs = new URLSearchParams(location.search)
-    qs.delete('category')
-    navigate({ pathname: '/women', search: qs.toString() ? `?${qs.toString()}` : '' }, { replace: true })
-  }
-
   return (
     <div className="women-page">
       <Navbar />
@@ -355,46 +349,19 @@ export default function WomenPage() {
             <div className="women-state-card error">{error}</div>
           ) : !allProducts.length ? (
             <EmptyState category={selectedCategory} />
+          ) : !products.length ? (
+            <EmptyState category={selectedCategory} />
           ) : (
-            <>
-              {/*<div className="women-state-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                <div style={{ fontWeight: 900 }}>
-                  {selectedCategory ? (
-                    <>
-                      Showing category: <span style={{ color: '#111' }}>{selectedCategory}</span>
-                    </>
-                  ) : (
-                    <>Showing all products</>
-                  )}
-                </div> 
-
-                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                  <Link to="/category-display" className="women-browse-btn primary">
-                    Browse Categories
-                  </Link>
-                  {selectedCategory ? (
-                    <button type="button" className="women-browse-btn" onClick={clearCategory}>
-                      Clear Category
-                    </button>
-                  ) : null}
-                </div> 
-              </div> */}
-
-              {!products.length ? (
-                <EmptyState category={selectedCategory} />
-              ) : (
-                <WomenDisplayPage
-                  products={products}
-                  userType={userType}
-                  loading={loading}
-                  error={error}
-                  likedKeys={likedKeys}
-                  keyFor={keyFor}
-                  onToggleLike={toggleLike}
-                  onProductClick={handleProductClick}
-                />
-              )}
-            </>
+            <WomenDisplayPage
+              products={products}
+              userType={userType}
+              loading={loading}
+              error={error}
+              likedKeys={likedKeys}
+              keyFor={keyFor}
+              onToggleLike={toggleLike}
+              onProductClick={handleProductClick}
+            />
           )}
         </div>
       </div>

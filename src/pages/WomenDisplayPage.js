@@ -284,28 +284,12 @@ export default function WomenDisplayPage({
     return `Browse the latest women’s collection`
   }, [selectedBrand, selectedCategory])
 
-  const chips = useMemo(() => {
-    const out = []
-    if (selectedBrand) out.push({ label: selectedBrand, kind: 'brand' })
-    if (selectedCategory) out.push({ label: selectedCategory, kind: 'cat' })
-    return out
-  }, [selectedBrand, selectedCategory])
-
   return (
     <section ref={sectionRef} className="womens-section4" id="women-display">
       <div className="section-head">
         <div className="section-head-left">
           <h2>{heading}</h2>
           <p className="section-sub">{subHeading}</p>
-          {/*{chips.length ? (
-            <div className="wds-chips">
-              {chips.map((c) => (
-                <span key={`${c.kind}:${c.label}`} className={`wds-chip ${c.kind}`}>
-                  {c.label}
-                </span>
-              ))}
-            </div>
-          ) : null} */}
         </div>
 
         <div className="section-head-right">
