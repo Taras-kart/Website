@@ -92,58 +92,58 @@ export default function Home1() {
 
 
         <section className="fc-section">
-          <div className="fc-inner">
-            <div className="fc-head">
-              <h2 className="fc-title">Featured Collections</h2>
-            </div>
+  <div className="fc-inner">
+    <div className="fc-head">
+      <h2 className="fc-title">Featured Collections</h2>
+    </div>
 
-            <div className="fc-grid">
-              <Link to="/women?brand=Twin%20Birds" className="fc-card">
-                <div className="fc-media">
-                  <img src={getImage('/images/updated/category-kurti-pant.webp')} alt="Kurti Pant" />
-                  <div className="fc-badge">Twin Birds</div>
-                </div>
-              </Link>
+    <div className="fc-grid">
+      <Link to="/category-display?brand=Twin%20Birds" className="fc-card">
+        <div className="fc-media">
+          <img src={getImage('/images/updated/category-kurti-pant.webp')} alt="Kurti Pant" />
+          <div className="fc-badge">Twin Birds</div>
+        </div>
+      </Link>
 
-              <Link to="/women?brand=Indian%20Flower" className="fc-card">
-                <div className="fc-media">
-                  <img src={getImage('/images/updated/category-leggin.webp')} alt="Leggin" />
-                  <div className="fc-badge">Indian Flower</div>
-                </div>
-              </Link>
+      <Link to="/category-display?brand=Indian%20Flower" className="fc-card">
+        <div className="fc-media">
+          <img src={getImage('/images/updated/category-leggin.webp')} alt="Leggin" />
+          <div className="fc-badge">Indian Flower</div>
+        </div>
+      </Link>
 
-              <Link to="/women?brand=Intimacy" className="fc-card">
-                <div className="fc-media">
-                  <img src={getImage('/images/updated/category-metallic-pant.webp')} alt="Metallic Pant" />
-                  <div className="fc-badge">Intimacy</div>
-                </div>
-              </Link>
+      <Link to="/category-display?brand=Intimacy" className="fc-card">
+        <div className="fc-media">
+          <img src={getImage('/images/updated/category-metallic-pant.webp')} alt="Metallic Pant" />
+          <div className="fc-badge">Intimacy</div>
+        </div>
+      </Link>
 
-              <Link to="/women?brand=Naidu%20Hall" className="fc-card">
-                <div className="fc-media">
-                  <img src={getImage('/images/updated/category-plazzo-pant.webp')} alt="Plazzo Pant" />
-                  <div className="fc-badge">Naidu Hall</div>
-                </div>
-              </Link>
+      <Link to="/category-display?brand=Naidu%20Hall" className="fc-card">
+        <div className="fc-media">
+          <img src={getImage('/images/updated/category-plazzo-pant.webp')} alt="Plazzo Pant" />
+          <div className="fc-badge">Naidu Hall</div>
+        </div>
+      </Link>
 
-              <Link to="/women?brand=Aswathi" className="fc-card">
-                <div className="fc-media">
-                  <img src={getImage('/images/updated/category-saree-shaper.webp')} alt="Saree Shaper" />
-                  <div className="fc-badge">Aswathi</div>
-                </div>
-              </Link>
+      <Link to="/category-display?brand=Aswathi" className="fc-card">
+        <div className="fc-media">
+          <img src={getImage('/images/updated/category-saree-shaper.webp')} alt="Saree Shaper" />
+          <div className="fc-badge">Aswathi</div>
+        </div>
+      </Link>
 
-              <Link to="/women" className="fc-card fc-viewall">
-                <div className="fc-media fc-viewall-media">
-                  <div className="fc-viewall-content">
-                    <span className="fc-viewall-title">View All</span>
-                    <span className="fc-viewall-sub">Women’s Collection</span>
-                  </div>
-                </div>
-              </Link>
-            </div>
+      <Link to="/category-display" className="fc-card fc-viewall">
+        <div className="fc-media fc-viewall-media">
+          <div className="fc-viewall-content">
+            <span className="fc-viewall-title">View All</span>
+            <span className="fc-viewall-sub">Women’s Collection</span>
           </div>
-        </section>
+        </div>
+      </Link>
+    </div>
+  </div>
+</section>
         <Divider label="Women" direction="ltr" />
 
         <section className="home-part-grid">

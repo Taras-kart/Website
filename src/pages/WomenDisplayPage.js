@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState } from 'react'
 import './WomenDisplayPage.css'
 import { FaHeart, FaRegHeart, FaEye } from 'react-icons/fa'
 import FullDetailsPopup from './FullDetailsPopup'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 
 const CLOUD_NAME = 'deymt9uyh'
 
@@ -162,7 +162,7 @@ function EmptyState() {
 
         <div className="wds-empty-grid">
           {brands.map((b) => (
-            <Link key={b} to={`/women?brand=${encodeURIComponent(b)}`} className="wds-empty-brand">
+            <Link key={b} to={`/category-display?brand=${encodeURIComponent(b)}`} className="wds-empty-brand">
               <div className="wds-empty-media">
                 <img src={buildBrandImage(b)} alt={b} loading="lazy" decoding="async" />
                 <div className="wds-empty-overlay" />
@@ -188,6 +188,11 @@ export default function WomenDisplayPage({
 }) {
   const [popupProduct, setPopupProduct] = useState(null)
   const sectionRef = useRef(null)
+  const location = useLocation()
+
+  const params = useMemo(() => new URLSearchParams(location.search), [location.search])
+  const selectedBrand = String(params.get('brand') || '').trim()
+  const selectedCategory = String(params.get('category') || '').trim()
 
   const groupedRaw = useMemo(() => groupProductsByColor(products || []), [products])
 
@@ -265,22 +270,58 @@ export default function WomenDisplayPage({
 
   const userLabel = userType === 'B2B' ? 'B2B prices' : 'Retail prices'
 
+  const heading = useMemo(() => {
+    if (selectedBrand && selectedCategory) return `You are looking > ${selectedBrand} > ${selectedCategory}`
+    if (selectedBrand) return `You are looking ${selectedBrand}`
+    if (selectedCategory) return `You are looking ${selectedCategory}`
+    return 'All products'
+  }, [selectedBrand, selectedCategory])
+
+  const subHeading = useMemo(() => {
+    if (selectedBrand && selectedCategory) return `Showing results for brand and category`
+    if (selectedBrand) return `Showing results for brand`
+    if (selectedCategory) return `Showing results for category`
+    return `Browse the latest women’s collection`
+  }, [selectedBrand, selectedCategory])
+
+  const chips = useMemo(() => {
+    const out = []
+    if (selectedBrand) out.push({ label: selectedBrand, kind: 'brand' })
+    if (selectedCategory) out.push({ label: selectedCategory, kind: 'cat' })
+    return out
+  }, [selectedBrand, selectedCategory])
+
   return (
     <section ref={sectionRef} className="womens-section4" id="women-display">
       <div className="section-head">
         <div className="section-head-left">
-          <h2>Women’s Collection</h2>
-          <p className="section-sub">Fresh picks, clean fits, everyday comfort</p>
+          <h2>{heading}</h2>
+          <p className="section-sub">{subHeading}</p>
+          {/*{chips.length ? (
+            <div className="wds-chips">
+              {chips.map((c) => (
+                <span key={`${c.kind}:${c.label}`} className={`wds-chip ${c.kind}`}>
+                  {c.label}
+                </span>
+              ))}
+            </div>
+          ) : null} */}
         </div>
+
         <div className="section-head-right">
           <span className="count">{grouped.length} items</span>
           <span className="user-pill">{userLabel}</span>
+          {(selectedBrand || selectedCategory) && (
+            <Link to="/women" className="wds-clear">
+              Clear filters
+            </Link>
+          )}
         </div>
       </div>
 
       {loading ? (
         <div className="wds-skeleton-grid">
-          {Array.from({ length: 8 }).map((_, i) => (
+          {Array.from({ length: 10 }).map((_, i) => (
             <div className="wds-skeleton-card" key={i}>
               <div className="wds-skeleton-img" />
               <div className="wds-skeleton-lines">
@@ -396,7 +437,7 @@ export default function WomenDisplayPage({
                 <div className="womens-section4-body">
                   <div className="brand-row">
                     <h4 className="brand-name">{group.brand}</h4>
-                    <span className="brand-chip">Top pick</span>
+                    {discount > 0 ? <span className="brand-chip">Hot deal</span> : <span className="brand-chip">Top pick</span>}
                   </div>
 
                   <h5 className="product-name">{group.product_name}</h5>

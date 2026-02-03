@@ -24,15 +24,18 @@ import OrderCancel from './pages/OrderCancel'
 import RefundRequest from './pages/RefundRequest'
 import NavbarFinal from './pages/Navbar'
 import Contactus from './pages/Contactus'
+import CategoryDisplay from './pages/CategoryDisplay'
 
 function NavigationLoader() {
   const location = useLocation()
   const [loading, setLoading] = useState(false)
+
   useEffect(() => {
     setLoading(true)
     const t = setTimeout(() => setLoading(false), 2500)
     return () => clearTimeout(t)
   }, [location.pathname, location.search])
+
   return loading ? <TaraLoader /> : null
 }
 
@@ -46,6 +49,7 @@ function AppShell() {
         <Route path="/" element={<Home1 />} />
         <Route path="/men" element={<MenPage />} />
         <Route path="/women" element={<WomenPage />} />
+        <Route path="/category-display" element={<CategoryDisplay />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/kids" element={<KidsPage />} />

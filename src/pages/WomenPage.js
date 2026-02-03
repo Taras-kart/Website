@@ -17,6 +17,7 @@ const CLOUD_NAME = 'deymt9uyh'
 const DEFAULT_IMG = '/images/women/women20.jpeg'
 const toArray = (x) => (Array.isArray(x) ? x : [])
 const niceTitle = (s) => String(s || '').trim()
+const normalizeKey = (s) => String(s || '').trim().toLowerCase()
 
 function cloudinaryUrlByEan(ean) {
   if (!ean) return ''
@@ -83,20 +84,6 @@ const writeVariantMap = (userId, map) => {
   } catch {}
 }
 
-const buildBrandImage = (brand) => {
-  const map = {
-    'Twin Birds': '/images/updated/category-kurti-pant.webp',
-    'Indian Flower': '/images/updated/category-leggin.webp',
-    Intimacy: '/images/updated/category-metallic-pant.webp',
-    'Naidu Hall': '/images/updated/category-plazzo-pant.webp',
-    Aswathi: '/images/updated/category-saree-shaper.webp',
-    Jockey: '/images/home/jockey3.webp'
-  }
-  return map[brand] || '/images/women/women20.jpeg'
-}
-
-const normalizeKey = (s) => String(s || '').trim().toLowerCase()
-
 const deriveCategory = (p) => {
   const name = String(p?.product_name || '').trim()
   if (!name) return 'Others'
@@ -110,105 +97,31 @@ const deriveCategory = (p) => {
   return top || 'Others'
 }
 
-const pickImageForProduct = (p) => {
-  const ean = String(p?.ean_code || '').trim()
-  const src = String(p?.image_url || '').trim()
-  if (src) return src
-  if (ean) return cloudinaryUrlByEan(ean)
-  return DEFAULT_IMG
-}
-
-function BrowseBlocks({ brand, blocks, currentCategory, onPickCategory }) {
-  const list = blocks || []
-  return (
-    <div className="women-browse">
-      <div className="women-browse-head">
-        <div className="women-browse-title">
-          <h3 className="women-browse-h">{brand ? 'Pick a category' : 'Browse by category'}</h3>
-          <p className="women-browse-sub">Choose a category to see matching products.</p>
-        </div>
-
-        <div className="women-browse-actions">
-          {currentCategory ? (
-            <button type="button" className="women-browse-btn" onClick={() => onPickCategory('')}>
-              Clear Category
-            </button>
-          ) : null}
-          <span className="women-browse-badge">{brand || 'Women'}</span>
-        </div>
-      </div>
-
-      <div className="women-browse-grid">
-        {list.map((b) => (
-          <button
-            key={b.key}
-            type="button"
-            className={`women-mini-card${normalizeKey(currentCategory) === normalizeKey(b.title) ? ' active' : ''}`}
-            onClick={() => onPickCategory(b.title)}
-            title={b.title}
-          >
-            <div className="women-mini-media">
-              <img
-                src={b.image || DEFAULT_IMG}
-                alt={b.title}
-                loading="lazy"
-                decoding="async"
-                onError={(e) => {
-                  if (e.currentTarget.src !== DEFAULT_IMG) e.currentTarget.src = DEFAULT_IMG
-                }}
-              />
-              <div className="women-mini-overlay" />
-              <div className="women-mini-title">{b.title}</div>
-            </div>
-            <div className="women-mini-meta">
-              <span className="women-mini-count">{b.count} items</span>
-              <span className="women-mini-cta">Shop</span>
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function EmptyState({ brand }) {
-  const brands = ['Twin Birds', 'Naidu Hall', 'Intimacy', 'Aswathi', 'Indian Flower', 'Jockey']
+function EmptyState({ category }) {
   return (
     <div className="women-empty-wrap">
       <div className="women-empty-card">
         <div className="women-empty-top">
           <div className="women-empty-badge">No products found</div>
           <h3 className="women-empty-title">
-            {brand ? (
+            {category ? (
               <>
-                We couldn’t find items for <span className="women-empty-accent">{brand}</span>
+                No items found for <span className="women-empty-accent">{category}</span>
               </>
             ) : (
               <>We couldn’t find items right now</>
             )}
           </h3>
-          <p className="women-empty-sub">Try one of our popular brands, or explore the full women’s store.</p>
+          <p className="women-empty-sub">Try another category, or browse everything.</p>
         </div>
 
         <div className="women-empty-actions">
-          <Link to="/women" className="women-empty-btn primary">
-            Explore Women’s Store
+          <Link to="/category-display" className="women-empty-btn primary">
+            Browse Categories
           </Link>
-          <Link to="/" className="women-empty-btn">
-            Back to Home
+          <Link to="/women" className="women-empty-btn">
+            View All Products
           </Link>
-        </div>
-
-        <div className="women-empty-grid">
-          {brands.map((b) => (
-            <Link key={b} to={`/women?brand=${encodeURIComponent(b)}`} className="women-empty-brand">
-              <div className="women-empty-brandMedia">
-                <img src={buildBrandImage(b)} alt={b} loading="lazy" decoding="async" />
-                <div className="women-empty-brandOverlay" />
-                <div className="women-empty-brandName">{b}</div>
-              </div>
-            </Link>
-          ))}
         </div>
       </div>
     </div>
@@ -222,22 +135,16 @@ export default function WomenPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [likedKeys, setLikedKeys] = useState(new Set())
-  const [activeCategory, setActiveCategory] = useState('')
   const navigate = useNavigate()
   const location = useLocation()
   const { addToWishlist, wishlistItems, setWishlistItems } = useWishlist()
 
   const restoreDoneRef = useRef(false)
   const rafSaveRef = useRef(0)
-  const pendingScrollToDisplayRef = useRef(false)
 
   const params = useMemo(() => new URLSearchParams(location.search), [location.search])
-  const selectedBrand = niceTitle(params.get('brand'))
   const selectedCategory = niceTitle(params.get('category'))
-
-  useEffect(() => {
-    setActiveCategory(selectedCategory)
-  }, [selectedCategory])
+  const selectedBrand = niceTitle(params.get('brand'))
 
   const getUserId = () => {
     if (typeof window === 'undefined') return null
@@ -337,40 +244,12 @@ export default function WomenPage() {
     }
   }, [selectedBrand])
 
-  const categoryBlocks = useMemo(() => {
-    const base = allProducts || []
-    const map = new Map()
-    for (const p of base) {
-      const cat = deriveCategory(p)
-      const key = normalizeKey(cat)
-      if (!map.has(key)) map.set(key, { key, title: cat, count: 0, image: pickImageForProduct(p) })
-      const obj = map.get(key)
-      obj.count += 1
-      if (!obj.image && p) obj.image = pickImageForProduct(p)
-    }
-    return Array.from(map.values())
-      .filter((x) => x.count > 0)
-      .sort((a, b) => b.count - a.count || a.title.localeCompare(b.title))
-  }, [allProducts])
-
   useEffect(() => {
     const base = allProducts || []
-    const cat = niceTitle(activeCategory)
+    const cat = niceTitle(selectedCategory)
     const next = cat ? base.filter((p) => normalizeKey(deriveCategory(p)) === normalizeKey(cat)) : base
     setProducts(next)
-  }, [allProducts, activeCategory])
-
-  useEffect(() => {
-    if (!pendingScrollToDisplayRef.current) return
-    if (loading) return
-    if (error) return
-    if (!products.length) return
-    pendingScrollToDisplayRef.current = false
-    requestAnimationFrame(() => {
-      const el = document.getElementById('women-display')
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    })
-  }, [loading, error, products.length])
+  }, [allProducts, selectedCategory])
 
   useLayoutEffect(() => {
     if (restoreDoneRef.current) return
@@ -456,15 +335,9 @@ export default function WomenPage() {
     navigate('/checkout')
   }
 
-  const pickCategory = (cat) => {
-    const next = niceTitle(cat)
-    setActiveCategory(next)
-    pendingScrollToDisplayRef.current = true
-
+  const clearCategory = () => {
     const qs = new URLSearchParams(location.search)
-    if (next) qs.set('category', next)
-    else qs.delete('category')
-
+    qs.delete('category')
     navigate({ pathname: '/women', search: qs.toString() ? `?${qs.toString()}` : '' }, { replace: true })
   }
 
@@ -481,15 +354,34 @@ export default function WomenPage() {
           ) : error ? (
             <div className="women-state-card error">{error}</div>
           ) : !allProducts.length ? (
-            <EmptyState brand={selectedBrand} />
+            <EmptyState category={selectedCategory} />
           ) : (
             <>
-              <BrowseBlocks brand={selectedBrand} blocks={categoryBlocks} currentCategory={activeCategory} onPickCategory={pickCategory} />
+              {/*<div className="women-state-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                <div style={{ fontWeight: 900 }}>
+                  {selectedCategory ? (
+                    <>
+                      Showing category: <span style={{ color: '#111' }}>{selectedCategory}</span>
+                    </>
+                  ) : (
+                    <>Showing all products</>
+                  )}
+                </div> 
+
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                  <Link to="/category-display" className="women-browse-btn primary">
+                    Browse Categories
+                  </Link>
+                  {selectedCategory ? (
+                    <button type="button" className="women-browse-btn" onClick={clearCategory}>
+                      Clear Category
+                    </button>
+                  ) : null}
+                </div> 
+              </div> */}
 
               {!products.length ? (
-                <div className="women-state-card">
-                  No items match <b>{activeCategory}</b>. Try another category above.
-                </div>
+                <EmptyState category={selectedCategory} />
               ) : (
                 <WomenDisplayPage
                   products={products}
