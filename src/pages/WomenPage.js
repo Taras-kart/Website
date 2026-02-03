@@ -232,6 +232,7 @@ export default function WomenPage() {
 
   const restoreDoneRef = useRef(false)
   const rafSaveRef = useRef(0)
+  const pendingScrollToDisplayRef = useRef(false)
 
   const params = useMemo(() => new URLSearchParams(location.search), [location.search])
   const selectedBrand = niceTitle(params.get('brand'))
@@ -362,6 +363,18 @@ export default function WomenPage() {
     setProducts(next)
   }, [allProducts, activeCategory])
 
+  useEffect(() => {
+    if (!pendingScrollToDisplayRef.current) return
+    if (loading) return
+    if (error) return
+    if (!products.length) return
+    pendingScrollToDisplayRef.current = false
+    requestAnimationFrame(() => {
+      const el = document.getElementById('women-display')
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }, [loading, error, products.length])
+
   useLayoutEffect(() => {
     if (restoreDoneRef.current) return
     if (loading) return
@@ -449,12 +462,13 @@ export default function WomenPage() {
   const pickCategory = (cat) => {
     const next = niceTitle(cat)
     setActiveCategory(next)
+    pendingScrollToDisplayRef.current = true
+
     const qs = new URLSearchParams(location.search)
     if (next) qs.set('category', next)
     else qs.delete('category')
+
     navigate({ pathname: '/women', search: qs.toString() ? `?${qs.toString()}` : '' }, { replace: true })
-    const el = document.getElementById('products')
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   return (

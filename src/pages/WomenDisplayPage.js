@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import './WomenDisplayPage.css'
 import { FaHeart, FaRegHeart, FaEye } from 'react-icons/fa'
 import FullDetailsPopup from './FullDetailsPopup'
@@ -201,14 +201,6 @@ export default function WomenDisplayPage({
     })
     return list
   }, [groupedRaw])
-
-  useEffect(() => {
-    if (loading) return
-    if (!grouped.length) return
-    const el = sectionRef.current
-    if (!el) return
-    requestAnimationFrame(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }))
-  }, [loading, grouped.length])
 
   const getPriceFields = (g) => {
     const p = g.price_fields || g || {}
