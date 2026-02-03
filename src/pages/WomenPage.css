@@ -148,7 +148,7 @@
 
 .women-browse {
   max-width: 1200px;
-  margin: 16px auto 6px auto;
+  margin: 50px auto 0;
   padding: 0 16px;
 }
 
@@ -164,6 +164,8 @@
   margin: 0 auto;
   text-align: center;
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: fit-content;
   padding: 6px 10px;
   border-radius: 999px;
@@ -172,7 +174,6 @@
   font-weight: 900;
   font-size: 12px;
 }
-
 .women-browse-h {
   margin: 8px 0 2px 0;
   font-size: 18px;
@@ -474,6 +475,9 @@
 }
 
 @media (max-width: 520px) {
+  .women-browse{
+    margin-top: 0px;
+  }
   .women-hero-title {
     font-size: 24px;
   }

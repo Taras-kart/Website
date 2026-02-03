@@ -124,7 +124,6 @@ function BrowseBlocks({ brand, blocks, currentCategory, onPickCategory }) {
     <div className="women-browse">
       <div className="women-browse-head">
         <div className="women-browse-title">
-          <span className="women-browse-badge">{brand || 'Women'}</span>
           <h3 className="women-browse-h">{brand ? 'Pick a category' : 'Browse by category'}</h3>
           <p className="women-browse-sub">Choose a category to see matching products.</p>
         </div>
@@ -135,9 +134,7 @@ function BrowseBlocks({ brand, blocks, currentCategory, onPickCategory }) {
               Clear Category
             </button>
           ) : null}
-          <Link to="/women" className="women-browse-btn primary">
-            View All Brands
-          </Link>
+          <span className="women-browse-badge">{brand || 'Women'}</span>
         </div>
       </div>
 
