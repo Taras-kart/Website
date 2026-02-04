@@ -84,9 +84,30 @@ const writeVariantMap = (userId, map) => {
   } catch {}
 }
 
+const CATEGORY_GROUPS = [
+  { title: 'Leggings', keywords: ['ankle legging', 'chudidar legging', 'cropped legging', 'legging'] },
+  { title: 'Jeggings', keywords: ['coloured jegging', 'jegging'] },
+  { title: 'Shimmer', keywords: ['chudidar shimmer', 'shimmer shawl', 'shimmer'] }
+]
+
+const matchGroupedCategory = (name) => {
+  const n = normalizeKey(name).replace(/\s+/g, ' ').trim()
+  if (!n) return ''
+  for (const g of CATEGORY_GROUPS) {
+    for (const k of g.keywords) {
+      if (n.includes(k)) return g.title
+    }
+  }
+  return ''
+}
+
 const deriveCategory = (p) => {
   const name = String(p?.product_name || '').trim()
   if (!name) return 'Others'
+
+  const grouped = matchGroupedCategory(name)
+  if (grouped) return grouped
+
   const cleaned = name
     .replace(/\s+/g, ' ')
     .replace(/[-_]+/g, ' ')

@@ -22,18 +22,28 @@ function cloudinaryUrlByEan(ean) {
   return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/f_auto,q_auto/products/${ean}`
 }
 
-const deriveCategory = (p) => {
-  const name = String(p?.product_name || '').trim()
-  if (!name) return 'Others'
-  const cleaned = name
-    .replace(/\s+/g, ' ')
-    .replace(/[-_]+/g, ' ')
+const CATEGORY_GROUPS = [
+  {
+    label: 'Leggings',
+    patterns: ['ankle legging', 'chudidar legging', 'cropped legging', 'legging']
+  },
+  {
+    label: 'Jeggings',
+    patterns: ['coloured jegging', 'jeggings', 'jegging']
+  },
+  {
+    label: 'Shimmer',
+    patterns: ['chudidar shimmer', 'chudiadr shimmer', 'shimmer shawl', 'shimmer']
+  }
+]
+
+const normalizeText = (s) =>
+  String(s || '')
+    .toLowerCase()
+    .replace(/[_-]+/g, ' ')
     .replace(/[()]/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim()
-  const parts = cleaned.split(' ').filter(Boolean)
-  const top = parts.slice(0, 3).join(' ')
-  return top || 'Others'
-}
 
 const pickImageForProduct = (p) => {
   const ean = String(p?.ean_code || '').trim()
@@ -41,6 +51,19 @@ const pickImageForProduct = (p) => {
   if (src) return src
   if (ean) return cloudinaryUrlByEan(ean)
   return DEFAULT_IMG
+}
+
+const deriveGroupedCategory = (p) => {
+  const name = normalizeText(p?.product_name || '')
+  if (!name) return 'Others'
+  for (const g of CATEGORY_GROUPS) {
+    for (const pat of g.patterns) {
+      if (name.includes(normalizeText(pat))) return g.label
+    }
+  }
+  const parts = name.split(' ').filter(Boolean)
+  const top = parts.slice(0, 3).join(' ')
+  return top ? top.replace(/\b\w/g, (m) => m.toUpperCase()) : 'Others'
 }
 
 export default function CategoryDisplay() {
@@ -89,14 +112,14 @@ export default function CategoryDisplay() {
     const map = new Map()
     for (const raw of filteredProducts || []) {
       const p = raw || {}
-      const cat = deriveCategory(p)
-      const key = normalizeKey(cat)
+      const title = deriveGroupedCategory(p)
+      const key = normalizeKey(title)
       if (!map.has(key)) {
         map.set(key, {
           key,
-          title: cat,
+          title,
           count: 0,
-          image: pickImageForProduct(p)
+          image: ''
         })
       }
       const obj = map.get(key)
@@ -125,7 +148,6 @@ export default function CategoryDisplay() {
   }
 
   const headerTitle = selectedBrand ? `${selectedBrand} Categories` : 'Women Categories'
-  //const headerPill = selectedBrand ? selectedBrand : 'Women'
   const subtitle = selectedBrand ? 'Choose a category for this brand' : 'Pick a category to see matching products'
 
   return (
@@ -171,9 +193,7 @@ export default function CategoryDisplay() {
         ) : !categories.length ? (
           <div className="category-state">
             <div className="category-empty-title">No categories found</div>
-            <div className="category-empty-sub">
-              {selectedBrand ? `Try another brand, or view all women products.` : `Try viewing all products.`}
-            </div>
+            <div className="category-empty-sub">{selectedBrand ? `Try another brand, or view all women products.` : `Try viewing all products.`}</div>
             <div className="category-empty-actions">
               <button type="button" className="category-viewall" onClick={goAllProducts}>
                 View All Products
