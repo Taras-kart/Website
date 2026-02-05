@@ -195,6 +195,7 @@ export default function WomenPage() {
   const params = useMemo(() => new URLSearchParams(location.search), [location.search])
   const selectedCategory = niceTitle(params.get('category'))
   const selectedBrand = niceTitle(params.get('brand'))
+  const sortFromQuery = niceTitle(params.get('sort')) || 'featured'
 
   const getUserId = () => {
     if (typeof window === 'undefined') return null
@@ -335,9 +336,8 @@ export default function WomenPage() {
   }
 
   useEffect(() => {
-    const s = niceTitle(params.get('sort')) || 'featured'
-    setSortBy(s)
-  }, [location.search])
+    setSortBy(sortFromQuery)
+  }, [sortFromQuery])
 
   useEffect(() => {
     const base = allProducts || []
@@ -505,7 +505,12 @@ export default function WomenPage() {
           </div>
 
           <div className="women-filter-actions-row">
-            <button type="button" className="women-soft-btn" onClick={clearAll} disabled={!selectedBrand && !selectedCategory && (!sortBy || sortBy === 'featured')}>
+            <button
+              type="button"
+              className="women-soft-btn"
+              onClick={clearAll}
+              disabled={!selectedBrand && !selectedCategory && (!sortBy || sortBy === 'featured')}
+            >
               Clear all
             </button>
             <div className="women-chip">
