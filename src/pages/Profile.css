@@ -6,6 +6,8 @@
   min-height: 100vh;
   position: relative;
   overflow: hidden;
+  padding-top: 120px;
+  box-sizing: border-box;
 }
 
 .profile-bg-orbs {
@@ -19,7 +21,6 @@
 }
 
 .profile-container {
-  margin-top: 60px !important;
   display: grid;
   grid-template-columns: 25% 75%;
   gap: 24px;
@@ -35,7 +36,7 @@
 
 .profile-left {
   position: sticky;
-  top: 84px;
+  top: calc(4px + 0px);
   align-self: flex-start;
   background: rgba(10, 10, 10, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -548,7 +549,7 @@
 
   .profile-left {
     position: sticky;
-    top: 84px;
+    top: calc(84px + 12px);
   }
 
   .profile-right {
@@ -557,6 +558,10 @@
 }
 
 @media (max-width: 1200px) {
+  .profile-page {
+    padding-top: 130px;
+  }
+
   .profile-container {
     grid-template-columns: 25% 75%;
     padding: 20px 20px 26px;
@@ -564,13 +569,17 @@
 }
 
 @media (max-width: 1024px) {
+  .profile-page {
+    padding-top: 120px;
+  }
+
   .profile-container {
     grid-template-columns: 25% 75%;
     padding: 18px 18px 26px;
   }
 
   .profile-left {
-    top: 76px;
+    top: calc(76px + 10px);
   }
 
   .profile-right {
@@ -584,6 +593,10 @@
 }
 
 @media (max-width: 768px) {
+  .profile-page {
+    padding-top: 110px;
+  }
+
   .profile-container {
     grid-template-columns: 200px minmax(0, 1fr);
     padding: 16px 14px 22px;
@@ -622,7 +635,7 @@
 
 @media (max-width: 560px) {
   .profile-page {
-    margin-top: 90px;
+    padding-top: 100px;
   }
 
   .profile-container {

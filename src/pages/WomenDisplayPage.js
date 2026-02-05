@@ -288,7 +288,6 @@ export default function WomenDisplayPage({
     <section ref={sectionRef} className="wds-wrap" id="women-display">
       <div className="wds-head">
         <div className="wds-head-left">
-          <div className="wds-kicker">Women</div>
           <h2 className="wds-h">{heading}</h2>
           <p className="wds-sub">{subHeading}</p>
         </div>
