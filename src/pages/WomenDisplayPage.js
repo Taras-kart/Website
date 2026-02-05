@@ -271,9 +271,9 @@ export default function WomenDisplayPage({
   const userLabel = userType === 'B2B' ? 'B2B prices' : 'Retail prices'
 
   const heading = useMemo(() => {
-    if (selectedBrand && selectedCategory) return `You are looking > ${selectedBrand} > ${selectedCategory}`
-    if (selectedBrand) return `You are looking ${selectedBrand}`
-    if (selectedCategory) return `You are looking ${selectedCategory}`
+    if (selectedBrand && selectedCategory) return `${selectedBrand} • ${selectedCategory}`
+    if (selectedBrand) return selectedBrand
+    if (selectedCategory) return selectedCategory
     return 'All products'
   }, [selectedBrand, selectedCategory])
 
@@ -285,16 +285,17 @@ export default function WomenDisplayPage({
   }, [selectedBrand, selectedCategory])
 
   return (
-    <section ref={sectionRef} className="womens-section4" id="women-display">
-      <div className="section-head">
-        <div className="section-head-left">
-          <h2>{heading}</h2>
-          <p className="section-sub">{subHeading}</p>
+    <section ref={sectionRef} className="wds-wrap" id="women-display">
+      <div className="wds-head">
+        <div className="wds-head-left">
+          <div className="wds-kicker">Women</div>
+          <h2 className="wds-h">{heading}</h2>
+          <p className="wds-sub">{subHeading}</p>
         </div>
 
-        <div className="section-head-right">
-          <span className="count">{grouped.length} items</span>
-          <span className="user-pill">{userLabel}</span>
+        <div className="wds-head-right">
+          <span className="wds-count">{grouped.length} items</span>
+          <span className="wds-user">{userLabel}</span>
           {(selectedBrand || selectedCategory) && (
             <Link to="/women" className="wds-clear">
               Clear filters
@@ -305,7 +306,7 @@ export default function WomenDisplayPage({
 
       {loading ? (
         <div className="wds-skeleton-grid">
-          {Array.from({ length: 10 }).map((_, i) => (
+          {Array.from({ length: 12 }).map((_, i) => (
             <div className="wds-skeleton-card" key={i}>
               <div className="wds-skeleton-img" />
               <div className="wds-skeleton-lines">
@@ -316,11 +317,11 @@ export default function WomenDisplayPage({
           ))}
         </div>
       ) : error ? (
-        <div className="state-card error-state">{error}</div>
+        <div className="wds-state error">{error}</div>
       ) : !grouped.length ? (
         <EmptyState />
       ) : (
-        <div className="womens-section4-grid">
+        <div className="wds-grid">
           {grouped.map((group, index) => {
             const active = group.images?.[0] || null
             const { offer, mrp } = getPriceFields(group)
@@ -342,9 +343,9 @@ export default function WomenDisplayPage({
             const showMrp = mrp > offer && offer > 0 && mrp > 0
 
             return (
-              <div
+              <article
                 key={group.key || index}
-                className={`womens-section4-card${isOutOfStock ? ' out-of-stock' : ''}`}
+                className={`wds-card${isOutOfStock ? ' out' : ''}`}
                 onClick={() => handleCardClick(group)}
                 role="button"
                 tabIndex={0}
@@ -352,25 +353,30 @@ export default function WomenDisplayPage({
                   if (e.key === 'Enter') handleCardClick(group)
                 }}
               >
-                <div className="womens-section4-img">
+                <div className="wds-media">
                   {showMissingEan && (
-                    <div className="missing-ean-pill">
+                    <div className="wds-missing">
                       <span>Missing image for EAN: {group.missing_ean_label}</span>
                     </div>
                   )}
 
-                  {discount > 0 && (
-                    <div className="discount-ribbon">
-                      <span>{discount}% OFF</span>
-                    </div>
-                  )}
-
-                  {hasVariants && <div className="variant-pill">{group.variants.length} sizes</div>}
+                  <div className="wds-badges">
+                    {discount > 0 && (
+                      <div className="wds-badge dark">
+                        <span>{discount}% OFF</span>
+                      </div>
+                    )}
+                    {hasVariants && (
+                      <div className="wds-badge gold">
+                        <span>{group.variants.length} sizes</span>
+                      </div>
+                    )}
+                  </div>
 
                   <img
                     src={imgSrc}
                     alt={group.product_name}
-                    className="fade-image"
+                    className="wds-img"
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
@@ -380,16 +386,10 @@ export default function WomenDisplayPage({
                     }}
                   />
 
-                  {isOutOfStock && (
-                    <div className="out-of-stock-overlay">
-                      <span>Out of Stock</span>
-                    </div>
-                  )}
-
-                  <div className="action-icons">
+                  <div className="wds-actions">
                     <button
                       type="button"
-                      className={`action-icon${likeEnabled ? '' : ' disabled'}`}
+                      className={`wds-action${likeEnabled ? '' : ' disabled'}`}
                       onClick={(e) => {
                         e.stopPropagation()
                         if (!likeEnabled) return
@@ -401,43 +401,51 @@ export default function WomenDisplayPage({
                       }}
                       aria-label="Add to wishlist"
                     >
-                      {liked ? <FaHeart className="gold-ico" /> : <FaRegHeart className="gold-ico" />}
+                      {liked ? <FaHeart className="wds-ico" /> : <FaRegHeart className="wds-ico" />}
                     </button>
 
                     <button
                       type="button"
-                      className="action-icon"
+                      className="wds-action"
                       onClick={(e) => {
                         e.stopPropagation()
                         openPopup(group)
                       }}
                       aria-label="Quick view"
                     >
-                      <FaEye className="gold-ico" />
+                      <FaEye className="wds-ico" />
                     </button>
                   </div>
+
+                  {isOutOfStock && (
+                    <div className="wds-out">
+                      <span>Out of Stock</span>
+                    </div>
+                  )}
+
+                  <div className="wds-fade" />
                 </div>
 
-                <div className="womens-section4-body">
-                  <div className="brand-row">
-                    <h4 className="brand-name">{group.brand}</h4>
-                    {discount > 0 ? <span className="brand-chip">Hot deal</span> : <span className="brand-chip">Top pick</span>}
+                <div className="wds-body">
+                  <div className="wds-brandRow">
+                    <h4 className="wds-brand">{group.brand}</h4>
+                    {discount > 0 ? <span className="wds-chip">Hot deal</span> : <span className="wds-chip subtle">Top pick</span>}
                   </div>
 
-                  <h5 className="product-name">{group.product_name}</h5>
+                  <h5 className="wds-name">{group.product_name}</h5>
 
-                  <div className="card-price-row">
-                    <span className="card-offer-price">{fmtMoney(offer)}</span>
-                    {showMrp && <span className="card-original-price">{fmtMoney(mrp)}</span>}
-                    {discount > 0 && <span className="card-discount-chip">{discount}% off</span>}
+                  <div className="wds-priceRow">
+                    <span className="wds-offer">{fmtMoney(offer)}</span>
+                    {showMrp && <span className="wds-mrp">{fmtMoney(mrp)}</span>}
+                    {discount > 0 && <span className="wds-discount">{discount}% off</span>}
                   </div>
 
-                  <div className="womens-section4-meta">
-                    <span className="price-type">{userType === 'B2B' ? 'Best B2B price' : 'Inclusive of all taxes'}</span>
-                    {discount > 0 && <span className="saving-text">Save more today</span>}
+                  <div className="wds-meta">
+                    <span className="wds-note">{userType === 'B2B' ? 'Best B2B price' : 'Inclusive of all taxes'}</span>
+                    {discount > 0 && <span className="wds-save">Save more</span>}
                   </div>
                 </div>
-              </div>
+              </article>
             )
           })}
         </div>

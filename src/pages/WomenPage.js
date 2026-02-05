@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useLayoutEffect, useMemo } from 'react'
-import { useNavigate, useLocation, Link } from 'react-router-dom'
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useLocation, useNavigate, Link } from 'react-router-dom'
 import Navbar from './Navbar'
 import './WomenPage.css'
 import Footer from './Footer'
@@ -87,15 +87,7 @@ const writeVariantMap = (userId, map) => {
 const CATEGORY_GROUPS = [
   {
     title: 'Leggings',
-    patterns: [
-      'ANKLE LEGGING',
-      'CHUDIDAR LEGGING',
-      'CROPPED LEGGING',
-      'SHIMMER LEGGINGS',
-      'CAPRI LEGGINGS',
-      'CAPRI',
-      'LEGGING'
-    ]
+    patterns: ['ANKLE LEGGING', 'CHUDIDAR LEGGING', 'CROPPED LEGGING', 'SHIMMER LEGGINGS', 'CAPRI LEGGINGS', 'CAPRI', 'LEGGING']
   },
   { title: 'Kurti Pants', patterns: ['SLEEK KURTI', 'WIDE LEG KURTI', 'COTTON KURTI', 'FLEXI KURTI PANT', 'KURTI PANT'] },
   { title: 'Jeggings', patterns: ['COLOURED JEGGING', 'JEGGING'] },
@@ -109,7 +101,6 @@ const CATEGORY_GROUPS = [
 const deriveCategory = (p) => {
   const name = String(p?.product_name || '').trim()
   if (!name) return ''
-
   const up = name.replace(/\s+/g, ' ').trim().toUpperCase()
   for (const g of CATEGORY_GROUPS) {
     for (const pat of g.patterns) {
@@ -118,6 +109,19 @@ const deriveCategory = (p) => {
     }
   }
   return niceTitle(name)
+}
+
+const getOfferPrice = (p, userType) => {
+  const num = (v) => {
+    const n = Number(v)
+    return Number.isFinite(n) && n > 0 ? n : 0
+  }
+  if (userType === 'B2B') {
+    const offerCandidates = [p.final_price_b2b, p.sale_price, p.mrp, p.original_price_b2b, p.original_price_b2c]
+    return offerCandidates.map(num).find((v) => v > 0) || 0
+  }
+  const offerCandidates = [p.final_price_b2c, p.sale_price, p.mrp, p.original_price_b2c]
+  return offerCandidates.map(num).find((v) => v > 0) || 0
 }
 
 function EmptyState({ category }) {
@@ -135,7 +139,7 @@ function EmptyState({ category }) {
               <>We couldn’t find items right now</>
             )}
           </h3>
-          <p className="women-empty-sub">Try another category, or browse everything.</p>
+          <p className="women-empty-sub">Try another filter, or browse everything.</p>
         </div>
 
         <div className="women-empty-actions">
@@ -151,6 +155,24 @@ function EmptyState({ category }) {
   )
 }
 
+function Sheet({ title, open, onClose, children }) {
+  if (!open) return null
+  return (
+    <div className="women-sheet-wrap" role="dialog" aria-modal="true">
+      <button type="button" className="women-sheet-backdrop" onClick={onClose} aria-label="Close" />
+      <div className="women-sheet">
+        <div className="women-sheet-head">
+          <div className="women-sheet-title">{title}</div>
+          <button type="button" className="women-sheet-x" onClick={onClose}>
+            ✕
+          </button>
+        </div>
+        <div className="women-sheet-body">{children}</div>
+      </div>
+    </div>
+  )
+}
+
 export default function WomenPage() {
   const [allProducts, setAllProducts] = useState([])
   const [products, setProducts] = useState([])
@@ -158,6 +180,11 @@ export default function WomenPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [likedKeys, setLikedKeys] = useState(new Set())
+
+  const [sortBy, setSortBy] = useState('featured')
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+  const [mobileSortOpen, setMobileSortOpen] = useState(false)
+
   const navigate = useNavigate()
   const location = useLocation()
   const { addToWishlist, wishlistItems, setWishlistItems } = useWishlist()
@@ -239,6 +266,8 @@ export default function WomenPage() {
             final_price_b2c: p.final_price_b2c ?? p.sale_price ?? p.price ?? p.mrp ?? 0,
             original_price_b2b: p.original_price_b2b ?? p.mrp ?? 0,
             final_price_b2b: p.final_price_b2b ?? p.sale_price ?? 0,
+            mrp: p.mrp ?? p.list_price ?? p.original_price_b2c ?? 0,
+            sale_price: p.sale_price ?? p.price ?? p.final_price_b2c ?? 0,
             on_hand: p.on_hand ?? p.onHand,
             reserved: p.reserved ?? p.reservedQty,
             available_qty: p.available_qty ?? p.availableQty,
@@ -247,10 +276,7 @@ export default function WomenPage() {
           }
         })
 
-        let filtered = arr
-        if (selectedBrand) filtered = filtered.filter((x) => normalizeKey(x.brand) === normalizeKey(selectedBrand))
-
-        if (!cancelled) setAllProducts(filtered)
+        if (!cancelled) setAllProducts(arr)
       } catch {
         if (!cancelled) {
           setAllProducts([])
@@ -265,14 +291,69 @@ export default function WomenPage() {
     return () => {
       cancelled = true
     }
-  }, [selectedBrand])
+  }, [])
+
+  const availableBrands = useMemo(() => {
+    const set = new Set()
+    for (const p of allProducts || []) {
+      const b = niceTitle(p.brand)
+      if (b) set.add(b)
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b))
+  }, [allProducts])
+
+  const availableCategories = useMemo(() => {
+    const counts = new Map()
+    for (const p of allProducts || []) {
+      const c = niceTitle(deriveCategory(p))
+      if (!c) continue
+      counts.set(c, (counts.get(c) || 0) + 1)
+    }
+    const ordered = CATEGORY_GROUPS.map((g) => g.title).filter((t) => counts.has(t))
+    const extras = Array.from(counts.keys())
+      .filter((k) => !ordered.includes(k))
+      .sort((a, b) => a.localeCompare(b))
+    return [...ordered, ...extras]
+  }, [allProducts])
+
+  const setQuery = (nextBrand, nextCategory, nextSort) => {
+    const sp = new URLSearchParams(location.search)
+    const b = niceTitle(nextBrand)
+    const c = niceTitle(nextCategory)
+    const s = niceTitle(nextSort)
+
+    if (b) sp.set('brand', b)
+    else sp.delete('brand')
+
+    if (c) sp.set('category', c)
+    else sp.delete('category')
+
+    if (s && s !== 'featured') sp.set('sort', s)
+    else sp.delete('sort')
+
+    navigate({ pathname: '/women', search: sp.toString() ? `?${sp.toString()}` : '' }, { replace: false })
+  }
+
+  useEffect(() => {
+    const s = niceTitle(params.get('sort')) || 'featured'
+    setSortBy(s)
+  }, [location.search])
 
   useEffect(() => {
     const base = allProducts || []
-    const cat = niceTitle(selectedCategory)
-    const next = cat ? base.filter((p) => normalizeKey(deriveCategory(p)) === normalizeKey(cat)) : base
+    let next = base
+
+    if (selectedBrand) next = next.filter((p) => normalizeKey(p.brand) === normalizeKey(selectedBrand))
+    if (selectedCategory) next = next.filter((p) => normalizeKey(deriveCategory(p)) === normalizeKey(selectedCategory))
+
+    const sort = niceTitle(sortBy) || 'featured'
+    if (sort === 'price_low') next = [...next].sort((a, b) => getOfferPrice(a, userType) - getOfferPrice(b, userType))
+    else if (sort === 'price_high') next = [...next].sort((a, b) => getOfferPrice(b, userType) - getOfferPrice(a, userType))
+    else if (sort === 'name_az') next = [...next].sort((a, b) => String(a.product_name || '').localeCompare(String(b.product_name || '')))
+    else if (sort === 'name_za') next = [...next].sort((a, b) => String(b.product_name || '').localeCompare(String(a.product_name || '')))
+
     setProducts(next)
-  }, [allProducts, selectedCategory])
+  }, [allProducts, selectedBrand, selectedCategory, sortBy, userType])
 
   useLayoutEffect(() => {
     if (restoreDoneRef.current) return
@@ -293,7 +374,6 @@ export default function WomenPage() {
     const ean_code = String(picked?.ean_code || '')
     const image_url = String(picked?.image_url || '')
     const color = String(picked?.color || '')
-
     if (!ean_code || !image_url) return
 
     const k = keyFor({ product_id: pid, ean_code })
@@ -358,36 +438,178 @@ export default function WomenPage() {
     navigate('/checkout')
   }
 
+  const clearAll = () => setQuery('', '', 'featured')
+
+  const FiltersUI = ({ compact = false, onDone }) => {
+    return (
+      <div className={`women-filters${compact ? ' compact' : ''}`}>
+        <div className="women-filters-head">
+          <div className="women-filters-title">Filters</div>
+          <div className="women-filters-actions">
+            {(selectedBrand || selectedCategory || (sortBy && sortBy !== 'featured')) && (
+              <button type="button" className="women-ghost-btn" onClick={clearAll}>
+                Reset
+              </button>
+            )}
+            {compact && (
+              <button type="button" className="women-primary-btn" onClick={onDone}>
+                Apply
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="women-filter-card">
+          <div className="women-field">
+            <label className="women-label">Brand</label>
+            <div className="women-select-wrap">
+              <select className="women-select" value={selectedBrand || ''} onChange={(e) => setQuery(e.target.value, selectedCategory, sortBy)}>
+                <option value="">All Brands</option>
+                {availableBrands.map((b) => (
+                  <option key={b} value={b}>
+                    {b}
+                  </option>
+                ))}
+              </select>
+              <span className="women-select-icon" aria-hidden="true" />
+            </div>
+          </div>
+
+          <div className="women-field">
+            <label className="women-label">Category</label>
+            <div className="women-select-wrap">
+              <select className="women-select" value={selectedCategory || ''} onChange={(e) => setQuery(selectedBrand, e.target.value, sortBy)}>
+                <option value="">All Categories</option>
+                {availableCategories.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+              <span className="women-select-icon" aria-hidden="true" />
+            </div>
+          </div>
+
+          <div className="women-field">
+            <label className="women-label">Sort</label>
+            <div className="women-select-wrap">
+              <select className="women-select" value={sortBy || 'featured'} onChange={(e) => setQuery(selectedBrand, selectedCategory, e.target.value)}>
+                <option value="featured">Featured</option>
+                <option value="price_low">Price: Low to High</option>
+                <option value="price_high">Price: High to Low</option>
+                <option value="name_az">Name: A to Z</option>
+                <option value="name_za">Name: Z to A</option>
+              </select>
+              <span className="women-select-icon" aria-hidden="true" />
+            </div>
+          </div>
+
+          <div className="women-filter-actions-row">
+            <button type="button" className="women-soft-btn" onClick={clearAll} disabled={!selectedBrand && !selectedCategory && (!sortBy || sortBy === 'featured')}>
+              Clear all
+            </button>
+            <div className="women-chip">
+              <span className="women-chip-dot" />
+              <span className="women-chip-text">{products.length} items</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="women-page">
       <Navbar />
-
       <div className="women-top-spacer" />
 
-      <div id="products" className="women-page-main">
-        <div className="women-page-content">
-          {loading ? (
-            <div className="women-state-card">Loading products…</div>
-          ) : error ? (
-            <div className="women-state-card error">{error}</div>
-          ) : !allProducts.length ? (
-            <EmptyState category={selectedCategory} />
-          ) : !products.length ? (
-            <EmptyState category={selectedCategory} />
-          ) : (
-            <WomenDisplayPage
-              products={products}
-              userType={userType}
-              loading={loading}
-              error={error}
-              likedKeys={likedKeys}
-              keyFor={keyFor}
-              onToggleLike={toggleLike}
-              onProductClick={handleProductClick}
-            />
-          )}
-        </div>
+      <div className="women-shell">
+        <aside className="women-sidebar">
+          <FiltersUI />
+        </aside>
+
+        <main className="women-main">
+          <div id="products" className="women-page-main">
+            <div className="women-page-content">
+              {loading ? (
+                <div className="women-state-card">Loading products…</div>
+              ) : error ? (
+                <div className="women-state-card error">{error}</div>
+              ) : !allProducts.length ? (
+                <EmptyState category={selectedCategory} />
+              ) : !products.length ? (
+                <EmptyState category={selectedCategory} />
+              ) : (
+                <WomenDisplayPage
+                  products={products}
+                  userType={userType}
+                  loading={loading}
+                  error={error}
+                  likedKeys={likedKeys}
+                  keyFor={keyFor}
+                  onToggleLike={toggleLike}
+                  onProductClick={handleProductClick}
+                />
+              )}
+            </div>
+          </div>
+        </main>
       </div>
+
+      <div className="women-mobile-bar">
+        <button
+          type="button"
+          className="women-mobile-btn"
+          onClick={() => {
+            setMobileFiltersOpen(true)
+            setMobileSortOpen(false)
+          }}
+        >
+          Filters
+          {(selectedBrand || selectedCategory) && <span className="women-mobile-dot" />}
+        </button>
+
+        <button
+          type="button"
+          className="women-mobile-btn"
+          onClick={() => {
+            setMobileSortOpen(true)
+            setMobileFiltersOpen(false)
+          }}
+        >
+          Sort
+          {sortBy && sortBy !== 'featured' && <span className="women-mobile-dot" />}
+        </button>
+      </div>
+
+      <Sheet title="Filters" open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)}>
+        <FiltersUI compact onDone={() => setMobileFiltersOpen(false)} />
+      </Sheet>
+
+      <Sheet title="Sort" open={mobileSortOpen} onClose={() => setMobileSortOpen(false)}>
+        <div className="women-sort-sheet">
+          <div className="women-field">
+            <label className="women-label">Sort</label>
+            <div className="women-select-wrap">
+              <select
+                className="women-select"
+                value={sortBy || 'featured'}
+                onChange={(e) => {
+                  setQuery(selectedBrand, selectedCategory, e.target.value)
+                  setMobileSortOpen(false)
+                }}
+              >
+                <option value="featured">Featured</option>
+                <option value="price_low">Price: Low to High</option>
+                <option value="price_high">Price: High to Low</option>
+                <option value="name_az">Name: A to Z</option>
+                <option value="name_za">Name: Z to A</option>
+              </select>
+              <span className="women-select-icon" aria-hidden="true" />
+            </div>
+          </div>
+        </div>
+      </Sheet>
 
       <Footer />
     </div>
