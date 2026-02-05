@@ -140,23 +140,31 @@
   transition:transform .45s ease, filter .45s ease;
   filter:saturate(1.02) contrast(1.02);
 }
-
 .fc-badge{
-  position:absolute;
-  left:0px;
-  bottom:12px;
-  z-index:3;
-  padding:9px 12px;
-  border-radius:12px;
-  font-size:14px;
-  font-weight:800;
-  letter-spacing:.2px;
-  color:#fff;
-  max-width:calc(100% - 24px);
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  text-align: center;
+  z-index: 3;
+  padding: 9px 12px;
+  border-radius: 12px;
+
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: .2px;
+
+  background-color: #000;          
+  color: #f5e6a8;                  
+  border: 1.5px solid #d4af37;     
+
+  max-width: calc(100% - 24px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+
 
 .fc-card:hover .fc-media img{
   transform:scale(1.06);
