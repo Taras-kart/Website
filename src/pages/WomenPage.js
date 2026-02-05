@@ -85,37 +85,39 @@ const writeVariantMap = (userId, map) => {
 }
 
 const CATEGORY_GROUPS = [
-  { title: 'Leggings', keywords: ['ankle legging', 'chudidar legging', 'cropped legging', 'legging'] },
-  { title: 'Jeggings', keywords: ['coloured jegging', 'jegging'] },
-  { title: 'Shimmer', keywords: ['chudidar shimmer', 'shimmer shawl', 'shimmer'] }
+  {
+    title: 'Leggings',
+    patterns: [
+      'ANKLE LEGGING',
+      'CHUDIDAR LEGGING',
+      'CROPPED LEGGING',
+      'SHIMMER LEGGINGS',
+      'CAPRI LEGGINGS',
+      'CAPRI',
+      'LEGGING'
+    ]
+  },
+  { title: 'Kurti Pants', patterns: ['SLEEK KURTI', 'WIDE LEG KURTI', 'COTTON KURTI', 'FLEXI KURTI PANT', 'KURTI PANT'] },
+  { title: 'Jeggings', patterns: ['COLOURED JEGGING', 'JEGGING'] },
+  { title: 'Denim', patterns: ['DENIM JACKET', 'HIGH WAIST DENIM', 'DENIM'] },
+  { title: 'Bra', patterns: ['ELESTIC SPORTS BRA', 'SPORTS BRA', 'SPORTS VEST', 'BRA'] },
+  { title: 'Saree Shaper', patterns: ['SAREE SHAPER', 'SAREE SKIRT'] },
+  { title: 'Shimmer', patterns: ['SHIMMER SHAWL', 'SHIMMER'] },
+  { title: 'T-shirt', patterns: ['ACTIVE WEAR T-SHIRT', 'T-SHIRT', 'T SHIRT'] }
 ]
-
-const matchGroupedCategory = (name) => {
-  const n = normalizeKey(name).replace(/\s+/g, ' ').trim()
-  if (!n) return ''
-  for (const g of CATEGORY_GROUPS) {
-    for (const k of g.keywords) {
-      if (n.includes(k)) return g.title
-    }
-  }
-  return ''
-}
 
 const deriveCategory = (p) => {
   const name = String(p?.product_name || '').trim()
-  if (!name) return 'Others'
+  if (!name) return ''
 
-  const grouped = matchGroupedCategory(name)
-  if (grouped) return grouped
-
-  const cleaned = name
-    .replace(/\s+/g, ' ')
-    .replace(/[-_]+/g, ' ')
-    .replace(/[()]/g, ' ')
-    .trim()
-  const parts = cleaned.split(' ').filter(Boolean)
-  const top = parts.slice(0, 3).join(' ')
-  return top || 'Others'
+  const up = name.replace(/\s+/g, ' ').trim().toUpperCase()
+  for (const g of CATEGORY_GROUPS) {
+    for (const pat of g.patterns) {
+      const t = String(pat || '').trim().toUpperCase()
+      if (t && up.includes(t)) return g.title
+    }
+  }
+  return niceTitle(name)
 }
 
 function EmptyState({ category }) {

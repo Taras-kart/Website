@@ -24,46 +24,77 @@ function cloudinaryUrlByEan(ean) {
 
 const CATEGORY_GROUPS = [
   {
-    label: 'Leggings',
-    patterns: ['ankle legging', 'chudidar legging', 'cropped legging', 'legging']
+    title: 'Leggings',
+    img: '/images/updated/category-leggin.webp',
+    patterns: [
+      'ANKLE LEGGING',
+      'CHUDIDAR LEGGING',
+      'CROPPED LEGGING',
+      'SHIMMER LEGGINGS',
+      'CAPRI LEGGINGS',
+      'CAPRI'
+    ]
   },
   {
-    label: 'Jeggings',
-    patterns: ['coloured jegging', 'jeggings', 'jegging']
+    title: 'Kurti Pants',
+    img: '/images/updated/category-kurti-pant.webp',
+    patterns: ['SLEEK KURTI', 'WIDE LEG KURTI', 'COTTON KURTI', 'FLEXI KURTI PANT', 'KURTI PANT']
   },
   {
-    label: 'Shimmer',
-    patterns: ['chudidar shimmer', 'chudiadr shimmer', 'shimmer shawl', 'shimmer']
+    title: 'Jeggings',
+    img: '/images/updated/category-metallic-pant.webp',
+    patterns: ['COLOURED JEGGING', 'JEGGING']
+  },
+  {
+    title: 'Denim',
+    img: '/images/updated/denim.webp',
+    patterns: ['DENIM', 'DENIM JACKET', 'HIGH WAIST DENIM']
+  },
+  {
+    title: 'Bra',
+    img: '/images/updated/inner3.jpg',
+    patterns: ['ELESTIC SPORTS BRA', 'SPORTS BRA', 'BRA', 'SPORTS VEST']
+  },
+  {
+    title: 'Saree Shaper',
+    img: '/images/updated/category-saree-shaper.webp',
+    patterns: ['SAREE SHAPER', 'SAREE SKIRT']
+  },
+  {
+    title: 'Shimmer',
+    img: '/images/updated/category-metallic-pant.webp',
+    patterns: ['SHIMMER SHAWL', 'SHIMMER']
+  },
+  {
+    title: 'T-shirt',
+    img: '/images/updated/t-shirt1.webp',
+    patterns: ['T-SHIRT', 'ACTIVE WEAR T-SHIRT', 'T SHIRT']
   }
 ]
 
-const normalizeText = (s) =>
-  String(s || '')
-    .toLowerCase()
-    .replace(/[_-]+/g, ' ')
-    .replace(/[()]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
+const deriveCategory = (p) => {
+  const name = String(p?.product_name || '').trim()
+  if (!name) return ''
+  const up = name.replace(/\s+/g, ' ').trim().toUpperCase()
 
-const pickImageForProduct = (p) => {
-  const ean = String(p?.ean_code || '').trim()
-  const src = String(p?.image_url || '').trim()
+  for (const g of CATEGORY_GROUPS) {
+    for (const pat of g.patterns) {
+      const t = String(pat || '').trim().toUpperCase()
+      if (t && up.includes(t)) return g.title
+    }
+  }
+  return niceTitle(name)
+}
+
+const pickImageForCategory = (title, firstProduct) => {
+  const t = normalizeKey(title)
+  const preset = CATEGORY_GROUPS.find((x) => normalizeKey(x.title) === t)?.img
+  if (preset) return preset
+  const ean = String(firstProduct?.ean_code || '').trim()
+  const src = String(firstProduct?.image_url || '').trim()
   if (src) return src
   if (ean) return cloudinaryUrlByEan(ean)
   return DEFAULT_IMG
-}
-
-const deriveGroupedCategory = (p) => {
-  const name = normalizeText(p?.product_name || '')
-  if (!name) return 'Others'
-  for (const g of CATEGORY_GROUPS) {
-    for (const pat of g.patterns) {
-      if (name.includes(normalizeText(pat))) return g.label
-    }
-  }
-  const parts = name.split(' ').filter(Boolean)
-  const top = parts.slice(0, 3).join(' ')
-  return top ? top.replace(/\b\w/g, (m) => m.toUpperCase()) : 'Others'
 }
 
 export default function CategoryDisplay() {
@@ -112,19 +143,20 @@ export default function CategoryDisplay() {
     const map = new Map()
     for (const raw of filteredProducts || []) {
       const p = raw || {}
-      const title = deriveGroupedCategory(p)
-      const key = normalizeKey(title)
+      const cat = deriveCategory(p)
+      const key = normalizeKey(cat || '')
+      if (!key) continue
       if (!map.has(key)) {
         map.set(key, {
           key,
-          title,
+          title: cat,
           count: 0,
           image: ''
         })
       }
       const obj = map.get(key)
       obj.count += 1
-      if (!obj.image) obj.image = pickImageForProduct(p)
+      if (!obj.image) obj.image = pickImageForCategory(cat, p)
     }
     return Array.from(map.values())
       .filter((x) => x.count > 0)
@@ -193,7 +225,9 @@ export default function CategoryDisplay() {
         ) : !categories.length ? (
           <div className="category-state">
             <div className="category-empty-title">No categories found</div>
-            <div className="category-empty-sub">{selectedBrand ? `Try another brand, or view all women products.` : `Try viewing all products.`}</div>
+            <div className="category-empty-sub">
+              {selectedBrand ? `Try another brand, or view all women products.` : `Try viewing all products.`}
+            </div>
             <div className="category-empty-actions">
               <button type="button" className="category-viewall" onClick={goAllProducts}>
                 View All Products
