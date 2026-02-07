@@ -101,35 +101,70 @@ export default function Home1() {
       <Link to="/category-display?brand=Twin%20Birds" className="fc-card">
         <div className="fc-media">
           <img src={getImage('/images/updated/category-kurti-pant.webp')} alt="Kurti Pant" />
-          <div className="fc-badge">Twin Birds</div>
+
+          <div className="fc-brandBadge" aria-label="Twin Birds">
+            <img
+              src={getImage('/images/brands/twin-birds-brand.jpeg')}
+              alt="Twin Birds"
+              loading="lazy"
+            />
+          </div>
         </div>
       </Link>
 
       <Link to="/category-display?brand=Indian%20Flower" className="fc-card">
         <div className="fc-media">
           <img src={getImage('/images/updated/category-leggin.webp')} alt="Leggin" />
-          <div className="fc-badge">Indian Flower</div>
+
+          <div className="fc-brandBadge" aria-label="Indian Flower">
+            <img
+              src={getImage('/images/brands/indian-flower-brand.jpeg')}
+              alt="Indian Flower"
+              loading="lazy"
+            />
+          </div>
         </div>
       </Link>
 
       <Link to="/category-display?brand=Intimacy" className="fc-card">
         <div className="fc-media">
           <img src={getImage('/images/updated/category-metallic-pant.webp')} alt="Metallic Pant" />
-          <div className="fc-badge">Intimacy</div>
+
+          <div className="fc-brandBadge" aria-label="Intimacy">
+            <img
+              src={getImage('/images/brands/intimacy-brand.jpeg')}
+              alt="Intimacy"
+              loading="lazy"
+            />
+          </div>
         </div>
       </Link>
 
       <Link to="/category-display?brand=Naidu%20Hall" className="fc-card">
         <div className="fc-media">
           <img src={getImage('/images/updated/category-plazzo-pant.webp')} alt="Plazzo Pant" />
-          <div className="fc-badge">Naidu Hall</div>
+
+          <div className="fc-brandBadge" aria-label="Naidu Hall">
+            <img
+              src={getImage('/images/brands/naidu-hall-brand.avif')}
+              alt="Naidu Hall"
+              loading="lazy"
+            />
+          </div>
         </div>
       </Link>
 
       <Link to="/category-display?brand=Aswathi" className="fc-card">
         <div className="fc-media">
           <img src={getImage('/images/updated/category-saree-shaper.webp')} alt="Saree Shaper" />
-          <div className="fc-badge">Aswathi</div>
+
+          <div className="fc-brandBadge" aria-label="Aswathi">
+            <img
+              src={getImage('/images/brands/aswathi-brand.jpeg')}
+              alt="Aswathi"
+              loading="lazy"
+            />
+          </div>
         </div>
       </Link>
 
@@ -144,6 +179,7 @@ export default function Home1() {
     </div>
   </div>
 </section>
+
         <Divider label="Women" direction="ltr" />
 
         <section className="home-part-grid">
