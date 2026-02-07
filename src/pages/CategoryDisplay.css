@@ -372,4 +372,28 @@
   .category-ghost {
     width: 100%;
   }
+  .category-name{
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+
+  text-align: center;
+  z-index: 3;
+  padding: 8px 14px;
+  border-radius: 12px;
+
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: .2px;
+
+  background-color: #000;
+  color: #f5e6a8;
+  border: 1.5px solid #d4af37;
+
+  max-width: calc(100% - 20px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 }

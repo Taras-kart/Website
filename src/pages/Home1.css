@@ -256,11 +256,27 @@
   }
   .fc-media{ border-radius:14px; }
   .fc-badge{
-    left:10px;
-    bottom:10px;
-    font-size:13px;
-    padding:8px 10px;
-    border-radius:11px;
+    position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  text-align: center;
+  z-index: 3;
+  padding: 9px 12px;
+  border-radius: 12px;
+
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: .2px;
+
+  background-color: #000;          
+  color: #f5e6a8;                  
+  border: 1.5px solid #d4af37;     
+
+  max-width: calc(100% - 24px);
+  overflow: hidden;
+  text-overflow: ellipsis;
   }
   .fc-viewall-content{
     border-radius:14px;
