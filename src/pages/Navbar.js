@@ -325,7 +325,7 @@ const NavbarFinal = () => {
           </div>
 
           <div className="desktop-title-center">
-            <div className="taras-title">TARA'S KART</div>
+            <div className="taras-title">Attach.co.in</div>
           </div>
 
           <div className="desktop-icons-right">

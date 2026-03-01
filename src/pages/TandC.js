@@ -77,7 +77,7 @@ const TandC = () => {
           <section id="intro" className="tc-block">
             <h2><span className="tc-index">1.</span> Introduction</h2>
             <p>
-              Welcome to Taras Kart. By accessing or using our website or placing an order, you agree to these Terms,
+              Welcome to Attach.co.in. By accessing or using our website or placing an order, you agree to these Terms,
               the Shipping Policy, and the Cancellations & Refunds Policy contained on this page.
             </p>
           </section>

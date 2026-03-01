@@ -123,7 +123,7 @@ export default function PaymentPage() {
         amount: info.amount,
         currency: info.currency,
         order_id: info.order_id,
-        name: 'Taras Kart',
+        name: 'Attach.co.in',
         description: 'Secure Payment',
         prefill: { name: '', email: '', contact: '' },
         theme: { color: '#ffd700' },

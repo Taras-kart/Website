@@ -189,7 +189,7 @@ export default function HomePage() {
                                 <source src="/images/logo-video.mp4" type="video/mp4" />
                             </video>
                             <div className="home-section1-full-text">
-                                <h1>Taras Kart</h1>
+                                <h1>Attach.co.in</h1>
                             </div>
                         </div>
                         <div className="home-section1-right">
@@ -302,7 +302,7 @@ export default function HomePage() {
                             <img src="/images/banners/women-category-anarkali.png" alt="Anarkali" loading="lazy" decoding="async" />
                         </Link>
                         <div className="wcat-info">
-                            <h3 className="wcat-brand">Tara Anarkali</h3>
+                            <h3 className="wcat-brand">Anarkali</h3>
                             <div className="wcat-price">
                                 <span className="wcat-mrp">₹3,499</span>
                                 <span className="wcat-off">₹4,499</span>
@@ -316,7 +316,7 @@ export default function HomePage() {
                             <img src="/images/banners/women-category-halfsaree.png" alt="Half Saree" loading="lazy" decoding="async" />
                         </Link>
                         <div className="wcat-info">
-                            <h3 className="wcat-brand">Tara Half Saree</h3>
+                            <h3 className="wcat-brand">Half Saree</h3>
                             <div className="wcat-price">
                                 <span className="wcat-mrp">₹5,299</span>
                                 <span className="wcat-off">₹6,499</span>
@@ -330,7 +330,7 @@ export default function HomePage() {
                             <img src="/images/banners/women-category-punjabi.png" alt="Punjabi Suit" loading="lazy" decoding="async" />
                         </Link>
                         <div className="wcat-info">
-                            <h3 className="wcat-brand">Tara Punjabi</h3>
+                            <h3 className="wcat-brand">Punjabi</h3>
                             <div className="wcat-price">
                                 <span className="wcat-mrp">₹2,799</span>
                                 <span className="wcat-off">₹3,499</span>
@@ -344,7 +344,7 @@ export default function HomePage() {
                             <img src="/images/banners/women-category-saree.png" alt="Saree" loading="lazy" decoding="async" />
                         </Link>
                         <div className="wcat-info">
-                            <h3 className="wcat-brand">Tara Saree</h3>
+                            <h3 className="wcat-brand">Saree</h3>
                             <div className="wcat-price">
                                 <span className="wcat-mrp">₹4,199</span>
                                 <span className="wcat-off">₹5,299</span>
@@ -563,7 +563,7 @@ export default function HomePage() {
                 <div className="tara-quad-glow"></div>
                 <div className="tara-quad-shell">
                     <div className="tara-quad-header">
-                        <h2 className="tara-quad-title">Tara Saree</h2>
+                        <h2 className="tara-quad-title">Saree</h2>
                         <div className="tara-quad-underline">
                             <span className="tara-line large"></span>
                             <span className="tara-line medium"></span>
