@@ -16,7 +16,7 @@ const Contactus = () => {
                     />
                     <div className="contact-hero__overlay" />
                     <div className="contact-hero__content">
-                        <h1 className="contact-hero__title">TARAS KART</h1>
+                        <h1 className="contact-hero__title">Attach.co.in</h1>
                     </div>
                 </section>
 
@@ -179,7 +179,7 @@ const Contactus = () => {
                                         </div>
                                         <div className="contact-help__mini">
                                             <div className="contact-help__miniLabel">Email</div>
-                                            <div className="contact-help__miniValue">support@taraskart.com</div>
+                                            <div className="contact-help__miniValue">support@attach.co.in</div>
                                         </div>
                                         <div className="contact-help__mini">
                                             <div className="contact-help__miniLabel">WhatsApp</div>
@@ -344,7 +344,7 @@ const Contactus = () => {
                                 <img className="contact-promise__img" src="/images/promise2.jpg" alt="Taras Kart promise" />
                                 <div className="contact-promise__overlay" />
                                 <div className="contact-promise__stamp">
-                                    <div className="contact-promise__stampTop">TARAS KART</div>
+                                    <div className="contact-promise__stampTop">ATTACH.CO.IN</div>
                                     <div className="contact-promise__stampBottom">Promise</div>
                                 </div>
                             </div>

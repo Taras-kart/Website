@@ -84,7 +84,7 @@ export default function Home1() {
       <div className="spacer-new-home">
         <section className="home1-hero-new-home">
           <div className="home1-hero-frame-new-home">
-            <img src={getImage('/images/home-screen-main.png')} alt="Home Banner" loading="eager" />
+            <img src={getImage('/images/home-screen-main1.png')} alt="Home Banner" loading="eager" />
           </div>
         </section>
 
@@ -92,93 +92,93 @@ export default function Home1() {
 
 
         <section className="fc-section">
-  <div className="fc-inner">
-    <div className="fc-head">
-      <h2 className="fc-title">Featured Collections</h2>
-    </div>
+          <div className="fc-inner">
+            <div className="fc-head">
+              <h2 className="fc-title">Featured Collections</h2>
+            </div>
 
-    <div className="fc-grid">
-      <Link to="/category-display?brand=Twin%20Birds" className="fc-card">
-        <div className="fc-media">
-          <img src={getImage('/images/updated/category-kurti-pant.webp')} alt="Kurti Pant" />
+            <div className="fc-grid">
+              <Link to="/category-display?brand=Twin%20Birds" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/updated/category-kurti-pant.webp')} alt="Kurti Pant" />
 
-          <div className="fc-brandBadge" aria-label="Twin Birds">
-            <img
-              src={getImage('/images/brands/twin-birds-brand.jpeg')}
-              alt="Twin Birds"
-              loading="lazy"
-            />
+                  <div className="fc-brandBadge" aria-label="Twin Birds">
+                    <img
+                      src={getImage('/images/brands/twin-birds-brand.jpeg')}
+                      alt="Twin Birds"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+              </Link>
+
+              <Link to="/category-display?brand=Indian%20Flower" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/updated/category-leggin.webp')} alt="Leggin" />
+
+                  <div className="fc-brandBadge" aria-label="Indian Flower">
+                    <img
+                      src={getImage('/images/brands/indian-flower-brand.jpeg')}
+                      alt="Indian Flower"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+              </Link>
+
+              <Link to="/category-display?brand=Intimacy" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/updated/category-metallic-pant.webp')} alt="Metallic Pant" />
+
+                  <div className="fc-brandBadge" aria-label="Intimacy">
+                    <img
+                      src={getImage('/images/brands/intimacy-brand.jpeg')}
+                      alt="Intimacy"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+              </Link>
+
+              <Link to="/category-display?brand=Naidu%20Hall" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/updated/category-plazzo-pant.webp')} alt="Plazzo Pant" />
+
+                  <div className="fc-brandBadge" aria-label="Naidu Hall">
+                    <img
+                      src={getImage('/images/brands/naidu-hall-brand.avif')}
+                      alt="Naidu Hall"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+              </Link>
+
+              <Link to="/category-display?brand=Aswathi" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/updated/category-saree-shaper.webp')} alt="Saree Shaper" />
+
+                  <div className="fc-brandBadge" aria-label="Aswathi">
+                    <img
+                      src={getImage('/images/brands/aswathi-brand.jpeg')}
+                      alt="Aswathi"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+              </Link>
+
+              <Link to="/category-display" className="fc-card fc-viewall">
+                <div className="fc-media fc-viewall-media">
+                  <div className="fc-viewall-content">
+                    <span className="fc-viewall-title">View All</span>
+                    <span className="fc-viewall-sub">Women’s Collection</span>
+                  </div>
+                </div>
+              </Link>
+            </div>
           </div>
-        </div>
-      </Link>
-
-      <Link to="/category-display?brand=Indian%20Flower" className="fc-card">
-        <div className="fc-media">
-          <img src={getImage('/images/updated/category-leggin.webp')} alt="Leggin" />
-
-          <div className="fc-brandBadge" aria-label="Indian Flower">
-            <img
-              src={getImage('/images/brands/indian-flower-brand.jpeg')}
-              alt="Indian Flower"
-              loading="lazy"
-            />
-          </div>
-        </div>
-      </Link>
-
-      <Link to="/category-display?brand=Intimacy" className="fc-card">
-        <div className="fc-media">
-          <img src={getImage('/images/updated/category-metallic-pant.webp')} alt="Metallic Pant" />
-
-          <div className="fc-brandBadge" aria-label="Intimacy">
-            <img
-              src={getImage('/images/brands/intimacy-brand.jpeg')}
-              alt="Intimacy"
-              loading="lazy"
-            />
-          </div>
-        </div>
-      </Link>
-
-      <Link to="/category-display?brand=Naidu%20Hall" className="fc-card">
-        <div className="fc-media">
-          <img src={getImage('/images/updated/category-plazzo-pant.webp')} alt="Plazzo Pant" />
-
-          <div className="fc-brandBadge" aria-label="Naidu Hall">
-            <img
-              src={getImage('/images/brands/naidu-hall-brand.avif')}
-              alt="Naidu Hall"
-              loading="lazy"
-            />
-          </div>
-        </div>
-      </Link>
-
-      <Link to="/category-display?brand=Aswathi" className="fc-card">
-        <div className="fc-media">
-          <img src={getImage('/images/updated/category-saree-shaper.webp')} alt="Saree Shaper" />
-
-          <div className="fc-brandBadge" aria-label="Aswathi">
-            <img
-              src={getImage('/images/brands/aswathi-brand.jpeg')}
-              alt="Aswathi"
-              loading="lazy"
-            />
-          </div>
-        </div>
-      </Link>
-
-      <Link to="/category-display" className="fc-card fc-viewall">
-        <div className="fc-media fc-viewall-media">
-          <div className="fc-viewall-content">
-            <span className="fc-viewall-title">View All</span>
-            <span className="fc-viewall-sub">Women’s Collection</span>
-          </div>
-        </div>
-      </Link>
-    </div>
-  </div>
-</section>
+        </section>
 
         <Divider label="Women" direction="ltr" />
 
@@ -574,13 +574,13 @@ export default function Home1() {
             >
               <SwiperSlide>
                 <div className="home1-hero-slide-new-home-2">
-                  <img src={getImage('/images/banners/banner4.png')} alt="Women Banner" loading="eager" />
+                  <img src={getImage('/images/banners/banner10.png')} alt="Women Banner" loading="eager" />
                 </div>
               </SwiperSlide>
               <SwiperSlide>
                 <div className="home1-hero-slide-new-home-2">
                   <img
-                    src={getImage('/images/banners/banner5.png')}
+                    src={getImage('/images/banners/banner11.png')}
                     alt="Women Banner"
                     loading="lazy"
                     decoding="async"
@@ -590,7 +590,7 @@ export default function Home1() {
               <SwiperSlide>
                 <div className="home1-hero-slide-new-home-2">
                   <img
-                    src={getImage('/images/banners/banner6.png')}
+                    src={getImage('/images/banners/banner12.png')}
                     alt="Women Banner"
                     loading="lazy"
                     decoding="async"
@@ -919,13 +919,13 @@ export default function Home1() {
             >
               <SwiperSlide>
                 <div className="home1-hero-slide-new-home-2">
-                  <img src={getImage('/images/banners/banner7.png')} alt="Women Banner" loading="eager" />
+                  <img src={getImage('/images/banners/banner10.png')} alt="Women Banner" loading="eager" />
                 </div>
               </SwiperSlide>
               <SwiperSlide>
                 <div className="home1-hero-slide-new-home-2">
                   <img
-                    src={getImage('/images/banners/banner8.png')}
+                    src={getImage('/images/banners/banner11.png')}
                     alt="Women Banner"
                     loading="lazy"
                     decoding="async"
@@ -935,7 +935,7 @@ export default function Home1() {
               <SwiperSlide>
                 <div className="home1-hero-slide-new-home-2">
                   <img
-                    src={getImage('/images/banners/banner9.png')}
+                    src={getImage('/images/banners/banner12.png')}
                     alt="Women Banner"
                     loading="lazy"
                     decoding="async"
