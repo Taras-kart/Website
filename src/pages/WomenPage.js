@@ -85,17 +85,81 @@ const writeVariantMap = (userId, map) => {
 }
 
 const CATEGORY_GROUPS = [
+  // --- LEGGINGS & SUBCATEGORIES ---
   {
-    title: 'Leggings',
-    patterns: ['ANKLE LEGGING', 'CHUDIDAR LEGGING', 'CROPPED LEGGING', 'SHIMMER LEGGINGS', 'CAPRI LEGGINGS', 'CAPRI', 'LEGGING']
+    parent: 'Leggings', 
+    title: 'Ankle Leggings', 
+    img: '/images/updated/ankle-leggings.webp', 
+    patterns: ['ANKLE LEGGING'] 
   },
-  { title: 'Kurti Pants', patterns: ['SLEEK KURTI', 'WIDE LEG KURTI', 'COTTON KURTI', 'FLEXI KURTI PANT', 'KURTI PANT'] },
-  { title: 'Jeggings', patterns: ['COLOURED JEGGING', 'JEGGING'] },
-  { title: 'Denim', patterns: ['DENIM JACKET', 'HIGH WAIST DENIM', 'DENIM'] },
-  { title: 'Bra', patterns: ['ELESTIC SPORTS BRA', 'SPORTS BRA', 'SPORTS VEST', 'BRA'] },
-  { title: 'Saree Shaper', patterns: ['SAREE SHAPER', 'SAREE SKIRT'] },
-  { title: 'Shimmer', patterns: ['SHIMMER SHAWL', 'SHIMMER'] },
-  { title: 'T-shirt', patterns: ['ACTIVE WEAR T-SHIRT', 'T-SHIRT', 'T SHIRT'] }
+  {
+    parent: 'Leggings', 
+    title: 'Capri', 
+    img: '/images/updated/capri-leggings.webp', 
+    patterns: ['CAPRI LEGGINGS', 'CAPRI'] 
+  },
+  { 
+    parent: 'Leggings', 
+    title: 'Chudidar Leggings', 
+    img: '/images/updated/chudidar-leggings.webp', 
+    patterns: ['CHUDIDAR LEGGING'] 
+  },
+  { 
+    parent: 'Leggings', 
+    title: 'Cropped Leggings', 
+    img: '/images/updated/cropped-leggings.webp', 
+    patterns: ['CROPPED LEGGING'] 
+  },
+  { 
+    parent: 'Leggings', 
+    title: 'Shimmer Leggings', 
+    img: '/images/updated/shimmer-leggings.webp', 
+    patterns: ['SHIMMER LEGGINGS'] 
+  },
+  { 
+    parent: 'Leggings', 
+    title: 'Basic Leggings', 
+    img: '/images/updated/category-leggin.webp', 
+    patterns: ['LEGGING'] 
+  },
+  // --- KURTI PANTS & SUBCATEGORIES ---
+  { parent: 'Kurti Pants', title: 'Sleek Kurti Pants', img: '/images/updated/category-kurti-pant.webp', patterns: ['SLEEK KURTI'] },
+  { parent: 'Kurti Pants', title: 'Wide Leg Kurti', img: '/images/updated/category-kurti-pant.webp', patterns: ['WIDE LEG KURTI'] },
+  { parent: 'Kurti Pants', title: 'Cotton Kurti', img: '/images/updated/category-kurti-pant.webp', patterns: ['COTTON KURTI'] },
+  { parent: 'Kurti Pants', title: 'Flexi Kurti Pant', img: '/images/updated/category-kurti-pant.webp', patterns: ['FLEXI KURTI PANT'] },
+  { parent: 'Kurti Pants', title: 'Basic Kurti Pants', img: '/images/updated/category-kurti-pant.webp', patterns: ['KURTI PANT'] },
+
+  // --- DENIM & SUBCATEGORIES ---
+  { parent: 'Denim', title: 'Denim Jackets', img: '/images/updated/denim.webp', patterns: ['DENIM JACKET'] },
+  { parent: 'Denim', title: 'High Waist Denim', img: '/images/updated/denim.webp', patterns: ['HIGH WAIST DENIM'] },
+  { parent: 'Denim', title: 'Basic Denim', img: '/images/updated/denim.webp', patterns: ['DENIM'] },
+
+  // --- BRA & INNERWEAR SUBCATEGORIES ---
+  { parent: 'Bra', title: 'Elastic Sports Bra', img: '/images/updated/inner3.jpg', patterns: ['ELESTIC SPORTS BRA'] },
+  { parent: 'Bra', title: 'Sports Bra', img: '/images/updated/inner3.jpg', patterns: ['SPORTS BRA'] },
+  { parent: 'Bra', title: 'Sports Vest', img: '/images/updated/inner3.jpg', patterns: ['SPORTS VEST'] },
+  { parent: 'Bra', title: 'Basic Bra', img: '/images/updated/inner3.jpg', patterns: ['BRA'] },
+
+  // --- JEGGINGS & SUBCATEGORIES ---
+  { parent: 'Jeggings', title: 'Coloured Jeggings', img: '/images/updated/category-metallic-pant.webp', patterns: ['COLOURED JEGGING'] },
+  { parent: 'Jeggings', title: 'Basic Jeggings', img: '/images/updated/category-metallic-pant.webp', patterns: ['JEGGING'] },
+
+  // --- SAREE SHAPER & SUBCATEGORIES ---
+  { parent: 'Saree Shaper', title: 'Saree Skirt', img: '/images/updated/category-saree-shaper.webp', patterns: ['SAREE SKIRT'] },
+  { parent: 'Saree Shaper', title: 'Basic Saree Shaper', img: '/images/updated/category-saree-shaper.webp', patterns: ['SAREE SHAPER'] },
+
+  // --- T-SHIRTS & SUBCATEGORIES ---
+  { parent: 'T-shirt', title: 'Active Wear T-shirt', img: '/images/updated/t-shirt1.webp', patterns: ['ACTIVE WEAR T-SHIRT'] },
+  { parent: 'T-shirt', title: 'Basic T-shirt', img: '/images/updated/t-shirt1.webp', patterns: ['T-SHIRT', 'T SHIRT'] },
+
+  // --- SHIMMER & SUBCATEGORIES ---
+  { parent: 'Shimmer', title: 'Shimmer Shawl', img: '/images/updated/category-metallic-pant.webp', patterns: ['SHIMMER SHAWL'] },
+  { parent: 'Shimmer', title: 'Basic Shimmer', img: '/images/updated/category-metallic-pant.webp', patterns: ['SHIMMER'] },
+
+  // --- SINGLE CATEGORIES (No Drill-Down Needed) ---
+  { parent: null, title: 'Plazo', img: '/images/updated/category-plazzo-pant.webp', patterns: ['PLAZO', 'PALAZZO'] },
+  { parent: null, title: 'Cycling Shorts', img: '/images/updated/inner5.jpg', patterns: ['CYCLING SHORTS'] },
+  { parent: null, title: 'Metallic Pants', img: '/images/updated/category-metallic-pant.webp', patterns: ['METALIC PANT', 'METALLIC PANT'] }
 ]
 
 const deriveCategory = (p) => {

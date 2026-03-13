@@ -1,12 +1,20 @@
 // src/pages/Home1.js
+
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+
+// Swiper core and required modules
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Autoplay, Pagination } from 'swiper'
+
+// Swiper styles
+import 'swiper/css'
+import 'swiper/css/pagination'
+
+// Local components and styles
 import './Home1.css'
 import Navbar from './Navbar'
 import Footer from './Footer'
-import { Swiper, SwiperSlide } from 'swiper/react'
-import { Autoplay } from 'swiper'
-import 'swiper/css'
-import { Link } from 'react-router-dom'
 import Divider from './Divider'
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://taras-kart-backend.vercel.app'
@@ -82,92 +90,108 @@ export default function Home1() {
     <div className="home1-page-new-home">
       <Navbar />
       <div className="spacer-new-home">
-        <section className="home1-hero-new-home">
+
+
+<section className="home1-hero-new-home">
           <div className="home1-hero-frame-new-home">
-            <img src={getImage('/images/home-screen-main1.png')} alt="Home Banner" loading="eager" />
+            <Swiper
+              modules={[Autoplay, Pagination]}
+              loop
+              slidesPerView={1}
+              autoplay={{ delay: 3500, disableOnInteraction: false }}
+              speed={900}
+              pagination={{ clickable: true }} // Enables the clickable dots
+              grabCursor={true} // Changes cursor to a "grab" hand on desktop, making it obvious you can swipe
+            >
+              <SwiperSlide>
+                <div className="home1-hero-slide-new-home-2">
+                  <img src={getImage('/images/home-screen-main1.png')} alt="Home Banner 1" loading="eager" />
+                </div>
+              </SwiperSlide>
+              <SwiperSlide>
+                <div className="home1-hero-slide-new-home-2">
+                  <img src={getImage('/images/home-screen-main2.png')} alt="Home Banner 2" loading="lazy" decoding="async" />
+                </div>
+              </SwiperSlide>
+              <SwiperSlide>
+                <div className="home1-hero-slide-new-home-2">
+                  <img src={getImage('/images/home-screen-main3.png')} alt="Home Banner 3" loading="lazy" decoding="async" />
+                </div>
+              </SwiperSlide>
+              <SwiperSlide>
+                <div className="home1-hero-slide-new-home-2">
+                  <img src={getImage('/images/home-screen-main4.png')} alt="Home Banner 4" loading="lazy" decoding="async" />
+                </div>
+              </SwiperSlide>
+            </Swiper>
           </div>
         </section>
 
         <Divider label="Women" direction="ltr" />
-
-
-        <section className="fc-section">
+<section className="fc-section">
           <div className="fc-inner">
             <div className="fc-head">
-              <h2 className="fc-title">Featured Collections</h2>
+              <h2 className="fc-title">Our Brands</h2>
             </div>
 
             <div className="fc-grid">
               <Link to="/category-display?brand=Twin%20Birds" className="fc-card">
                 <div className="fc-media">
-                  <img src={getImage('/images/updated/category-kurti-pant.webp')} alt="Kurti Pant" />
-
-                  <div className="fc-brandBadge" aria-label="Twin Birds">
-                    <img
-                      src={getImage('/images/brands/twin-birds-brand.jpeg')}
-                      alt="Twin Birds"
-                      loading="lazy"
-                    />
-                  </div>
+                  <img src={getImage('/images/brands/twin-birds-brand.jpeg')} alt="Twin Birds" loading="lazy" />
                 </div>
               </Link>
 
               <Link to="/category-display?brand=Indian%20Flower" className="fc-card">
                 <div className="fc-media">
-                  <img src={getImage('/images/updated/category-leggin.webp')} alt="Leggin" />
-
-                  <div className="fc-brandBadge" aria-label="Indian Flower">
-                    <img
-                      src={getImage('/images/brands/indian-flower-brand.jpeg')}
-                      alt="Indian Flower"
-                      loading="lazy"
-                    />
-                  </div>
+                  <img src={getImage('/images/brands/indian-flower-brand.jpeg')} alt="Indian Flower" loading="lazy" />
                 </div>
               </Link>
 
               <Link to="/category-display?brand=Intimacy" className="fc-card">
                 <div className="fc-media">
-                  <img src={getImage('/images/updated/category-metallic-pant.webp')} alt="Metallic Pant" />
-
-                  <div className="fc-brandBadge" aria-label="Intimacy">
-                    <img
-                      src={getImage('/images/brands/intimacy-brand.jpeg')}
-                      alt="Intimacy"
-                      loading="lazy"
-                    />
-                  </div>
+                  <img src={getImage('/images/brands/intimacy-brand.jpeg')} alt="Intimacy" loading="lazy" />
                 </div>
               </Link>
 
               <Link to="/category-display?brand=Naidu%20Hall" className="fc-card">
                 <div className="fc-media">
-                  <img src={getImage('/images/updated/category-plazzo-pant.webp')} alt="Plazzo Pant" />
-
-                  <div className="fc-brandBadge" aria-label="Naidu Hall">
-                    <img
-                      src={getImage('/images/brands/naidu-hall-brand.avif')}
-                      alt="Naidu Hall"
-                      loading="lazy"
-                    />
-                  </div>
+                  <img src={getImage('/images/brands/naidu-hall-brand.avif')} alt="Naidu Hall" loading="lazy" />
                 </div>
               </Link>
 
               <Link to="/category-display?brand=Aswathi" className="fc-card">
                 <div className="fc-media">
-                  <img src={getImage('/images/updated/category-saree-shaper.webp')} alt="Saree Shaper" />
-
-                  <div className="fc-brandBadge" aria-label="Aswathi">
-                    <img
-                      src={getImage('/images/brands/aswathi-brand.jpeg')}
-                      alt="Aswathi"
-                      loading="lazy"
-                    />
-                  </div>
+                  <img src={getImage('/images/brands/aswathi-brand.jpeg')} alt="Aswathi" loading="lazy" />
                 </div>
               </Link>
 
+              {/* --- NEW BRANDS ADDED BELOW --- */}
+              
+              <Link to="/category-display?brand=Cucumber" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/brands/cucumber-brand.jpg')} alt="Cucumber" loading="lazy" />
+                </div>
+              </Link>
+
+              <Link to="/category-display?brand=Quickdry" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/brands/quickdry-brand.jpg')} alt="Quickdry" loading="lazy" />
+                </div>
+              </Link>
+
+              <Link to="/category-display?brand=Jockey" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/brands/jockey-brand.jpg')} alt="Jockey" loading="lazy" />
+                </div>
+              </Link>
+
+              <Link to="/category-display?brand=Dazzle" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/brands/dazzle-brand.jpg')} alt="Dazzle" loading="lazy" />
+                </div>
+              </Link>
+
+              {/* --- VIEW ALL CARD --- */}
               <Link to="/category-display" className="fc-card fc-viewall">
                 <div className="fc-media fc-viewall-media">
                   <div className="fc-viewall-content">
@@ -179,7 +203,6 @@ export default function Home1() {
             </div>
           </div>
         </section>
-
         <Divider label="Women" direction="ltr" />
 
         <section className="home-part-grid">

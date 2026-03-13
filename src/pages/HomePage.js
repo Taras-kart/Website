@@ -180,7 +180,11 @@ export default function HomePage() {
 
     return (
         <div className="home-section1-wrapper">
+
+
             <Navbar />
+
+            
             <div className="home-section1">
                 <div className="home-section1-overlay">
                     <div className="home-section1-content">
