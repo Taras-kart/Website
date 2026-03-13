@@ -85,82 +85,55 @@ const writeVariantMap = (userId, map) => {
 }
 
 const CATEGORY_GROUPS = [
-  // --- LEGGINGS & SUBCATEGORIES ---
-  {
-    parent: 'Leggings', 
-    title: 'Ankle Leggings', 
-    img: '/images/updated/ankle-leggings.webp', 
-    patterns: ['ANKLE LEGGING'] 
-  },
-  {
-    parent: 'Leggings', 
-    title: 'Capri', 
-    img: '/images/updated/capri-leggings.webp', 
-    patterns: ['CAPRI LEGGINGS', 'CAPRI'] 
-  },
-  { 
-    parent: 'Leggings', 
-    title: 'Chudidar Leggings', 
-    img: '/images/updated/chudidar-leggings.webp', 
-    patterns: ['CHUDIDAR LEGGING'] 
-  },
-  { 
-    parent: 'Leggings', 
-    title: 'Cropped Leggings', 
-    img: '/images/updated/cropped-leggings.webp', 
-    patterns: ['CROPPED LEGGING'] 
-  },
-  { 
-    parent: 'Leggings', 
-    title: 'Shimmer Leggings', 
-    img: '/images/updated/shimmer-leggings.webp', 
-    patterns: ['SHIMMER LEGGINGS'] 
-  },
-  { 
-    parent: 'Leggings', 
-    title: 'Basic Leggings', 
-    img: '/images/updated/category-leggin.webp', 
-    patterns: ['LEGGING'] 
-  },
-  // --- KURTI PANTS & SUBCATEGORIES ---
-  { parent: 'Kurti Pants', title: 'Sleek Kurti Pants', img: '/images/updated/category-kurti-pant.webp', patterns: ['SLEEK KURTI'] },
-  { parent: 'Kurti Pants', title: 'Wide Leg Kurti', img: '/images/updated/category-kurti-pant.webp', patterns: ['WIDE LEG KURTI'] },
-  { parent: 'Kurti Pants', title: 'Cotton Kurti', img: '/images/updated/category-kurti-pant.webp', patterns: ['COTTON KURTI'] },
-  { parent: 'Kurti Pants', title: 'Flexi Kurti Pant', img: '/images/updated/category-kurti-pant.webp', patterns: ['FLEXI KURTI PANT'] },
-  { parent: 'Kurti Pants', title: 'Basic Kurti Pants', img: '/images/updated/category-kurti-pant.webp', patterns: ['KURTI PANT'] },
+  // --- SAREE SHAPER ---
+  { parent: 'Saree Shaper', title: 'Saree Shaper', img: '/images/updated/Saree_Shaper.webp', patterns: ['SAREE SHAPER', 'SAREESHAPER'] },
+  { parent: 'Saree Shaper', title: 'Skirt Shaper', img: '/images/updated/Skirt_Shaper.webp', patterns: ['SKIRT SHAPER', 'SKIRTSHAPER', 'SAREE SKIRT', 'SAREESKIRT'] },
+  { parent: 'Saree Shaper', title: 'Straight Fit Saree Shaper', img: '/images/updated/StraightFit_Saree_Shaper.webp', patterns: ['STRAIGHT FIT', 'STRAIGHTFIT'] },
 
-  // --- DENIM & SUBCATEGORIES ---
-  { parent: 'Denim', title: 'Denim Jackets', img: '/images/updated/denim.webp', patterns: ['DENIM JACKET'] },
-  { parent: 'Denim', title: 'High Waist Denim', img: '/images/updated/denim.webp', patterns: ['HIGH WAIST DENIM'] },
-  { parent: 'Denim', title: 'Basic Denim', img: '/images/updated/denim.webp', patterns: ['DENIM'] },
+  // --- KURTI PANTS ---
+  { parent: 'Kurti Pants', title: 'Viscose Kurti Pant', img: '/images/updated/viscose_kurti_pant.webp', patterns: ['VISCOSE KURTI', 'VISCOSEKURTI'] },
+  { parent: 'Kurti Pants', title: 'Cotton Kurti Pant', img: '/images/updated/cotton_kurti_pant.webp', patterns: ['COTTON KURTI', 'COTTONKURTI'] },
+  { parent: 'Kurti Pants', title: 'Sleek Kurti Pant', img: '/images/updated/sleek_kurti_pant.webp', patterns: ['SLEEK KURTI', 'SLEEKKURTI'] },
+  { parent: 'Kurti Pants', title: 'Flexi Kurti Pant', img: '/images/updated/flexi_kurti_pant.webp', patterns: ['FLEXI KURTI', 'FLEXIKURTI', 'WIDE LEG KURTI', 'WIDELEGKURTI'] },
+  // Catch-all for generic Kurtis in DB
+  { parent: 'Kurti Pants', title: 'Viscose Kurti Pant', img: '/images/updated/kurti_pant.webp', patterns: ['KURTI PANT', 'KURTIPANT', 'KURTI'] }, 
 
-  // --- BRA & INNERWEAR SUBCATEGORIES ---
-  { parent: 'Bra', title: 'Elastic Sports Bra', img: '/images/updated/inner3.jpg', patterns: ['ELESTIC SPORTS BRA'] },
-  { parent: 'Bra', title: 'Sports Bra', img: '/images/updated/inner3.jpg', patterns: ['SPORTS BRA'] },
-  { parent: 'Bra', title: 'Sports Vest', img: '/images/updated/inner3.jpg', patterns: ['SPORTS VEST'] },
-  { parent: 'Bra', title: 'Basic Bra', img: '/images/updated/inner3.jpg', patterns: ['BRA'] },
+  // --- LEGGINGS (Ordered from most specific to generic) ---
+  { parent: 'Leggings', title: 'Viscose Churidar Legging', img: '/images/updated/Viscose_Churidar_Legging.webp', patterns: ['VISCOSE CHURIDAR', 'VISCOSECHURIDAR', 'VISCOSE CHUDIDAR', 'VISCOSECHUDIDAR'] },
 
-  // --- JEGGINGS & SUBCATEGORIES ---
-  { parent: 'Jeggings', title: 'Coloured Jeggings', img: '/images/updated/category-metallic-pant.webp', patterns: ['COLOURED JEGGING'] },
-  { parent: 'Jeggings', title: 'Basic Jeggings', img: '/images/updated/category-metallic-pant.webp', patterns: ['JEGGING'] },
+{ parent: 'Leggings', title: 'Bamboo Modal Churidar Legging', img: '/images/updated/BambooModal_Churidar_Legging.webp', patterns: ['BAMBOO MODAL CHURIDAR', 'BAMBOOMODALCHURIDAR', 'BAMBOO MODAL CHUDIDAR', 'BAMBOOMODALCHUDIDAR'] },
 
-  // --- SAREE SHAPER & SUBCATEGORIES ---
-  { parent: 'Saree Shaper', title: 'Saree Skirt', img: '/images/updated/category-saree-shaper.webp', patterns: ['SAREE SKIRT'] },
-  { parent: 'Saree Shaper', title: 'Basic Saree Shaper', img: '/images/updated/category-saree-shaper.webp', patterns: ['SAREE SHAPER'] },
+{ parent: 'Leggings', title: 'Cotton Capri Legging', img: '/images/updated/Cotton_Capri_Legging.webp', patterns: ['COTTON CAPRI', 'COTTONCAPRI', 'CAPRI'] },
 
-  // --- T-SHIRTS & SUBCATEGORIES ---
-  { parent: 'T-shirt', title: 'Active Wear T-shirt', img: '/images/updated/t-shirt1.webp', patterns: ['ACTIVE WEAR T-SHIRT'] },
-  { parent: 'T-shirt', title: 'Basic T-shirt', img: '/images/updated/t-shirt1.webp', patterns: ['T-SHIRT', 'T SHIRT'] },
+{ parent: 'Leggings', title: 'Viscose Ankle Legging', img: '/images/updated/Viscose_Ankle_Legging.webp', patterns: ['VISCOSE ANKLE', 'VISCOSEANKLE'] },
 
-  // --- SHIMMER & SUBCATEGORIES ---
-  { parent: 'Shimmer', title: 'Shimmer Shawl', img: '/images/updated/category-metallic-pant.webp', patterns: ['SHIMMER SHAWL'] },
-  { parent: 'Shimmer', title: 'Basic Shimmer', img: '/images/updated/category-metallic-pant.webp', patterns: ['SHIMMER'] },
+{ parent: 'Leggings', title: 'Viscose 7/8 High Ankle/Cropped Leggings', img: '/images/updated/Viscose7-8_HighAnkle(or)Cropped_Legging.webp', patterns: ['VISCOSE 7/8', 'VISCOSE7/8', 'CROPPED', 'HIGH ANKLE', 'HIGHANKLE'] },
 
-  // --- SINGLE CATEGORIES (No Drill-Down Needed) ---
-  { parent: null, title: 'Plazo', img: '/images/updated/category-plazzo-pant.webp', patterns: ['PLAZO', 'PALAZZO'] },
-  { parent: null, title: 'Cycling Shorts', img: '/images/updated/inner5.jpg', patterns: ['CYCLING SHORTS'] },
-  { parent: null, title: 'Metallic Pants', img: '/images/updated/category-metallic-pant.webp', patterns: ['METALIC PANT', 'METALLIC PANT'] }
+{ parent: 'Leggings', title: 'Bamboo Modal Ankle Legging', img: '/images/updated/BambooModal_Ankle_Legging.webp', patterns: ['BAMBOO MODAL ANKLE', 'BAMBOOMODALANKLE'] },
+
+{ parent: 'Leggings', title: 'Cotton Churidar Legging', img: '/images/updated/Cotton_Churidar_Legging.webp', patterns: ['COTTON CHURIDAR', 'COTTONCHURIDAR', 'COTTON CHUDIDAR', 'COTTONCHUDIDAR', 'CHURIDAR', 'CHUDIDAR'] },
+
+{ parent: 'Leggings', title: 'Shimmer Legging', img: '/images/updated/Shimmer_Legging.webp', patterns: ['SHIMMER LEGGING', 'SHIMMERLEGGING', 'SHIMMER'] },
+  // Catch-all for generic Leggings in DB
+  { parent: 'Leggings', title: 'Cotton Ankle Legging', img: '/images/updated/Cotton_Ankle_Legging.webp', patterns: ['COTTON ANKLE', 'COTTONANKLE', 'ANKLE', 'LEGGING'] },
+
+  // --- PALAZZO PANTS ---
+ { parent: 'Palazzo Pants', title: 'Solid Knitted Palazzo Pants', img: '/images/updated/Solid_knitted_Palazzo_Pants.webp', patterns: ['SOLID KNITTED', 'SOLIDKNITTED'] },
+
+{ parent: 'Palazzo Pants', title: 'Printed Knitted Palazzo Pants', img: '/images/updated/Printed_Knitted_Palazzo_Pants.webp', patterns: ['PRINTED KNITTED', 'PRINTEDKNITTED'] },
+
+{ parent: 'Palazzo Pants', title: 'Knotted Striped Palazzo', img: '/images/updated/Knotted_Striped_Palazzo.webp', patterns: ['KNOTTED STRIPED', 'KNOTTEDSTRIPED', 'KNOTTED'] },
+
+{ parent: 'Palazzo Pants', title: 'Striped Palazzo', img: '/images/updated/Striped_Palazzo.webp', patterns: ['STRIPED'] },
+
+// Catch-all for generic Palazzos
+{ parent: 'Palazzo Pants', title: 'Solid Wide Leg Palazzo', img: '/images/updated/Solid_Wide_Leg_Palazzo.webp', patterns: ['SOLID WIDE LEG', 'SOLIDWIDELEG', 'PALAZZO', 'PLAZO'] },
+
+  // --- STANDALONE CATEGORIES (No Drill-Down, Parent is null) ---
+  { parent: null, title: 'Metallic Pants', img: '/images/updated/metallic_straight_pant.webp', patterns: ['METALLIC', 'METALIC'] },
+  { parent: null, title: 'T-shirts', img: '/images/updated/active_t-shirt.webp', patterns: ['T-SHIRT', 'T SHIRT', 'TSHIRT'] }
 ]
+
 
 const deriveCategory = (p) => {
   const name = String(p?.product_name || '').trim()

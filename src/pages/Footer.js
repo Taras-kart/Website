@@ -171,15 +171,18 @@ const Footer = () => {
 return (
     <footer className="footer">
       <div className="footer-desktop">
-        <div className="footer-column">
-          <div className="logo-final1">
-            <img 
-              src="/logo1.png" 
-              alt="Attach Logo" 
-              style={{ maxWidth: '160px', height: 'auto', objectFit: 'contain', marginTop: '10px' }} 
-            />
-          </div>
-        </div>
+<div className="footer-column">
+
+
+
+  <div className="logo-final1">
+    <img src="/attach-loader.gif" alt="Attach Logo" />
+
+    <h3 className="footer-logo-title">Attach</h3>
+  </div>
+  
+
+</div>
         <div className="footer-column">
           <h3>Categories</h3>
           <DesktopList section="Categories" items={['Mens', 'Womens', 'Kids']} />

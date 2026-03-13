@@ -565,7 +565,6 @@ const CheckoutPage = () => {
             <>
               <div className="co-top">
                 <div>
-                  <h1 className="co-brand">{product?.brand}</h1>
                   <h2 className="co-name">{product?.product_name}</h2>
                 </div>
                 <div className="co-trust">

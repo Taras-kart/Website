@@ -93,41 +93,73 @@ export default function Home1() {
 
 
 <section className="home1-hero-new-home">
-          <div className="home1-hero-frame-new-home">
-            <Swiper
-              modules={[Autoplay, Pagination]}
-              loop
-              slidesPerView={1}
-              autoplay={{ delay: 3500, disableOnInteraction: false }}
-              speed={900}
-              pagination={{ clickable: true }} // Enables the clickable dots
-              grabCursor={true} // Changes cursor to a "grab" hand on desktop, making it obvious you can swipe
-            >
-              <SwiperSlide>
-                <div className="main-hero-slide">
-                  <img src={getImage('/images/home-screen-main1.png')} alt="Home Banner 1" loading="eager" />
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="main-hero-slide">
-                  <img src={getImage('/images/home-screen-main2.png')} alt="Home Banner 2" loading="lazy" decoding="async" />
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="main-hero-slide">
-                  <img src={getImage('/images/home-screen-main3.png')} alt="Home Banner 3" loading="lazy" decoding="async" />
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="main-hero-slide">
-                  <img src={getImage('/images/home-screen-main4.png')} alt="Home Banner 4" loading="lazy" decoding="async" />
-                </div>
-              </SwiperSlide>
-            </Swiper>
-          </div>
-        </section>
+  <div className="home1-hero-frame-new-home">
+<Swiper
+  modules={[Autoplay, Pagination]}
+  loop
+  slidesPerView={1}
+  autoplay={{ delay: 3500, disableOnInteraction: false }}
+  speed={900}
+  pagination={{ clickable: true }}
+  grabCursor={true}
+>
+
+  {/* Banner 1 (unchanged) */}
+  <SwiperSlide>
+    <div className="main-hero-slide">
+      <img src={getImage('/images/ATTACH BANNER.png')} alt="Home Banner 1" loading="eager" />
+    </div>
+  </SwiperSlide>
+
+  <SwiperSlide>
+    <div className="main-hero-slide">
+      <img src={getImage('/images/CUCUMBER BANNER.png')} alt="Cucumber Banner" loading="lazy" />
+    </div>
+  </SwiperSlide>
+
+  <SwiperSlide>
+    <div className="main-hero-slide">
+      <img src={getImage('/images/QUICK DRY BANNER.png')} alt="Quick Dry Banner" loading="lazy" />
+    </div>
+  </SwiperSlide>
+
+  <SwiperSlide>
+    <div className="main-hero-slide">
+      <img src={getImage('/images/JOCKEY BANNER.png')} alt="Jockey Banner" loading="lazy" />
+    </div>
+  </SwiperSlide>
+
+  <SwiperSlide>
+    <div className="main-hero-slide">
+      <img src={getImage('/images/TWIN BIRDS BANNER.png')} alt="Twin Birds Banner" loading="lazy" />
+    </div>
+  </SwiperSlide>
+
+  <SwiperSlide>
+    <div className="main-hero-slide">
+      <img src={getImage('/images/INDIAN FLOWER BANNER.png')} alt="Indian Flower Banner" loading="lazy" />
+    </div>
+  </SwiperSlide>
+
+  <SwiperSlide>
+    <div className="main-hero-slide">
+      <img src={getImage('/images/DAZZEL BANNER.png')} alt="Dazzel Banner" loading="lazy" />
+    </div>
+  </SwiperSlide>
+
+  <SwiperSlide>
+    <div className="main-hero-slide">
+      <img src={getImage('/images/ASWATI BANNER.png')} alt="Aswati Banner" loading="lazy" />
+    </div>
+  </SwiperSlide>
+
+</Swiper>
+  </div>
+</section>
 
         <Divider label="Women" direction="ltr" />
+
+        
 <section className="fc-section">
           <div className="fc-inner">
             <div className="fc-head">
@@ -597,13 +629,13 @@ export default function Home1() {
             >
               <SwiperSlide>
                 <div className="home1-hero-slide-new-home-2">
-                  <img src={getImage('/images/banners/banner10.png')} alt="Women Banner" loading="eager" />
+                  <img src={getImage('/images/banners/attach-banner-1.png')} alt="Women Banner" loading="eager" />
                 </div>
               </SwiperSlide>
               <SwiperSlide>
                 <div className="home1-hero-slide-new-home-2">
                   <img
-                    src={getImage('/images/banners/banner11.png')}
+                    src={getImage('/images/banners/attach-banner-2.png')}
                     alt="Women Banner"
                     loading="lazy"
                     decoding="async"
@@ -613,7 +645,17 @@ export default function Home1() {
               <SwiperSlide>
                 <div className="home1-hero-slide-new-home-2">
                   <img
-                    src={getImage('/images/banners/banner12.png')}
+                    src={getImage('/images/banners/attach-banner-3.png')}
+                    alt="Women Banner"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+              </SwiperSlide>
+              <SwiperSlide>
+                <div className="home1-hero-slide-new-home-2">
+                  <img
+                    src={getImage('/images/banners/attach-banner-4.png')}
                     alt="Women Banner"
                     loading="lazy"
                     decoding="async"
@@ -623,6 +665,8 @@ export default function Home1() {
             </Swiper>
           </div>
         </section>
+
+
         <Divider label="Women" direction="ltr" />
 
         <section className="three-clock-section">
@@ -927,45 +971,6 @@ export default function Home1() {
                 </div>
               </Link>
             </div>
-          </div>
-        </section>
-
-        <section className="home1-hero-new-home-2">
-          <div className="home1-hero-frame-new-home-2">
-            <Swiper
-              className="home1-hero-swiper-new-home-2"
-              modules={[Autoplay]}
-              loop
-              slidesPerView={1}
-              autoplay={{ delay: 3500, disableOnInteraction: false }}
-              speed={900}
-            >
-              <SwiperSlide>
-                <div className="home1-hero-slide-new-home-2">
-                  <img src={getImage('/images/banners/banner10.png')} alt="Women Banner" loading="eager" />
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="home1-hero-slide-new-home-2">
-                  <img
-                    src={getImage('/images/banners/banner11.png')}
-                    alt="Women Banner"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="home1-hero-slide-new-home-2">
-                  <img
-                    src={getImage('/images/banners/banner12.png')}
-                    alt="Women Banner"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-              </SwiperSlide>
-            </Swiper>
           </div>
         </section>
 

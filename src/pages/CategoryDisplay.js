@@ -23,88 +23,66 @@ function cloudinaryUrlByEan(ean) {
 }
 
 const CATEGORY_GROUPS = [
-  // --- LEGGINGS & SUBCATEGORIES ---
-  {
-    parent: 'Leggings', 
-    title: 'Ankle Leggings', 
-    img: '/images/updated/ankle-leggings.webp', 
-    patterns: ['ANKLE LEGGING'] 
-  },
-  {
-    parent: 'Leggings', 
-    title: 'Capri', 
-    img: '/images/updated/capri-leggings.webp', 
-    patterns: ['CAPRI LEGGINGS', 'CAPRI'] 
-  },
-  { 
-    parent: 'Leggings', 
-    title: 'Chudidar Leggings', 
-    img: '/images/updated/chudidar-leggings.webp', 
-    patterns: ['CHUDIDAR LEGGING'] 
-  },
-  { 
-    parent: 'Leggings', 
-    title: 'Cropped Leggings', 
-    img: '/images/updated/cropped-leggings.webp', 
-    patterns: ['CROPPED LEGGING'] 
-  },
-  { 
-    parent: 'Leggings', 
-    title: 'Shimmer Leggings', 
-    img: '/images/updated/shimmer-leggings.webp', 
-    patterns: ['SHIMMER LEGGINGS'] 
-  },
-  { 
-    parent: 'Leggings', 
-    title: 'Basic Leggings', 
-    img: '/images/updated/category-leggin.webp', 
-    patterns: ['LEGGING'] 
-  },
-  // --- KURTI PANTS & SUBCATEGORIES ---
-  { parent: 'Kurti Pants', title: 'Sleek Kurti Pants', img: '/images/updated/category-kurti-pant.webp', patterns: ['SLEEK KURTI'] },
-  { parent: 'Kurti Pants', title: 'Wide Leg Kurti', img: '/images/updated/category-kurti-pant.webp', patterns: ['WIDE LEG KURTI'] },
-  { parent: 'Kurti Pants', title: 'Cotton Kurti', img: '/images/updated/category-kurti-pant.webp', patterns: ['COTTON KURTI'] },
-  { parent: 'Kurti Pants', title: 'Flexi Kurti Pant', img: '/images/updated/category-kurti-pant.webp', patterns: ['FLEXI KURTI PANT'] },
-  { parent: 'Kurti Pants', title: 'Basic Kurti Pants', img: '/images/updated/category-kurti-pant.webp', patterns: ['KURTI PANT'] },
+  // --- SAREE SHAPER ---
+  { parent: 'Saree Shaper', title: 'Saree Shaper', img: '/images/updated/Saree_Shaper.webp', patterns: ['SAREE SHAPER', 'SAREESHAPER'] },
+  { parent: 'Saree Shaper', title: 'Skirt Shaper', img: '/images/updated/Skirt_Shaper.webp', patterns: ['SKIRT SHAPER', 'SKIRTSHAPER', 'SAREE SKIRT', 'SAREESKIRT'] },
+  { parent: 'Saree Shaper', title: 'Straight Fit Saree Shaper', img: '/images/updated/StraightFit_Saree_Shaper.webp', patterns: ['STRAIGHT FIT', 'STRAIGHTFIT'] },
 
-  // --- DENIM & SUBCATEGORIES ---
-  { parent: 'Denim', title: 'Denim Jackets', img: '/images/updated/denim.webp', patterns: ['DENIM JACKET'] },
-  { parent: 'Denim', title: 'High Waist Denim', img: '/images/updated/denim.webp', patterns: ['HIGH WAIST DENIM'] },
-  { parent: 'Denim', title: 'Basic Denim', img: '/images/updated/denim.webp', patterns: ['DENIM'] },
+  // --- KURTI PANTS ---
+  { parent: 'Kurti Pants', title: 'Viscose Kurti Pant', img: '/images/updated/viscose_kurti_pant.webp', patterns: ['VISCOSE KURTI', 'VISCOSEKURTI'] },
+  { parent: 'Kurti Pants', title: 'Cotton Kurti Pant', img: '/images/updated/cotton_kurti_pant.webp', patterns: ['COTTON KURTI', 'COTTONKURTI'] },
+  { parent: 'Kurti Pants', title: 'Sleek Kurti Pant', img: '/images/updated/sleek_kurti_pant.webp', patterns: ['SLEEK KURTI', 'SLEEKKURTI'] },
+  { parent: 'Kurti Pants', title: 'Flexi Kurti Pant', img: '/images/updated/flexi_kurti_pant.webp', patterns: ['FLEXI KURTI', 'FLEXIKURTI', 'WIDE LEG KURTI', 'WIDELEGKURTI'] },
+  // Catch-all for generic Kurtis in DB
+  { parent: 'Kurti Pants', title: 'Viscose Kurti Pant', img: '/images/updated/kurti_pant.webp', patterns: ['KURTI PANT', 'KURTIPANT', 'KURTI'] }, 
 
-  // --- BRA & INNERWEAR SUBCATEGORIES ---
-  { parent: 'Bra', title: 'Elastic Sports Bra', img: '/images/updated/inner3.jpg', patterns: ['ELESTIC SPORTS BRA'] },
-  { parent: 'Bra', title: 'Sports Bra', img: '/images/updated/inner3.jpg', patterns: ['SPORTS BRA'] },
-  { parent: 'Bra', title: 'Sports Vest', img: '/images/updated/inner3.jpg', patterns: ['SPORTS VEST'] },
-  { parent: 'Bra', title: 'Basic Bra', img: '/images/updated/inner3.jpg', patterns: ['BRA'] },
+  // --- LEGGINGS (Ordered from most specific to generic) ---
+  { parent: 'Leggings', title: 'Viscose Churidar Legging', img: '/images/updated/Viscose_Churidar_Legging.webp', patterns: ['VISCOSE CHURIDAR', 'VISCOSECHURIDAR', 'VISCOSE CHUDIDAR', 'VISCOSECHUDIDAR'] },
 
-  // --- JEGGINGS & SUBCATEGORIES ---
-  { parent: 'Jeggings', title: 'Coloured Jeggings', img: '/images/updated/category-metallic-pant.webp', patterns: ['COLOURED JEGGING'] },
-  { parent: 'Jeggings', title: 'Basic Jeggings', img: '/images/updated/category-metallic-pant.webp', patterns: ['JEGGING'] },
+{ parent: 'Leggings', title: 'Bamboo Modal Churidar Legging', img: '/images/updated/BambooModal_Churidar_Legging.webp', patterns: ['BAMBOO MODAL CHURIDAR', 'BAMBOOMODALCHURIDAR', 'BAMBOO MODAL CHUDIDAR', 'BAMBOOMODALCHUDIDAR'] },
 
-  // --- SAREE SHAPER & SUBCATEGORIES ---
-  { parent: 'Saree Shaper', title: 'Saree Skirt', img: '/images/updated/category-saree-shaper.webp', patterns: ['SAREE SKIRT'] },
-  { parent: 'Saree Shaper', title: 'Basic Saree Shaper', img: '/images/updated/category-saree-shaper.webp', patterns: ['SAREE SHAPER'] },
+{ parent: 'Leggings', title: 'Cotton Capri Legging', img: '/images/updated/Cotton_Capri_Legging.webp', patterns: ['COTTON CAPRI', 'COTTONCAPRI', 'CAPRI'] },
 
-  // --- T-SHIRTS & SUBCATEGORIES ---
-  { parent: 'T-shirt', title: 'Active Wear T-shirt', img: '/images/updated/t-shirt1.webp', patterns: ['ACTIVE WEAR T-SHIRT'] },
-  { parent: 'T-shirt', title: 'Basic T-shirt', img: '/images/updated/t-shirt1.webp', patterns: ['T-SHIRT', 'T SHIRT'] },
+{ parent: 'Leggings', title: 'Viscose Ankle Legging', img: '/images/updated/Viscose_Ankle_Legging.webp', patterns: ['VISCOSE ANKLE', 'VISCOSEANKLE'] },
 
-  // --- SHIMMER & SUBCATEGORIES ---
-  { parent: 'Shimmer', title: 'Shimmer Shawl', img: '/images/updated/category-metallic-pant.webp', patterns: ['SHIMMER SHAWL'] },
-  { parent: 'Shimmer', title: 'Basic Shimmer', img: '/images/updated/category-metallic-pant.webp', patterns: ['SHIMMER'] },
+{ parent: 'Leggings', title: 'Viscose 7/8 High Ankle/Cropped Leggings', img: '/images/updated/Viscose7-8_HighAnkle(or)Cropped_Legging.webp', patterns: ['VISCOSE 7/8', 'VISCOSE7/8', 'CROPPED', 'HIGH ANKLE', 'HIGHANKLE'] },
 
-  // --- SINGLE CATEGORIES (No Drill-Down Needed) ---
-  { parent: null, title: 'Plazo', img: '/images/updated/category-plazzo-pant.webp', patterns: ['PLAZO', 'PALAZZO'] },
-  { parent: null, title: 'Cycling Shorts', img: '/images/updated/inner5.jpg', patterns: ['CYCLING SHORTS'] },
-  { parent: null, title: 'Metallic Pants', img: '/images/updated/category-metallic-pant.webp', patterns: ['METALIC PANT', 'METALLIC PANT'] }
+{ parent: 'Leggings', title: 'Bamboo Modal Ankle Legging', img: '/images/updated/BambooModal_Ankle_Legging.webp', patterns: ['BAMBOO MODAL ANKLE', 'BAMBOOMODALANKLE'] },
+
+{ parent: 'Leggings', title: 'Cotton Churidar Legging', img: '/images/updated/Cotton_Churidar_Legging.webp', patterns: ['COTTON CHURIDAR', 'COTTONCHURIDAR', 'COTTON CHUDIDAR', 'COTTONCHUDIDAR', 'CHURIDAR', 'CHUDIDAR'] },
+
+{ parent: 'Leggings', title: 'Shimmer Legging', img: '/images/updated/Shimmer_Legging.webp', patterns: ['SHIMMER LEGGING', 'SHIMMERLEGGING', 'SHIMMER'] },
+  // Catch-all for generic Leggings in DB
+  { parent: 'Leggings', title: 'Cotton Ankle Legging', img: '/images/updated/Cotton_Ankle_Legging.webp', patterns: ['COTTON ANKLE', 'COTTONANKLE', 'ANKLE', 'LEGGING'] },
+
+  // --- PALAZZO PANTS ---
+ { parent: 'Palazzo Pants', title: 'Solid Knitted Palazzo Pants', img: '/images/updated/Solid_knitted_Palazzo_Pants.webp', patterns: ['SOLID KNITTED', 'SOLIDKNITTED'] },
+
+{ parent: 'Palazzo Pants', title: 'Printed Knitted Palazzo Pants', img: '/images/updated/Printed_Knitted_Palazzo_Pants.webp', patterns: ['PRINTED KNITTED', 'PRINTEDKNITTED'] },
+
+{ parent: 'Palazzo Pants', title: 'Knotted Striped Palazzo', img: '/images/updated/Knotted_Striped_Palazzo.webp', patterns: ['KNOTTED STRIPED', 'KNOTTEDSTRIPED', 'KNOTTED'] },
+
+{ parent: 'Palazzo Pants', title: 'Striped Palazzo', img: '/images/updated/Striped_Palazzo.webp', patterns: ['STRIPED'] },
+
+// Catch-all for generic Palazzos
+{ parent: 'Palazzo Pants', title: 'Solid Wide Leg Palazzo', img: '/images/updated/Solid_Wide_Leg_Palazzo.webp', patterns: ['SOLID WIDE LEG', 'SOLIDWIDELEG', 'PALAZZO', 'PLAZO'] },
+
+  // --- STANDALONE CATEGORIES (No Drill-Down, Parent is null) ---
+  { parent: null, title: 'Metallic Pants', img: '/images/updated/metallic_straight_pant.webp', patterns: ['METALLIC', 'METALIC'] },
+  { parent: null, title: 'T-shirts', img: '/images/updated/active_t-shirt.webp', patterns: ['T-SHIRT', 'T SHIRT', 'TSHIRT'] }
 ]
 
 // 2. UPDATED: Returns parent and child data
 const deriveCategoryData = (p) => {
   const name = String(p?.product_name || '').trim()
-  if (!name) return { parent: null, title: '' }
+  if (!name) return null
   const up = name.replace(/\s+/g, ' ').trim().toUpperCase()
+
+  // KILL SWITCH: Instantly hide these unwanted database items
+  const IGNORE_WORDS = ['SPORTS VEST', 'SPORTS BRA', 'SHAWL', 'DENIM', 'JEAN', 'JEGGING', 'SHRUG', 'HOODIE', 'SWEATSHIRT', 'DRESS', 'TOP']
+  if (IGNORE_WORDS.some(w => up.includes(w))) {
+    return null; // This tells the UI to completely ignore the product
+  }
 
   for (const g of CATEGORY_GROUPS) {
     for (const pat of g.patterns) {
@@ -112,7 +90,9 @@ const deriveCategoryData = (p) => {
       if (t && up.includes(t)) return { parent: g.parent, title: g.title, img: g.img }
     }
   }
-  return { parent: null, title: niceTitle(name), img: '' }
+  
+  // If it STILL doesn't match our 6 strict categories, hide it!
+  return null 
 }
 
 const pickImageForCategory = (title, firstProduct) => {
@@ -170,14 +150,19 @@ export default function CategoryDisplay() {
   }, [allProducts, selectedBrand])
 
   // 4. UPDATED: Groups categories based on if we are drilled down or not
-  const categories = useMemo(() => {
+const categories = useMemo(() => {
     const map = new Map()
     for (const raw of filteredProducts || []) {
       const p = raw || {}
       const catData = deriveCategoryData(p)
+      
+      // NEW LINE: If deriveCategoryData returned null, skip this product entirely!
+      if (!catData) continue;
+
       const key = normalizeKey(catData.title)
       if (!key) continue
-
+      
+      // ... (Keep the rest of this function exactly as it was)
       // If no parent is selected, show parent groups. If parent IS selected, show its children.
       const displayTitle = !selectedParent && catData.parent ? catData.parent : catData.title
       const displayKey = normalizeKey(displayTitle)
@@ -202,17 +187,45 @@ export default function CategoryDisplay() {
       .sort((a, b) => b.count - a.count || a.title.localeCompare(b.title))
   }, [filteredProducts, selectedParent])
 
-  // 5. UPDATED: Click handler logic
+
+// 5. UPDATED: Click handler logic for direct-to-product-page routing
   const openCategory = (catObj) => {
     if (catObj.isParentNode) {
-      // Drill down into subcategories!
       setSelectedParent(catObj.title)
     } else {
-      // Navigate to products!
-      const qs = new URLSearchParams()
-      if (selectedBrand) qs.set('brand', selectedBrand)
-      qs.set('category', catObj.title)
-      navigate(`/women?${qs.toString()}`)
+      // 1. Find every single product in this subcategory
+      const matchingVariants = filteredProducts.filter((p) => {
+        const pCat = deriveCategoryData(p)
+        
+        // THE BUG FIX: If the product was hidden (null), skip it safely!
+        if (!pCat) return false; 
+        
+        return normalizeKey(pCat.title) === normalizeKey(catObj.title)
+      })
+
+      if (matchingVariants.length > 0) {
+        const baseProduct = matchingVariants[0]
+
+        const uniqueImages = new Set()
+        matchingVariants.forEach((v) => {
+          const img = v.image_url || pickImageForCategory(catObj.title, v)
+          if (img && img !== DEFAULT_IMG) uniqueImages.add(img)
+        })
+
+        const payload = {
+          ...baseProduct,
+          variants: matchingVariants, 
+          images: Array.from(uniqueImages).length > 0 ? Array.from(uniqueImages) : [catObj.image || DEFAULT_IMG]
+        }
+
+        sessionStorage.setItem('selectedProduct', JSON.stringify(payload))
+        navigate('/checkout') 
+      } else {
+        const qs = new URLSearchParams()
+        if (selectedBrand) qs.set('brand', selectedBrand)
+        qs.set('category', catObj.title)
+        navigate(`/women?${qs.toString()}`)
+      }
     }
   }
 
@@ -232,38 +245,11 @@ export default function CategoryDisplay() {
   return (
     <div className="category-page">
       <Navbar />
+
+
       <div className="category-top-spacer" />
 
-      <div className="category-hero">
-        <div className="category-hero-inner">
-          <div className="category-hero-glow" />
-          <div className="category-hero-row">
-            <div className="category-hero-left">
-              <h2 className="category-title">{headerTitle}</h2>
-              <p className="category-sub">{subtitle}</p>
-            </div>
-
-            <div className="category-hero-center">
-              <div className="category-center-badge">
-                <span className="category-center-dot" />
-                <span className="category-center-text">{selectedParent || selectedBrand || 'Brand Categories'}</span>
-              </div>
-            </div>
-
-            <div className="category-hero-right">
-              <button type="button" className="category-viewall" onClick={goAllProducts}>
-                View All Products
-              </button>
-              {selectedBrand ? (
-                <button type="button" className="category-ghost" onClick={goAllCategories}>
-                  Clear Brand
-                </button>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      </div>
-
+   
       <div className="category-wrap">
         {loading ? (
           <div className="category-state">Loading categories…</div>
@@ -288,23 +274,7 @@ export default function CategoryDisplay() {
           </div>
         ) : (
           <>
-            <div className="category-toolbar">
-              <div className="category-toolbar-left">
-                {/* 6. NEW: Back Button when drilled down */}
-                {selectedParent && (
-                  <button type="button" className="category-ghost" onClick={() => setSelectedParent(null)}>
-                    ← Back to Main Categories
-                  </button>
-                )}
-                <span className="category-toolbar-count">{categories.length} categories</span>
-                <span className="category-toolbar-hint">Tap a card to {selectedParent ? 'shop' : 'explore'}</span>
-              </div>
-              <div className="category-toolbar-right">
-                <button type="button" className="category-mini" onClick={goAllProducts}>
-                  Go to Products
-                </button>
-              </div>
-            </div>
+
 
             <div className="category-grid">
               {categories.map((c) => (

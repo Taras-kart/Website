@@ -15,7 +15,7 @@ export default function TaraLoader() {
 <div className="tara-overlay">
   <img
     className="tara-video"
-    src="/attach-loader.gif"
+    src="/loader-bg.gif"
     alt="Loading animation"
   />
 </div>

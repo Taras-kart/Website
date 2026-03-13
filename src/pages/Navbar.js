@@ -319,17 +319,21 @@ const NavbarFinal = () => {
 
 <div className="desktop-top-row-final desktop-top-row-updated">
           
-{/* Left side: Looping MP4 Video */}
 <div className="desktop-brand-left">
-  <div style={{ display: "flex", alignItems: "center", height: "50px" }}>
-    <img
-      src="/attach-loader.gif"
-      alt="Loading animation"
-      style={{ height: "50px", minWidth: "80px", width: "auto", objectFit: "contain" }}
-    />
-  </div>
-</div>
-          
+            <div style={{ display: "flex", alignItems: "center", height: "50px", overflow: "hidden" }}>
+              <img
+                src="/attach-loader.gif"
+                alt="Loading animation"
+                style={{ 
+                  height: "50px", 
+                  minWidth: "80px", 
+                  width: "auto", 
+                  objectFit: "contain",
+                  transform: "scale(1.8)" /* <-- This zooms in by 180% */
+                }}
+              />
+            </div>
+          </div>
           {/* Center side: Static Image Logo */}
           <div className="desktop-title-center">
             <div className="logo-final" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
