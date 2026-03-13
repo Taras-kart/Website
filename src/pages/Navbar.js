@@ -315,13 +315,26 @@ const NavbarFinal = () => {
     <nav className={`navbar-final ${showNav ? '' : 'nav-hidden'}`}>
       <div className="desktop-only-final">
 
+
+
 <div className="desktop-top-row-final desktop-top-row-updated">
           
-          {/* Left side is now empty to balance the flex layout */}
+{/* Left side: Looping MP4 Video */}
           <div className="desktop-brand-left">
+            <div style={{ display: 'flex', alignItems: 'center', height: '50px' }}>
+              <video 
+                autoPlay 
+                loop 
+                muted 
+                playsInline
+                style={{ height: '50px', minWidth: '80px', width: 'auto', objectFit: 'contain' }}
+              >
+                <source src="/attach-loader.mp4" type="video/mp4" />
+              </video>
+            </div>
           </div>
-
-          {/* Logo moved to the center, text removed */}
+          
+          {/* Center side: Static Image Logo */}
           <div className="desktop-title-center">
             <div className="logo-final" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <img 
