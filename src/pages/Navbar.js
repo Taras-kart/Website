@@ -320,19 +320,15 @@ const NavbarFinal = () => {
 <div className="desktop-top-row-final desktop-top-row-updated">
           
 {/* Left side: Looping MP4 Video */}
-          <div className="desktop-brand-left">
-            <div style={{ display: 'flex', alignItems: 'center', height: '50px' }}>
-              <video 
-                autoPlay 
-                loop 
-                muted 
-                playsInline
-                style={{ height: '50px', minWidth: '80px', width: 'auto', objectFit: 'contain' }}
-              >
-                <source src="/attach-loader.mp4" type="video/mp4" />
-              </video>
-            </div>
-          </div>
+<div className="desktop-brand-left">
+  <div style={{ display: "flex", alignItems: "center", height: "50px" }}>
+    <img
+      src="/attach-loader.gif"
+      alt="Loading animation"
+      style={{ height: "50px", minWidth: "80px", width: "auto", objectFit: "contain" }}
+    />
+  </div>
+</div>
           
           {/* Center side: Static Image Logo */}
           <div className="desktop-title-center">

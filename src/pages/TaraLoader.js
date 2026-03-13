@@ -12,15 +12,12 @@ export default function TaraLoader() {
   if (!visible) return null;
 
   return (
-    <div className="tara-overlay">
-      <video
-        className="tara-video"
-        src="/attach-loader.mp4"
-        autoPlay
-        muted
-        loop
-        playsInline
-      />
-    </div>
+<div className="tara-overlay">
+  <img
+    className="tara-video"
+    src="/attach-loader.gif"
+    alt="Loading animation"
+  />
+</div>
   );
 }
