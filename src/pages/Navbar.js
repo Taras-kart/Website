@@ -316,16 +316,17 @@ const NavbarFinal = () => {
       <div className="desktop-only-final">
         <div className="desktop-top-row-final desktop-top-row-updated">
           <div className="desktop-brand-left">
-            <div className="logo-final">
-              <video autoPlay loop muted playsInline>
-                <source src="/images/logo.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            </div>
+<div className="logo-final" style={{ display: 'flex', alignItems: 'center' }}>
+  <img 
+    src="/logo1.png" 
+    alt="Attach Logo" 
+    style={{ maxHeight: '50px', width: 'auto', objectFit: 'contain' }} 
+  />
+</div>
           </div>
 
           <div className="desktop-title-center">
-            <div className="taras-title">Attach.co.in</div>
+            <div className="taras-title">Attach</div>
           </div>
 
           <div className="desktop-icons-right">
@@ -415,12 +416,13 @@ const NavbarFinal = () => {
             </div>
           </div>
 
-          <div className="logo-final">
-            <video autoPlay loop muted playsInline>
-              <source src="/images/logo.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-          </div>
+<div className="logo-final" style={{ display: 'flex', alignItems: 'center' }}>
+  <img 
+    src="/logo1.png" 
+    alt="Attach Logo" 
+    style={{ maxHeight: '50px', width: 'auto', objectFit: 'contain' }} 
+  />
+</div>
 
           <div className="mobile-top-icons">
             <Link to="/profile" className={`icon-btn ${isActive('/profile') ? 'icon-active-btn' : ''}`}>

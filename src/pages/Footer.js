@@ -168,18 +168,18 @@ const Footer = () => {
     }
   ];
 
-  return (
+return (
     <footer className="footer">
       <div className="footer-desktop">
         <div className="footer-column">
-          <h2 className="footer-title">Tars Kart</h2>
           <div className="logo-final1">
-            <video autoPlay loop muted playsInline>
-              <source src="/images/logo.mp4" type="video/mp4" />
-            </video>
+            <img 
+              src="/logo1.png" 
+              alt="Attach Logo" 
+              style={{ maxWidth: '160px', height: 'auto', objectFit: 'contain', marginTop: '10px' }} 
+            />
           </div>
         </div>
-
         <div className="footer-column">
           <h3>Categories</h3>
           <DesktopList section="Categories" items={['Mens', 'Womens', 'Kids']} />

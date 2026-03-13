@@ -193,7 +193,7 @@ export default function HomePage() {
                                 <source src="/images/logo-video.mp4" type="video/mp4" />
                             </video>
                             <div className="home-section1-full-text">
-                                <h1>Attach.co.in</h1>
+                                <h1>Attach</h1>
                             </div>
                         </div>
                         <div className="home-section1-right">
