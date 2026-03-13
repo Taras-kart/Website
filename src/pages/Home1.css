@@ -2734,3 +2734,36 @@
   border-radius: 4px;
   background: #000000; /* Solid black for the active pill */
 }
+
+
+/* =========================================
+   MAIN HERO SLIDER (Uniform Image Fitting)
+========================================= */
+.main-hero-slide {
+  width: 100%;
+  aspect-ratio: 21 / 9; /* Creates a wide, cinematic rectangle for desktop */
+  position: relative;
+  overflow: hidden;
+  background: #f7f2ee; /* Soft background color while the image loads */
+}
+
+.main-hero-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* This is the magic property! It fills the box perfectly without stretching */
+  object-position: center; /* Keeps the center of the image focused if cropping occurs */
+  display: block;
+}
+
+/* Make it responsive for smaller screens */
+@media (max-width: 1024px) {
+  .main-hero-slide {
+    aspect-ratio: 16 / 9; /* Slightly taller for tablets */
+  }
+}
+
+@media (max-width: 600px) {
+  .main-hero-slide {
+    aspect-ratio: 4 / 5; /* Taller portrait mode for mobile phones */
+  }
+}

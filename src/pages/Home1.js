@@ -104,22 +104,22 @@ export default function Home1() {
               grabCursor={true} // Changes cursor to a "grab" hand on desktop, making it obvious you can swipe
             >
               <SwiperSlide>
-                <div className="home1-hero-slide-new-home-2">
+                <div className="main-hero-slide">
                   <img src={getImage('/images/home-screen-main1.png')} alt="Home Banner 1" loading="eager" />
                 </div>
               </SwiperSlide>
               <SwiperSlide>
-                <div className="home1-hero-slide-new-home-2">
+                <div className="main-hero-slide">
                   <img src={getImage('/images/home-screen-main2.png')} alt="Home Banner 2" loading="lazy" decoding="async" />
                 </div>
               </SwiperSlide>
               <SwiperSlide>
-                <div className="home1-hero-slide-new-home-2">
+                <div className="main-hero-slide">
                   <img src={getImage('/images/home-screen-main3.png')} alt="Home Banner 3" loading="lazy" decoding="async" />
                 </div>
               </SwiperSlide>
               <SwiperSlide>
-                <div className="home1-hero-slide-new-home-2">
+                <div className="main-hero-slide">
                   <img src={getImage('/images/home-screen-main4.png')} alt="Home Banner 4" loading="lazy" decoding="async" />
                 </div>
               </SwiperSlide>

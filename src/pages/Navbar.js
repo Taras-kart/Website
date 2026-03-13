@@ -314,21 +314,25 @@ const NavbarFinal = () => {
   return (
     <nav className={`navbar-final ${showNav ? '' : 'nav-hidden'}`}>
       <div className="desktop-only-final">
-        <div className="desktop-top-row-final desktop-top-row-updated">
+
+<div className="desktop-top-row-final desktop-top-row-updated">
+          
+          {/* Left side is now empty to balance the flex layout */}
           <div className="desktop-brand-left">
-<div className="logo-final" style={{ display: 'flex', alignItems: 'center' }}>
-  <img 
-    src="/logo1.png" 
-    alt="Attach Logo" 
-    style={{ maxHeight: '50px', width: 'auto', objectFit: 'contain' }} 
-  />
-</div>
           </div>
 
+          {/* Logo moved to the center, text removed */}
           <div className="desktop-title-center">
-            <div className="taras-title">Attach</div>
+            <div className="logo-final" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <img 
+                src="/logo1.png" 
+                alt="Attach Logo" 
+                style={{ maxHeight: '65px', width: 'auto', objectFit: 'contain' }} 
+              />
+            </div>
           </div>
 
+          {/* Right side icons remain exactly the same */}
           <div className="desktop-icons-right">
             <div className="icon-buttons-final">
               <Link to="/profile" className={`icon-btn ${isActive('/profile') ? 'icon-active-btn' : ''}`}>
@@ -342,6 +346,7 @@ const NavbarFinal = () => {
                 </div>
                 <span className={`icon-label ${isActive('/profile') ? 'label-active' : ''}`}>Profile</span>
               </Link>
+              {/* ... Rest of your icons (Wishlist, Cart) stay here ... */}
 
               <Link to="/wishlist" className={`icon-btn ${isActive('/wishlist') ? 'icon-active-btn' : ''}`}>
                 <div className="icon-circle">
