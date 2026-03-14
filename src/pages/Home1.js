@@ -198,14 +198,13 @@ export default function Home1() {
                 </div>
               </Link>
 
-              <Link to="/category-display" className="fc-card fc-viewall">
-                <div className="fc-media fc-viewall-media">
-                  <div className="fc-viewall-content">
-                    <span className="fc-viewall-title">View All</span>
-                    <span className="fc-viewall-sub">Women's Collection</span>
-                  </div>
+              <Link to="/category-display?brand=Dazzle" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/brands/body-care.jpg')} alt="Body Care" loading="lazy" />
                 </div>
               </Link>
+
+
             </div>
           </div>
         </section>
