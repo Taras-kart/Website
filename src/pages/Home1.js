@@ -97,7 +97,7 @@ export default function Home1() {
               </SwiperSlide>
               <SwiperSlide>
                 <div className="main-hero-slide">
-                  <img src={getImage('/images/CUCUMBER BANNER.png')} alt="Cucumber Banner" loading="lazy" />
+                  <img src={getImage('/images/CUCUMBER-BANNER.png')} alt="Cucumber Banner" loading="lazy" />
                 </div>
               </SwiperSlide>
               <SwiperSlide>
@@ -107,7 +107,7 @@ export default function Home1() {
               </SwiperSlide>
               <SwiperSlide>
                 <div className="main-hero-slide">
-                  <img src={getImage('/images/JOCKEY BANNER.png')} alt="Jockey Banner" loading="lazy" />
+                  <img src={getImage('/images/JOCKEY-BANNER.png')} alt="Jockey Banner" loading="lazy" />
                 </div>
               </SwiperSlide>
               <SwiperSlide>
@@ -117,7 +117,7 @@ export default function Home1() {
               </SwiperSlide>
               <SwiperSlide>
                 <div className="main-hero-slide">
-                  <img src={getImage('/images/INDIAN FLOWER BANNER.png')} alt="Indian Flower Banner" loading="lazy" />
+                  <img src={getImage('/images/INDIAN-FLOWER-BANNER.png')} alt="Indian Flower Banner" loading="lazy" />
                 </div>
               </SwiperSlide>
               <SwiperSlide>
