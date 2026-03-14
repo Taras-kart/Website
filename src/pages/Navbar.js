@@ -13,6 +13,7 @@ const API_BASE_RAW =
   DEFAULT_API_BASE
 const API_BASE = API_BASE_RAW.replace(/\/+$/, '')
 
+/* ─── Text helpers (logic unchanged) ────────────────────────── */
 const normalizeText = (str) =>
   String(str || '')
     .toLowerCase()
@@ -23,10 +24,7 @@ const normalizeText = (str) =>
     .trim()
 
 const normalizeSuggestionToken = (str) =>
-  String(str || '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, '')
-    .trim()
+  String(str || '').toLowerCase().replace(/[^a-z0-9]/g, '').trim()
 
 const levenshteinDistance = (a, b) => {
   const s = normalizeSuggestionToken(a)
@@ -36,50 +34,30 @@ const levenshteinDistance = (a, b) => {
   const dp = Array.from({ length: s.length + 1 }, () => new Array(t.length + 1).fill(0))
   for (let i = 0; i <= s.length; i += 1) dp[i][0] = i
   for (let j = 0; j <= t.length; j += 1) dp[0][j] = j
-  for (let i = 1; i <= s.length; i += 1) {
+  for (let i = 1; i <= s.length; i += 1)
     for (let j = 1; j <= t.length; j += 1) {
       const cost = s[i - 1] === t[j - 1] ? 0 : 1
-      const del = dp[i - 1][j] + 1
-      const ins = dp[i][j - 1] + 1
-      const sub = dp[i - 1][j - 1] + cost
-      dp[i][j] = Math.min(del, ins, sub)
+      dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost)
     }
-  }
   return dp[s.length][t.length]
 }
 
 const buildSuggestionTokens = (products) => {
   const map = new Map()
   products.forEach((p) => {
-    const name = normalizeText(p.product_name)
-    if (name) {
-      name.split(' ').forEach((w) => {
-        const token = w.trim()
-        if (token.length >= 3 && !map.has(token)) map.set(token, true)
-      })
-    }
-    const brand = normalizeText(p.brand)
-    if (brand) {
-      brand.split(' ').forEach((w) => {
-        const token = w.trim()
-        if (token.length >= 3 && !map.has(token)) map.set(token, true)
-      })
-    }
-    const color = normalizeText(p.color)
-    if (color) {
-      color.split(' ').forEach((w) => {
-        const token = w.trim()
-        if (token.length >= 3 && !map.has(token)) map.set(token, true)
-      })
-    }
+    ;[p.product_name, p.brand, p.color].forEach((field) => {
+      const norm = normalizeText(field)
+      if (norm)
+        norm.split(' ').forEach((w) => {
+          const token = w.trim()
+          if (token.length >= 3 && !map.has(token)) map.set(token, true)
+        })
+    })
   })
   return Array.from(map.keys())
 }
 
-const toTitleCase = (str) => {
-  if (!str) return ''
-  return str.charAt(0).toUpperCase() + str.slice(1)
-}
+const toTitleCase = (str) => (str ? str.charAt(0).toUpperCase() + str.slice(1) : '')
 
 const getSuggestions = (input, tokens) => {
   const q = normalizeSuggestionToken(input)
@@ -98,7 +76,7 @@ const getSuggestions = (input, tokens) => {
     }
     scored.push({ token, score })
   })
-  scored.sort((a, b) => (a.score !== b.score ? a.score - b.score : a.token.length - b.token.length))
+  scored.sort((a, b) => a.score - b.score || a.token.length - b.token.length)
   const unique = []
   const used = new Set()
   for (let i = 0; i < scored.length; i += 1) {
@@ -112,6 +90,7 @@ const getSuggestions = (input, tokens) => {
   return unique
 }
 
+/* ─── Search bar ─────────────────────────────────────────────── */
 const SearchBar = React.memo(function SearchBar({
   wrapperClassName = '',
   inputRef,
@@ -124,34 +103,36 @@ const SearchBar = React.memo(function SearchBar({
   onPickSuggestion
 }) {
   return (
-    <div className={`search-bar-final Btn ${wrapperClassName}`}>
-      <FaSearch className="search-icon-final" onMouseDown={(e) => e.preventDefault()} onClick={onSearch} />
+    <div className={`search-bar-final ${wrapperClassName}`}>
+      <FaSearch
+        className="search-icon-final"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={onSearch}
+      />
       <input
         ref={inputRef}
         type="text"
-        placeholder="search a product"
+        placeholder="Search products…"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === 'Enter') onSearch()
           if (e.key === 'Escape') setShowSuggestions(false)
         }}
-        onFocus={() => {
-          if (suggestions.length > 0) setShowSuggestions(true)
-        }}
+        onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true) }}
         autoComplete="off"
         spellCheck={false}
       />
-      <div className={`nav-suggestions ${showSuggestions && suggestions.length > 0 ? 'open' : ''}`} role="listbox">
+      <div
+        className={`nav-suggestions${showSuggestions && suggestions.length > 0 ? ' open' : ''}`}
+        role="listbox"
+      >
         {suggestions.map((s) => (
           <button
             key={s}
             type="button"
             className="nav-suggestion-item"
-            onMouseDown={(e) => {
-              e.preventDefault()
-              onPickSuggestion(s)
-            }}
+            onMouseDown={(e) => { e.preventDefault(); onPickSuggestion(s) }}
           >
             <span className="nav-suggestion-dot" />
             <span className="nav-suggestion-text">{s}</span>
@@ -162,47 +143,44 @@ const SearchBar = React.memo(function SearchBar({
   )
 })
 
+/* ─── Main component ─────────────────────────────────────────── */
 const NavbarFinal = () => {
   const { wishlistItems } = useWishlist()
-  const { cartItems } = useCart()
+  const { cartItems }     = useCart()
+
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [showNav, setShowNav] = useState(true)
-  const [suggestions, setSuggestions] = useState([])
+  const [searchTerm,      setSearchTerm]      = useState('')
+  const [showNav,         setShowNav]         = useState(true)
+  const [suggestions,     setSuggestions]     = useState([])
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const location = useLocation()
-  const navigate = useNavigate()
 
-  const mobileNavRef = useRef(null)
-  const lastY = useRef(0)
-  const ticking = useRef(false)
+  const location           = useLocation()
+  const navigate           = useNavigate()
+  const mobileNavRef       = useRef(null)
+  const lastY              = useRef(0)
+  const ticking            = useRef(false)
   const suggestionAbortRef = useRef(null)
+  const desktopInputRef    = useRef(null)
+  const mobileInputRef     = useRef(null)
 
-  const desktopInputRef = useRef(null)
-  const mobileInputRef = useRef(null)
-
-  const navLinks = useMemo(
-    () => [
-      { name: 'Home', path: '/' },
-      { name: 'Women', path: '/women' },
-      { name: 'Men', path: '/men' },
-      { name: 'Kids', path: '/kids' },
-      { name: 'Contact Us', path: '/customer-care' }
-    ],
-    []
-  )
+  const navLinks = useMemo(() => [
+    { name: 'Home',       path: '/' },
+    { name: 'Women',      path: '/women' },
+    { name: 'Men',        path: '/men' },
+    { name: 'Kids',       path: '/kids' },
+    { name: 'Contact Us', path: '/customer-care' }
+  ], [])
 
   const isActive = (p) => location.pathname === p
 
+  /* drawer + body lock */
   useEffect(() => {
-    const handleOutsideClick = (event) => {
+    const handleOutsideClick = (e) => {
       if (
         mobileNavRef.current &&
-        !mobileNavRef.current.contains(event.target) &&
-        !event.target.closest('.nav-toggle-final')
-      ) {
-        setIsMobileNavOpen(false)
-      }
+        !mobileNavRef.current.contains(e.target) &&
+        !e.target.closest('.nav-toggle-final')
+      ) setIsMobileNavOpen(false)
     }
     if (isMobileNavOpen) {
       document.addEventListener('click', handleOutsideClick)
@@ -216,20 +194,18 @@ const NavbarFinal = () => {
     }
   }, [isMobileNavOpen])
 
+  /* scroll hide */
   useEffect(() => {
-    lastY.current = window.scrollY || window.pageYOffset || 0
+    lastY.current = window.scrollY || 0
     const threshold = 6
     const onScroll = () => {
       if (ticking.current) return
       ticking.current = true
       requestAnimationFrame(() => {
-        const y = window.scrollY || window.pageYOffset || 0
+        const y = window.scrollY || 0
         const delta = y - lastY.current
         if (y <= 0) setShowNav(true)
-        else if (Math.abs(delta) > threshold) {
-          setShowNav(delta < 0)
-          lastY.current = y
-        }
+        else if (Math.abs(delta) > threshold) { setShowNav(delta < 0); lastY.current = y }
         ticking.current = false
       })
     }
@@ -237,57 +213,47 @@ const NavbarFinal = () => {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  /* clear suggestions on route change */
   useEffect(() => {
     setShowSuggestions(false)
     setSuggestions([])
   }, [location.pathname])
 
+  /* suggestion fetch */
   useEffect(() => {
     const term = searchTerm.trim()
     if (term.length < 2) {
       setSuggestions([])
       setShowSuggestions(false)
-      if (suggestionAbortRef.current) {
-        suggestionAbortRef.current.abort()
-        suggestionAbortRef.current = null
-      }
+      if (suggestionAbortRef.current) { suggestionAbortRef.current.abort(); suggestionAbortRef.current = null }
       return
     }
-
     if (suggestionAbortRef.current) suggestionAbortRef.current.abort()
     const controller = new AbortController()
     suggestionAbortRef.current = controller
-
     const run = async () => {
       try {
-        const url = `${API_BASE}/api/products/search?q=${encodeURIComponent(term)}`
-        const res = await fetch(url, { signal: controller.signal })
+        const res  = await fetch(`${API_BASE}/api/products/search?q=${encodeURIComponent(term)}`, { signal: controller.signal })
         const data = await res.json()
-        const arr = Array.isArray(data) ? data : []
-        const tokens = buildSuggestionTokens(arr)
-        const s = getSuggestions(term, tokens)
+        const s    = getSuggestions(term, buildSuggestionTokens(Array.isArray(data) ? data : []))
         setSuggestions(s)
         setShowSuggestions(true)
       } catch {
-        if (!controller.signal.aborted) {
-          setSuggestions([])
-          setShowSuggestions(false)
-        }
+        if (!controller.signal.aborted) { setSuggestions([]); setShowSuggestions(false) }
       }
     }
-
     run()
     return () => controller.abort()
   }, [searchTerm])
 
+  /* close suggestions on outside click */
   useEffect(() => {
-    const onDocPointerDownCapture = (e) => {
-      const isInsideSearch = !!e.target.closest('.search-bar-final')
-      const isInsideSuggestions = !!e.target.closest('.nav-suggestions')
-      if (!isInsideSearch && !isInsideSuggestions) setShowSuggestions(false)
+    const onDown = (e) => {
+      if (!e.target.closest('.search-bar-final') && !e.target.closest('.nav-suggestions'))
+        setShowSuggestions(false)
     }
-    document.addEventListener('pointerdown', onDocPointerDownCapture, true)
-    return () => document.removeEventListener('pointerdown', onDocPointerDownCapture, true)
+    document.addEventListener('pointerdown', onDown, true)
+    return () => document.removeEventListener('pointerdown', onDown, true)
   }, [])
 
   const handleNavClick = () => {
@@ -311,87 +277,68 @@ const NavbarFinal = () => {
     setShowSuggestions(false)
   }
 
+  /* ══════════════════════════════════════════════════════════════
+     RENDER
+     ══════════════════════════════════════════════════════════════ */
   return (
-    <nav className={`navbar-final ${showNav ? '' : 'nav-hidden'}`}>
+    <nav className={`navbar-final${showNav ? '' : ' nav-hidden'}`}>
+
+      {/* ════════ DESKTOP ════════ */}
       <div className="desktop-only-final">
 
+        {/* Row 1 — GIF left | Logo center | Icons right */}
+        <div className="nb-row nb-row--top">
 
-
-<div className="desktop-top-row-final desktop-top-row-updated">
-          
-<div className="desktop-brand-left">
-            <div style={{ display: "flex", alignItems: "center", height: "50px", overflow: "hidden" }}>
-              <img
-                src="/attach-loader.gif"
-                alt="Loading animation"
-                style={{ 
-                  height: "50px", 
-                  minWidth: "80px", 
-                  width: "auto", 
-                  objectFit: "contain",
-                  transform: "scale(1.8)" /* <-- This zooms in by 180% */
-                }}
-              />
-            </div>
-          </div>
-          {/* Center side: Static Image Logo */}
-          <div className="desktop-title-center">
-            <div className="logo-final" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <img 
-                src="/logo1.png" 
-                alt="Attach Logo" 
-                style={{ maxHeight: '65px', width: 'auto', objectFit: 'contain' }} 
-              />
-            </div>
+          <div className="nb-gif-wrap">
+            <img src="/loader-bg.gif" alt="" aria-hidden="true" className="nb-gif" />
           </div>
 
-          {/* Right side icons remain exactly the same */}
-          <div className="desktop-icons-right">
+          <div className="nb-logo-center">
+            <Link to="/" onClick={handleNavClick}>
+              <img src="/logo1.png" alt="Taras Kart" className="nb-logo-img" />
+            </Link>
+          </div>
+
+          <div className="nb-icons-right">
             <div className="icon-buttons-final">
-              <Link to="/profile" className={`icon-btn ${isActive('/profile') ? 'icon-active-btn' : ''}`}>
-                <div className="icon-circle">
-                  {isActive('/profile') ? (
-                    <FaUser className="icon icon-filled" />
-                  ) : (
-                    <FaRegUser className="icon icon-outline" />
-                  )}
-                  <span className="inner-ring" />
-                </div>
-                <span className={`icon-label ${isActive('/profile') ? 'label-active' : ''}`}>Profile</span>
-              </Link>
-              {/* ... Rest of your icons (Wishlist, Cart) stay here ... */}
 
-              <Link to="/wishlist" className={`icon-btn ${isActive('/wishlist') ? 'icon-active-btn' : ''}`}>
+              <Link to="/profile" className={`icon-btn${isActive('/profile') ? ' icon-active-btn' : ''}`}>
                 <div className="icon-circle">
-                  {isActive('/wishlist') ? (
-                    <FaHeart className="icon icon-filled" />
-                  ) : (
-                    <FaRegHeart className="icon icon-outline" />
-                  )}
+                  {isActive('/profile') ? <FaUser className="icon icon-filled" /> : <FaRegUser className="icon icon-outline" />}
+                  {isActive('/profile') && <span className="inner-ring" />}
+                </div>
+                <span className={`icon-label${isActive('/profile') ? ' label-active' : ''}`}>Profile</span>
+              </Link>
+
+              <Link to="/wishlist" className={`icon-btn${isActive('/wishlist') ? ' icon-active-btn' : ''}`}>
+                <div className="icon-circle">
+                  {isActive('/wishlist') ? <FaHeart className="icon icon-filled" /> : <FaRegHeart className="icon icon-outline" />}
                   {wishlistItems.length > 0 && <span className="red-dot1" />}
-                  <span className="inner-ring" />
+                  {isActive('/wishlist') && <span className="inner-ring" />}
                 </div>
-                <span className={`icon-label ${isActive('/wishlist') ? 'label-active' : ''}`}>Wishlist</span>
+                <span className={`icon-label${isActive('/wishlist') ? ' label-active' : ''}`}>Wishlist</span>
               </Link>
 
-              <Link to="/cart" className={`icon-btn ${isActive('/cart') ? 'icon-active-btn' : ''}`}>
+              <Link to="/cart" className={`icon-btn${isActive('/cart') ? ' icon-active-btn' : ''}`}>
                 <div className="icon-circle">
-                  {isActive('/cart') ? (
-                    <FaShoppingBag className="icon icon-filled" />
-                  ) : (
-                    <FiShoppingBag className="icon icon-outline-stroke" />
-                  )}
+                  {isActive('/cart') ? <FaShoppingBag className="icon icon-filled" /> : <FiShoppingBag className="icon icon-outline-stroke" />}
                   {cartItems.length > 0 && <span className="red-dot1" />}
-                  <span className="inner-ring" />
+                  {isActive('/cart') && <span className="inner-ring" />}
                 </div>
-                <span className={`icon-label ${isActive('/cart') ? 'label-active' : ''}`}>Kart</span>
+                <span className={`icon-label${isActive('/cart') ? ' label-active' : ''}`}>Kart</span>
               </Link>
+
             </div>
           </div>
         </div>
 
-        <div className="desktop-bottom-row-final desktop-bottom-row-updated">
-          <div className="desktop-search-left">
+        {/* Gold divider */}
+        <div className="nb-divider" aria-hidden="true" />
+
+        {/* Row 2 — Search | Nav links | spacer */}
+        <div className="nb-row nb-row--bottom">
+
+          <div className="nb-search-wrap">
             <SearchBar
               wrapperClassName="search-desktop-light"
               inputRef={desktopInputRef}
@@ -405,14 +352,14 @@ const NavbarFinal = () => {
             />
           </div>
 
-          <div className="desktop-links-center">
+          <div className="nb-links-center">
             <div className="nav-links-final nav-links-desktop-final">
               {navLinks.map(({ name, path }) => (
                 <Link
                   key={name}
                   to={path}
                   onClick={handleNavClick}
-                  className={`nav-link-final Btn ${isActive(path) ? 'active-final' : ''}`}
+                  className={`nav-link-final${isActive(path) ? ' active-final' : ''}`}
                 >
                   <span>{name}</span>
                 </Link>
@@ -420,54 +367,47 @@ const NavbarFinal = () => {
             </div>
           </div>
 
-          <div className="desktop-bottom-spacer" />
+          {/* Mirror spacer keeps links true-center */}
+          <div className="nb-search-wrap" aria-hidden="true" />
         </div>
       </div>
 
+      {/* ════════ MOBILE ════════ */}
       <div className="mobile-only-final">
+
+        {/* Top row: GIF | Logo | Hamburger */}
         <div className="top-row-final">
-          <div className="nav-toggle-final" onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}>
-            <div className={`dot-grid-final ${isMobileNavOpen ? 'dots-open' : ''}`}>
-              {[...Array(9)].map((_, i) => (
-                <span key={i} />
-              ))}
-            </div>
+
+          {/* Left: GIF */}
+          <div className="nb-mob-gif-wrap">
+            <img src="/loader-bg.gif" alt="" aria-hidden="true" className="nb-mob-gif" />
           </div>
 
-<div className="logo-final" style={{ display: 'flex', alignItems: 'center' }}>
-  <img 
-    src="/logo1.png" 
-    alt="Attach Logo" 
-    style={{ maxHeight: '50px', width: 'auto', objectFit: 'contain' }} 
-  />
-</div>
-
-          <div className="mobile-top-icons">
-            <Link to="/profile" className={`icon-btn ${isActive('/profile') ? 'icon-active-btn' : ''}`}>
-              <div className="icon-circle">
-                {isActive('/profile') ? <FaUser className="icon icon-filled" /> : <FaRegUser className="icon icon-outline" />}
-                <span className="inner-ring" />
-              </div>
-            </Link>
-
-            <Link to="/wishlist" className={`icon-btn ${isActive('/wishlist') ? 'icon-active-btn' : ''}`}>
-              <div className="icon-circle">
-                {isActive('/wishlist') ? <FaHeart className="icon icon-filled" /> : <FaRegHeart className="icon icon-outline" />}
-                {wishlistItems.length > 0 && <span className="red-dot1" />}
-                <span className="inner-ring" />
-              </div>
-            </Link>
-
-            <Link to="/cart" className={`icon-btn ${isActive('/cart') ? 'icon-active-btn' : ''}`}>
-              <div className="icon-circle">
-                {isActive('/cart') ? <FaShoppingBag className="icon icon-filled" /> : <FiShoppingBag className="icon icon-outline-stroke" />}
-                {cartItems.length > 0 && <span className="red-dot1" />}
-                <span className="inner-ring" />
-              </div>
+          {/* Center: Logo */}
+          <div className="nb-mob-logo-wrap">
+            <Link to="/" onClick={handleNavClick}>
+              <img src="/logo1.png" alt="Taras Kart" className="nb-mobile-logo" />
             </Link>
           </div>
+
+          {/* Right: Hamburger */}
+          <div className="nb-mob-toggle-wrap">
+            <button
+              type="button"
+              className="nav-toggle-final"
+              aria-label={isMobileNavOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={isMobileNavOpen}
+              onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
+            >
+              <div className={`dot-grid-final${isMobileNavOpen ? ' dots-open' : ''}`}>
+                {[...Array(9)].map((_, i) => <span key={i} />)}
+              </div>
+            </button>
+          </div>
+
         </div>
 
+        {/* Search row */}
         <div className="bottom-row-final">
           <SearchBar
             inputRef={mobileInputRef}
@@ -481,32 +421,65 @@ const NavbarFinal = () => {
           />
         </div>
 
+        {/* Drawer */}
         {isMobileNavOpen && (
           <div className="mobile-drawer-final slide-in" ref={mobileNavRef}>
-            <div className="close-btn-final" onClick={() => setIsMobileNavOpen(false)}>
-              <FaTimes />
-            </div>
-            <div className="nav-links-final">
-              {navLinks
-                .filter((l) => l.name !== 'Contact Us')
-                .map(({ name, path }) => (
-                  <Link
-                    key={name}
-                    to={path}
-                    onClick={handleNavClick}
-                    className={`nav-link-final Btn ${isActive(path) ? 'active-final' : ''}`}
-                  >
-                    <span>{name}</span>
-                  </Link>
-                ))}
-              <Link
-                to="/customer-care"
-                onClick={handleNavClick}
-                className={`nav-link-final Btn ${isActive('/customer-care') ? 'active-final' : ''}`}
+
+            {/* Close button only — no logo, no white box */}
+            <div className="nb-drawer-topbar">
+              <button
+                type="button"
+                className="close-btn-final"
+                aria-label="Close menu"
+                onClick={() => setIsMobileNavOpen(false)}
               >
-                <span>Contact Us</span>
+                <FaTimes />
+              </button>
+            </div>
+
+            {/* Nav links */}
+            <nav className="nb-drawer-nav">
+              {navLinks.map(({ name, path }) => (
+                <Link
+                  key={name}
+                  to={path}
+                  onClick={handleNavClick}
+                  className={`nb-drawer-link${isActive(path) ? ' nb-drawer-link--active' : ''}`}
+                >
+                  <span className="nb-drawer-link-dot" aria-hidden="true" />
+                  <span>{name}</span>
+                </Link>
+              ))}
+            </nav>
+
+            <div className="nb-drawer-sep" aria-hidden="true" />
+
+            {/* Footer: profile / wishlist / cart */}
+            <div className="nb-drawer-footer">
+              <Link to="/profile" className="nb-drawer-footer-row" onClick={handleNavClick}>
+                <FaRegUser />
+                <span>Profile</span>
+              </Link>
+              <Link to="/wishlist" className="nb-drawer-footer-row" onClick={handleNavClick}>
+                <FaRegHeart />
+                <span>
+                  Wishlist
+                  {wishlistItems.length > 0 && (
+                    <span className="nb-drawer-count">{wishlistItems.length}</span>
+                  )}
+                </span>
+              </Link>
+              <Link to="/cart" className="nb-drawer-footer-row" onClick={handleNavClick}>
+                <FiShoppingBag />
+                <span>
+                  Cart
+                  {cartItems.length > 0 && (
+                    <span className="nb-drawer-count">{cartItems.length}</span>
+                  )}
+                </span>
               </Link>
             </div>
+
           </div>
         )}
       </div>

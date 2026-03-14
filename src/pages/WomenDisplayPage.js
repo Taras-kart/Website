@@ -293,7 +293,6 @@ export default function WomenDisplayPage({
         </div>
 
         <div className="wds-head-right">
-          <span className="wds-count">{grouped.length} items</span>
           <span className="wds-user">{userLabel}</span>
           {(selectedBrand || selectedCategory) && (
             <Link to="/women" className="wds-clear">

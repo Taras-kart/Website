@@ -85,55 +85,31 @@ const writeVariantMap = (userId, map) => {
 }
 
 const CATEGORY_GROUPS = [
-  // --- SAREE SHAPER ---
   { parent: 'Saree Shaper', title: 'Saree Shaper', img: '/images/updated/Saree_Shaper.webp', patterns: ['SAREE SHAPER', 'SAREESHAPER'] },
   { parent: 'Saree Shaper', title: 'Skirt Shaper', img: '/images/updated/Skirt_Shaper.webp', patterns: ['SKIRT SHAPER', 'SKIRTSHAPER', 'SAREE SKIRT', 'SAREESKIRT'] },
   { parent: 'Saree Shaper', title: 'Straight Fit Saree Shaper', img: '/images/updated/StraightFit_Saree_Shaper.webp', patterns: ['STRAIGHT FIT', 'STRAIGHTFIT'] },
-
-  // --- KURTI PANTS ---
   { parent: 'Kurti Pants', title: 'Viscose Kurti Pant', img: '/images/updated/viscose_kurti_pant.webp', patterns: ['VISCOSE KURTI', 'VISCOSEKURTI'] },
   { parent: 'Kurti Pants', title: 'Cotton Kurti Pant', img: '/images/updated/cotton_kurti_pant.webp', patterns: ['COTTON KURTI', 'COTTONKURTI'] },
   { parent: 'Kurti Pants', title: 'Sleek Kurti Pant', img: '/images/updated/sleek_kurti_pant.webp', patterns: ['SLEEK KURTI', 'SLEEKKURTI'] },
   { parent: 'Kurti Pants', title: 'Flexi Kurti Pant', img: '/images/updated/flexi_kurti_pant.webp', patterns: ['FLEXI KURTI', 'FLEXIKURTI', 'WIDE LEG KURTI', 'WIDELEGKURTI'] },
-  // Catch-all for generic Kurtis in DB
-  { parent: 'Kurti Pants', title: 'Viscose Kurti Pant', img: '/images/updated/kurti_pant.webp', patterns: ['KURTI PANT', 'KURTIPANT', 'KURTI'] }, 
-
-  // --- LEGGINGS (Ordered from most specific to generic) ---
+  { parent: 'Kurti Pants', title: 'Viscose Kurti Pant', img: '/images/updated/kurti_pant.webp', patterns: ['KURTI PANT', 'KURTIPANT', 'KURTI'] },
   { parent: 'Leggings', title: 'Viscose Churidar Legging', img: '/images/updated/Viscose_Churidar_Legging.webp', patterns: ['VISCOSE CHURIDAR', 'VISCOSECHURIDAR', 'VISCOSE CHUDIDAR', 'VISCOSECHUDIDAR'] },
-
-{ parent: 'Leggings', title: 'Bamboo Modal Churidar Legging', img: '/images/updated/BambooModal_Churidar_Legging.webp', patterns: ['BAMBOO MODAL CHURIDAR', 'BAMBOOMODALCHURIDAR', 'BAMBOO MODAL CHUDIDAR', 'BAMBOOMODALCHUDIDAR'] },
-
-{ parent: 'Leggings', title: 'Cotton Capri Legging', img: '/images/updated/Cotton_Capri_Legging.webp', patterns: ['COTTON CAPRI', 'COTTONCAPRI', 'CAPRI'] },
-
-{ parent: 'Leggings', title: 'Viscose Ankle Legging', img: '/images/updated/Viscose_Ankle_Legging.webp', patterns: ['VISCOSE ANKLE', 'VISCOSEANKLE'] },
-
-{ parent: 'Leggings', title: 'Viscose 7/8 High Ankle/Cropped Leggings', img: '/images/updated/Viscose7-8_HighAnkle(or)Cropped_Legging.webp', patterns: ['VISCOSE 7/8', 'VISCOSE7/8', 'CROPPED', 'HIGH ANKLE', 'HIGHANKLE'] },
-
-{ parent: 'Leggings', title: 'Bamboo Modal Ankle Legging', img: '/images/updated/BambooModal_Ankle_Legging.webp', patterns: ['BAMBOO MODAL ANKLE', 'BAMBOOMODALANKLE'] },
-
-{ parent: 'Leggings', title: 'Cotton Churidar Legging', img: '/images/updated/Cotton_Churidar_Legging.webp', patterns: ['COTTON CHURIDAR', 'COTTONCHURIDAR', 'COTTON CHUDIDAR', 'COTTONCHUDIDAR', 'CHURIDAR', 'CHUDIDAR'] },
-
-{ parent: 'Leggings', title: 'Shimmer Legging', img: '/images/updated/Shimmer_Legging.webp', patterns: ['SHIMMER LEGGING', 'SHIMMERLEGGING', 'SHIMMER'] },
-  // Catch-all for generic Leggings in DB
+  { parent: 'Leggings', title: 'Bamboo Modal Churidar Legging', img: '/images/updated/BambooModal_Churidar_Legging.webp', patterns: ['BAMBOO MODAL CHURIDAR', 'BAMBOOMODALCHURIDAR', 'BAMBOO MODAL CHUDIDAR', 'BAMBOOMODALCHUDIDAR'] },
+  { parent: 'Leggings', title: 'Cotton Capri Legging', img: '/images/updated/Cotton_Capri_Legging.webp', patterns: ['COTTON CAPRI', 'COTTONCAPRI', 'CAPRI'] },
+  { parent: 'Leggings', title: 'Viscose Ankle Legging', img: '/images/updated/Viscose_Ankle_Legging.webp', patterns: ['VISCOSE ANKLE', 'VISCOSEANKLE'] },
+  { parent: 'Leggings', title: 'Viscose 7/8 High Ankle/Cropped Leggings', img: '/images/updated/Viscose7-8_HighAnkle(or)Cropped_Legging.webp', patterns: ['VISCOSE 7/8', 'VISCOSE7/8', 'CROPPED', 'HIGH ANKLE', 'HIGHANKLE'] },
+  { parent: 'Leggings', title: 'Bamboo Modal Ankle Legging', img: '/images/updated/BambooModal_Ankle_Legging.webp', patterns: ['BAMBOO MODAL ANKLE', 'BAMBOOMODALANKLE'] },
+  { parent: 'Leggings', title: 'Cotton Churidar Legging', img: '/images/updated/Cotton_Churidar_Legging.webp', patterns: ['COTTON CHURIDAR', 'COTTONCHURIDAR', 'COTTON CHUDIDAR', 'COTTONCHUDIDAR', 'CHURIDAR', 'CHUDIDAR'] },
+  { parent: 'Leggings', title: 'Shimmer Legging', img: '/images/updated/Shimmer_Legging.webp', patterns: ['SHIMMER LEGGING', 'SHIMMERLEGGING', 'SHIMMER'] },
   { parent: 'Leggings', title: 'Cotton Ankle Legging', img: '/images/updated/Cotton_Ankle_Legging.webp', patterns: ['COTTON ANKLE', 'COTTONANKLE', 'ANKLE', 'LEGGING'] },
-
-  // --- PALAZZO PANTS ---
- { parent: 'Palazzo Pants', title: 'Solid Knitted Palazzo Pants', img: '/images/updated/Solid_knitted_Palazzo_Pants.webp', patterns: ['SOLID KNITTED', 'SOLIDKNITTED'] },
-
-{ parent: 'Palazzo Pants', title: 'Printed Knitted Palazzo Pants', img: '/images/updated/Printed_Knitted_Palazzo_Pants.webp', patterns: ['PRINTED KNITTED', 'PRINTEDKNITTED'] },
-
-{ parent: 'Palazzo Pants', title: 'Knotted Striped Palazzo', img: '/images/updated/Knotted_Striped_Palazzo.webp', patterns: ['KNOTTED STRIPED', 'KNOTTEDSTRIPED', 'KNOTTED'] },
-
-{ parent: 'Palazzo Pants', title: 'Striped Palazzo', img: '/images/updated/Striped_Palazzo.webp', patterns: ['STRIPED'] },
-
-// Catch-all for generic Palazzos
-{ parent: 'Palazzo Pants', title: 'Solid Wide Leg Palazzo', img: '/images/updated/Solid_Wide_Leg_Palazzo.webp', patterns: ['SOLID WIDE LEG', 'SOLIDWIDELEG', 'PALAZZO', 'PLAZO'] },
-
-  // --- STANDALONE CATEGORIES (No Drill-Down, Parent is null) ---
+  { parent: 'Palazzo Pants', title: 'Solid Knitted Palazzo Pants', img: '/images/updated/Solid_knitted_Palazzo_Pants.webp', patterns: ['SOLID KNITTED', 'SOLIDKNITTED'] },
+  { parent: 'Palazzo Pants', title: 'Printed Knitted Palazzo Pants', img: '/images/updated/Printed_Knitted_Palazzo_Pants.webp', patterns: ['PRINTED KNITTED', 'PRINTEDKNITTED'] },
+  { parent: 'Palazzo Pants', title: 'Knotted Striped Palazzo', img: '/images/updated/Knotted_Striped_Palazzo.webp', patterns: ['KNOTTED STRIPED', 'KNOTTEDSTRIPED', 'KNOTTED'] },
+  { parent: 'Palazzo Pants', title: 'Striped Palazzo', img: '/images/updated/Striped_Palazzo.webp', patterns: ['STRIPED'] },
+  { parent: 'Palazzo Pants', title: 'Solid Wide Leg Palazzo', img: '/images/updated/Solid_Wide_Leg_Palazzo.webp', patterns: ['SOLID WIDE LEG', 'SOLIDWIDELEG', 'PALAZZO', 'PLAZO'] },
   { parent: null, title: 'Metallic Pants', img: '/images/updated/metallic_straight_pant.webp', patterns: ['METALLIC', 'METALIC'] },
   { parent: null, title: 'T-shirts', img: '/images/updated/active_t-shirt.webp', patterns: ['T-SHIRT', 'T SHIRT', 'TSHIRT'] }
 ]
-
 
 const deriveCategory = (p) => {
   const name = String(p?.product_name || '').trim()
@@ -173,7 +149,7 @@ function EmptyState({ category }) {
                 No items found for <span className="women-empty-accent">{category}</span>
               </>
             ) : (
-              <>We couldn’t find items right now</>
+              <>We couldn't find items right now</>
             )}
           </h3>
           <p className="women-empty-sub">Try another filter, or browse everything.</p>
@@ -198,9 +174,11 @@ function Sheet({ title, open, onClose, children }) {
     <div className="women-sheet-wrap" role="dialog" aria-modal="true">
       <button type="button" className="women-sheet-backdrop" onClick={onClose} aria-label="Close" />
       <div className="women-sheet">
+        {/* Drag handle pill */}
+        <div className="women-sheet-handle" aria-hidden="true" />
         <div className="women-sheet-head">
           <div className="women-sheet-title">{title}</div>
-          <button type="button" className="women-sheet-x" onClick={onClose}>
+          <button type="button" className="women-sheet-x" onClick={onClose} aria-label="Close panel">
             ✕
           </button>
         </div>
@@ -477,13 +455,23 @@ export default function WomenPage() {
 
   const clearAll = () => setQuery('', '', 'featured')
 
+  /* ── Derive a human-readable sort label for the active-chips bar ── */
+  const sortLabel =
+    sortBy === 'price_low' ? 'Price: Low → High'
+    : sortBy === 'price_high' ? 'Price: High → Low'
+    : sortBy === 'name_az' ? 'Name: A → Z'
+    : sortBy === 'name_za' ? 'Name: Z → A'
+    : null
+
+  const hasActiveFilters = !!(selectedBrand || selectedCategory || (sortBy && sortBy !== 'featured'))
+
   const FiltersUI = ({ compact = false, onDone }) => {
     return (
       <div className={`women-filters${compact ? ' compact' : ''}`}>
         <div className="women-filters-head">
           <div className="women-filters-title">Filters</div>
           <div className="women-filters-actions">
-            {(selectedBrand || selectedCategory || (sortBy && sortBy !== 'featured')) && (
+            {hasActiveFilters && (
               <button type="button" className="women-ghost-btn" onClick={clearAll}>
                 Reset
               </button>
@@ -503,9 +491,7 @@ export default function WomenPage() {
               <select className="women-select" value={selectedBrand || ''} onChange={(e) => setQuery(e.target.value, selectedCategory, sortBy)}>
                 <option value="">All Brands</option>
                 {availableBrands.map((b) => (
-                  <option key={b} value={b}>
-                    {b}
-                  </option>
+                  <option key={b} value={b}>{b}</option>
                 ))}
               </select>
               <span className="women-select-icon" aria-hidden="true" />
@@ -518,9 +504,7 @@ export default function WomenPage() {
               <select className="women-select" value={selectedCategory || ''} onChange={(e) => setQuery(selectedBrand, e.target.value, sortBy)}>
                 <option value="">All Categories</option>
                 {availableCategories.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
+                  <option key={c} value={c}>{c}</option>
                 ))}
               </select>
               <span className="women-select-icon" aria-hidden="true" />
@@ -550,10 +534,7 @@ export default function WomenPage() {
             >
               Clear all
             </button>
-            <div className="women-chip">
-              <span className="women-chip-dot" />
-              <span className="women-chip-text">{products.length} items</span>
-            </div>
+            
           </div>
         </div>
       </div>
@@ -565,18 +546,45 @@ export default function WomenPage() {
       <Navbar />
       <div className="women-top-spacer" />
 
+      {/* ── Page header ── */}
+      <header className="women-page-header">
+        <div className="women-page-header-inner">
+          <p className="women-page-eyebrow">Collection</p>
+          <h1 className="women-page-title">
+            Women
+            {selectedCategory && (
+              <span className="women-page-title-cat"> — {selectedCategory}</span>
+            )}
+          </h1>
+        </div>
+      </header>
+
       <div className="women-shell">
+        {/* ── Sidebar ── */}
         <aside className="women-sidebar">
+          <div className="women-sidebar-top" aria-hidden="true">
+            <span className="women-sidebar-accent-bar" />
+          </div>
           <FiltersUI />
         </aside>
 
+        {/* ── Main content ── */}
         <main className="women-main">
           <div id="products" className="women-page-main">
             <div className="women-page-content">
+
+
+              {/* ── Product states ── */}
               {loading ? (
-                <div className="women-state-card">Loading products…</div>
+                <div className="women-state-card loading">
+                  <span className="women-spinner" aria-hidden="true" />
+                  <span>Loading products…</span>
+                </div>
               ) : error ? (
-                <div className="women-state-card error">{error}</div>
+                <div className="women-state-card error">
+                  <span className="women-state-icon" aria-hidden="true">⚠</span>
+                  <span>{error}</span>
+                </div>
               ) : !allProducts.length ? (
                 <EmptyState category={selectedCategory} />
               ) : !products.length ? (
@@ -598,6 +606,7 @@ export default function WomenPage() {
         </main>
       </div>
 
+      {/* ── Mobile bottom bar ── */}
       <div className="women-mobile-bar">
         <button
           type="button"
@@ -607,9 +616,12 @@ export default function WomenPage() {
             setMobileSortOpen(false)
           }}
         >
+          <span className="women-mobile-btn-icon" aria-hidden="true">⊞</span>
           Filters
           {(selectedBrand || selectedCategory) && <span className="women-mobile-dot" />}
         </button>
+
+        <div className="women-mobile-divider" aria-hidden="true" />
 
         <button
           type="button"
@@ -619,11 +631,13 @@ export default function WomenPage() {
             setMobileFiltersOpen(false)
           }}
         >
+          <span className="women-mobile-btn-icon" aria-hidden="true">⇅</span>
           Sort
           {sortBy && sortBy !== 'featured' && <span className="women-mobile-dot" />}
         </button>
       </div>
 
+      {/* ── Sheets ── */}
       <Sheet title="Filters" open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)}>
         <FiltersUI compact onDone={() => setMobileFiltersOpen(false)} />
       </Sheet>
@@ -631,7 +645,7 @@ export default function WomenPage() {
       <Sheet title="Sort" open={mobileSortOpen} onClose={() => setMobileSortOpen(false)}>
         <div className="women-sort-sheet">
           <div className="women-field">
-            <label className="women-label">Sort</label>
+            <label className="women-label">Sort by</label>
             <div className="women-select-wrap">
               <select
                 className="women-select"
