@@ -455,13 +455,6 @@ export default function WomenPage() {
 
   const clearAll = () => setQuery('', '', 'featured')
 
-  /* ── Derive a human-readable sort label for the active-chips bar ── */
-  const sortLabel =
-    sortBy === 'price_low' ? 'Price: Low → High'
-    : sortBy === 'price_high' ? 'Price: High → Low'
-    : sortBy === 'name_az' ? 'Name: A → Z'
-    : sortBy === 'name_za' ? 'Name: Z → A'
-    : null
 
   const hasActiveFilters = !!(selectedBrand || selectedCategory || (sortBy && sortBy !== 'featured'))
 

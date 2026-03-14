@@ -146,17 +146,6 @@ function resolveColor(name) {
   return `hsl(${hue}, 45%, 68%)`
 }
 
-/** True if the resolved color is light (needs dark text/border) */
-function isLightColor(cssColor) {
-  if (cssColor.startsWith('linear-gradient') || cssColor.startsWith('hsl')) return false
-  const hex = cssColor.replace('#', '')
-  if (hex.length < 6) return false
-  const r = parseInt(hex.slice(0, 2), 16)
-  const g = parseInt(hex.slice(2, 4), 16)
-  const b = parseInt(hex.slice(4, 6), 16)
-  return (r * 299 + g * 587 + b * 114) / 1000 > 200
-}
-
 /* ══════════════════════════════════════════════════════════════
    Decorative floating stars (unchanged)
    ══════════════════════════════════════════════════════════════ */
