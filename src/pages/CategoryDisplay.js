@@ -239,8 +239,7 @@ const categories = useMemo(() => {
     navigate('/category-display')
   }
 
-  const headerTitle = selectedBrand ? `${selectedBrand} Categories` : 'Women Categories'
-  const subtitle = selectedBrand ? 'Choose a category for this brand' : 'Pick a category to see matching products'
+
 
   return (
     <div className="category-page">
