@@ -15,9 +15,6 @@ const API_BASE_RAW =
     DEFAULT_API_BASE;
 const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
 
-
-
-
 function withWidth(url, w) {
     try {
         const u = new URL(url, window.location.origin);
@@ -39,36 +36,36 @@ function shuffle(arr) {
 }
 
 const FALLBACK_WOMEN = [
-    { img: '/images/women/women-anarkali.jpg', title: 'Anarkali' },
-    { img: '/images/women/women-chudidar.jpg', title: 'Chudidar' },
-    { img: '/images/women/women-gowns.jpg', title: 'Gowns' },
-    { img: '/images/women/women-kurta.jpg', title: 'Kurta' },
-    { img: '/images/women/women-lehanga.jpeg', title: 'Lehanga' },
-    { img: '/images/women/women-palazzo.jpg', title: 'Palazzo' },
-    { img: '/images/women/women-salwar.jpg', title: 'Salwar' },
-    { img: '/images/women/women-sarees.jpg', title: 'Sarees' }
+    { img: '/images/women/women-anarkali.jpg',  title: 'Anarkali'  },
+    { img: '/images/women/women-chudidar.jpg',  title: 'Chudidar'  },
+    { img: '/images/women/women-gowns.jpg',     title: 'Gowns'     },
+    { img: '/images/women/women-kurta.jpg',     title: 'Kurta'     },
+    { img: '/images/women/women-lehanga.jpeg',  title: 'Lehanga'   },
+    { img: '/images/women/women-palazzo.jpg',   title: 'Palazzo'   },
+    { img: '/images/women/women-salwar.jpg',    title: 'Salwar'    },
+    { img: '/images/women/women-sarees.jpg',    title: 'Sarees'    }
 ];
 
 const FALLBACK_MEN = [
-    { img: '/images/men/mens-casuals.jpg', title: 'Casuals' },
-    { img: '/images/men/mens-ethinic.jpg', title: 'Ethnic' },
-    { img: '/images/men/mens-formals.jpg', title: 'Formals' },
-    { img: '/images/men/mens-party-wear.jpg', title: 'Party Wear' },
-    { img: '/images/men/mens-semi-formals.jpg', title: 'Semi Formals' },
-    { img: '/images/men/mens-street-wear.jpg', title: 'Street Wear' },
-    { img: '/images/men/mens-suits.jpg', title: 'Suits' },
-    { img: '/images/men/mens-wedding-wear.jpg', title: 'Wedding Wear' }
+    { img: '/images/men/mens-casuals.jpg',      title: 'Casuals'    },
+    { img: '/images/men/mens-ethinic.jpg',      title: 'Ethnic'     },
+    { img: '/images/men/mens-formals.jpg',      title: 'Formals'    },
+    { img: '/images/men/mens-party-wear.jpg',   title: 'Party Wear' },
+    { img: '/images/men/mens-semi-formals.jpg', title: 'Semi Formals'},
+    { img: '/images/men/mens-street-wear.jpg',  title: 'Street Wear'},
+    { img: '/images/men/mens-suits.jpg',        title: 'Suits'      },
+    { img: '/images/men/mens-wedding-wear.jpg', title: 'Wedding Wear'}
 ];
 
 const FALLBACK_KIDS = [
-    { img: '/images/kids/kids-boys-casual-wear.jpg', title: 'Boys Casual Wear' },
-    { img: '/images/kids/kids-boys-kurta-paijama.jpg', title: 'Boys Kurta Paijama' },
-    { img: '/images/kids/kids-boys-sherwani.jpg', title: 'Boys Sherwani' },
-    { img: '/images/kids/kids-formal.jpg', title: 'Formal' },
-    { img: '/images/kids/kids-girls-frock.jpg', title: 'Girls Frock' },
-    { img: '/images/kids/kids-girls-gown.jpg', title: 'Girls Gown' },
-    { img: '/images/kids/kids-girls-lehenga-choli.jpg', title: 'Girls Lehenga Choli' },
-    { img: '/images/kids/kids-girls-salwar.jpg', title: 'Girls Salwar' }
+    { img: '/images/kids/kids-boys-casual-wear.jpg',    title: 'Boys Casual Wear'     },
+    { img: '/images/kids/kids-boys-kurta-paijama.jpg',  title: 'Boys Kurta Paijama'   },
+    { img: '/images/kids/kids-boys-sherwani.jpg',       title: 'Boys Sherwani'        },
+    { img: '/images/kids/kids-formal.jpg',              title: 'Formal'               },
+    { img: '/images/kids/kids-girls-frock.jpg',         title: 'Girls Frock'          },
+    { img: '/images/kids/kids-girls-gown.jpg',          title: 'Girls Gown'           },
+    { img: '/images/kids/kids-girls-lehenga-choli.jpg', title: 'Girls Lehenga Choli'  },
+    { img: '/images/kids/kids-girls-salwar.jpg',        title: 'Girls Salwar'         }
 ];
 
 export default function HomePage() {
@@ -76,15 +73,15 @@ export default function HomePage() {
     const [slides, setSlides] = useState(FALLBACK_SLIDES);
     const [isLoadingSlides, setIsLoadingSlides] = useState(true);
     const [womenItems, setWomenItems] = useState(FALLBACK_WOMEN);
-    const [menItems, setMenItems] = useState(FALLBACK_MEN);
-    const [kidsItems, setKidsItems] = useState(FALLBACK_KIDS);
+    const [menItems, setMenItems]     = useState(FALLBACK_MEN);
+    const [kidsItems, setKidsItems]   = useState(FALLBACK_KIDS);
     const section3Images = Array.from({ length: 12 }, (_, i) => `/images/random${i + 1}.jpg`);
     const womenRef = useRef(null);
-    const menRef = useRef(null);
-    const kidsRef = useRef(null);
-    const navigate = useNavigate()
+    const menRef   = useRef(null);
+    const kidsRef  = useRef(null);
+    const navigate = useNavigate();
 
-    /* new section 1 */
+    /* Women's spotlight pool */
     const LUX_DEFAULT_WOMEN = Array.from({ length: 20 }, (_, i) => `/images/women/women${i + 1}.jpeg`);
     const rotorWomen = React.useMemo(() => {
         const backendImgs = (womenItems || [])
@@ -94,8 +91,8 @@ export default function HomePage() {
         const pick = pool.slice(0, 12);
         return pick.map(src => withWidth(src, 900));
     }, [womenItems]);
-    /* end of new section 1 */
 
+    /* Fetch section images from API */
     useEffect(() => {
         let mounted = true;
         async function fetchAll() {
@@ -107,7 +104,9 @@ export default function HomePage() {
                 if (res.ok) {
                     const data = await res.json();
                     if (mounted && data && Array.isArray(data.hero)) {
-                        const heroUrls = data.hero.map(x => x.image_url).filter(u => u && typeof u === 'string' && !/^\/images\//.test(u));
+                        const heroUrls = data.hero
+                            .map(x => x.image_url)
+                            .filter(u => u && typeof u === 'string' && !/^\/images\//.test(u));
                         if (heroUrls.length) setSlides(shuffle(heroUrls).slice(0, 30));
                     }
                     if (mounted && data && Array.isArray(data.women) && data.women.length) {
@@ -142,11 +141,10 @@ export default function HomePage() {
             if (mounted) setIsLoadingSlides(false);
         }
         fetchAll();
-        return () => {
-            mounted = false;
-        };
+        return () => { mounted = false; };
     }, []);
 
+    /* Auto-scroll interval for gender rails */
     useEffect(() => {
         const scrollForward = (el) => {
             let scrollAmount = 0;
@@ -168,9 +166,9 @@ export default function HomePage() {
                 }
             }, 20);
         };
-        const womenInterval = scrollForward(womenRef.current?.querySelector('.home-section5-slider'));
-        const menInterval = scrollBackward(menRef.current?.querySelector('.home-section5-slider'));
-        const kidsInterval = scrollForward(kidsRef.current?.querySelector('.home-section5-slider'));
+        const womenInterval = scrollForward( womenRef.current?.querySelector('.home-section5-slider'));
+        const menInterval   = scrollBackward(menRef.current?.querySelector('.home-section5-slider'));
+        const kidsInterval  = scrollForward( kidsRef.current?.querySelector('.home-section5-slider'));
         return () => {
             clearInterval(womenInterval);
             clearInterval(menInterval);
@@ -180,7 +178,10 @@ export default function HomePage() {
 
     return (
         <div className="home-section1-wrapper">
+
             <Navbar />
+
+            {/* ── HERO: Video + Category Blocks ─────────────────── */}
             <div className="home-section1">
                 <div className="home-section1-overlay">
                     <div className="home-section1-content">
@@ -189,7 +190,7 @@ export default function HomePage() {
                                 <source src="/images/logo-video.mp4" type="video/mp4" />
                             </video>
                             <div className="home-section1-full-text">
-                                <h1>Attach.co.in</h1>
+                                <h1>Attach</h1>
                             </div>
                         </div>
                         <div className="home-section1-right">
@@ -230,6 +231,8 @@ export default function HomePage() {
                     </div>
                 </div>
             </div>
+
+            {/* ── COVERFLOW SWIPER (Section 2) ──────────────────── */}
             <section className="home-section2">
                 <h2 className="home-section2-title">Boost your clothing sales with our fashion varieties!</h2>
                 <div className="home-section2-frame">
@@ -247,8 +250,8 @@ export default function HomePage() {
                         allowTouchMove={false}
                     >
                         {slides.map((src, index) => {
-                            const w400 = withWidth(src, 400);
-                            const w800 = withWidth(src, 800);
+                            const w400  = withWidth(src, 400);
+                            const w800  = withWidth(src, 800);
                             const w1200 = withWidth(src, 1200);
                             return (
                                 <SwiperSlide key={index}>
@@ -268,6 +271,7 @@ export default function HomePage() {
                 <h3 className="home-section2-subtitle">From briefs to stunning images in seconds — save time, cut costs, and drive success!</h3>
             </section>
 
+            {/* ── STYLE 100+ VARIETIES (Section 3) ─────────────── */}
             <section className="home-section3">
                 <div className="home-section3-grid">
                     {section3Images.map((src, i) => (
@@ -285,7 +289,7 @@ export default function HomePage() {
                 </div>
             </section>
 
-
+            {/* ── SHOP BY CATEGORY (wcat) ───────────────────────── */}
             <section className="wcat">
                 <div className="wcat-head">
                     <h2 className="wcat-title">Shop by Category</h2>
@@ -359,16 +363,14 @@ export default function HomePage() {
                 </div>
             </section>
 
-
-
-
+            {/* ── WOMEN'S COLLECTION SWIPER ─────────────────────── */}
             <section className="women-premium galaxy" ref={womenRef}>
                 <div className="galaxy-layer stars-1"></div>
                 <div className="galaxy-layer stars-2"></div>
                 <div className="galaxy-layer dust"></div>
 
                 <div className="women-premium-head">
-                    <h2 className="women-premium-title">Women’s Collection</h2>
+                    <h2 className="women-premium-title">Women's Collection</h2>
                     <div className="women-premium-underline">
                         <span className="wl w1"></span>
                         <span className="wl w2"></span>
@@ -386,14 +388,14 @@ export default function HomePage() {
                         spaceBetween={18}
                         slidesPerView={1.25}
                         breakpoints={{
-                            480: { slidesPerView: 2 },
-                            768: { slidesPerView: 3 },
+                            480:  { slidesPerView: 2 },
+                            768:  { slidesPerView: 3 },
                             1100: { slidesPerView: 4 }
                         }}
                     >
                         {[...new Set(womenItems.map(it => JSON.stringify(it)))].map((s, idx) => {
-                            const item = JSON.parse(s);
-                            const src = withWidth(item.img, 800);
+                            const item  = JSON.parse(s);
+                            const src   = withWidth(item.img, 800);
                             const title = item.title || "Women";
                             return (
                                 <SwiperSlide key={idx}>
@@ -419,50 +421,7 @@ export default function HomePage() {
                 </div>
             </section>
 
-
-
-
-
-            {/*<section className="lux-rotor-section">
-                <div className="lux-sky">
-                    <div className="sky-layer stars-1"></div>
-                    <div className="sky-layer stars-2"></div>
-                    <div className="sky-layer stars-3"></div>
-                    <div className="sky-layer nebula"></div>
-                    <div className="sky-layer orbits"></div>
-                    <div className="sky-layer glow"></div>
-                </div>
-                <div className="lux-rotor-shell">
-                    <div className="lux-rotor-header">
-                        <h2 className="lux-rotor-title">Women’s Spotlight</h2>
-                        <div className="lux-rotor-underline">
-                            <span className="lux-line large"></span>
-                            <span className="lux-line medium"></span>
-                            <span className="lux-line small"></span>
-                        </div>
-                    </div>
-                    <div className="lux-rotor-stage">
-                        <div className="lux-rotor-inner" style={{ ['--quantity']: rotorWomen.length }}>
-                            {rotorWomen.map((src, i) => (
-                                <a href="/women" key={i} className="lux-rotor-card" style={{ ['--index']: i }}>
-                                    <div className="lux-rotor-frame">
-                                        <img
-                                            src={src}
-                                            alt={`Women's ${i + 1}`}
-                                            loading="lazy"
-                                            decoding="async"
-                                            onError={(e) => { e.currentTarget.src = LUX_DEFAULT_WOMEN[i % LUX_DEFAULT_WOMEN.length]; }}
-                                        />
-                                    </div>
-                                </a>
-                            ))}
-                        </div>
-                        <div className="lux-rotor-floor"></div>
-                    </div>
-                </div>
-            </section> */}
-
-
+            {/* ── BANNER SLIDESHOW (Women) ───────────────────────── */}
             <section className="banner-slideshow">
                 <div className="banner-frame">
                     <Swiper
@@ -492,20 +451,14 @@ export default function HomePage() {
                 </div>
             </section>
 
-
-
-
-
-
-
-
+            {/* ── MEN'S COLLECTION SWIPER ───────────────────────── */}
             <section className="men-premium galaxy" ref={menRef}>
                 <div className="galaxy-layer stars-1"></div>
                 <div className="galaxy-layer stars-2"></div>
                 <div className="galaxy-layer dust"></div>
 
                 <div className="men-premium-head">
-                    <h2 className="men-premium-title">Men’s Collection</h2>
+                    <h2 className="men-premium-title">Men's Collection</h2>
                     <div className="men-premium-underline">
                         <span className="ml m1"></span>
                         <span className="ml m2"></span>
@@ -523,14 +476,14 @@ export default function HomePage() {
                         spaceBetween={18}
                         slidesPerView={1.25}
                         breakpoints={{
-                            480: { slidesPerView: 2 },
-                            768: { slidesPerView: 3 },
+                            480:  { slidesPerView: 2 },
+                            768:  { slidesPerView: 3 },
                             1100: { slidesPerView: 4 }
                         }}
                     >
                         {[...new Set(menItems.map(it => JSON.stringify(it)))].map((s, idx) => {
-                            const item = JSON.parse(s);
-                            const src = withWidth(item.img, 800);
+                            const item  = JSON.parse(s);
+                            const src   = withWidth(item.img, 800);
                             const title = item.title || "Men";
                             return (
                                 <SwiperSlide key={idx}>
@@ -556,9 +509,7 @@ export default function HomePage() {
                 </div>
             </section>
 
-
-
-
+            {/* ── SAREE QUAD ────────────────────────────────────── */}
             <section className="tara-quad-section">
                 <div className="tara-quad-glow"></div>
                 <div className="tara-quad-shell">
@@ -615,9 +566,7 @@ export default function HomePage() {
                 </div>
             </section>
 
-
-
-
+            {/* ── CRAFTED STYLES DUO ────────────────────────────── */}
             <section className="ai-duo-section">
                 <div className="ai-duo-container">
                     <div className="ai-duo-left">
@@ -673,7 +622,7 @@ export default function HomePage() {
 
                             <div className="ai-btn-row">
                                 <a href="/women" className="ai-btn">
-                                    Explore Women’s
+                                    Explore Women's
                                     <span className="ai-btn-shine"></span>
                                 </a>
                                 <a href="/women" className="ai-btn-outline">View Lookbook</a>
@@ -698,7 +647,7 @@ export default function HomePage() {
                 </div>
             </section>
 
-
+            {/* ── BANNER SLIDESHOW (Men) ─────────────────────────── */}
             <section className="mens-banner-slideshow">
                 <div className="mens-banner-frame">
                     <Swiper
@@ -728,13 +677,7 @@ export default function HomePage() {
                 </div>
             </section>
 
-
-
-
-
-
-
-
+            {/* ── STYLE UP YOUR WARDROBE (mens-section2) ────────── */}
             <section className="mens-section2">
                 <div className="mens-section2-bg">
                     <img src="/images/mens-bg1.jpg" alt="Mens Style Background" />
@@ -748,11 +691,10 @@ export default function HomePage() {
                 </div>
             </section>
 
-
-
+            {/* ── WOMEN'S CATEGORY SAREE CARDS (wc-section) ────── */}
             <section className="wc-section">
                 <div className="wc-header">
-                    <h2 className="wc-title">Women’s Category</h2>
+                    <h2 className="wc-title">Women's Category</h2>
                     <Link to="/women" className="wc-viewall">VIEW ALL</Link>
                 </div>
                 <div className="wc-grid">
@@ -802,102 +744,16 @@ export default function HomePage() {
                 </div>
             </section>
 
-
-
-            {/*<section className="ai-elite-section-final">
-  <div className="ai-elite-container-final">
-    <div className="ai-elite-left-final">
-      <div className="ai-elite-head-final">
-        <h2 className="ai-elite-title-final">Refined Menswear</h2>
-      </div>
-
-      <p className="ai-elite-desc-final">
-        Tailored layers, modern cuts, and fabrics that move with you. Build a wardrobe that speaks in quiet confidence.
-      </p>
-
-      <ul className="ai-elite-points-final">
-        <li className="ai-elite-point-final">Smart Tailoring</li>
-        <li className="ai-elite-point-final">Breathable Weaves</li>
-        <li className="ai-elite-point-final">Week-to-Weekend</li>
-      </ul>
-
-      <div className="ai-elite-actions-final">
-        <a href="/men" className="ai-elite-btn-premium-final">
-          <span className="ai-elite-btn-glow-final"></span>
-          <span className="ai-elite-btn-text-final">Shop Now</span>
-          <span className="ai-elite-btn-shine-final" aria-hidden="true"></span>
-        </a>
-        <a href="/men" className="ai-elite-link-final">Explore Collection</a>
-      </div>
-
-      <div className="ai-elite-metrics-final">
-        <div className="ai-elite-metric-final">
-          <span className="ai-elite-metric-num-final">50+</span>
-          <span className="ai-elite-metric-label-final">Fresh Styles</span>
-        </div>
-        <div className="ai-elite-metric-final">
-          <span className="ai-elite-metric-num-final">Premium</span>
-          <span className="ai-elite-metric-label-final">Fabrics</span>
-        </div>
-        <div className="ai-elite-metric-final">
-          <span className="ai-elite-metric-num-final">Tailored</span>
-          <span className="ai-elite-metric-label-final">Comfort</span>
-        </div>
-      </div>
-    </div>
-
-    <div className="ai-elite-right-final">
-      <div className="ai-elite-frame-final">
-        <Swiper
-          className="ai-elite-slider-final"
-          modules={[Autoplay]}
-          loop={true}
-          slidesPerView={1}
-          autoplay={{ delay: 3000, disableOnInteraction: false }}
-          speed={800}
-        >
-          <SwiperSlide>
-            <div className="ai-elite-slide-final">
-              <img
-                src="/images/banners/mens-slide2.jpg"
-                alt="Menswear look one"
-                loading="lazy"
-                decoding="async"
-                onError={(e) => { e.currentTarget.src = "/images/banners/mens-slide2.jpg"; }}
-              />
-            </div>
-          </SwiperSlide>
-          <SwiperSlide>
-            <div className="ai-elite-slide-final">
-              <img
-                src="/images/banners/mens-slide3.jpg"
-                alt="Menswear look two"
-                loading="lazy"
-                decoding="async"
-                onError={(e) => { e.currentTarget.src = "/images/banners/mens-slide3.jpg"; }}
-              />
-            </div>
-          </SwiperSlide>
-        </Swiper>
-        <div className="ai-elite-glow-final"></div>
-        <div className="ai-elite-border-final"></div>
-      </div>
-    </div>
-  </div>
-</section>  */}
-
-
-
+            {/* ── TRENDING NOW (home-section6) ──────────────────── */}
             <section className="home-section6">
-                <h2 className="home-section6-title">Trending Now....</h2>
+                <h2 className="home-section6-title">Trending Now</h2>
                 <div className="home-section6-grid">
-                    {/* Part 1 */}
                     <div className="home-section6-item">
                         <div className="home-section6-left">
                             <img src="/images/trending-part1-big1.jpeg" alt="Printed Sarees" />
                         </div>
                         <div className="home-section6-right">
-                            <h3>Printed Sarees...</h3>
+                            <h3>Printed Sarees</h3>
                             <div className="home-section6-small-images">
                                 <img src="/images/trending-part1-small1.jpeg" alt="Saree 1" />
                                 <img src="/images/trending-part1-small2.jpeg" alt="Saree 2" />
@@ -905,13 +761,12 @@ export default function HomePage() {
                         </div>
                     </div>
 
-                    {/* Part 2 */}
                     <div className="home-section6-item">
                         <div className="home-section6-left">
                             <img src="/images/trending-part2-big1.jpeg" alt="Lehanga" />
                         </div>
                         <div className="home-section6-right">
-                            <h3> Printed Lehanga...</h3>
+                            <h3>Printed Lehanga</h3>
                             <div className="home-section6-small-images">
                                 <img src="/images/trending-part2-small1.jpeg" alt="Lehanga 1" />
                                 <img src="/images/trending-part2-small2.jpeg" alt="Lehanga 2" />
@@ -919,13 +774,12 @@ export default function HomePage() {
                         </div>
                     </div>
 
-                    {/* Part 3 */}
                     <div className="home-section6-item">
                         <div className="home-section6-left">
                             <img src="/images/trending-part3-big1.jpeg" alt="Wedding Sarees" />
                         </div>
                         <div className="home-section6-right">
-                            <h3>Wedding Sarees...</h3>
+                            <h3>Wedding Sarees</h3>
                             <div className="home-section6-small-images">
                                 <img src="/images/trending-part3-small1.jpeg" alt="Saree 1" />
                                 <img src="/images/trending-part3-small2.jpeg" alt="Saree 2" />
@@ -933,52 +787,48 @@ export default function HomePage() {
                         </div>
                     </div>
 
-                    {/* Part 4 */}
                     <div className="home-section6-item">
                         <div className="home-section6-left">
-                            <img src="/images/trending-part4-big1.jpeg" alt="Printed Sarees" />
+                            <img src="/images/trending-part4-big1.jpeg" alt="Printed Chudidars" />
                         </div>
                         <div className="home-section6-right">
-                            <h3>Printed Chudidars...</h3>
+                            <h3>Printed Chudidars</h3>
                             <div className="home-section6-small-images">
-                                <img src="/images/trending-part4-small1.jpeg" alt="Saree 1" />
-                                <img src="/images/trending-part4-small2.jpeg" alt="Saree 2" />
+                                <img src="/images/trending-part4-small1.jpeg" alt="Chudidar 1" />
+                                <img src="/images/trending-part4-small2.jpeg" alt="Chudidar 2" />
                             </div>
                         </div>
                     </div>
 
-                    {/* Part 5 */}
                     <div className="home-section6-item">
                         <div className="home-section6-left">
-                            <img src="/images/trending-part5-big1.jpeg" alt="Lehanga" />
+                            <img src="/images/trending-part5-big1.jpeg" alt="Printed Gowns" />
                         </div>
                         <div className="home-section6-right">
-                            <h3> Printed Gowns...</h3>
+                            <h3>Printed Gowns</h3>
                             <div className="home-section6-small-images">
-                                <img src="/images/trending-part5-small1.jpeg" alt="Lehanga 1" />
-                                <img src="/images/trending-part5-small2.jpeg" alt="Lehanga 2" />
+                                <img src="/images/trending-part5-small1.jpeg" alt="Gown 1" />
+                                <img src="/images/trending-part5-small2.jpeg" alt="Gown 2" />
                             </div>
                         </div>
                     </div>
 
-                    {/* Part 6 */}
                     <div className="home-section6-item">
                         <div className="home-section6-left">
-                            <img src="/images/trending-part6-big1.jpeg" alt="Wedding Sarees" />
+                            <img src="/images/trending-part6-big1.jpeg" alt="Half Sarees" />
                         </div>
                         <div className="home-section6-right">
-                            <h3>Half Sarees...</h3>
+                            <h3>Half Sarees</h3>
                             <div className="home-section6-small-images">
-                                <img src="/images/trending-part6-small1.jpeg" alt="Saree 1" />
-                                <img src="/images/trending-part6-small2.jpeg" alt="Saree 2" />
+                                <img src="/images/trending-part6-small1.jpeg" alt="Half Saree 1" />
+                                <img src="/images/trending-part6-small2.jpeg" alt="Half Saree 2" />
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-
-
+            {/* ── PREMIUM COLLECTIONS (lux4 fan cards) ─────────── */}
             <section className="home-section4">
                 <h2 className="home-section4-title">Our Premium Collections</h2>
                 <div className="lux4-underline">
@@ -992,27 +842,26 @@ export default function HomePage() {
                         aria-label="Shop Men's Fashion"
                         className="lux4-glass"
                         data-text="Men"
-                        style={{ ['--r']: '-12', ['--bg']: "url('/images/card1.jpg')" }}
+                        style={{ '--r': '-12', '--bg': "url('/images/card1.jpg')" }}
                     ></a>
                     <a
                         href="/women"
                         aria-label="Shop Women's Fashion"
                         className="lux4-glass"
                         data-text="Women"
-                        style={{ ['--r']: '6', ['--bg']: "url('/images/card3.jpg')" }}
+                        style={{ '--r': '6', '--bg': "url('/images/card3.jpg')" }}
                     ></a>
                     <a
                         href="/kids"
                         aria-label="Shop Kids Fashion"
                         className="lux4-glass"
                         data-text="Kids"
-                        style={{ ['--r']: '18', ['--bg']: "url('/images/card4.jpg')" }}
+                        style={{ '--r': '18', '--bg': "url('/images/card4.jpg')" }}
                     ></a>
                 </div>
             </section>
 
-
-
+            {/* ── KIDS COSMO (animated tracks) ──────────────────── */}
             <section className="kids-cosmo">
                 <div className="kids-sky layer-a"></div>
                 <div className="kids-sky layer-b"></div>
@@ -1068,11 +917,10 @@ export default function HomePage() {
                 </div>
             </section>
 
-
-
+            {/* ── WOMEN'S CATEGORIES (animated border cards) ────── */}
             <section className="ai-cats">
                 <div className="ai-cats-head">
-                    <h2 className="ai-cats-title">Women’s Categories</h2>
+                    <h2 className="ai-cats-title">Women's Categories</h2>
                     <div className="ai-cats-underline">
                         <span className="ac ac1"></span>
                         <span className="ac ac2"></span>
@@ -1125,8 +973,7 @@ export default function HomePage() {
                 </div>
             </section>
 
-
-
+            {/* ── ELEGANT STYLES HERO CARD ──────────────────────── */}
             <section className="ai-hero-card">
                 <div className="ai-hero-bg">
                     <img src="/images/ai/main-card1.png" alt="" />
@@ -1147,18 +994,10 @@ export default function HomePage() {
                 </div>
             </section>
 
-
-
-
-
-
-
-
-
-
+            {/* ── WOMEN'S PICKS (offer + swiper) ────────────────── */}
             <section className="ws-section">
                 <div className="ws-top">
-                    <h2 className="ws-title">Women’s Picks</h2>
+                    <h2 className="ws-title">Women's Picks</h2>
                     <div className="ws-underline">
                         <span className="ws-line l1"></span>
                         <span className="ws-dot"></span>
@@ -1213,11 +1052,10 @@ export default function HomePage() {
                 </div>
             </section>
 
-
-
+            {/* ── WOMEN'S SHOWCASE DUO ──────────────────────────── */}
             <section className="wc-duo">
                 <div className="wc-duo-top">
-                    <h2 className="wc-duo-title">Women’s Showcase</h2>
+                    <h2 className="wc-duo-title">Women's Showcase</h2>
                     <div className="wc-duo-underline">
                         <span className="kl k1"></span>
                         <span className="kl k2"></span>
@@ -1231,7 +1069,6 @@ export default function HomePage() {
                             <img src="/images/banners/circle.png" alt="Women Collection Circle" loading="lazy" decoding="async" />
                         </div>
                     </Link>
-
                     <Link to="/women" className="wc-box">
                         <div className="wc-duo-rect">
                             <img src="/images/banners/square1.png" alt="Women Collection Square" loading="lazy" decoding="async" />
@@ -1244,14 +1081,14 @@ export default function HomePage() {
                 </div>
             </section>
 
-
+            {/* ── KIDS' SHOWCASE (scrollable rail) ──────────────── */}
             <section className="kids-showcase galaxy" ref={kidsRef}>
                 <div className="galaxy-layer stars-1"></div>
                 <div className="galaxy-layer stars-2"></div>
                 <div className="galaxy-layer dust"></div>
 
                 <div className="kids-head">
-                    <h2 className="kids-title">Kids’ Collection</h2>
+                    <h2 className="kids-title">Kids' Collection</h2>
                     <div className="kids-underline">
                         <span className="kl k1"></span>
                         <span className="kl k2"></span>
@@ -1273,8 +1110,8 @@ export default function HomePage() {
                     </button>
                     <div id="kids-rail" className="kids-rail">
                         {[...new Set(kidsItems.map(it => JSON.stringify(it)))].map((s, idx) => {
-                            const item = JSON.parse(s);
-                            const src = withWidth(item.img, 900);
+                            const item  = JSON.parse(s);
+                            const src   = withWidth(item.img, 900);
                             const title = item.title || "Kids";
                             return (
                                 <a href="/kids" className="kids-card" key={idx}>
@@ -1309,15 +1146,6 @@ export default function HomePage() {
                     </button>
                 </div>
             </section>
-
-
-
-
-
-
-
-
-
 
             <Footer />
         </div>

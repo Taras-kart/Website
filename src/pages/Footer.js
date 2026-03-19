@@ -168,18 +168,21 @@ const Footer = () => {
     }
   ];
 
-  return (
+return (
     <footer className="footer">
       <div className="footer-desktop">
-        <div className="footer-column">
-          <h2 className="footer-title">Tars Kart</h2>
-          <div className="logo-final1">
-            <video autoPlay loop muted playsInline>
-              <source src="/images/logo.mp4" type="video/mp4" />
-            </video>
-          </div>
-        </div>
+<div className="footer-column">
 
+
+
+  <div className="logo-final1">
+    <img src="/attach-loader.gif" alt="Attach Logo" />
+
+    <h3 className="footer-logo-title">Attach</h3>
+  </div>
+  
+
+</div>
         <div className="footer-column">
           <h3>Categories</h3>
           <DesktopList section="Categories" items={['Mens', 'Womens', 'Kids']} />

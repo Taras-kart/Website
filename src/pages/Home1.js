@@ -1,18 +1,25 @@
 // src/pages/Home1.js
+
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+
+// Swiper core and required modules
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Autoplay, Pagination } from 'swiper'
+
+// Swiper styles
+import 'swiper/css'
+import 'swiper/css/pagination'
+
+// Local components and styles
 import './Home1.css'
 import Navbar from './Navbar'
 import Footer from './Footer'
-import { Swiper, SwiperSlide } from 'swiper/react'
-import { Autoplay } from 'swiper'
-import 'swiper/css'
-import { Link } from 'react-router-dom'
 import Divider from './Divider'
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://taras-kart-backend.vercel.app'
 
 export default function Home1() {
-  //const railRef = useRef(null)
   const [imageMap, setImageMap] = useState({})
 
   useEffect(() => {
@@ -66,123 +73,146 @@ export default function Home1() {
     ]
   }
 
-  //const scrollLeft = () => {
-  //  if (railRef.current) {
-  //    railRef.current.scrollBy({ left: -300, behavior: 'smooth' })
-  //  }
-  //}
-
-  //const scrollRight = () => {
-  //  if (railRef.current) {
-  //   railRef.current.scrollBy({ left: 300, behavior: 'smooth' })
-  // }
-  // } 
-
   return (
     <div className="home1-page-new-home">
       <Navbar />
       <div className="spacer-new-home">
+
+        {/* ── HERO BANNER ─────────────────────────────── */}
         <section className="home1-hero-new-home">
           <div className="home1-hero-frame-new-home">
-            <img src={getImage('/images/home-screen-main1.png')} alt="Home Banner" loading="eager" />
+            <Swiper
+              modules={[Autoplay, Pagination]}
+              loop
+              slidesPerView={1}
+              autoplay={{ delay: 3500, disableOnInteraction: false }}
+              speed={900}
+              pagination={{ clickable: true }}
+              grabCursor={true}
+            >
+              <SwiperSlide>
+                <div className="main-hero-slide">
+                  <img src={getImage('/images/ATTACH-BANNER.png')} alt="Home Banner 1" loading="eager" />
+                </div>
+              </SwiperSlide>
+              <SwiperSlide>
+                <div className="main-hero-slide">
+                  <img src={getImage('/images/CUCUMBER-BANNER.png')} alt="Cucumber Banner" loading="lazy" />
+                </div>
+              </SwiperSlide>
+              <SwiperSlide>
+                <div className="main-hero-slide">
+                  <img src={getImage('/images/QUICK-DRY-BANNER.png')} alt="Quick Dry Banner" loading="lazy" />
+                </div>
+              </SwiperSlide>
+              <SwiperSlide>
+                <div className="main-hero-slide">
+                  <img src={getImage('/images/JOCKEY-BANNER.png')} alt="Jockey Banner" loading="lazy" />
+                </div>
+              </SwiperSlide>
+              <SwiperSlide>
+                <div className="main-hero-slide">
+                  <img src={getImage('/images/TWIN-BIRDS-BANNER.png')} alt="Twin Birds Banner" loading="lazy" />
+                </div>
+              </SwiperSlide>
+              <SwiperSlide>
+                <div className="main-hero-slide">
+                  <img src={getImage('/images/INDIAN-FLOWER-BANNER.png')} alt="Indian Flower Banner" loading="lazy" />
+                </div>
+              </SwiperSlide>
+              <SwiperSlide>
+                <div className="main-hero-slide">
+                  <img src={getImage('/images/DAZZEL-BANNER.png')} alt="Dazzel Banner" loading="lazy" />
+                </div>
+              </SwiperSlide>
+              <SwiperSlide>
+                <div className="main-hero-slide">
+                  <img src={getImage('/images/ASWATI-BANNER.png')} alt="Aswati Banner" loading="lazy" />
+                </div>
+              </SwiperSlide>
+            </Swiper>
           </div>
         </section>
 
         <Divider label="Women" direction="ltr" />
 
-
-        <section className="fc-section">
+        {/* ── OUR BRANDS ──────────────────────────────── */}
+        <section className="fc-section section-animate">
           <div className="fc-inner">
             <div className="fc-head">
-              <h2 className="fc-title">Featured Collections</h2>
+              <h2 className="fc-title">Our Brands</h2>
             </div>
 
             <div className="fc-grid">
               <Link to="/category-display?brand=Twin%20Birds" className="fc-card">
                 <div className="fc-media">
-                  <img src={getImage('/images/updated/category-kurti-pant.webp')} alt="Kurti Pant" />
-
-                  <div className="fc-brandBadge" aria-label="Twin Birds">
-                    <img
-                      src={getImage('/images/brands/twin-birds-brand.jpeg')}
-                      alt="Twin Birds"
-                      loading="lazy"
-                    />
-                  </div>
+                  <img src={getImage('/images/brands/twin-birds-brand.jpeg')} alt="Twin Birds" loading="lazy" />
                 </div>
               </Link>
 
               <Link to="/category-display?brand=Indian%20Flower" className="fc-card">
                 <div className="fc-media">
-                  <img src={getImage('/images/updated/category-leggin.webp')} alt="Leggin" />
-
-                  <div className="fc-brandBadge" aria-label="Indian Flower">
-                    <img
-                      src={getImage('/images/brands/indian-flower-brand.jpeg')}
-                      alt="Indian Flower"
-                      loading="lazy"
-                    />
-                  </div>
+                  <img src={getImage('/images/brands/indian-flower-brand.jpeg')} alt="Indian Flower" loading="lazy" />
                 </div>
               </Link>
 
               <Link to="/category-display?brand=Intimacy" className="fc-card">
                 <div className="fc-media">
-                  <img src={getImage('/images/updated/category-metallic-pant.webp')} alt="Metallic Pant" />
-
-                  <div className="fc-brandBadge" aria-label="Intimacy">
-                    <img
-                      src={getImage('/images/brands/intimacy-brand.jpeg')}
-                      alt="Intimacy"
-                      loading="lazy"
-                    />
-                  </div>
+                  <img src={getImage('/images/brands/intimacy-brand.jpeg')} alt="Intimacy" loading="lazy" />
                 </div>
               </Link>
 
               <Link to="/category-display?brand=Naidu%20Hall" className="fc-card">
                 <div className="fc-media">
-                  <img src={getImage('/images/updated/category-plazzo-pant.webp')} alt="Plazzo Pant" />
-
-                  <div className="fc-brandBadge" aria-label="Naidu Hall">
-                    <img
-                      src={getImage('/images/brands/naidu-hall-brand.avif')}
-                      alt="Naidu Hall"
-                      loading="lazy"
-                    />
-                  </div>
+                  <img src={getImage('/images/brands/naidu-hall-brand.avif')} alt="Naidu Hall" loading="lazy" />
                 </div>
               </Link>
 
               <Link to="/category-display?brand=Aswathi" className="fc-card">
                 <div className="fc-media">
-                  <img src={getImage('/images/updated/category-saree-shaper.webp')} alt="Saree Shaper" />
-
-                  <div className="fc-brandBadge" aria-label="Aswathi">
-                    <img
-                      src={getImage('/images/brands/aswathi-brand.jpeg')}
-                      alt="Aswathi"
-                      loading="lazy"
-                    />
-                  </div>
+                  <img src={getImage('/images/brands/aswathi-brand.jpeg')} alt="Aswathi" loading="lazy" />
                 </div>
               </Link>
 
-              <Link to="/category-display" className="fc-card fc-viewall">
-                <div className="fc-media fc-viewall-media">
-                  <div className="fc-viewall-content">
-                    <span className="fc-viewall-title">View All</span>
-                    <span className="fc-viewall-sub">Women’s Collection</span>
-                  </div>
+              <Link to="/category-display?brand=Cucumber" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/brands/cucumber-brand.jpg')} alt="Cucumber" loading="lazy" />
                 </div>
               </Link>
+
+              <Link to="/category-display?brand=Quickdry" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/brands/quickdry-brand.jpg')} alt="Quickdry" loading="lazy" />
+                </div>
+              </Link>
+
+              <Link to="/category-display?brand=Jockey" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/brands/jockey-brand.jpg')} alt="Jockey" loading="lazy" />
+                </div>
+              </Link>
+
+              <Link to="/category-display?brand=Dazzle" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/brands/dazzle-brand.jpg')} alt="Dazzle" loading="lazy" />
+                </div>
+              </Link>
+
+              <Link to="/category-display?brand=Dazzle" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/brands/body-care.jpg')} alt="Body Care" loading="lazy" />
+                </div>
+              </Link>
+
+
             </div>
           </div>
         </section>
 
         <Divider label="Women" direction="ltr" />
 
-        <section className="home-part-grid">
+        {/* ── WOMEN CATEGORY GRID ─────────────────────── */}
+        <section className="home-part-grid section-animate">
           <div className="home-part-inner">
             <div className="home-part-card">
               <img src={getImage('/images/updated/grid1.jpg')} alt="Women Tops" className="home-part-img" />
@@ -228,6 +258,7 @@ export default function Home1() {
 
         <Divider label="Women" direction="ltr" />
 
+        {/* ── STAY COOL IN STYLE ──────────────────────── */}
         <section className="cool4-sec">
           <div className="cool4-shell">
             <h2 className="cool4-title">Stay Cool in Style</h2>
@@ -285,50 +316,12 @@ export default function Home1() {
 
         <Divider label="Women" direction="ltr" />
 
-        <section className="home1-hero-new-home-2">
-          <div className="home1-hero-frame-new-home-2">
-            <Swiper
-              className="home1-hero-swiper-new-home-2"
-              modules={[Autoplay]}
-              loop
-              slidesPerView={1}
-              autoplay={{ delay: 3500, disableOnInteraction: false }}
-              speed={900}
-            >
-              <SwiperSlide>
-                <div className="home1-hero-slide-new-home-2">
-                  <img src={getImage('/images/banners/banner1.jpg')} alt="Women Banner" loading="eager" />
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="home1-hero-slide-new-home-2">
-                  <img
-                    src={getImage('/images/banners/banner2.jpg')}
-                    alt="Women Banner"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="home1-hero-slide-new-home-2">
-                  <img
-                    src={getImage('/images/banners/banner3.jpg')}
-                    alt="Women Banner"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-              </SwiperSlide>
-            </Swiper>
-          </div>
-        </section>
-
+        {/* ── WOMEN'S CATEGORIES (aurum2) ─────────────── */}
         <section className="aurum2-sec">
           <div className="aurum2-shell">
             <div className="aurum2-head">
               <div className="aurum2-kicker">Explore</div>
-              <h2 className="aurum2-title">Women’s Categories</h2>
+              <h2 className="aurum2-title">Women's Categories</h2>
               <p className="aurum2-sub">Handpicked picks to refresh your wardrobe, in one glance.</p>
               <a className="aurum2-view" href="/women">View all</a>
             </div>
@@ -425,7 +418,7 @@ export default function Home1() {
           </div>
         </section>
 
-
+        {/* ── TWIN BIRDS MARQUEE (wb3) ─────────────────── */}
         <section className="wb3-sec">
           <div className="wb3-head">
             <h2>Women • Twin Birds</h2>
@@ -491,23 +484,16 @@ export default function Home1() {
           </div>
 
           <div className="wb3-actions">
-            <Link to="/women" className="wb3-pill">
-              Cotton Kurti
-            </Link>
-            <Link to="/women" className="wb3-pill">
-              Flexi Kurti Pant
-            </Link>
-            <Link to="/women" className="wb3-pill">
-              Sleek Kurti Pant
-            </Link>
-            <Link to="/women" className="wb3-pill">
-              Viscose Kurti Pant
-            </Link>
+            <Link to="/women" className="wb3-pill">Cotton Kurti</Link>
+            <Link to="/women" className="wb3-pill">Flexi Kurti Pant</Link>
+            <Link to="/women" className="wb3-pill">Sleek Kurti Pant</Link>
+            <Link to="/women" className="wb3-pill">Viscose Kurti Pant</Link>
           </div>
         </section>
 
         <Divider label="Women" direction="ltr" />
 
+        {/* ── POPULAR BRANDS (wb3x) ─────────────────────── */}
         <section className="wb3x-sec">
           <div className="wb3x-shell">
             <div className="wb3x-head">
@@ -518,7 +504,7 @@ export default function Home1() {
               <div className="wb3x-left">
                 <div className="wb3x-leftTop">
                   <div className="wb3x-kicker">Shop by brand</div>
-                  <div className="wb3x-note">Pick a brand and explore women’s collections.</div>
+                  <div className="wb3x-note">Pick a brand and explore women's collections.</div>
                 </div>
 
                 <div className="wb3x-brandGrid">
@@ -532,7 +518,6 @@ export default function Home1() {
                   <Link to="/women?brand=Amante" className="wb3x-brand">Amante</Link>
                   <Link to="/women?brand=Triumph" className="wb3x-brand">Triumph</Link>
                   <Link to="/women?brand=Lovable" className="wb3x-brand">Lovable</Link>
-
                   <Link to="/women?brand=Zivame" className="wb3x-brand">Zivame</Link>
                   <Link to="/women?brand=Clovia" className="wb3x-brand">Clovia</Link>
                   <Link to="/women?brand=PrettySecrets" className="wb3x-brand">PrettySecrets</Link>
@@ -546,7 +531,7 @@ export default function Home1() {
                 </div>
 
                 <div className="wb3x-actions">
-                  <Link to="/women" className="wb3x-cta">Explore Women’s Store</Link>
+                  <Link to="/women" className="wb3x-cta">Explore Women's Store</Link>
                 </div>
               </div>
 
@@ -561,7 +546,7 @@ export default function Home1() {
 
         <Divider label="Women" direction="ltr" />
 
-
+        {/* ── SECONDARY BANNER (attach banners) ───────── */}
         <section className="home1-hero-new-home-2">
           <div className="home1-hero-frame-new-home-2">
             <Swiper
@@ -574,34 +559,31 @@ export default function Home1() {
             >
               <SwiperSlide>
                 <div className="home1-hero-slide-new-home-2">
-                  <img src={getImage('/images/banners/banner10.png')} alt="Women Banner" loading="eager" />
+                  <img src={getImage('/images/banners/attach-banner-1.png')} alt="Women Banner" loading="eager" />
                 </div>
               </SwiperSlide>
               <SwiperSlide>
                 <div className="home1-hero-slide-new-home-2">
-                  <img
-                    src={getImage('/images/banners/banner11.png')}
-                    alt="Women Banner"
-                    loading="lazy"
-                    decoding="async"
-                  />
+                  <img src={getImage('/images/banners/attach-banner-2.png')} alt="Women Banner" loading="lazy" decoding="async" />
                 </div>
               </SwiperSlide>
               <SwiperSlide>
                 <div className="home1-hero-slide-new-home-2">
-                  <img
-                    src={getImage('/images/banners/banner12.png')}
-                    alt="Women Banner"
-                    loading="lazy"
-                    decoding="async"
-                  />
+                  <img src={getImage('/images/banners/attach-banner-3.png')} alt="Women Banner" loading="lazy" decoding="async" />
+                </div>
+              </SwiperSlide>
+              <SwiperSlide>
+                <div className="home1-hero-slide-new-home-2">
+                  <img src={getImage('/images/banners/attach-banner-4.png')} alt="Women Banner" loading="lazy" decoding="async" />
                 </div>
               </SwiperSlide>
             </Swiper>
           </div>
         </section>
+
         <Divider label="Women" direction="ltr" />
 
+        {/* ── THREE-UP EDITORIAL ──────────────────────── */}
         <section className="three-clock-section">
           <div className="three-clock-grid">
             <div className="three-clock-card">
@@ -635,7 +617,7 @@ export default function Home1() {
           </div>
         </section>
 
-
+        {/* ── INDIAN FLOWER PICKS (wb4n) ───────────────── */}
         <section className="wb4n-sec">
           <div className="wb4n-shell">
             <div className="wb4n-head">
@@ -690,11 +672,7 @@ export default function Home1() {
 
         <Divider label="Women" direction="ltr" />
 
-
-
-
-
-
+        {/* ── INNERWEAR ESSENTIALS (iwx) ───────────────── */}
         <section className="iwx-sec">
           <div className="iwx-shell">
             <div className="iwx-head">
@@ -755,12 +733,14 @@ export default function Home1() {
             </div>
           </div>
         </section>
+
         <Divider label="Women" direction="ltr" />
 
+        {/* ── MEN'S ESSENTIALS CIRCLES (mb1x) ─────────── */}
         <section className="mb1x-sec">
           <div className="mb1x-shell">
             <div className="mb1x-head">
-              <h2 className="mb1x-title">Men’s Essentials</h2>
+              <h2 className="mb1x-title">Men's Essentials</h2>
               <Link to="/men" className="mb1x-view">View All</Link>
             </div>
 
@@ -771,49 +751,42 @@ export default function Home1() {
                 </div>
                 <span className="mb1x-cap">Briefs</span>
               </Link>
-
               <Link to="/men" className="mb1x-item">
                 <div className="mb1x-photo">
                   <img src={getImage('/images/home/jockey2.webp')} alt="T-Shirts" />
                 </div>
                 <span className="mb1x-cap">T-Shirts</span>
               </Link>
-
               <Link to="/men" className="mb1x-item">
                 <div className="mb1x-photo">
                   <img src={getImage('/images/home/jockey4.webp')} alt="Vests" />
                 </div>
                 <span className="mb1x-cap">Vests</span>
               </Link>
-
               <Link to="/men" className="mb1x-item">
                 <div className="mb1x-photo">
                   <img src={getImage('/images/home/jockey5.webp')} alt="Trunks" />
                 </div>
                 <span className="mb1x-cap">Trunks</span>
               </Link>
-
               <Link to="/men" className="mb1x-item">
                 <div className="mb1x-photo">
                   <img src={getImage('/images/home/jockey6.webp')} alt="Knit Shirts" />
                 </div>
                 <span className="mb1x-cap">Knit Shirts</span>
               </Link>
-
               <Link to="/men" className="mb1x-item">
                 <div className="mb1x-photo">
                   <img src={getImage('/images/home/jockey7.webp')} alt="Polos" />
                 </div>
                 <span className="mb1x-cap">Polos</span>
               </Link>
-
               <Link to="/men" className="mb1x-item">
                 <div className="mb1x-photo">
                   <img src={getImage('/images/home/jockey8.webp')} alt="Boxers" />
                 </div>
                 <span className="mb1x-cap">Boxers</span>
               </Link>
-
               <Link to="/men" className="mb1x-item">
                 <div className="mb1x-photo">
                   <img src={getImage('/images/home/jockey9.webp')} alt="Gym Vests" />
@@ -826,10 +799,11 @@ export default function Home1() {
 
         <Divider label="Women" direction="ltr" />
 
+        {/* ── MEN'S PICKS SCROLL ROW (mb3x) ───────────── */}
         <section className="mb3x-sec">
           <div className="mb3x-shell">
             <div className="mb3x-head">
-              <h2 className="mb3x-title">Men’s Picks</h2>
+              <h2 className="mb3x-title">Men's Picks</h2>
               <Link to="/men" className="mb3x-view">View All</Link>
             </div>
 
@@ -843,7 +817,6 @@ export default function Home1() {
                   <div className="mb3x-sub">Layer up in style</div>
                 </div>
               </Link>
-
               <Link to="/men/shirts" className="mb3x-card">
                 <div className="mb3x-media">
                   <img src={getImage('/images/home/jockey6.webp')} alt="Shirts" />
@@ -853,7 +826,6 @@ export default function Home1() {
                   <div className="mb3x-sub">Everyday essentials</div>
                 </div>
               </Link>
-
               <Link to="/men/polos" className="mb3x-card">
                 <div className="mb3x-media">
                   <img src={getImage('/images/home/jockey2.webp')} alt="Polos" />
@@ -863,7 +835,6 @@ export default function Home1() {
                   <div className="mb3x-sub">Smart and casual</div>
                 </div>
               </Link>
-
               <Link to="/men/trousers" className="mb3x-card">
                 <div className="mb3x-media">
                   <img src={getImage('/images/home/jockey3.webp')} alt="Trousers" />
@@ -873,7 +844,6 @@ export default function Home1() {
                   <div className="mb3x-sub">Clean fits</div>
                 </div>
               </Link>
-
               <Link to="/men/denim" className="mb3x-card">
                 <div className="mb3x-media">
                   <img src={getImage('/images/home/jockey4.webp')} alt="Denim" />
@@ -883,7 +853,6 @@ export default function Home1() {
                   <div className="mb3x-sub">Classic looks</div>
                 </div>
               </Link>
-
               <Link to="/men/ethnic" className="mb3x-card">
                 <div className="mb3x-media">
                   <img src={getImage('/images/home/jockey5.webp')} alt="Ethnic" />
@@ -893,7 +862,6 @@ export default function Home1() {
                   <div className="mb3x-sub">Festive ready</div>
                 </div>
               </Link>
-
               <Link to="/men/footwear" className="mb3x-card">
                 <div className="mb3x-media">
                   <img src={getImage('/images/home/jockey6.webp')} alt="Footwear" />
@@ -907,49 +875,11 @@ export default function Home1() {
           </div>
         </section>
 
-        <section className="home1-hero-new-home-2">
-          <div className="home1-hero-frame-new-home-2">
-            <Swiper
-              className="home1-hero-swiper-new-home-2"
-              modules={[Autoplay]}
-              loop
-              slidesPerView={1}
-              autoplay={{ delay: 3500, disableOnInteraction: false }}
-              speed={900}
-            >
-              <SwiperSlide>
-                <div className="home1-hero-slide-new-home-2">
-                  <img src={getImage('/images/banners/banner10.png')} alt="Women Banner" loading="eager" />
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="home1-hero-slide-new-home-2">
-                  <img
-                    src={getImage('/images/banners/banner11.png')}
-                    alt="Women Banner"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="home1-hero-slide-new-home-2">
-                  <img
-                    src={getImage('/images/banners/banner12.png')}
-                    alt="Women Banner"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-              </SwiperSlide>
-            </Swiper>
-          </div>
-        </section>
-
+        {/* ── MEN'S DAILY ESSENTIALS (mb4x) ───────────── */}
         <section className="mb4x-sec">
           <div className="mb4x-shell">
             <div className="mb4x-head">
-              <h2 className="mb4x-title">Men’s Daily Essentials</h2>
+              <h2 className="mb4x-title">Men's Daily Essentials</h2>
               <Link to="/men" className="mb4x-view">View All</Link>
             </div>
 
@@ -975,7 +905,6 @@ export default function Home1() {
                     <div className="mb4x-sub">Everyday comfort</div>
                   </div>
                 </Link>
-
                 <Link to="/men/trousers" className="mb4x-card">
                   <div className="mb4x-media">
                     <img src={getImage('/images/updated/men3.jpg')} alt="Trousers" />
@@ -985,7 +914,6 @@ export default function Home1() {
                     <div className="mb4x-sub">Clean silhouettes</div>
                   </div>
                 </Link>
-
                 <Link to="/men/denim" className="mb4x-card">
                   <div className="mb4x-media">
                     <img src={getImage('/images/updated/men4.jpg')} alt="Denim" />
@@ -995,7 +923,6 @@ export default function Home1() {
                     <div className="mb4x-sub">Classic staples</div>
                   </div>
                 </Link>
-
                 <Link to="/men/jackets" className="mb4x-card">
                   <div className="mb4x-media">
                     <img src={getImage('/images/updated/men5.jpg')} alt="Jackets" />
@@ -1005,7 +932,6 @@ export default function Home1() {
                     <div className="mb4x-sub">Layer in style</div>
                   </div>
                 </Link>
-
                 <Link to="/men/ethnic" className="mb4x-card">
                   <div className="mb4x-media">
                     <img src={getImage('/images/updated/men6.jpg')} alt="Ethnic" />
@@ -1015,7 +941,6 @@ export default function Home1() {
                     <div className="mb4x-sub">Festive ready</div>
                   </div>
                 </Link>
-
                 <Link to="/men/footwear" className="mb4x-card">
                   <div className="mb4x-media">
                     <img src={getImage('/images/updated/men7.jpg')} alt="Footwear" />
@@ -1036,6 +961,7 @@ export default function Home1() {
             </div>
           </div>
         </section>
+
       </div>
       <Footer />
     </div>

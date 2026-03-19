@@ -1,26 +1,29 @@
 /* TaraLoader.css */
+/* The full-screen overlay (Make sure its background is transparent or semi-transparent, not solid white) */
 .tara-overlay {
   position: fixed;
-  inset: 0;
-  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(5px);
+  background-color: rgba(255, 255, 255, 0.8); /* Optional: A slight frosted glass effect, or change to 'transparent' */
+  z-index: 9999;
 }
 
+/* The actual GIF */
 .tara-video {
-  width: min(220px, 50vw);
+  width: 150px; /* Adjust size as needed */
   height: auto;
-  border-radius: 16px;
-  outline: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow:
-    0 18px 60px rgba(0, 0, 0, 0.55),
-    0 0 0 1px rgba(255, 255, 255, 0.06) inset;
-  opacity: 0.9;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  
+  /* THIS IS THE MAGIC LINE: It makes the white background of the GIF vanish! */
+  mix-blend-mode: multiply; 
 }
-
 @media (max-width: 768px) {
   .tara-video {
     width: min(200px, 60vw);
