@@ -298,7 +298,7 @@ return (
       </div>
 
       <div className="footer-mobile">
-        <h2 className="footer-title">Attach.co.in</h2>
+        <h2 className="footer-title">Attach</h2>
         {mobileSections.map((section, index) => (
           <div className="footer-mobile-section" key={index}>
             <div className="footer-mobile-header" onClick={() => toggleSection(index)}>
@@ -340,7 +340,7 @@ return (
           <span>•</span>
           <a href={POLICY_LINKS.terms} target="_blank" rel="noreferrer">Terms & Conditions</a>
         </div>
-        <div className="footer-bottom-right">© {new Date().getFullYear()} Attach.co.in</div>
+        <div className="footer-bottom-right">© {new Date().getFullYear()} Attach</div>
       </div>
     </footer>
   );

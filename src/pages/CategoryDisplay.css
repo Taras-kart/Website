@@ -349,7 +349,7 @@
 
 /* Mobile */
 @media (max-width: 560px) {
-  .category-top-spacer { height: 86px; }
+  .category-top-spacer { height: 125px; }
 
   .category-wrap { padding: 12px 10px 60px; }
 

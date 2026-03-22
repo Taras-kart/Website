@@ -58,9 +58,23 @@
 
 /* ── 4. PAGE SHELL & SPACER ─────────────────────────────────── */
 .spacer-new-home {
-  padding-top: 140px; /* Adjust this number to match your exact Navbar height */
+  padding-top: 123px; /* Reduced slightly for desktop to sit perfectly flush */
   margin-top: 0; 
   background-color: var(--bg);
+}
+
+/* Tablet spacer adjustment */
+@media (max-width: 1024px) {
+  .spacer-new-home {
+    padding-top: 116px; 
+  }
+}
+
+/* Mobile spacer adjustment (Reduces the massive gap) */
+@media (max-width: 600px) {
+  .spacer-new-home {
+    padding-top: 104px; 
+  }
 }
 /* ── 5. HERO BANNER (MAIN SWIPER) ───────────────────────────── */
 .home1-hero-new-home {
