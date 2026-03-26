@@ -17,8 +17,6 @@ const API_BASE = API_BASE_RAW.replace(/\/+$/, '')
 const normalizeText = (str) =>
   String(str || '')
     .toLowerCase()
-    .replace(/₹/g, ' ')
-    .replace(/rs\.?/g, ' ')
     .replace(/[^a-z0-9]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
@@ -148,7 +146,6 @@ const NavbarFinal = () => {
   const { wishlistItems } = useWishlist()
   const { cartItems }     = useCart()
 
-  // FIX: Make userType a React State so the Navbar instantly updates!
   const [userType, setUserType] = useState(() => {
     if (typeof window === 'undefined') return 'B2C'
     return sessionStorage.getItem('userType') || localStorage.getItem('userType') || 'B2C'
@@ -188,7 +185,6 @@ const NavbarFinal = () => {
   const desktopInputRef    = useRef(null)
   const mobileInputRef     = useRef(null)
 
-  // NOW THIS WILL WORK PERFECTLY!
   const navLinks = useMemo(() => {
     if (isB2B) {
       return [
@@ -206,8 +202,6 @@ const NavbarFinal = () => {
   }, [isB2B])
 
   const isActive = (p) => location.pathname === p
-
-  // ... the rest of the file stays exactly the same!
 
   /* drawer + body lock */
   useEffect(() => {
@@ -313,33 +307,24 @@ const NavbarFinal = () => {
     setShowSuggestions(false)
   }
 
-  /* ══════════════════════════════════════════════════════════════
-     RENDER
-     ══════════════════════════════════════════════════════════════ */
   return (
     <nav className={`navbar-final${showNav ? '' : ' nav-hidden'}`}>
 
       {/* ════════ DESKTOP ════════ */}
       <div className="desktop-only-final">
-
-        {/* Row 1 — GIF left | Logo center | Icons right */}
         <div className="nb-row nb-row--top">
-
           <div className="nb-gif-wrap">
             <img src="/loader-bg.gif" alt="" aria-hidden="true" className="nb-gif" />
           </div>
 
           <div className="nb-logo-center">
-            <Link to="/" onClick={handleNavClick}>
+            <Link to={homePath} onClick={handleNavClick}>
               <img src="/logo1.png" alt="Taras Kart" className="nb-logo-img" />
             </Link>
           </div>
 
           <div className="nb-icons-right">
-
-
-<div className="icon-buttons-final">
-              {/* Profile is visible to everyone */}
+            <div className="icon-buttons-final">
               <Link to="/profile" className={`icon-btn${isActive('/profile') ? ' icon-active-btn' : ''}`}>
                 <div className="icon-circle">
                   {isActive('/profile') ? <FaUser className="icon icon-filled" /> : <FaRegUser className="icon icon-outline" />}
@@ -348,7 +333,6 @@ const NavbarFinal = () => {
                 <span className={`icon-label${isActive('/profile') ? ' label-active' : ''}`}>Profile</span>
               </Link>
 
-              {/* Wishlist & Cart are hidden from B2B */}
               {!isB2B && (
                 <>
                   <Link to="/wishlist" className={`icon-btn${isActive('/wishlist') ? ' icon-active-btn' : ''}`}>
@@ -371,29 +355,27 @@ const NavbarFinal = () => {
                 </>
               )}
             </div>
-
-
           </div>
         </div>
 
-        {/* Gold divider */}
         <div className="nb-divider" aria-hidden="true" />
 
-        {/* Row 2 — Search | Nav links | spacer */}
         <div className="nb-row nb-row--bottom">
-
+          {/* SEARCH HIDDEN FOR B2B */}
           <div className="nb-search-wrap">
-            <SearchBar
-              wrapperClassName="search-desktop-light"
-              inputRef={desktopInputRef}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              suggestions={suggestions}
-              showSuggestions={showSuggestions}
-              setShowSuggestions={setShowSuggestions}
-              onSearch={handleSearch}
-              onPickSuggestion={handleSuggestionClick}
-            />
+            {!isB2B && (
+              <SearchBar
+                wrapperClassName="search-desktop-light"
+                inputRef={desktopInputRef}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                suggestions={suggestions}
+                showSuggestions={showSuggestions}
+                setShowSuggestions={setShowSuggestions}
+                onSearch={handleSearch}
+                onPickSuggestion={handleSuggestionClick}
+              />
+            )}
           </div>
 
           <div className="nb-links-center">
@@ -411,30 +393,23 @@ const NavbarFinal = () => {
             </div>
           </div>
 
-          {/* Mirror spacer keeps links true-center */}
           <div className="nb-search-wrap" aria-hidden="true" />
         </div>
       </div>
 
       {/* ════════ MOBILE ════════ */}
       <div className="mobile-only-final">
-
-        {/* Top row: GIF | Logo | Hamburger */}
         <div className="top-row-final">
-
-          {/* Left: GIF */}
           <div className="nb-mob-gif-wrap">
             <img src="/loader-bg.gif" alt="" aria-hidden="true" className="nb-mob-gif" />
           </div>
 
-          {/* Center: Logo */}
           <div className="nb-mob-logo-wrap">
-            <Link to="/" onClick={handleNavClick}>
+            <Link to={homePath} onClick={handleNavClick}>
               <img src="/logo1.png" alt="Taras Kart" className="nb-mobile-logo" />
             </Link>
           </div>
 
-          {/* Right: Hamburger */}
           <div className="nb-mob-toggle-wrap">
             <button
               type="button"
@@ -448,28 +423,26 @@ const NavbarFinal = () => {
               </div>
             </button>
           </div>
-
         </div>
 
-        {/* Search row */}
-        <div className="bottom-row-final">
-          <SearchBar
-            inputRef={mobileInputRef}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            suggestions={suggestions}
-            showSuggestions={showSuggestions}
-            setShowSuggestions={setShowSuggestions}
-            onSearch={handleSearch}
-            onPickSuggestion={handleSuggestionClick}
-          />
-        </div>
+        {/* SEARCH HIDDEN FOR B2B */}
+        {!isB2B && (
+          <div className="bottom-row-final">
+            <SearchBar
+              inputRef={mobileInputRef}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              suggestions={suggestions}
+              showSuggestions={showSuggestions}
+              setShowSuggestions={setShowSuggestions}
+              onSearch={handleSearch}
+              onPickSuggestion={handleSuggestionClick}
+            />
+          </div>
+        )}
 
-        {/* Drawer */}
         {isMobileNavOpen && (
           <div className="mobile-drawer-final slide-in" ref={mobileNavRef}>
-
-            {/* Close button only — no logo, no white box */}
             <div className="nb-drawer-topbar">
               <button
                 type="button"
@@ -481,7 +454,6 @@ const NavbarFinal = () => {
               </button>
             </div>
 
-            {/* Nav links */}
             <nav className="nb-drawer-nav">
               {navLinks.map(({ name, path }) => (
                 <Link
@@ -498,14 +470,12 @@ const NavbarFinal = () => {
 
             <div className="nb-drawer-sep" aria-hidden="true" />
 
-{/* Footer: profile / wishlist / cart */}
             <div className="nb-drawer-footer">
               <Link to="/profile" className="nb-drawer-footer-row" onClick={handleNavClick}>
                 <FaRegUser />
                 <span>Profile</span>
               </Link>
 
-              {/* Hide Wishlist and Cart for B2B users in Mobile Drawer */}
               {!isB2B && (
                 <>
                   <Link to="/wishlist" className="nb-drawer-footer-row" onClick={handleNavClick}>
@@ -529,7 +499,6 @@ const NavbarFinal = () => {
                 </>
               )}
             </div>
-
           </div>
         )}
       </div>

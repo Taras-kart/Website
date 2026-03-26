@@ -1,179 +1,565 @@
-/* B2BDashboard.css */
+/* ============================================================
+   B2BDASHBOARD.CSS — Refined warm-luxury theme
+   ============================================================ */
+
+/* ── 1. DESIGN TOKENS ───────────────────────────────────────── */
 :root {
-  --b2b-gold: #ffd277;
-  --b2b-gold-dark: #d4af37;
-  --b2b-bg: #f9fafb;
-  --b2b-card-bg: #ffffff;
-  --b2b-text-main: #111827;
-  --b2b-text-muted: #6b7280;
-  --b2b-border: #e5e7eb;
+  --brand:        #6c4d38;
+  --brand-dark:   #5a3d2b;
+  --brand-2xl:    rgba(108, 77, 56, 0.22);
+  --brand-xl:     rgba(108, 77, 56, 0.14);
+  --brand-lg:     rgba(108, 77, 56, 0.09);
+  --brand-sm:     rgba(108, 77, 56, 0.05);
+  --ink:          #2b1e16;
+  --ink-mute:     rgba(43, 30, 22, 0.62);
+  --ink-faint:    rgba(43, 30, 22, 0.38);
+  --gold:         #D4AF37;
+  --gold-glow:    rgba(212, 175, 55, 0.22);
+  --gold-faint:   rgba(212, 175, 55, 0.10);
+  --bg:           #ffffff;
+  --bg-warm:      #faf8f5;
+  --bg-card:      #fffefb;
+  --border:       rgba(108, 77, 56, 0.12);
+  --border-hover: rgba(108, 77, 56, 0.26);
+
+  --max-w:        1280px;
+  --inner-x:      clamp(16px, 4vw, 40px);
+
+  --r-card:       20px;
+  --r-pill:       999px;
+  --r-sm:         10px;
+
+  --shadow-card:  0 4px 16px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-hover: 0 20px 48px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-brand: 0 12px 28px rgba(108, 77, 56, 0.20);
+
+  --ease:         cubic-bezier(0.25, 0.8, 0.25, 1);
+  --ease-spring:  cubic-bezier(0.34, 1.36, 0.64, 1);
+  --dur:          0.24s;
 }
 
+/* ── 2. KEYFRAMES ───────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.93) translateY(16px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── 3. PAGE SHELL ──────────────────────────────────────────── */
 .b2b-page-wrapper {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: var(--b2b-bg);
-  font-family: "Noto Sans", sans-serif;
+  background-color: var(--bg-warm);
+  color: var(--ink);
 }
 
 .b2b-main-content {
   flex: 1;
-  padding: 140px 20px 80px; /* Pads past the fixed navbar */
+  padding: clamp(100px, 12vw, 148px) var(--inner-x) clamp(60px, 8vw, 100px);
 }
 
 .b2b-container {
-  max-width: 1100px;
+  max-width: var(--max-w);
   margin: 0 auto;
 }
 
+/* ── 4. PAGE HEADER ─────────────────────────────────────────── */
 .b2b-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: clamp(36px, 5vw, 60px);
+  animation: fadeUp 0.6s var(--ease) both;
+}
+
+.b2b-header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: var(--r-pill);
+  background: var(--brand-sm);
+  border: 1px solid var(--border);
+  color: var(--brand);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
 }
 
 .b2b-title {
-  font-size: clamp(28px, 4vw, 36px);
-  color: var(--b2b-text-main);
+  font-size: clamp(26px, 4vw, 44px);
+  color: var(--brand);
   font-weight: 800;
-  margin: 0 0 10px;
+  margin: 0 0 12px;
+  letter-spacing: -0.3px;
+  line-height: 1.12;
 }
 
 .b2b-subtitle {
-  font-size: 16px;
-  color: var(--b2b-text-muted);
-  margin: 0;
+  font-size: clamp(14px, 1.5vw, 16px);
+  color: var(--ink-mute);
+  margin: 0 auto 26px;
+  max-width: 520px;
+  line-height: 1.7;
 }
 
-/* Grid Layouts */
+.b2b-header-divider {
+  width: 60px;
+  height: 2px;
+  border-radius: var(--r-pill);
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin: 0 auto;
+}
+
+/* ── 5. DISTRIBUTOR GRID ────────────────────────────────────── */
 .b2b-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(14px, 2vw, 22px);
 }
 
-.brand-grid {
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-}
-
-/* Card Styles */
-.b2b-card {
-  background: var(--b2b-card-bg);
-  border: 1px solid var(--b2b-border);
-  border-radius: 16px;
-  padding: 30px 24px;
-  text-align: center;
+/* ── 6. DISTRIBUTOR CARDS ───────────────────────────────────── */
+.dist-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-card);
+  padding: clamp(32px, 4vw, 48px) clamp(24px, 3vw, 36px);
   cursor: pointer;
-  text-decoration: none;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
+  text-align: center;
+  gap: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+  animation: scaleIn 0.5s var(--ease) both;
+  transition:
+    transform var(--dur) var(--ease-spring),
+    box-shadow var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+  will-change: transform;
 }
 
-.b2b-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
-  border-color: var(--b2b-gold);
+/* Subtle warm glow in corner */
+.dist-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 80% 10%, var(--gold-faint), transparent 60%);
+  pointer-events: none;
 }
+
+/* Top accent line */
+.dist-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.dist-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-hover);
+}
+
+.dist-card:hover::after { opacity: 1; }
 
 .b2b-card-icon {
   width: 60px;
   height: 60px;
-  background: rgba(255, 210, 119, 0.15);
-  color: var(--b2b-gold-dark);
+  background: var(--brand-lg);
+  color: var(--brand);
+  border: 1px solid var(--border);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
-  margin-bottom: 20px;
+  margin-bottom: 6px;
+  transition:
+    transform var(--dur) var(--ease-spring),
+    background var(--dur) ease,
+    box-shadow var(--dur) ease;
 }
 
-.brand-icon {
-  width: 48px;
-  height: 48px;
-  font-size: 20px;
-  margin-bottom: 16px;
+.dist-card:hover .b2b-card-icon {
+  transform: scale(1.1);
+  background: var(--brand-xl);
+  box-shadow: var(--shadow-brand);
 }
 
 .b2b-card-title {
-  font-size: 20px;
-  color: var(--b2b-text-main);
-  font-weight: 700;
-  margin: 0 0 8px;
-}
-
-.brand-card .b2b-card-title {
-  font-size: 17px;
+  font-size: clamp(17px, 1.8vw, 21px);
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0;
+  letter-spacing: -0.2px;
+  line-height: 1.2;
 }
 
 .b2b-card-meta {
-  font-size: 14px;
-  color: var(--b2b-text-muted);
-  margin: 0 0 20px;
-  font-weight: 500;
+  font-size: 13px;
+  color: var(--ink-mute);
+  margin: 0 0 8px;
 }
 
 .b2b-card-action {
-  margin-top: auto;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--b2b-gold-dark);
-}
-
-/* Brands View Specifics */
-.b2b-brands-view {
-  animation: fadeIn 0.3s ease;
-}
-
-.b2b-back-btn {
   display: inline-flex;
   align-items: center;
+  gap: 7px;
+  padding: 10px 22px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  border-radius: var(--r-pill);
+  box-shadow: 0 8px 20px rgba(108,77,56,0.22);
+  transition:
+    transform var(--dur) var(--ease-spring),
+    box-shadow var(--dur) ease,
+    filter var(--dur) ease;
+}
+
+.dist-card:hover .b2b-card-action {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow: var(--shadow-brand);
+}
+
+.b2b-card-action svg {
+  transition: transform var(--dur) var(--ease-spring);
+}
+
+.dist-card:hover .b2b-card-action svg {
+  transform: translateX(3px);
+}
+
+/* ── 7. BRANDS VIEW ─────────────────────────────────────────── */
+.b2b-brands-view {
+  animation: fadeIn 0.35s var(--ease) both;
+}
+
+/* ── 7a. BREADCRUMB ─────────────────────────────────────────── */
+.b2b-breadcrumb {
+  display: flex;
+  align-items: center;
   gap: 8px;
-  background: transparent;
-  border: none;
-  color: var(--b2b-text-muted);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0;
   margin-bottom: 24px;
-  transition: color 0.2s ease;
+  font-size: 13px;
 }
 
-.b2b-back-btn:hover {
-  color: var(--b2b-text-main);
+.b2b-breadcrumb-home {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--brand);
+  font-weight: 700;
+  font-size: 13px;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: opacity var(--dur) ease;
 }
 
-.b2b-brands-header {
-  margin-bottom: 30px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--b2b-border);
-}
+.b2b-breadcrumb-home:hover { opacity: 0.7; }
 
-.b2b-brands-header h2 {
-  font-size: 24px;
-  color: var(--b2b-text-main);
-  margin: 0 0 6px;
-}
-
-.b2b-brands-header p {
-  color: var(--b2b-text-muted);
-  margin: 0;
+.b2b-breadcrumb-sep {
+  color: var(--ink-faint);
   font-size: 15px;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+.b2b-breadcrumb-current {
+  color: var(--ink-mute);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-@media (max-width: 768px) {
-  .b2b-main-content {
-    padding-top: 120px;
+/* ── 7b. STATS STRIP ────────────────────────────────────────── */
+.b2b-stats-strip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border-radius: var(--r-pill);
+  background: var(--brand-sm);
+  border: 1px solid var(--border);
+  color: var(--ink-mute);
+  font-size: 13px;
+  margin-bottom: clamp(20px, 3vw, 32px);
+}
+
+.b2b-stats-strip svg { color: var(--brand); flex-shrink: 0; }
+.b2b-stats-strip strong { color: var(--ink); font-weight: 700; }
+
+/* ── 7c. BRAND GRID ─────────────────────────────────────────── */
+.brand-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(12px, 1.8vw, 20px);
+}
+
+/* ── 7d. BRAND CARDS ────────────────────────────────────────── */
+.brand-card {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--r-card);
+  overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+  animation: scaleIn 0.4s var(--ease) both;
+  transition:
+    transform var(--dur) var(--ease-spring),
+    box-shadow var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+  will-change: transform;
+  position: relative;
+}
+
+.brand-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-hover);
+}
+
+/* ── Logo zone ── */
+.brand-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.brand-media-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(18px, 3vw, 30px);
+  transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.brand-card:hover .brand-media-inner {
+  transform: scale(1.06);
+}
+
+.brand-media-inner img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  mix-blend-mode: darken;
+  display: block;
+}
+
+/* ── Hover overlay with CTA ── */
+.brand-hover-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 30%,
+    rgba(108, 77, 56, 0.80) 100%
+  );
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 18px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.brand-card:hover .brand-hover-overlay {
+  opacity: 1;
+}
+
+.brand-hover-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 7px 16px;
+  border-radius: var(--r-pill);
+  border: 1px solid rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(6px);
+  transform: translateY(6px);
+  transition: transform 0.3s var(--ease-spring);
+}
+
+.brand-card:hover .brand-hover-cta {
+  transform: translateY(0);
+}
+
+/* ── Info strip ── */
+.brand-info {
+  padding: 13px 16px 15px;
+  text-align: center;
+  background: var(--bg-card);
+  position: relative;
+}
+
+/* Animated underline that slides in on hover */
+.brand-info::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--brand), transparent);
+  border-radius: var(--r-pill);
+  transform: translateX(-50%);
+  transition: width 0.35s var(--ease);
+}
+
+.brand-card:hover .brand-info::after {
+  width: 70%;
+}
+
+.brand-title {
+  font-size: 13px;
+  color: var(--ink);
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: 0.15px;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color var(--dur) ease;
+}
+
+.brand-card:hover .brand-title {
+  color: var(--brand);
+}
+
+/* ── 8. RESPONSIVE ──────────────────────────────────────────── */
+
+/* Large tablets / small desktops */
+@media (max-width: 1100px) {
+  .brand-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
+}
+
+/* Tablets */
+@media (max-width: 900px) {
+  .b2b-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .brand-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Wide mobile */
+@media (max-width: 720px) {
   .b2b-grid {
     grid-template-columns: 1fr;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .brand-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .b2b-stats-strip {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .b2b-stat-divider { display: none; }
+}
+
+/* Mobile */
+@media (max-width: 520px) {
+  .b2b-main-content {
+    padding-top: 100px;
+  }
+
+  .brand-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .brand-media {
+    aspect-ratio: 1 / 1;
+  }
+
+  .brand-hover-overlay {
+    display: none; /* on touch, show info strip instead */
+  }
+
+  .dist-card {
+    padding: 22px 18px;
+  }
+
+  .b2b-breadcrumb-current {
+    max-width: 180px;
+  }
+}
+
+/* Very small */
+@media (max-width: 360px) {
+  .brand-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .brand-info {
+    padding: 10px 12px 12px;
+  }
+}
+
+/* ── 9. REDUCED MOTION ──────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .dist-card,
+  .brand-card,
+  .brand-media-inner,
+  .brand-hover-overlay,
+  .brand-hover-cta,
+  .brand-arrow,
+  .b2b-card-icon,
+  .dist-brand-count,
+  .b2b-card-action {
+    transition: none !important;
+    transform: none !important;
+    animation: none !important;
   }
 }
