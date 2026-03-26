@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { FaGoogle } from 'react-icons/fa'
 import { FiX, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi'
+import { useNavigate } from 'react-router-dom'
 import './LoginPopup.css'
 import ForgotPasswordPopup from './ForgotPasswordPopup'
 import SignupPopup from './SignupPopup'
@@ -49,7 +50,9 @@ const LoginPopup = ({ onClose, onSuccess }) => {
   const emailRef = useRef(null)
   const passwordRef = useRef(null)
   const msgTimerRef = useRef(null)
+  const navigate = useNavigate()
 
+  const [loginType, setLoginType] = useState('B2C') // NEW: B2C / B2B toggle state
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [popupMessage, setPopupMessage] = useState('')
@@ -175,6 +178,13 @@ const LoginPopup = ({ onClose, onSuccess }) => {
       setTimeout(() => {
         onSuccess && onSuccess(toUserShape(backendUser || u))
         setPopupMessage('')
+        
+        // NEW: Redirect B2B users to their dashboard
+        const uType = String(backendUser?.type || 'B2C').toUpperCase()
+        if (uType === 'B2B') {
+          if (onClose) onClose()
+          navigate('/b2b-dashboard')
+        }
       }, 900)
     } catch (e) {
       const raw = String(e?.message || '')
@@ -207,6 +217,13 @@ const LoginPopup = ({ onClose, onSuccess }) => {
                 userType: user.type
               })
             setPopupMessage('')
+            
+            // NEW: Redirect B2B users to their dashboard (Fallback route)
+            const uType = String(user?.type || 'B2C').toUpperCase()
+            if (uType === 'B2B') {
+              if (onClose) onClose()
+              navigate('/b2b-dashboard')
+            }
           }, 1200)
         } catch (err) {
           setMsg(String(err?.message || 'Invalid email or password'))
@@ -219,7 +236,7 @@ const LoginPopup = ({ onClose, onSuccess }) => {
     } finally {
       setLoading(false)
     }
-  }, [canSubmit, email, password, backendLogin, onSuccess, setMsg, syncUserWithBackend, toUserShape])
+  }, [canSubmit, email, password, backendLogin, onSuccess, setMsg, syncUserWithBackend, toUserShape, navigate, onClose])
 
   const handleLoginRef = useRef(handleLogin)
   useEffect(() => {
@@ -313,7 +330,25 @@ const LoginPopup = ({ onClose, onSuccess }) => {
 
           <div className="head-login">
             <p className="title-login">Welcome back</p>
-            <p className="sub-login">Sign in to continue to Tars Kart</p>
+            <p className="sub-login">Sign in to continue to Attach</p>
+          </div>
+
+          {/* NEW: B2C / B2B Toggle Switch */}
+          <div className="login-type-toggle">
+            <button
+              type="button"
+              className={`type-btn ${loginType === 'B2C' ? 'active' : ''}`}
+              onClick={() => setLoginType('B2C')}
+            >
+              Customer
+            </button>
+            <button
+              type="button"
+              className={`type-btn ${loginType === 'B2B' ? 'active' : ''}`}
+              onClick={() => setLoginType('B2B')}
+            >
+              Wholesale (B2B)
+            </button>
           </div>
 
           <form className="form-login" onSubmit={(e) => e.preventDefault()}>
@@ -358,11 +393,13 @@ const LoginPopup = ({ onClose, onSuccess }) => {
               </button>
             </div>
 
-            <div className="row-login">
-              <button type="button" className="forgot-login-btn" onClick={() => setShowForgot(true)}>
-                Forgot Password?
-              </button>
-            </div>
+{loginType === 'B2C' && (
+              <div className="row-login">
+                <button type="button" className="forgot-login-btn" onClick={() => setShowForgot(true)}>
+                  Forgot Password?
+                </button>
+              </div>
+            )}
 
             <button className={`sign-login ${canSubmit ? '' : 'disabled'}`} onClick={handleLogin} disabled={!canSubmit}>
               {loading ? <span className="spinner-login" /> : 'Sign In'}
@@ -375,24 +412,29 @@ const LoginPopup = ({ onClose, onSuccess }) => {
             )}
           </form>
 
-          <div className="social-message-login">
-            <div className="line-login"></div>
-            <p className="message-login">Or continue with</p>
-            <div className="line-login"></div>
-          </div>
+          {/* NEW: Hide Signup and Google if B2B is selected */}
+          {loginType === 'B2C' && (
+            <>
+              <div className="social-message-login">
+                <div className="line-login"></div>
+                <p className="message-login">Or continue with</p>
+                <div className="line-login"></div>
+              </div>
 
-          <div className="social-grid-login">
-            <button className="btn-google-login" onClick={loginWithGoogle} type="button">
-              <FaGoogle /> Google
-            </button>
-          </div>
+              <div className="social-grid-login">
+                <button className="btn-google-login" onClick={loginWithGoogle} type="button">
+                  <FaGoogle /> Google
+                </button>
+              </div>
 
-          <p className="signup-login">
-            Don’t have an account{' '}
-            <button className="signup-link-login" onClick={() => setShowSignup(true)} type="button">
-              Sign up
-            </button>
-          </p>
+              <p className="signup-login">
+                Don’t have an account{' '}
+                <button className="signup-link-login" onClick={() => setShowSignup(true)} type="button">
+                  Sign up
+                </button>
+              </p>
+            </>
+          )}
         </div>
       </div>
 

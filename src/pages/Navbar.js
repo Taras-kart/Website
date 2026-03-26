@@ -148,6 +148,29 @@ const NavbarFinal = () => {
   const { wishlistItems } = useWishlist()
   const { cartItems }     = useCart()
 
+  // FIX: Make userType a React State so the Navbar instantly updates!
+  const [userType, setUserType] = useState(() => {
+    if (typeof window === 'undefined') return 'B2C'
+    return sessionStorage.getItem('userType') || localStorage.getItem('userType') || 'B2C'
+  })
+
+  useEffect(() => {
+    const syncUserType = () => {
+      if (typeof window === 'undefined') return
+      const storedType = sessionStorage.getItem('userType') || localStorage.getItem('userType') || 'B2C'
+      if (storedType !== userType) setUserType(storedType)
+    }
+    window.addEventListener('storage', syncUserType)
+    const interval = setInterval(syncUserType, 500)
+    return () => {
+      window.removeEventListener('storage', syncUserType)
+      clearInterval(interval)
+    }
+  }, [userType])
+
+  const isB2B = String(userType).toUpperCase() === 'B2B'
+  const homePath = isB2B ? '/b2b-dashboard' : '/'
+
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
   const [searchTerm,      setSearchTerm]      = useState('')
   const [showNav,         setShowNav]         = useState(true)
@@ -163,15 +186,26 @@ const NavbarFinal = () => {
   const desktopInputRef    = useRef(null)
   const mobileInputRef     = useRef(null)
 
-  const navLinks = useMemo(() => [
-    { name: 'Home',       path: '/' },
-    { name: 'Women',      path: '/women' },
-    { name: 'Men',        path: '/men' },
-    { name: 'Kids',       path: '/kids' },
-    { name: 'Contact Us', path: '/customer-care' }
-  ], [])
+  // NOW THIS WILL WORK PERFECTLY!
+  const navLinks = useMemo(() => {
+    if (isB2B) {
+      return [
+        { name: 'Dashboard', path: '/b2b-dashboard' },
+        { name: 'Contact Us', path: '/customer-care' }
+      ]
+    }
+    return [
+      { name: 'Home',       path: '/' },
+      { name: 'Women',      path: '/women' },
+      { name: 'Men',        path: '/men' },
+      { name: 'Kids',       path: '/kids' },
+      { name: 'Contact Us', path: '/customer-care' }
+    ]
+  }, [isB2B])
 
   const isActive = (p) => location.pathname === p
+
+  // ... the rest of the file stays exactly the same!
 
   /* drawer + body lock */
   useEffect(() => {
@@ -300,8 +334,10 @@ const NavbarFinal = () => {
           </div>
 
           <div className="nb-icons-right">
-            <div className="icon-buttons-final">
 
+
+<div className="icon-buttons-final">
+              {/* Profile is visible to everyone */}
               <Link to="/profile" className={`icon-btn${isActive('/profile') ? ' icon-active-btn' : ''}`}>
                 <div className="icon-circle">
                   {isActive('/profile') ? <FaUser className="icon icon-filled" /> : <FaRegUser className="icon icon-outline" />}
@@ -310,25 +346,31 @@ const NavbarFinal = () => {
                 <span className={`icon-label${isActive('/profile') ? ' label-active' : ''}`}>Profile</span>
               </Link>
 
-              <Link to="/wishlist" className={`icon-btn${isActive('/wishlist') ? ' icon-active-btn' : ''}`}>
-                <div className="icon-circle">
-                  {isActive('/wishlist') ? <FaHeart className="icon icon-filled" /> : <FaRegHeart className="icon icon-outline" />}
-                  {wishlistItems.length > 0 && <span className="red-dot1" />}
-                  {isActive('/wishlist') && <span className="inner-ring" />}
-                </div>
-                <span className={`icon-label${isActive('/wishlist') ? ' label-active' : ''}`}>Wishlist</span>
-              </Link>
+              {/* Wishlist & Cart are hidden from B2B */}
+              {!isB2B && (
+                <>
+                  <Link to="/wishlist" className={`icon-btn${isActive('/wishlist') ? ' icon-active-btn' : ''}`}>
+                    <div className="icon-circle">
+                      {isActive('/wishlist') ? <FaHeart className="icon icon-filled" /> : <FaRegHeart className="icon icon-outline" />}
+                      {wishlistItems.length > 0 && <span className="red-dot1" />}
+                      {isActive('/wishlist') && <span className="inner-ring" />}
+                    </div>
+                    <span className={`icon-label${isActive('/wishlist') ? ' label-active' : ''}`}>Wishlist</span>
+                  </Link>
 
-              <Link to="/cart" className={`icon-btn${isActive('/cart') ? ' icon-active-btn' : ''}`}>
-                <div className="icon-circle">
-                  {isActive('/cart') ? <FaShoppingBag className="icon icon-filled" /> : <FiShoppingBag className="icon icon-outline-stroke" />}
-                  {cartItems.length > 0 && <span className="red-dot1" />}
-                  {isActive('/cart') && <span className="inner-ring" />}
-                </div>
-                <span className={`icon-label${isActive('/cart') ? ' label-active' : ''}`}>Kart</span>
-              </Link>
-
+                  <Link to="/cart" className={`icon-btn${isActive('/cart') ? ' icon-active-btn' : ''}`}>
+                    <div className="icon-circle">
+                      {isActive('/cart') ? <FaShoppingBag className="icon icon-filled" /> : <FiShoppingBag className="icon icon-outline-stroke" />}
+                      {cartItems.length > 0 && <span className="red-dot1" />}
+                      {isActive('/cart') && <span className="inner-ring" />}
+                    </div>
+                    <span className={`icon-label${isActive('/cart') ? ' label-active' : ''}`}>Kart</span>
+                  </Link>
+                </>
+              )}
             </div>
+
+
           </div>
         </div>
 
@@ -454,30 +496,36 @@ const NavbarFinal = () => {
 
             <div className="nb-drawer-sep" aria-hidden="true" />
 
-            {/* Footer: profile / wishlist / cart */}
+{/* Footer: profile / wishlist / cart */}
             <div className="nb-drawer-footer">
               <Link to="/profile" className="nb-drawer-footer-row" onClick={handleNavClick}>
                 <FaRegUser />
                 <span>Profile</span>
               </Link>
-              <Link to="/wishlist" className="nb-drawer-footer-row" onClick={handleNavClick}>
-                <FaRegHeart />
-                <span>
-                  Wishlist
-                  {wishlistItems.length > 0 && (
-                    <span className="nb-drawer-count">{wishlistItems.length}</span>
-                  )}
-                </span>
-              </Link>
-              <Link to="/cart" className="nb-drawer-footer-row" onClick={handleNavClick}>
-                <FiShoppingBag />
-                <span>
-                  Cart
-                  {cartItems.length > 0 && (
-                    <span className="nb-drawer-count">{cartItems.length}</span>
-                  )}
-                </span>
-              </Link>
+
+              {/* Hide Wishlist and Cart for B2B users in Mobile Drawer */}
+              {!isB2B && (
+                <>
+                  <Link to="/wishlist" className="nb-drawer-footer-row" onClick={handleNavClick}>
+                    <FaRegHeart />
+                    <span>
+                      Wishlist
+                      {wishlistItems.length > 0 && (
+                        <span className="nb-drawer-count">{wishlistItems.length}</span>
+                      )}
+                    </span>
+                  </Link>
+                  <Link to="/cart" className="nb-drawer-footer-row" onClick={handleNavClick}>
+                    <FiShoppingBag />
+                    <span>
+                      Cart
+                      {cartItems.length > 0 && (
+                        <span className="nb-drawer-count">{cartItems.length}</span>
+                      )}
+                    </span>
+                  </Link>
+                </>
+              )}
             </div>
 
           </div>

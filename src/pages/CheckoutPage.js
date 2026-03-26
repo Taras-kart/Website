@@ -127,6 +127,7 @@ const COLOR_MAP = {
  * Returns a CSS color value for a given color name string.
  * Falls back to a deterministic HSL pastel for unmapped names.
  */
+  
 function resolveColor(name) {
   if (!name) return '#CCCCCC'
   const key = String(name).trim().toUpperCase()
@@ -226,6 +227,8 @@ const CheckoutPage = () => {
   const [pincodeStatus, setPincodeStatus] = useState(null)
   const [pincodeMessage, setPincodeMessage] = useState('')
 
+  
+
   const [userId, setUserId] = useState(() => {
     if (typeof window === 'undefined') return ''
     const stored = sessionStorage.getItem('userId') || localStorage.getItem('userId') || ''
@@ -236,6 +239,9 @@ const CheckoutPage = () => {
     if (typeof window === 'undefined') return 'B2C'
     return sessionStorage.getItem('userType') || localStorage.getItem('userType') || 'B2C'
   })
+
+  const [b2bQuantity, setB2bQuantity] = useState(10)
+  const [isSubmittingB2B, setIsSubmittingB2B] = useState(false)
 
   const zoomFactor = 3
 
@@ -498,6 +504,7 @@ const CheckoutPage = () => {
     }
   }
 
+  
   const handleMouseMove = (e) => {
     const image = e.target
     const rect = image.getBoundingClientRect()
@@ -572,6 +579,91 @@ const CheckoutPage = () => {
 
   const pricing = getActivePricing()
   const discount = getDiscount()
+
+  const handleB2BOrder = async () => {
+    if (!selectedColor || !selectedSize || !(product?.product_id || product?.id)) {
+      setPopupMessage('Please select color and size')
+      setTimeout(() => setPopupMessage(''), 2000)
+      return
+    }
+    if (b2bQuantity < 1) {
+      setPopupMessage('Quantity must be at least 1')
+      setTimeout(() => setPopupMessage(''), 2000)
+      return
+    }
+
+    const effectiveUserId = sessionStorage.getItem('userId') || localStorage.getItem('userId') || userId
+    if (!effectiveUserId) {
+      setPopupMessage('Please log in to place a bulk order')
+      setTimeout(() => setPopupMessage(''), 2000)
+      return
+    }
+
+    const chosenVariant = variants.find((v) => v.color === selectedColor && v.size === selectedSize) || null
+    setIsSubmittingB2B(true)
+    
+    try {
+      const userEmail = sessionStorage.getItem('userEmail') || localStorage.getItem('userEmail') || ''
+      const userName = sessionStorage.getItem('userName') || localStorage.getItem('userName') || 'B2B User'
+      
+      const orderPayload = {
+        customer_email: userEmail,
+        customer_name: userName,
+        customer_mobile: '0000000000',
+        payment_status: 'PENDING',
+        payment_method: 'B2B_BULK',
+        shipping_address: {
+          first_name: userName,
+          last_name: 'Wholesale',
+          address_1: 'B2B Bulk Order Request',
+          city: 'N/A',
+          state: 'N/A',
+          pincode: '000000',
+          phone: '0000000000'
+        },
+        items: [{
+          variant_id: chosenVariant?.id || null,
+          product_id: chosenVariant?.product_id || product?.product_id || product?.id || null,
+          qty: Number(b2bQuantity),
+          price: Number(pricing.offer),
+          mrp: Number(pricing.mrp),
+          size: selectedSize,
+          colour: selectedColor,
+          image_url: mainImage()
+        }],
+        totals: {
+          bagTotal: Number(pricing.mrp) * Number(b2bQuantity),
+          discountTotal: (Number(pricing.mrp) - Number(pricing.offer)) * Number(b2bQuantity),
+          couponPct: 0,
+          couponDiscount: 0,
+          convenience: 0,
+          giftWrap: 0,
+          payable: Number(pricing.offer) * Number(b2bQuantity)
+        }
+      }
+
+     const resp = await fetch(`${API_BASE}/api/sales/web/b2b-place`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderPayload)
+      })
+
+      if (resp.ok) {
+        setPopupMessage('Bulk Order request submitted to Admin!')
+        setTimeout(() => {
+          setPopupMessage('')
+          navigate('/b2b-dashboard')
+        }, 2500)
+      } else {
+        throw new Error('Server rejected order')
+      }
+    } catch (error) {
+      setPopupMessage('Failed to submit order. Please contact admin.')
+      setTimeout(() => setPopupMessage(''), 3000)
+    } finally {
+      setIsSubmittingB2B(false)
+    }
+  }
 
   return (
     <div className="co-wrap">
@@ -688,40 +780,67 @@ const CheckoutPage = () => {
                   ))}
                 </div>
 
-                <div className="co-actions">
-                  <button className="btn gold ghost" onClick={() => handleAdd('wishlist')}>
-                    <FaHeart style={{ marginRight: 8 }} /> Add to Wishlist
-                  </button>
-                  <button className="btn gold solid" onClick={() => handleAdd('bag')}>
-                    <FaShoppingBag style={{ marginRight: 8 }} /> Add to Bag
-                  </button>
+<div className="co-actions">
+                  {userType === 'B2B' ? (
+                    <div style={{ width: '100%', marginTop: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', background: '#f9f9f9', padding: '12px', borderRadius: '8px', border: '1px solid #ddd' }}>
+                        <strong style={{ color: '#333' }}>Bulk Qty:</strong>
+                        <input 
+                          type="number" 
+                          min="1" 
+                          value={b2bQuantity} 
+                          onChange={(e) => setB2bQuantity(e.target.value)}
+                          style={{ width: '80px', padding: '8px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '16px', textAlign: 'center' }}
+                        />
+                      </div>
+                      <button 
+                        className="btn gold solid" 
+                        style={{ width: '100%', padding: '16px', fontSize: '16px' }}
+                        onClick={handleB2BOrder}
+                        disabled={isSubmittingB2B}
+                      >
+                        {isSubmittingB2B ? 'Submitting...' : `Submit Bulk Order (₹${Number(pricing.offer * b2bQuantity).toFixed(2)})`}
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <button className="btn gold ghost" onClick={() => handleAdd('wishlist')}>
+                        <FaHeart style={{ marginRight: 8 }} /> Add to Wishlist
+                      </button>
+                      <button className="btn gold solid" onClick={() => handleAdd('bag')}>
+                        <FaShoppingBag style={{ marginRight: 8 }} /> Add to Bag
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
+{/* ── Delivery (HIDDEN FOR B2B) ── */}
+              {userType !== 'B2B' && (
+                <div className="co-section">
+                  <h3>Delivery</h3>
+                  <p className="co-sub">Enter your pincode to check delivery options</p>
+                  <div className="co-pin">
+                    <input
+                      type="text"
+                      maxLength="6"
+                      value={pincode}
+                      onChange={handlePincodeChange}
+                      placeholder="Enter Pincode"
+                      className="enter"
+                    />
+                    <button className="btn black" onClick={handlePincodeApply} disabled={isCheckingPin}>
+                      {isCheckingPin ? 'Checking…' : 'Apply'}
+                    </button>
+                  </div>
+                  {pincodeMessage && (
+                    <p className={`co-pin-msg ${pincodeStatus === 'ok' ? 'success' : pincodeStatus === 'unserviceable' ? 'warn' : 'error'}`}>
+                      {pincodeMessage}
+                    </p>
+                  )}
+                </div>
+              )}
 
-              {/* ── Delivery ── */}
-              <div className="co-section">
-                <h3>Delivery</h3>
-                <p className="co-sub">Enter your pincode to check delivery options</p>
-                <div className="co-pin">
-                  <input
-                    type="text"
-                    maxLength="6"
-                    value={pincode}
-                    onChange={handlePincodeChange}
-                    placeholder="Enter Pincode"
-                    className="enter"
-                  />
-                  <button className="btn black" onClick={handlePincodeApply} disabled={isCheckingPin}>
-                    {isCheckingPin ? 'Checking…' : 'Apply'}
-                  </button>
-                </div>
-                {pincodeMessage && (
-                  <p className={`co-pin-msg ${pincodeStatus === 'ok' ? 'success' : pincodeStatus === 'unserviceable' ? 'warn' : 'error'}`}>
-                    {pincodeMessage}
-                  </p>
-                )}
-              </div>
-            </>
+            </>  
           )}
         </div>
       </div>

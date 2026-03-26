@@ -239,7 +239,7 @@ const Profile = () => {
               <div className="login-signup-panel">
                 <div className="welcome-hero">
                   <div className="welcome-ring"></div>
-                  <h2>Welcome to Attach.co.in</h2>
+                  <h2>Welcome to Attach</h2>
                   <p>Sign in to manage your profile, orders, and preferences in one place.</p>
                 </div>
                 <div className="login-signup-buttons">

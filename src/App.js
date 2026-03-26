@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import './App.css'
+import B2CGuard from './components/B2CGuard';
 import MenPage from './pages/MenPage'
 import WomenPage from './pages/WomenPage'
 import Profile from './pages/Profile'
@@ -25,6 +26,7 @@ import RefundRequest from './pages/RefundRequest'
 import NavbarFinal from './pages/Navbar'
 import Contactus from './pages/Contactus'
 import CategoryDisplay from './pages/CategoryDisplay'
+import B2BDashboard from './pages/B2BDashboard';
 
 function NavigationLoader() {
   const location = useLocation()
@@ -45,14 +47,26 @@ function AppShell() {
       <NavigationLoader />
       <ScrollToTop />
       <NavbarFinal />
+      
       <Routes>
-        <Route path="/" element={<Home1 />} />
-        <Route path="/men" element={<MenPage />} />
-        <Route path="/women" element={<WomenPage />} />
+        {/* ════════ B2B EXCLUSIVE ROUTES ════════ */}
+        <Route path="/b2b-dashboard" element={<B2BDashboard />} />
+
+{/* ════════ B2C PROTECTED ROUTES (Marketing, Cart, Wishlist) ════════ */}
+        {/* B2B users will be bounced away from these pages */}
+        <Route element={<B2CGuard />}>
+          <Route path="/" element={<Home1 />} />
+          <Route path="/men" element={<MenPage />} />
+          <Route path="/women" element={<WomenPage />} />
+          <Route path="/kids" element={<KidsPage />} />
+          <Route path="/cart" element={<Cart />} />          
+          <Route path="/wishlist" element={<Wishlist />} />  
+        </Route>
+
+        {/* ════════ SHARED ROUTES (Accessible to both B2B and B2C) ════════ */}
         <Route path="/category-display" element={<CategoryDisplay />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/checkout" element={<CheckoutPage />} />
-        <Route path="/kids" element={<KidsPage />} />
         <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/brands" element={<Brands />} />
