@@ -169,6 +169,8 @@ const NavbarFinal = () => {
   }, [userType])
 
   const isB2B = String(userType).toUpperCase() === 'B2B'
+
+  // eslint-disable-next-line no-unused-vars
   const homePath = isB2B ? '/b2b-dashboard' : '/'
 
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
