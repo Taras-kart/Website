@@ -257,6 +257,7 @@ const CheckoutPage = () => {
   useEffect(() => { window.scrollTo(0, 0) }, [])
 
   const hydrateBackendUser = async (email) => {
+
     if (!email) return
     try {
       const res = await fetch(`${API_BASE}/api/user/by-email/${encodeURIComponent(email)}`, { cache: 'no-store' })
@@ -642,11 +643,11 @@ const CheckoutPage = () => {
         }
       }
 
-     const resp = await fetch(`${API_BASE}/api/sales/web/b2b-place`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderPayload)
-      })
+      const resp = await fetch(`${API_BASE}/api/sales/web/b2b-place`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(orderPayload)
+})
 
       if (resp.ok) {
         setPopupMessage('Bulk Order request submitted to Admin!')
@@ -785,13 +786,13 @@ const CheckoutPage = () => {
                     <div style={{ width: '100%', marginTop: '10px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', background: '#f9f9f9', padding: '12px', borderRadius: '8px', border: '1px solid #ddd' }}>
                         <strong style={{ color: '#333' }}>Bulk Qty:</strong>
-                        <input 
-                          type="number" 
-                          min="1" 
-                          value={b2bQuantity} 
-                          onChange={(e) => setB2bQuantity(e.target.value)}
-                          style={{ width: '80px', padding: '8px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '16px', textAlign: 'center' }}
-                        />
+<input 
+  type="number" 
+  min="1" 
+  value={b2bQuantity} 
+  onChange={(e) => setB2bQuantity(e.target.value === '' ? '' : Number(e.target.value))}
+  style={{ width: '80px', padding: '8px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '16px', textAlign: 'center' }}
+/>
                       </div>
                       <button 
                         className="btn gold solid" 
