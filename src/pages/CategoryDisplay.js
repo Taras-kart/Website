@@ -21,65 +21,68 @@ function cloudinaryUrlByEan(ean) {
   if (!ean) return ''
   return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/f_auto,q_auto/products/${ean}`
 }
+
+
 const CATEGORY_GROUPS = [
   // ════════ LEGGING ════════
-  { parent: 'Legging', title: 'Viscose Ankle Legging', img: '/images/updated/Viscose_Ankle_Legging.webp', patterns: ['VISCOSE ANKLE LEGGING'] },
-  { parent: 'Legging', title: 'Cotton Ankle Legging', img: '/images/updated/Cotton_Ankle_Legging.webp', patterns: ['COTTON ANKLE LEGGING'] },
-  { parent: 'Legging', title: 'Viscose Chudidar Legging', img: '/images/updated/Viscose_Churidar_Legging.webp', patterns: ['VISCOSE CHUDIDAR LEGGING'] },
-  { parent: 'Legging', title: 'Cotton Chudidar Legging', img: '/images/updated/Cotton_Churidar_Legging.webp', patterns: ['COTTON CHUDIDAR LEGGING'] },
-  { parent: 'Legging', title: 'Capri Legging', img: '/images/updated/Cotton_Capri_Legging.webp', patterns: ['CAPRI LEGGING'] },
-  { parent: 'Legging', title: 'Cropped Legging', img: '/images/updated/Cropped_Leggings.webp', patterns: ['CROPPED LEGGING'] },
-  { parent: 'Legging', title: 'Shimmer Legging', img: '/images/updated/Shimmer_Legging.webp', patterns: ['SHIMMER LEGGING'] },
+  { parent: 'Legging', title: 'Viscose Ankle Legging', patterns: ['VISCOSE ANKLE LEGGING'] },
+  { parent: 'Legging', title: 'Cotton Ankle Legging', patterns: ['COTTON ANKLE LEGGING'] },
+  { parent: 'Legging', title: 'Viscose Chudidar Legging', patterns: ['VISCOSE CHUDIDAR LEGGING'] },
+  { parent: 'Legging', title: 'Cotton Chudidar Legging', patterns: ['COTTON CHUDIDAR LEGGING'] },
+  { parent: 'Legging', title: 'Capri Legging', patterns: ['CAPRI LEGGING'] },
+  { parent: 'Legging', title: 'Cropped Legging', patterns: ['CROPPED LEGGING'] },
+  { parent: 'Legging', title: 'Shimmer Legging', patterns: ['SHIMMER LEGGING'] },
 
   // ════════ KURTI PANT ════════
-  { parent: 'Kurti Pant', title: 'Cotton Straight Pant', img: null, patterns: ['COTTON STRAIGHT PANT'] },
-  { parent: 'Kurti Pant', title: 'Flexi Kurti Pant', img: '/images/updated/flexi_kurti_pant.webp', patterns: ['FLEXI KURTI PANT'] },
-  { parent: 'Kurti Pant', title: 'Wide Leg Kurti', img: '/images/updated/flexi_kurti_pant.webp', patterns: ['WIDE LEG KURTI'] },
-  { parent: 'Kurti Pant', title: 'Cotton Kurti', img: '/images/updated/cotton_kurti_pant.webp', patterns: ['COTTON KURTI'] },
-  { parent: 'Kurti Pant', title: 'Sleek Kurti', img: '/images/updated/sleek_kurti_pant.webp', patterns: ['SLEEK KURTI'] },
-  { parent: 'Kurti Pant', title: 'Metalic Pant', img: '/images/updated/metallic_straight_pant.webp', patterns: ['METALIC PANT'] },
+  { parent: 'Kurti Pant', title: 'Cotton Straight Pant', patterns: ['COTTON STRAIGHT PANT'] },
+  { parent: 'Kurti Pant', title: 'Flexi Kurti Pant', patterns: ['FLEXI KURTI PANT'] },
+  { parent: 'Kurti Pant', title: 'Wide Leg Kurti', patterns: ['WIDE LEG KURTI'] },
+  { parent: 'Kurti Pant', title: 'Cotton Kurti', patterns: ['COTTON KURTI'] },
+  { parent: 'Kurti Pant', title: 'Sleek Kurti', patterns: ['SLEEK KURTI'] },
+  { parent: 'Kurti Pant', title: 'Metalic Pant', patterns: ['METALIC PANT'] },
 
   // ════════ JEGGING ════════
-  { parent: 'Jegging', title: 'Flexi Indigo Jeggings', img: null, patterns: ['FLEXI INDIGO JEGGINGS'] },
-  { parent: 'Jegging', title: 'Coloured Jegging', img: null, patterns: ['COLOURED JEGGING'] },
+  { parent: 'Jegging', title: 'Flexi Indigo Jeggings', patterns: ['FLEXI INDIGO JEGGINGS'] },
+  { parent: 'Jegging', title: 'Coloured Jegging', patterns: ['COLOURED JEGGING'] },
 
   // ════════ PLAZZO ════════
-  { parent: 'Plazzo', title: 'Plazo', img: '/images/updated/Solid_Wide_Leg_Palazzo.webp', patterns: ['PLAZO'] },
+  { parent: 'Plazzo', title: 'Plazo', patterns: ['PLAZO'] },
 
   // ════════ SAREE SHAPER ════════
-  { parent: 'Saree Shaper', title: 'Saree Skirt', img: '/images/updated/Skirt_Shaper.webp', patterns: ['SAREE SKIRT'] },
-  { parent: 'Saree Shaper', title: 'Saree Shaper', img: '/images/updated/Saree_Shaper.webp', patterns: ['SAREE SHAPER'] },
+  { parent: 'Saree Shaper', title: 'Saree Skirt', patterns: ['SAREE SKIRT'] },
+  { parent: 'Saree Shaper', title: 'Saree Shaper', patterns: ['SAREE SHAPER'] },
 
   // ════════ SHAWL ════════
-  { parent: 'Shawl', title: 'Shimmer Shawl', img: null, patterns: ['SHIMMER SHAWL'] },
-  { parent: 'Shawl', title: 'Fashion Shawl', img: null, patterns: ['FASHION SHAWL'] },
+  { parent: 'Shawl', title: 'Shimmer Shawl', patterns: ['SHIMMER SHAWL'] },
+  { parent: 'Shawl', title: 'Fashion Shawl', patterns: ['FASHION SHAWL'] },
 
   // ════════ SPORTS BRA ════════
-  { parent: 'Sports Bra', title: 'Elestic Sports Bra', img: null, patterns: ['ELESTIC SPORTS BRA'] },
-  { parent: 'Sports Bra', title: 'Stretch Sports Vest', img: null, patterns: ['STRETCH SPORTS VEST'] },
+  { parent: 'Sports Bra', title: 'Elestic Sports Bra', patterns: ['ELESTIC SPORTS BRA'] },
+  { parent: 'Sports Bra', title: 'Stretch Sports Vest', patterns: ['STRETCH SPORTS VEST'] },
 
   // ════════ LOUNGE WEAR ════════
-  { parent: 'Lounge Wear', title: 'Plain Night Pant', img: null, patterns: ['PLAIN NIGHT PANT'] },
-  { parent: 'Lounge Wear', title: 'Textured Pant', img: null, patterns: ['TEXTURED PANT'] },
-  { parent: 'Lounge Wear', title: 'Plain Shorts', img: null, patterns: ['PLAIN SHORTS'] },
-  { parent: 'Lounge Wear', title: 'Printed Shorts', img: null, patterns: ['PRINTED SHORTS'] },
-  { parent: 'Lounge Wear', title: 'Printed Night Pant', img: null, patterns: ['PRINTED NIGHT PANT'] },
-  { parent: 'Lounge Wear', title: 'Printed T-Shirt', img: null, patterns: ['PRINTED T-SHIRT'] },
-  { parent: 'Lounge Wear', title: 'Collor Cord Set', img: null, patterns: ['COLLOR CORD SET'] },
-  { parent: 'Lounge Wear', title: 'Round Neck Cord Set', img: null, patterns: ['ROUND NECK CORD SET'] },
-  { parent: 'Lounge Wear', title: 'Easy Tees', img: null, patterns: ['EASY TEES'] },
-  { parent: 'Lounge Wear', title: 'Easy Pant', img: null, patterns: ['EASY PANT'] },
+  { parent: 'Lounge Wear', title: 'Plain Night Pant', patterns: ['PLAIN NIGHT PANT'] },
+  { parent: 'Lounge Wear', title: 'Textured Pant', patterns: ['TEXTURED PANT'] },
+  { parent: 'Lounge Wear', title: 'Plain Shorts', patterns: ['PLAIN SHORTS'] },
+  { parent: 'Lounge Wear', title: 'Printed Shorts', patterns: ['PRINTED SHORTS'] },
+  { parent: 'Lounge Wear', title: 'Printed Night Pant', patterns: ['PRINTED NIGHT PANT'] },
+  { parent: 'Lounge Wear', title: 'Printed T-Shirt', patterns: ['PRINTED T-SHIRT'] },
+  { parent: 'Lounge Wear', title: 'Collor Cord Set', patterns: ['COLLOR CORD SET'] },
+  { parent: 'Lounge Wear', title: 'Round Neck Cord Set', patterns: ['ROUND NECK CORD SET'] },
+  { parent: 'Lounge Wear', title: 'Easy Tees', patterns: ['EASY TEES'] },
+  { parent: 'Lounge Wear', title: 'Easy Pant', patterns: ['EASY PANT'] },
 
   // ════════ EXACT PARENT MATCHES (FALLBACKS) ════════
   // These MUST be at the bottom. If the product is just named "LEGGING", it lands here.
-  { parent: 'Legging', title: 'Leggings', img: null, patterns: ['LEGGING'] },
-  { parent: 'Kurti Pant', title: 'Kurti Pants', img: null, patterns: ['KURTI PANT'] },
-  { parent: 'Jegging', title: 'Jeggings', img: null, patterns: ['JEGGING'] },
-  { parent: 'Plazzo', title: 'Plazzos', img: null, patterns: ['PLAZZO'] },
-  { parent: 'Shawl', title: 'Shawls', img: null, patterns: ['SHAWL'] },
-  { parent: 'Sports Bra', title: 'Sports Bras', img: null, patterns: ['SPORTS BRA'] },
-  { parent: 'Lounge Wear', title: 'Lounge Wear', img: null, patterns: ['LOUNGE WEAR'] }
+  { parent: 'Legging', title: 'Leggings', patterns: ['LEGGING'] },
+  { parent: 'Kurti Pant', title: 'Kurti Pants', patterns: ['KURTI PANT'] },
+  { parent: 'Jegging', title: 'Jeggings', patterns: ['JEGGING'] },
+  { parent: 'Plazzo', title: 'Plazzos', patterns: ['PLAZZO'] },
+  { parent: 'Shawl', title: 'Shawls', patterns: ['SHAWL'] },
+  { parent: 'Sports Bra', title: 'Sports Bras', patterns: ['SPORTS BRA'] },
+  { parent: 'Lounge Wear', title: 'Lounge Wear', patterns: ['LOUNGE WEAR'] }
 ];
+
 const deriveCategoryData = (p) => {
   const name = String(p?.product_name || '').trim()
   if (!name) return null
