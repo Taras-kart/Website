@@ -37,7 +37,7 @@ const BRAND_LOGOS = {
   'Dazzle Prime':           '/images/brands/dazzle-brand.jpg',
   'Quick Dry':              '/images/brands/quickdry-brand.jpg',
   'BodyCare':               '/images/brands/body-care.jpg',
-  'Charak':                 '/images/brands/charak-brand.jpg',
+  'Charak':                 '/images/brands/charak-brand.png',
   'Selvas':                 '/images/brands/selvas-brand.jpg',
 };
 

@@ -198,9 +198,22 @@ export default function Home1() {
                 </div>
               </Link>
 
-              <Link to="/category-display?brand=Dazzle" className="fc-card">
+              <Link to="/category-display?brand=BodyCare" className="fc-card">
                 <div className="fc-media">
                   <img src={getImage('/images/brands/body-care.jpg')} alt="Body Care" loading="lazy" />
+                </div>
+              </Link>
+
+
+              <Link to="/category-display?brand=Charak" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/brands/charak-brand.png')} alt="Charak" loading="lazy" />
+                </div>
+              </Link>
+
+              <Link to="/category-display?brand=Selvas" className="fc-card">
+                <div className="fc-media">
+                  <img src={getImage('/images/brands/selvas-brand.jpg')} alt="Selvas" loading="lazy" />
                 </div>
               </Link>
 
