@@ -145,13 +145,37 @@ const CATEGORY_GROUPS = [
   // ════════ NAIDU HALL ════════
   { brand: 'NAIDU HALL', parent: 'T-Shirt Bra', title: 'Candi', patterns: ['CNDI'] },
 
-  // ════════ INTIMACY ════════
-  { brand: 'INTIMACY', parent: 'Sports Bra', title: 'Sports Bra', patterns: ['CA01', 'CA05', 'CA09', 'CA11', 'CA12', 'BB01'] },
-  { brand: 'INTIMACY', parent: 'Everyday Bra', title: 'Everyday Bra', patterns: ['EC07', 'ES02', 'ES06', 'ES21'] },
-  { brand: 'INTIMACY', parent: 'Padded Bra', title: 'Padded Bra', patterns: ['EC06', 'UC02', 'UC09'] },
-  { brand: 'INTIMACY', parent: 'DEF Collection', title: 'DEF Collection', patterns: ['DEF-M', 'DEF-T'] },
-  { brand: 'INTIMACY', parent: 'Feeding Bra', title: 'Feeding Bra', patterns: ['FB909', 'IN21'] },
-  { brand: 'INTIMACY', parent: 'Slips', title: 'Slips', patterns: ['IN15', '3NSL', 'NGSL'] },
+// ════════ INTIMACY — SPORTS BRA ════════
+  { brand: 'INTIMACY', parent: 'Sports Bra', title: 'CA01', patterns: ['CA01'] },
+  { brand: 'INTIMACY', parent: 'Sports Bra', title: 'CA05', patterns: ['CA05'] },
+  { brand: 'INTIMACY', parent: 'Sports Bra', title: 'CA09', patterns: ['CA09'] },
+  { brand: 'INTIMACY', parent: 'Sports Bra', title: 'CA11', patterns: ['CA11'] },
+  { brand: 'INTIMACY', parent: 'Sports Bra', title: 'CA12', patterns: ['CA12'] },
+  { brand: 'INTIMACY', parent: 'Sports Bra', title: 'BB01', patterns: ['BB01'] },
+
+  // ════════ INTIMACY — EVERYDAY BRA ════════
+  { brand: 'INTIMACY', parent: 'Everyday Bra', title: 'EC07', patterns: ['EC07'] },
+  { brand: 'INTIMACY', parent: 'Everyday Bra', title: 'ES02', patterns: ['ES02'] },
+  { brand: 'INTIMACY', parent: 'Everyday Bra', title: 'ES06', patterns: ['ES06'] },
+  { brand: 'INTIMACY', parent: 'Everyday Bra', title: 'ES21', patterns: ['ES21'] },
+
+  // ════════ INTIMACY — PADDED BRA ════════
+  { brand: 'INTIMACY', parent: 'Padded Bra', title: 'EC06', patterns: ['EC06'] },
+  { brand: 'INTIMACY', parent: 'Padded Bra', title: 'UC02', patterns: ['UC02'] },
+  { brand: 'INTIMACY', parent: 'Padded Bra', title: 'UC09', patterns: ['UC09'] },
+
+  // ════════ INTIMACY — DEF COLLECTION ════════
+  { brand: 'INTIMACY', parent: 'DEF Collection', title: 'DEFM', patterns: ['DEFM'] },
+  { brand: 'INTIMACY', parent: 'DEF Collection', title: 'DEFT', patterns: ['DEFT'] },
+
+  // ════════ INTIMACY — FEEDING BRA ════════
+  { brand: 'INTIMACY', parent: 'Feeding Bra', title: 'F909', patterns: ['F909'] },
+  { brand: 'INTIMACY', parent: 'Feeding Bra', title: 'IN21', patterns: ['IN21'] },
+
+  // ════════ INTIMACY — SLIPS ════════
+  { brand: 'INTIMACY', parent: 'Slips', title: 'IN15', patterns: ['IN15'] },
+  { brand: 'INTIMACY', parent: 'Slips', title: '3NSL', patterns: ['3NSL'] },
+  { brand: 'INTIMACY', parent: 'Slips', title: 'NGSL', patterns: ['NGSL'] },
 ]
 
 const deriveCategory = (p) => {
