@@ -85,70 +85,83 @@ const writeVariantMap = (userId, map) => {
 }
 
 const CATEGORY_GROUPS = [
-  // ════════ LEGGING ════════
-  { parent: 'Legging', title: 'Viscose Ankle Legging', patterns: ['VISCOSE ANKLE LEGGING'] },
-  { parent: 'Legging', title: 'Cotton Ankle Legging', patterns: ['COTTON ANKLE LEGGING'] },
-  { parent: 'Legging', title: 'Viscose Chudidar Legging', patterns: ['VISCOSE CHUDIDAR LEGGING'] },
-  { parent: 'Legging', title: 'Cotton Chudidar Legging', patterns: ['COTTON CHUDIDAR LEGGING'] },
-  { parent: 'Legging', title: 'Capri Legging', patterns: ['CAPRI LEGGING'] },
-  { parent: 'Legging', title: 'Cropped Legging', patterns: ['CROPPED LEGGING'] },
-  { parent: 'Legging', title: 'Shimmer Legging', patterns: ['SHIMMER LEGGING'] },
+  // ════════ TWIN BIRDS — LEGGING ════════
+  { brand: 'TWIN BIRDS', parent: 'Legging', title: 'Viscose Ankle Legging', patterns: ['VISCOSE ANKLE LEGGING'] },
+  { brand: 'TWIN BIRDS', parent: 'Legging', title: 'Cotton Ankle Legging', patterns: ['COTTON ANKLE LEGGING'] },
+  { brand: 'TWIN BIRDS', parent: 'Legging', title: 'Viscose Chudidar Legging', patterns: ['VISCOSE CHUDIDAR LEGGING'] },
+  { brand: 'TWIN BIRDS', parent: 'Legging', title: 'Cotton Chudidar Legging', patterns: ['COTTON CHUDIDAR LEGGING'] },
+  { brand: 'TWIN BIRDS', parent: 'Legging', title: 'Capri Legging', patterns: ['CAPRI LEGGING'] },
+  { brand: 'TWIN BIRDS', parent: 'Legging', title: 'Cropped Legging', patterns: ['CROPPED LEGGING'] },
+  { brand: 'TWIN BIRDS', parent: 'Legging', title: 'Shimmer Legging', patterns: ['SHIMMER LEGGING'] },
 
-  // ════════ KURTI PANT ════════
-  { parent: 'Kurti Pant', title: 'Cotton Straight Pant', patterns: ['COTTON STRAIGHT PANT'] },
-  { parent: 'Kurti Pant', title: 'Flexi Kurti Pant', patterns: ['FLEXI KURTI PANT'] },
-  { parent: 'Kurti Pant', title: 'Wide Leg Kurti', patterns: ['WIDE LEG KURTI'] },
-  { parent: 'Kurti Pant', title: 'Cotton Kurti', patterns: ['COTTON KURTI'] },
-  { parent: 'Kurti Pant', title: 'Sleek Kurti', patterns: ['SLEEK KURTI'] },
-  { parent: 'Kurti Pant', title: 'Metalic Pant', patterns: ['METALIC PANT'] },
+  // ════════ TWIN BIRDS — KURTI PANT ════════
+  { brand: 'TWIN BIRDS', parent: 'Kurti Pant', title: 'Cotton Straight Pant', patterns: ['COTTON STRAIGHT PANT'] },
+  { brand: 'TWIN BIRDS', parent: 'Kurti Pant', title: 'Flexi Kurti Pant', patterns: ['FLEXI KURTI PANT'] },
+  { brand: 'TWIN BIRDS', parent: 'Kurti Pant', title: 'Wide Leg Kurti', patterns: ['WIDE LEG KURTI'] },
+  { brand: 'TWIN BIRDS', parent: 'Kurti Pant', title: 'Cotton Kurti', patterns: ['COTTON KURTI'] },
+  { brand: 'TWIN BIRDS', parent: 'Kurti Pant', title: 'Sleek Kurti', patterns: ['SLEEK KURTI'] },
+  { brand: 'TWIN BIRDS', parent: 'Kurti Pant', title: 'Metalic Pant', patterns: ['METALIC PANT'] },
 
-  // ════════ JEGGING ════════
-  { parent: 'Jegging', title: 'Flexi Indigo Jeggings', patterns: ['FLEXI INDIGO JEGGINGS'] },
-  { parent: 'Jegging', title: 'Coloured Jegging', patterns: ['COLOURED JEGGING'] },
+  // ════════ TWIN BIRDS — JEGGING ════════
+  { brand: 'TWIN BIRDS', parent: 'Jegging', title: 'Flexi Indigo Jeggings', patterns: ['FLEXI INDIGO JEGGINGS'] },
+  { brand: 'TWIN BIRDS', parent: 'Jegging', title: 'Coloured Jegging', patterns: ['COLOURED JEGGING'] },
 
-  // ════════ PLAZZO ════════
-  { parent: 'Plazzo', title: 'Plazo', patterns: ['PLAZO'] },
+  // ════════ TWIN BIRDS — PLAZZO ════════
+  { brand: 'TWIN BIRDS', parent: 'Plazzo', title: 'Plazo', patterns: ['PLAZO'] },
 
-  // ════════ SAREE SHAPER ════════
-  { parent: 'Saree Shaper', title: 'Saree Skirt', patterns: ['SAREE SKIRT'] },
-  { parent: 'Saree Shaper', title: 'Saree Shaper', patterns: ['SAREE SHAPER'] },
+  // ════════ TWIN BIRDS — SAREE SHAPER ════════
+  { brand: 'TWIN BIRDS', parent: 'Saree Shaper', title: 'Saree Skirt', patterns: ['SAREE SKIRT'] },
+  { brand: 'TWIN BIRDS', parent: 'Saree Shaper', title: 'Saree Shaper', patterns: ['SAREE SHAPER'] },
 
-  // ════════ SHAWL ════════
-  { parent: 'Shawl', title: 'Shimmer Shawl', patterns: ['SHIMMER SHAWL'] },
-  { parent: 'Shawl', title: 'Fashion Shawl', patterns: ['FASHION SHAWL'] },
+  // ════════ TWIN BIRDS — SHAWL ════════
+  { brand: 'TWIN BIRDS', parent: 'Shawl', title: 'Shimmer Shawl', patterns: ['SHIMMER SHAWL'] },
+  { brand: 'TWIN BIRDS', parent: 'Shawl', title: 'Fashion Shawl', patterns: ['FASHION SHAWL'] },
 
-  // ════════ SPORTS BRA ════════
-  { parent: 'Sports Bra', title: 'Elestic Sports Bra', patterns: ['ELESTIC SPORTS BRA'] },
-  { parent: 'Sports Bra', title: 'Stretch Sports Vest', patterns: ['STRETCH SPORTS VEST'] },
+  // ════════ TWIN BIRDS — SPORTS BRA ════════
+  { brand: 'TWIN BIRDS', parent: 'Sports Bra', title: 'Elestic Sports Bra', patterns: ['ELESTIC SPORTS BRA'] },
+  { brand: 'TWIN BIRDS', parent: 'Sports Bra', title: 'Stretch Sports Vest', patterns: ['STRETCH SPORTS VEST'] },
 
-  // ════════ LOUNGE WEAR ════════
-  { parent: 'Lounge Wear', title: 'Plain Night Pant', patterns: ['PLAIN NIGHT PANT'] },
-  { parent: 'Lounge Wear', title: 'Textured Pant', patterns: ['TEXTURED PANT'] },
-  { parent: 'Lounge Wear', title: 'Plain Shorts', patterns: ['PLAIN SHORTS'] },
-  { parent: 'Lounge Wear', title: 'Printed Shorts', patterns: ['PRINTED SHORTS'] },
-  { parent: 'Lounge Wear', title: 'Printed Night Pant', patterns: ['PRINTED NIGHT PANT'] },
-  { parent: 'Lounge Wear', title: 'Printed T-Shirt', patterns: ['PRINTED T-SHIRT'] },
-  { parent: 'Lounge Wear', title: 'Collor Cord Set', patterns: ['COLLOR CORD SET'] },
-  { parent: 'Lounge Wear', title: 'Round Neck Cord Set', patterns: ['ROUND NECK CORD SET'] },
-  { parent: 'Lounge Wear', title: 'Easy Tees', patterns: ['EASY TEES'] },
-  { parent: 'Lounge Wear', title: 'Easy Pant', patterns: ['EASY PANT'] },
+  // ════════ TWIN BIRDS — LOUNGE WEAR ════════
+  { brand: 'TWIN BIRDS', parent: 'Lounge Wear', title: 'Plain Night Pant', patterns: ['PLAIN NIGHT PANT'] },
+  { brand: 'TWIN BIRDS', parent: 'Lounge Wear', title: 'Textured Pant', patterns: ['TEXTURED PANT'] },
+  { brand: 'TWIN BIRDS', parent: 'Lounge Wear', title: 'Plain Shorts', patterns: ['PLAIN SHORTS'] },
+  { brand: 'TWIN BIRDS', parent: 'Lounge Wear', title: 'Printed Shorts', patterns: ['PRINTED SHORTS'] },
+  { brand: 'TWIN BIRDS', parent: 'Lounge Wear', title: 'Printed Night Pant', patterns: ['PRINTED NIGHT PANT'] },
+  { brand: 'TWIN BIRDS', parent: 'Lounge Wear', title: 'Printed T-Shirt', patterns: ['PRINTED T-SHIRT'] },
+  { brand: 'TWIN BIRDS', parent: 'Lounge Wear', title: 'Collor Cord Set', patterns: ['COLLOR CORD SET'] },
+  { brand: 'TWIN BIRDS', parent: 'Lounge Wear', title: 'Round Neck Cord Set', patterns: ['ROUND NECK CORD SET'] },
+  { brand: 'TWIN BIRDS', parent: 'Lounge Wear', title: 'Easy Tees', patterns: ['EASY TEES'] },
+  { brand: 'TWIN BIRDS', parent: 'Lounge Wear', title: 'Easy Pant', patterns: ['EASY PANT'] },
 
-  // ════════ EXACT PARENT MATCHES (FALLBACKS) ════════
-  // These MUST be at the bottom. If the product is just named "LEGGING", it lands here.
-  { parent: 'Legging', title: 'Leggings', patterns: ['LEGGING'] },
-  { parent: 'Kurti Pant', title: 'Kurti Pants', patterns: ['KURTI PANT'] },
-  { parent: 'Jegging', title: 'Jeggings', patterns: ['JEGGING'] },
-  { parent: 'Plazzo', title: 'Plazzos', patterns: ['PLAZZO'] },
-  { parent: 'Shawl', title: 'Shawls', patterns: ['SHAWL'] },
-  { parent: 'Sports Bra', title: 'Sports Bras', patterns: ['SPORTS BRA'] },
-  { parent: 'Lounge Wear', title: 'Lounge Wear', patterns: ['LOUNGE WEAR'] }
-];
+  // ════════ TWIN BIRDS — FALLBACKS ════════
+  { brand: 'TWIN BIRDS', parent: 'Legging', title: 'Leggings', patterns: ['LEGGING'] },
+  { brand: 'TWIN BIRDS', parent: 'Kurti Pant', title: 'Kurti Pants', patterns: ['KURTI PANT'] },
+  { brand: 'TWIN BIRDS', parent: 'Jegging', title: 'Jeggings', patterns: ['JEGGING'] },
+  { brand: 'TWIN BIRDS', parent: 'Plazzo', title: 'Plazzos', patterns: ['PLAZZO'] },
+  { brand: 'TWIN BIRDS', parent: 'Shawl', title: 'Shawls', patterns: ['SHAWL'] },
+  { brand: 'TWIN BIRDS', parent: 'Sports Bra', title: 'Sports Bras', patterns: ['SPORTS BRA'] },
+  { brand: 'TWIN BIRDS', parent: 'Lounge Wear', title: 'Lounge Wear', patterns: ['LOUNGE WEAR'] },
+
+  // ════════ NAIDU HALL ════════
+  { brand: 'NAIDU HALL', parent: 'T-Shirt Bra', title: 'Candi', patterns: ['CNDI'] },
+
+  // ════════ INTIMACY ════════
+  { brand: 'INTIMACY', parent: 'Sports Bra', title: 'Sports Bra', patterns: ['CA01', 'CA05', 'CA09', 'CA11', 'CA12', 'BB01'] },
+  { brand: 'INTIMACY', parent: 'Everyday Bra', title: 'Everyday Bra', patterns: ['EC07', 'ES02', 'ES06', 'ES21'] },
+  { brand: 'INTIMACY', parent: 'Padded Bra', title: 'Padded Bra', patterns: ['EC06', 'UC02', 'UC09'] },
+  { brand: 'INTIMACY', parent: 'DEF Collection', title: 'DEF Collection', patterns: ['DEF-M', 'DEF-T'] },
+  { brand: 'INTIMACY', parent: 'Feeding Bra', title: 'Feeding Bra', patterns: ['FB909', 'IN21'] },
+  { brand: 'INTIMACY', parent: 'Slips', title: 'Slips', patterns: ['IN15', '3NSL', 'NGSL'] },
+]
 
 const deriveCategory = (p) => {
   const name = String(p?.product_name || '').trim()
+  const brand = String(p?.brand || p?.brand_name || '').trim().toUpperCase()
   if (!name) return ''
   const up = name.replace(/\s+/g, ' ').trim().toUpperCase()
+
   for (const g of CATEGORY_GROUPS) {
+    if (g.brand && g.brand.toUpperCase() !== brand) continue
     for (const pat of g.patterns) {
       const t = String(pat || '').trim().toUpperCase()
       if (t && up.includes(t)) return g.title

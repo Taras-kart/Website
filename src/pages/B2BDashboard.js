@@ -5,6 +5,12 @@ import Footer from './Footer';
 import { FiBriefcase, FiArrowRight, FiPackage, FiGrid } from 'react-icons/fi';
 import './B2BDashboard.css';
 
+const BRAND_LINKS = {
+  'Twin Birds Prime':       'Twin Birds',
+  'Twin Birds Bottom wear': 'Twin Birds',
+  'Intimacy Lingerie':      'Intimacy',
+}
+
 const DISTRIBUTORS = [
   {
     id: 'nihira',
@@ -124,12 +130,12 @@ export default function B2BDashboard() {
               {/* Brand grid */}
               <div className="brand-grid">
                 {selectedDistributor.brands.map((brand, idx) => (
-                  <Link
-                    key={idx}
-                    to={`/category-display?brand=${encodeURIComponent(brand)}`}
-                    className="brand-card"
-                    style={{ animationDelay: `${idx * 0.07}s` }}
-                  >
+<Link
+  key={idx}
+  to={`/category-display?brand=${encodeURIComponent(BRAND_LINKS[brand] || brand)}`}
+  className="brand-card"
+  style={{ animationDelay: `${idx * 0.07}s` }}
+>
                     {/* Logo zone */}
                     <div className="brand-media">
                       <div className="brand-media-inner">

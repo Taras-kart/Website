@@ -121,8 +121,43 @@ const COLOR_MAP = {
   'SHIMMER': 'linear-gradient(135deg,#c9a84c,#f5d485,#c9a84c,#f5d485)',
   'METALLIC': 'linear-gradient(135deg,#a8a8a8,#e0e0e0,#a8a8a8)',
   'GOLD MINE': 'linear-gradient(135deg,#BF953F,#FCF6BA,#B38728,#FBF5B7)',
+// Short codes (brand-specific abbreviations)
+  'WHT': '#FFFFFF',   // White
+  'SKN': '#E8C99A',   // Skin
+  'NBL': '#000080',   // Navy Blue
+  'GRM': '#6B8E23',   // Green Muted / Olive Green
+  'FUS': '#FF0090',   // Fuchsia
+  'CBR': '#7B3F00',   // Chocolate Brown
+  'BLK': '#1A1A1A',   // Black
+  'AML': '#9966CC',   // Amethyst Lilac
+  'BLU': '#4169E1',   // Blue
+  'PNK': '#FFB6C1',   // Pink
+  'BTI': '#C68642',   // Batik / Earthy Brown
+  'CPE': '#B87333',   // Copper
+  'LLG': '#D3D3D3',   // Light Grey
+  'PCH': '#FFCBA4',   // Peach
+  'DSK': '#C4956A',   // Dark Skin
+  'LAV': '#E6E6FA',   // Lavender
+  'RED': '#DC143C',   // Red
+  'WIN': '#722F37',   // Wine
+  'YEL': '#FFD700',   // Yellow
+  'ORG': '#FF7F00',   // Orange
+  'LAB': '#ADD8E6',   // Light Aqua Blue
+  'HPK': '#FF69B4',   // Hot Pink
+  'MPU': '#9F5F80',   // Mauve Purple
+  'BAT': '#6B4C3B',   // Batik Brown
+  'WBK': '#2B2B2B',   // Warm Black
+  'BAB': '#89CFF0',   // Baby Blue
+  'ORY': '#FAF7F0',   // Off White / Ivory
+  'BKW': 'linear-gradient(135deg,#1A1A1A 50%,#FFFFFF 50%)', // Black & White
+  'CSB': '#4682B4',   // Cool Steel Blue
+  'ALB': '#F0F8FF',   // Alice Blue / Alabaster
+  'PRP': '#800080',   // Purple
+  'DKT': '#008080',   // Dark Teal
+  'CLR': '#FF6B6B',   // Coral
+  'FRD': '#C41E3A',   // French Red
+  'BGE': '#F5F5DC',   // Beige
 }
-
 /**
  * Returns a CSS color value for a given color name string.
  * Falls back to a deterministic HSL pastel for unmapped names.
