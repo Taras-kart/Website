@@ -138,7 +138,6 @@ const COLOR_MAP = {
   'PCH': '#FFCBA4',   // Peach
   'DSK': '#C4956A',   // Dark Skin
   'LAV': '#E6E6FA',   // Lavender
-  'RED': '#DC143C',   // Red
   'WIN': '#722F37',   // Wine
   'YEL': '#FFD700',   // Yellow
   'ORG': '#FF7F00',   // Orange
