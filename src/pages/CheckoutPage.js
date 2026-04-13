@@ -354,7 +354,7 @@ const CheckoutPage = () => {
       setIsLoading(true)
       try {
         const q = encodeURIComponent(product.product_name || '')
-        const res = await fetch(`${API_BASE}/api/products?limit=300&hasImage=true&q=${q}`)
+        const res = await fetch(`${API_BASE}/api/products?limit=5000&hasImage=true&q=${q}`)
         const data = await res.json()
         const same = (Array.isArray(data) ? data : []).filter(
           (r) =>
