@@ -390,7 +390,11 @@ export default function WomenPage() {
 
   const availableCategories = useMemo(() => {
     const counts = new Map()
-    for (const p of allProducts || []) {
+    const brandFilteredForCategories = selectedBrand
+    ? (allProducts || []).filter(p => normalizeKey(p.brand) === normalizeKey(selectedBrand))
+    : (allProducts || [])
+
+  for (const p of brandFilteredForCategories) {
       const c = niceTitle(deriveCategory(p))
       if (!c) continue
       counts.set(c, (counts.get(c) || 0) + 1)
@@ -400,7 +404,7 @@ export default function WomenPage() {
       .filter((k) => !ordered.includes(k))
       .sort((a, b) => a.localeCompare(b))
     return [...ordered, ...extras]
-  }, [allProducts])
+}, [allProducts, selectedBrand])
 
   const setQuery = (nextBrand, nextCategory, nextSort) => {
     const sp = new URLSearchParams(location.search)
@@ -437,7 +441,17 @@ export default function WomenPage() {
     else if (sort === 'name_az') next = [...next].sort((a, b) => String(a.product_name || '').localeCompare(String(b.product_name || '')))
     else if (sort === 'name_za') next = [...next].sort((a, b) => String(b.product_name || '').localeCompare(String(a.product_name || '')))
 
-    setProducts(next)
+    // After the sort, deduplicate — one card per product name + brand
+    const deduped = []
+    const seen = new Set()
+    for (const p of next) {
+      const key = normalizeKey(`${p.brand}::${p.product_name}`)
+      if (!seen.has(key)) {
+        seen.add(key)
+        deduped.push(p)
+      }
+    }
+    setProducts(deduped)
   }, [allProducts, selectedBrand, selectedCategory, sortBy, userType])
 
   useLayoutEffect(() => {
