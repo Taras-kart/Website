@@ -120,7 +120,7 @@ const CATEGORY_GROUPS = [
   { brand: 'INDIAN FLOWER', parent: 'Legging', title: 'Ankle Legging', patterns: ['ANKLE LEGGING'] },
 
   // ════════ INDIAN FLOWER — SAREE SHAPER ════════
-  { brand: 'INDIAN FLOWER', parent: 'Saree Shaper', title: 'Saree Shaper', patterns: ['SAREE SHAPPER', 'SAREE SHAPER'] },
+ { brand: 'INDIAN FLOWER', parent: null, title: 'Saree Shaper', patterns: ['SAREE SHAPPER', 'SAREE SHAPER'] },
 ]
 
 const deriveCategoryData = (p) => {
