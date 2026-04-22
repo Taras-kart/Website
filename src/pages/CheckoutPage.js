@@ -233,7 +233,7 @@ function resolveColor(name) {
 
   const cleanName = String(name).replace(/^\d+-\s*/, '')
   
-  const key = String(name).trim().toUpperCase()
+  const key = cleanName.trim().toUpperCase()
 
   // Direct match
   if (COLOR_MAP[key]) return COLOR_MAP[key]
