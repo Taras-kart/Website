@@ -176,6 +176,13 @@ const CATEGORY_GROUPS = [
   { brand: 'INTIMACY', parent: 'Slips', title: 'IN15', patterns: ['IN15'] },
   { brand: 'INTIMACY', parent: 'Slips', title: '3NSL', patterns: ['3NSL'] },
   { brand: 'INTIMACY', parent: 'Slips', title: 'NGSL', patterns: ['NGSL'] },
+  
+  // ════════ INDIAN FLOWER — LEGGING ════════
+  { brand: 'INDIAN FLOWER', parent: 'Legging', title: 'Chudidar Legging', patterns: ['CHUDIDAR LEGGING'] },
+  { brand: 'INDIAN FLOWER', parent: 'Legging', title: 'Ankle Legging', patterns: ['ANKLE LEGGING'] },
+
+  // ════════ INDIAN FLOWER — SAREE SHAPER ════════
+  { brand: 'INDIAN FLOWER', parent: 'Saree Shaper', title: 'Saree Shaper', patterns: ['SAREE SHAPPER', 'SAREE SHAPER'] },
 ]
 
 const deriveCategory = (p) => {
