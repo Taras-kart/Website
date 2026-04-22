@@ -156,6 +156,66 @@ const COLOR_MAP = {
   'CLR': '#FF6B6B',   // Coral
   'FRD': '#C41E3A',   // French Red
   'BGE': '#F5F5DC',   // Beige
+
+  // Additional Short Codes
+  'TMA': '#FF6347',   // Tomato
+  'WNT': '#5C4033',   // Walnut
+  'PBL': '#005F69',   // Peacock Blue
+  'MNT': '#98FF98',   // Mint
+  'MUS': '#FFDB58',   // Mustard
+  'SND': '#C2B280',   // Sand
+  'SKY': '#87CEEB',   // Sky Blue
+  'SAL': '#FA8072',   // Salmon
+  'TGN': '#F28500',   // Tangerine
+  'TUR': '#40E0D0',   // Turquoise
+  'CHB': '#36454F',   // Charcoal Black (using your Charcoal hex)
+  'CRM': '#FFFDD0',   // Cream
+  'RST': '#B7410E',   // Rust
+  'MRN': '#800000',   // Maroon
+  'OLV': '#808000',   // Olive
+
+
+  // ════════ Indian Textile & Admin Panel Specifics ════════
+  'N.PURPLE': '#6F2DA8',       // Grape/Deep Purple
+  'RAMA BLUE': '#00727A',      // Teal / Rama Green-Blue
+  'LT.T.BLUE': '#ADD8E6',      // Light Blue
+  'T.BLUE': '#00CED1',         // Turquoise Blue
+  'NEW.DK.RED': '#8B0000',     // Dark Red
+  'NEW DK.RED': '#8B0000',     // Dark Red (no dot)
+  'NEW DK RED': '#8B0000',     // Dark Red (no dot)
+  'DK.RED': '#8B0000',         // Dark Red
+  'C.BROWN': '#5C4033',        // Coffee Brown
+  'TERRACOTTA': '#E2725B',     // Terracotta
+  'MALACHITE GREEN': '#0BDA51',// Malachite
+  'LT.GREEN': '#90EE90',       // Light Green
+  'TURF GREEN': '#4C6A24',     // Turf Green
+  'TEA ROSE': '#F4C2C2',       // Tea Rose
+  'DK.RANI': '#C9005A',        // Dark Rani Pink
+  'RANI ROSE': '#FF1493',      // Rani Pink / Deep Pink
+  'B.GREEN': '#006A4E',        // Bottle Green
+  'WATER CRESS': '#A1C181',    // Watercress Green
+  'TOMOTO': '#FF6347',         // Tomato (Catching the typo)
+  'STONE': '#877F7D',          // Stone Grey
+  'SKIN': '#E8C99A',           // Skin / Nude
+  'NEW SKIN': '#E8C99A',       // Skin / Nude
+  'ROSE WINE': '#722F37',      // Rose Wine
+  'ROYAL': '#4169E1',          // Royal Blue
+  'LT.ROYAL': '#4A76EA',       // Light Royal Blue
+  'CAMEL': '#C19A6B',          // Camel Brown
+  'NEW.NAVY': '#000080',       // Navy
+  'NEW NAVY': '#000080',       // Navy
+  'MARRON': '#800000',         // Maroon (Catching the typo)
+  'PEACOCK': '#005F69',        // Peacock Blue
+  'S.GREY': '#71797E',         // Steel/Silver Grey
+  'GAJARI': '#FF7F50',         // Gajri / Coral Pink
+  'FUCHIA': '#FF00FF',         // Fuchsia (Catching the typo)
+  'PASTEL BLUE': '#AEC6CF',    // Pastel Blue
+  'F/S PARROT': '#55C936',     // Parrot Green
+  'F/S GREEN': '#228B22',      // Standard Green
+  'NEW N.GREEN': '#006400',    // Dark Green
+  'NEW N .GREEN': '#006400',   // Dark Green (Catching space typo)
+  'LIME CREAN': '#F0E68C',     // Lime Cream (Catching typo)
+  'N.ORANGE': '#FF7F00',       // Neon/Standard Orange
 }
 /**
  * Returns a CSS color value for a given color name string.
@@ -170,6 +230,9 @@ const isBoxBrand = (brand) => BOX_BRANDS.includes(String(brand || '').trim().toU
 
 function resolveColor(name) {
   if (!name) return '#CCCCCC'
+
+  const cleanName = String(name).replace(/^\d+-\s*/, '')
+  
   const key = String(name).trim().toUpperCase()
 
   // Direct match
