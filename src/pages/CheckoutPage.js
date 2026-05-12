@@ -216,6 +216,12 @@ const COLOR_MAP = {
   'NEW N .GREEN': '#006400',   // Dark Green (Catching space typo)
   'LIME CREAN': '#F0E68C',     // Lime Cream (Catching typo)
   'N.ORANGE': '#FF7F00',       // Neon/Standard Orange
+
+  // ════════ Vendor-Specific "Colors" (Aswati) ════════
+  'ASSTD': 'linear-gradient(135deg, #FF6B6B, #4ECDC4, #FFE66D)', // A bright, 3-color gradient to show "Assorted"
+  'PRINT': 'linear-gradient(135deg, #e0c, #c0e, #08f)',         // A vibrant gradient for "Print"
+  'PLAIN': '#EAEAEA',                                           // A clean, neutral light grey for "Plain"
+  'WBS': '#FFFFFF',                                             // Defaulting to White (often means White Broad Strap)
 }
 /**
  * Returns a CSS color value for a given color name string.

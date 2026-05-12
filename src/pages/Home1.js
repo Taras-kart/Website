@@ -168,9 +168,9 @@ export default function Home1() {
                 </div>
               </Link>
 
-              <Link to="/category-display?brand=Aswathi" className="fc-card">
+              <Link to="/category-display?brand=Aswati" className="fc-card">
                 <div className="fc-media">
-                  <img src={getImage('/images/brands/aswathi-brand.jpeg')} alt="Aswathi" loading="lazy" />
+                  <img src={getImage('/images/brands/aswathi-brand.jpeg')} alt="Aswati" loading="lazy" />
                 </div>
               </Link>
 
@@ -397,8 +397,8 @@ export default function Home1() {
 
               <a href="/women" className="aurum2-card">
                 <div className="aurum2-media">
-                  <img src={getImage('/images/women/new/category14.png')} alt="Aswathi Inner Wear" loading="lazy" decoding="async" />
-                  <div className="aurum2-badge">Aswathi</div>
+                  <img src={getImage('/images/women/new/category14.png')} alt="Aswati Inner Wear" loading="lazy" decoding="async" />
+                  <div className="aurum2-badge">Aswati</div>
                 </div>
                 <div className="aurum2-meta">
                   <div className="aurum2-cat">Sharara Suits</div>
@@ -524,7 +524,7 @@ export default function Home1() {
                   <Link to="/women?brand=Twin%20Birds" className="wb3x-brand">Twin Birds</Link>
                   <Link to="/women?brand=Naidu%20Hall" className="wb3x-brand">Naidu Hall</Link>
                   <Link to="/women?brand=Intimacy" className="wb3x-brand">Intimacy</Link>
-                  <Link to="/women?brand=Aswathi" className="wb3x-brand">Aswathi</Link>
+                  <Link to="/women?brand=Aswati" className="wb3x-brand">Aswati</Link>
                   <Link to="/women?brand=Indian%20Flower" className="wb3x-brand">Indian Flower</Link>
                   <Link to="/women?brand=Jockey" className="wb3x-brand">Jockey</Link>
                   <Link to="/women?brand=Enamor" className="wb3x-brand">Enamor</Link>

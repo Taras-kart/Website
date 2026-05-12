@@ -121,6 +121,32 @@ const CATEGORY_GROUPS = [
 
   // ════════ INDIAN FLOWER — SAREE SHAPER ════════
  { brand: 'INDIAN FLOWER', parent: null, title: 'Saree Shaper', patterns: ['SAREE SHAPPER', 'SAREE SHAPER'] },
+
+// ════════ ASWATI — BRA ════════
+  { brand: 'ASWATI', parent: 'Bra', title: '888 Bra', patterns: ['888'] },
+  { brand: 'ASWATI', parent: 'Bra', title: 'Moulded Bra', patterns: ['MOULDED'] },
+  { brand: 'ASWATI', parent: 'Bra', title: 'Sports Bra', patterns: ['SPORTS'] },
+  { brand: 'ASWATI', parent: 'Bra', title: 'Sweety Bra', patterns: ['SWEETY'] },
+
+  // ════════ ASWATI — PANTY ════════
+  { brand: 'ASWATI', parent: 'Panty', title: 'Mody Plain', patterns: ['MODY PLAIN'] },
+  { brand: 'ASWATI', parent: 'Panty', title: 'Mody Print', patterns: ['MODY PRINT'] },
+  { brand: 'ASWATI', parent: 'Panty', title: 'Priya Plain', patterns: ['PRIYA PLAIN'] },
+  { brand: 'ASWATI', parent: 'Panty', title: 'Priya Print', patterns: ['PRIYA PRINT'] },
+
+  // ════════ ASWATI — YOGA SHORTS (direct) ════════
+  { brand: 'ASWATI', parent: null, title: 'Yoga Shorts', patterns: ['YOGA SHORTS'] },
+
+  // ════════ ASWATI — SLIP ════════
+  { brand: 'ASWATI', parent: 'Slip', title: 'Angel Bra Slip', patterns: ['ANGEL BRA SLIP'] },
+  { brand: 'ASWATI', parent: 'Slip', title: 'Cindrella', patterns: ['CINDRELLA'] },
+  { brand: 'ASWATI', parent: 'Slip', title: 'Karishma WBS', patterns: ['KARISHMA WBS'] },
+  { brand: 'ASWATI', parent: 'Slip', title: 'Karishma', patterns: ['KARISHMA'] },
+  { brand: 'ASWATI', parent: 'Slip', title: 'Lotus', patterns: ['LOTUS'] },
+  { brand: 'ASWATI', parent: 'Slip', title: 'Nighty Slip', patterns: ['NIGHTY SLIP'] },
+  { brand: 'ASWATI', parent: 'Slip', title: 'Princess', patterns: ['PRINCESS'] },
+  { brand: 'ASWATI', parent: 'Slip', title: 'Queen Bra Slip', patterns: ['QUEEN BRA SLIP'] },
+  { brand: 'ASWATI', parent: 'Slip', title: 'Saniya', patterns: ['SANIYA'] },
 ]
 
 const deriveCategoryData = (p) => {
