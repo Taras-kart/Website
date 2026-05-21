@@ -907,10 +907,6 @@ const CheckoutPage = () => {
                   ))}
                 </div>
 
-// Remove the warning from here if you added it earlier
-// (It should only be inside the userType === 'B2B' block)
-
-// In the co-actions div (around line 1096):
 <div className="co-actions">
   {userType === 'B2B' ? (
     <div style={{ width: '100%', marginTop: '10px' }}>
