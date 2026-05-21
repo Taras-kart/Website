@@ -229,7 +229,7 @@ const COLOR_MAP = {
  */
   
 
-const BOX_BRANDS = ['CUCUMBER', 'ASWATI', 'DAZZLE', 'SELVAS']
+const BOX_BRANDS = ['CUCUMBER', 'ASWATI', 'DAZZLE PRIME', 'SELVAS']
 
 const isBoxBrand = (brand) => BOX_BRANDS.includes(String(brand || '').trim().toUpperCase())
 
@@ -820,7 +820,7 @@ const CheckoutPage = () => {
           </div>
         </div>
 
-        {/* ── Right: details ──────────────────────────────── */}
+{/* ── Right: details ──────────────────────────────── */}
         <div className="co-right">
           {isLoading ? (
             <div className="co-loader">
@@ -848,6 +848,23 @@ const CheckoutPage = () => {
                 <span className="co-mrp-strike">₹{Number(pricing.mrp || 0).toFixed(2)}</span>
                 <span className="co-tax">Inclusive of all taxes</span>
               </div>
+
+              {/* ── GLOBAL BOX BRAND NOTICE ── */}
+              {isBoxBrand(product?.brand) && (
+                <div style={{
+                  background: '#FFF8E7',
+                  border: '1px solid #F5C842',
+                  borderRadius: '8px',
+                  padding: '10px 14px',
+                  marginTop: '12px',
+                  marginBottom: '12px',
+                  fontSize: '13.5px',
+                  color: '#7A5C00',
+                  lineHeight: '1.4'
+                }}>
+                  ⚠️ <strong>Note:</strong> Products from this brand are sold in <strong>box sets only</strong> and cannot be ordered as single pieces.
+                </div>
+              )}
 
               {/* ── Color selector ── */}
               <div className="co-section">
@@ -890,47 +907,30 @@ const CheckoutPage = () => {
                   ))}
                 </div>
 
-<div className="co-actions">
+                <div className="co-actions">
+                  {userType === 'B2B' ? (
+                    <div style={{ width: '100%', marginTop: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', background: '#f9f9f9', padding: '12px', borderRadius: '8px', border: '1px solid #ddd' }}>
+                        <strong style={{ color: '#333' }}>Bulk Qty:</strong>
+                        <input
+                          type="number"
+                          min="1"
+                          value={b2bQuantity}
+                          onChange={(e) => setB2bQuantity(e.target.value === '' ? '' : Number(e.target.value))}
+                          style={{ width: '80px', padding: '8px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '16px', textAlign: 'center' }}
+                        />
+                      </div>
 
-{userType === 'B2B' ? (
-  <div style={{ width: '100%', marginTop: '10px' }}>
-
-    {/* Box brand notice */}
-    {isBoxBrand(product?.brand) && (
-      <div style={{
-        background: '#FFF8E7',
-        border: '1px solid #F5C842',
-        borderRadius: '8px',
-        padding: '10px 14px',
-        marginBottom: '14px',
-        fontSize: '13px',
-        color: '#7A5C00'
-      }}>
-        ⚠️ This brand's products are available in <strong>box sets only</strong> and cannot be ordered as single pieces.
-      </div>
-    )}
-
-    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', background: '#f9f9f9', padding: '12px', borderRadius: '8px', border: '1px solid #ddd' }}>
-      <strong style={{ color: '#333' }}>Bulk Qty:</strong>
-      <input
-        type="number"
-        min="1"
-        value={b2bQuantity}
-        onChange={(e) => setB2bQuantity(e.target.value === '' ? '' : Number(e.target.value))}
-        style={{ width: '80px', padding: '8px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '16px', textAlign: 'center' }}
-      />
-    </div>
-
-    <button
-      className="btn gold solid"
-      style={{ width: '100%', padding: '16px', fontSize: '16px' }}
-      onClick={handleB2BOrder}
-      disabled={isSubmittingB2B}
-    >
-      {isSubmittingB2B ? 'Submitting...' : `Submit Bulk Order (₹${Number(pricing.offer * b2bQuantity).toFixed(2)})`}
-    </button>
-  </div>
-) : (
+                      <button
+                        className="btn gold solid"
+                        style={{ width: '100%', padding: '16px', fontSize: '16px' }}
+                        onClick={handleB2BOrder}
+                        disabled={isSubmittingB2B}
+                      >
+                        {isSubmittingB2B ? 'Submitting...' : `Submit Bulk Order (₹${Number(pricing.offer * b2bQuantity).toFixed(2)})`}
+                      </button>
+                    </div>
+                  ) : (
                     <>
                       <button className="btn gold ghost" onClick={() => handleAdd('wishlist')}>
                         <FaHeart style={{ marginRight: 8 }} /> Add to Wishlist

@@ -147,6 +147,29 @@ const CATEGORY_GROUPS = [
   { brand: 'ASWATI', parent: 'Slip', title: 'Princess', patterns: ['PRINCESS'] },
   { brand: 'ASWATI', parent: 'Slip', title: 'Queen Bra Slip', patterns: ['QUEEN BRA SLIP'] },
   { brand: 'ASWATI', parent: 'Slip', title: 'Saniya', patterns: ['SANIYA'] },
+
+  // ════════ DAZZLE PRIME — PANT ════════
+  { brand: 'DAZZLE PRIME', parent: 'Pant', title: 'Multi Dryfit Pant', patterns: ['MULTI DRYFIT PANT'] },
+  { brand: 'DAZZLE PRIME', parent: 'Pant', title: 'Cargo', patterns: ['CARGO'] },
+
+  // ════════ DAZZLE PRIME — TRACKS ════════
+  { brand: 'DAZZLE PRIME', parent: 'Tracks', title: 'Multi Dryfit Track', patterns: ['MULTI DRYFIT TRACK'] },
+  { brand: 'DAZZLE PRIME', parent: 'Tracks', title: 'Leisure Track', patterns: ['LEISURE TRACK'] },
+  { brand: 'DAZZLE PRIME', parent: 'Tracks', title: 'Relax Track', patterns: ['RELAX TRACK'] },
+  { brand: 'DAZZLE PRIME', parent: 'Tracks', title: 'Fine Track', patterns: ['FINE TRACK'] },
+
+  // ════════ DAZZLE PRIME — SHORTS ════════
+  { brand: 'DAZZLE PRIME', parent: 'Shorts', title: 'Multi Dryfit Long Short', patterns: ['MULTI DRYFIT LONG SHORT'] },
+  { brand: 'DAZZLE PRIME', parent: 'Shorts', title: 'Multi Dryfit Sports Short', patterns: ['MULTI  DRYFIT SPORTS SHORT', 'MULTI DRYFIT SPORTS SHORT'] },
+  { brand: 'DAZZLE PRIME', parent: 'Shorts', title: 'Leisure Short', patterns: ['LEISURE SHORT'] },
+  { brand: 'DAZZLE PRIME', parent: 'Shorts', title: 'Bloom Short', patterns: ['BLOOM SHORT'] },
+
+  // ════════ DAZZLE PRIME — T-SHIRTS ════════
+  { brand: 'DAZZLE PRIME', parent: 'T-Shirts', title: 'Classic Cotton T-Shirt', patterns: ['CLASSIC COTTON T SHIRT', 'CLASSIC COTTON T-SHIRT'] },
+  { brand: 'DAZZLE PRIME', parent: 'T-Shirts', title: 'Classic Polo T-Shirt', patterns: ['CLASSIC POLO T-SHIRT', 'CLASSIC POLO T SHIRT'] },
+  { brand: 'DAZZLE PRIME', parent: 'T-Shirts', title: 'Grace T-Shirt', patterns: ['GRACE T SHIRT', 'GRACE T-SHIRT'] },
+  { brand: 'DAZZLE PRIME', parent: 'T-Shirts', title: 'Tangy T-Shirt Full Sleeves', patterns: ['TANGY T-SHIRT FULL SELVESS', 'TANGY T SHIRT FULL SELVESS'] }, // MUST BE ABOVE TANGY T-SHIRT
+  { brand: 'DAZZLE PRIME', parent: 'T-Shirts', title: 'Tangy T-Shirt', patterns: ['TANGY T-SHIRT', 'TANGY T SHIRT'] },
 ]
 
 const deriveCategoryData = (p) => {
@@ -205,7 +228,7 @@ export default function CategoryDisplay() {
       setLoading(true)
       setError('')
       try {
-        const res = await fetch(`${API_BASE}/api/products?gender=WOMEN&limit=50000&_t=${Date.now()}`, { cache: 'no-store' })
+        const res = await fetch(`${API_BASE}/api/products?limit=50000&_t=${Date.now()}`, { cache: 'no-store' })
         if (!res.ok) throw new Error('Failed to load products')
         const data = await res.json()
         if (!cancelled) setAllProducts(toArray(data))
@@ -285,15 +308,24 @@ export default function CategoryDisplay() {
         const qs = new URLSearchParams()
         if (selectedBrand) qs.set('brand', selectedBrand)
         qs.set('category', catObj.title)
-        navigate(`/women?${qs.toString()}`)
+        navigate(`/${inferredGender || 'women'}?${qs.toString()}`)
       }
     }
   }
 
-  const goAllProducts = () => {
-    if (selectedBrand) navigate(`/women?brand=${encodeURIComponent(selectedBrand)}`)
-    else navigate('/women')
-  }
+// Add this above the return statement
+const inferredGender = useMemo(() => {
+  if (!filteredProducts.length) return null
+  const g = String(filteredProducts[0]?.gender || '').toUpperCase()
+  return g === 'MEN' ? 'men' : g === 'KIDS' ? 'kids' : 'women'
+}, [filteredProducts])
+
+// Replace goAllProducts:
+const goAllProducts = () => {
+  const base = inferredGender || 'women'
+  if (selectedBrand) navigate(`/${base}?brand=${encodeURIComponent(selectedBrand)}`)
+  else navigate(`/${base}`)
+}
 
   const goAllCategories = () => {
     navigate('/category-display')
