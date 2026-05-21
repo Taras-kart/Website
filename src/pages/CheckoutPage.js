@@ -849,22 +849,7 @@ const CheckoutPage = () => {
                 <span className="co-tax">Inclusive of all taxes</span>
               </div>
 
-              {/* ── GLOBAL BOX BRAND NOTICE ── */}
-              {isBoxBrand(product?.brand) && (
-                <div style={{
-                  background: '#FFF8E7',
-                  border: '1px solid #F5C842',
-                  borderRadius: '8px',
-                  padding: '10px 14px',
-                  marginTop: '12px',
-                  marginBottom: '12px',
-                  fontSize: '13.5px',
-                  color: '#7A5C00',
-                  lineHeight: '1.4'
-                }}>
-                  ⚠️ <strong>Note:</strong> Products from this brand are sold in <strong>box sets only</strong> and cannot be ordered as single pieces.
-                </div>
-              )}
+
 
               {/* ── Color selector ── */}
               <div className="co-section">
