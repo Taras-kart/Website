@@ -22,7 +22,7 @@ const DISTRIBUTORS = [
     id: 'padmavathi',
     name: 'Padmavathi Agencies',
     tagline: 'Diverse portfolio of leading labels',
-    brands: ['Aswati', 'Indian Flower', 'Cucumber', 'Dazzle Prime', 'Twin Birds Prime', 'Quick Dry', 'Selvas']
+    brands: ['Aswati', 'Indian Flower', 'Cucumber', 'Dazzle', 'Twin Birds Prime', 'Quick Dry', 'Selvas']
   },
   {
     id: 'mahalakshmi',
