@@ -907,10 +907,30 @@ const CheckoutPage = () => {
                   ))}
                 </div>
 
-                <div className="co-actions">
-                  {userType === 'B2B' ? (
-                    <div style={{ width: '100%', marginTop: '10px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', background: '#f9f9f9', padding: '12px', borderRadius: '8px', border: '1px solid #ddd' }}>
+// Remove the warning from here if you added it earlier
+// (It should only be inside the userType === 'B2B' block)
+
+// In the co-actions div (around line 1096):
+<div className="co-actions">
+  {userType === 'B2B' ? (
+    <div style={{ width: '100%', marginTop: '10px' }}>
+
+      {/* ✅ BOX BRAND NOTICE (Now correctly restricted to B2B) */}
+      {isBoxBrand(product?.brand) && (
+        <div style={{
+          background: '#FFF8E7',
+          border: '1px solid #F5C842',
+          borderRadius: '8px',
+          padding: '10px 14px',
+          marginBottom: '14px',
+          fontSize: '13px',
+          color: '#7A5C00'
+        }}>
+          ⚠️ This brand's products are available in <strong>box sets only</strong> and cannot be ordered as single pieces.
+        </div>
+      )}
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', background: '#f9f9f9', padding: '12px', borderRadius: '8px', border: '1px solid #ddd' }}>
                         <strong style={{ color: '#333' }}>Bulk Qty:</strong>
                         <input
                           type="number"

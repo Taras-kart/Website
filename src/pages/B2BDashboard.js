@@ -9,6 +9,7 @@ const BRAND_LINKS = {
   'Twin Birds Prime':       'Twin Birds',
   'Twin Birds Bottom wear': 'Twin Birds',
   'Intimacy Lingerie':      'Intimacy',
+  'Dazzle Prime':           'Dazzle Prime',
 }
 
 const DISTRIBUTORS = [
@@ -22,7 +23,7 @@ const DISTRIBUTORS = [
     id: 'padmavathi',
     name: 'Padmavathi Agencies',
     tagline: 'Diverse portfolio of leading labels',
-    brands: ['Aswati', 'Indian Flower', 'Cucumber', 'Dazzle', 'Twin Birds Prime', 'Quick Dry', 'Selvas']
+    brands: ['Aswati', 'Indian Flower', 'Cucumber', 'Dazzle Prime', 'Twin Birds Prime', 'Quick Dry', 'Selvas']
   },
   {
     id: 'mahalakshmi',
