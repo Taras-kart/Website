@@ -6,13 +6,14 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
 
   const addToCart = (item) => {
-    if (!cartItems.find(i => i.name === item.name)) {
+    const key = item.variant_id ?? item.id
+    if (!cartItems.find(i => (i.variant_id ?? i.id) === key)) {
       setCartItems([...cartItems, item]);
     }
   };
 
-  const removeFromCart = (name) => {
-    setCartItems(cartItems.filter(item => item.name !== name));
+  const removeFromCart = (id) => {
+    setCartItems(cartItems.filter(item => (item.variant_id ?? item.id) !== id));
   };
 
   return (

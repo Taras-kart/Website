@@ -39,6 +39,7 @@ export default function PaymentPage() {
   const saleId = saleIdFromState || saleIdFromQuery
 
   const [loading, setLoading] = useState(false)
+  const [razorpayOpen, setRazorpayOpen] = useState(false)
   const [initializing, setInitializing] = useState(true)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -48,18 +49,14 @@ export default function PaymentPage() {
 
   const createOrderPaths = useMemo(
     () => [
-      `${API_BASE}/api/razorpay/payments/create-order`,
-      `${API_BASE}/razorpay/payments/create-order`,
-      `${API_BASE}/api/payments/create-order`
+      `${API_BASE}/api/razorpay/payments/create-order`
     ],
     []
   )
 
   const verifyPaths = useMemo(
     () => [
-      `${API_BASE}/api/razorpay/payments/verify`,
-      `${API_BASE}/razorpay/payments/verify`,
-      `${API_BASE}/api/payments/verify`
+      `${API_BASE}/api/razorpay/payments/verify`
     ],
     []
   )
@@ -147,23 +144,28 @@ export default function PaymentPage() {
               } catch (err2) {
                 console.error('Failed to set sale as PAID', err2)
               }
+              setRazorpayOpen(false)
               setSuccessType('ONLINE')
               setSuccess(true)
             } else {
+              setRazorpayOpen(false)
               setError('Payment verification failed')
             }
           } catch (e) {
+            setRazorpayOpen(false)
             setError(e.message || 'Verification error')
           }
         },
         modal: {
           ondismiss: function () {
+            setRazorpayOpen(false)
             setError('Payment was cancelled before completion')
           }
         }
       })
 
       rz.open()
+      setRazorpayOpen(true)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -248,8 +250,8 @@ export default function PaymentPage() {
                     You will complete your payment securely with Razorpay. Your details are encrypted and never stored by us.
                   </p>
                   <div className="panel-actions">
-                    <button disabled={loading} className="btn solid" onClick={startOnlinePayment}>
-                      {loading ? 'Opening Secure Gateway…' : 'Pay Securely'}
+                    <button disabled={loading || razorpayOpen} className="btn solid" onClick={startOnlinePayment}>
+                      {loading ? 'Opening Secure Gateway…' : razorpayOpen ? 'Processing Payment…' : 'Pay Securely'}
                     </button>
                     <button className="btn ghost" onClick={() => navigate('/cart')}>
                       Back to Cart

@@ -10,7 +10,6 @@ import KidsPage from './pages/KidsPage'
 import Wishlist from './pages/Wishlist'
 import Cart from './pages/Cart'
 import Brands from './pages/Brands'
-import { WishlistProvider } from './WishlistContext'
 import SearchResults from './pages/SearchResults'
 import TaraLoader from './pages/TaraLoader'
 import ScrollToTop from './pages/ScrollToTop'
@@ -88,12 +87,10 @@ function AppShell() {
 
 export default function App() {
   return (
-    <WishlistProvider>
-      <Router>
-        <div className="App">
-          <AppShell />
-        </div>
-      </Router>
-    </WishlistProvider>
+    <Router>
+      <div className="App">
+        <AppShell />
+      </div>
+    </Router>
   )
 }

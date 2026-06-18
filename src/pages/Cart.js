@@ -283,13 +283,7 @@ const Cart = () => {
                           </div>
                           <div className="opt">
                             <span className="opt-label">Size</span>
-                            <select defaultValue={item.selected_size || item.size} className="select">
-                              {['S', 'M', 'L', 'XL', 'XXL', 'FREE'].map((s) => (
-                                <option key={s} value={s}>
-                                  {s}
-                                </option>
-                              ))}
-                            </select>
+                            <span className="opt-value">{item.selected_size || item.size || '—'}</span>
                           </div>
                           <div className="opt">
                             <span className="opt-label">Qty</span>
