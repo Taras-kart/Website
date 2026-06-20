@@ -163,7 +163,7 @@ const Footer = () => {
     },
     {
       title: 'Brands',
-      items: ['Jockey', 'Tasin Birds', 'Intimacy', 'Naidu hall', 'Indian flower', 'Cucumber', 'Dazzle', 'Quick dry', 'LUX'],
+      items: ['Jockey', 'Twin Birds', 'Intimacy', 'Naidu hall', 'Indian flower', 'Cucumber', 'Dazzle', 'Quick dry', 'LUX'],
       social: false
     }
   ];
@@ -267,7 +267,7 @@ return (
 
         <div className="footer-column">
           <h3>Brands</h3>
-          <DesktopList section="Brands" items={['Jockey', 'Tasin Birds', 'Intimacy', 'Naidu hall', 'Indian flower', 'Cucumber', 'Dazzle', 'Quick dry', 'LUX']} />
+          <DesktopList section="Brands" items={['Jockey', 'Twin Birds', 'Intimacy', 'Naidu hall', 'Indian flower', 'Cucumber', 'Dazzle', 'Quick dry', 'LUX']} />
         </div>
       </div>
 
