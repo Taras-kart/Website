@@ -46,6 +46,8 @@ const Profile = () => {
   const [mobileInput, setMobileInput] = useState('')
   const [mobileMsg, setMobileMsg] = useState('')
   const [savingMobile, setSavingMobile] = useState(false)
+  const [coinBalance, setCoinBalance] = useState(null)
+  const [loadingCoins, setLoadingCoins] = useState(false)
 
   const setToast = (m) => {
     setMobileMsg(m)
@@ -96,6 +98,7 @@ const Profile = () => {
         setSessionAndLocal('userEmail', data?.email || email)
         setSessionAndLocal('userName', name)
         if (localType) setSessionAndLocal('userType', localType)
+        fetchCoins(data?.email || email)
       }
     } catch {
       setIsLoggedIn(!!(email || id || uid))
@@ -105,6 +108,20 @@ const Profile = () => {
         email: email || '',
         mobile: ''
       })
+    }
+  }
+
+  const fetchCoins = async (email) => {
+    if (!email) return
+    setLoadingCoins(true)
+    try {
+      const res = await fetch(`${API_BASE}/api/coins/wallet?email=${encodeURIComponent(email)}`)
+      const data = await res.json()
+      if (data.ok) setCoinBalance(data.balance ?? 0)
+    } catch {
+      // silently fail — coins are a non-critical feature
+    } finally {
+      setLoadingCoins(false)
     }
   }
 
@@ -213,6 +230,10 @@ const Profile = () => {
               <span className="btn-shine"></span>
               Returns &amp; Refunds
             </button>
+            <button className={`profile-button ${activeSection === 'CoinWallet' ? 'active' : ''}`} onClick={() => setActiveSection('CoinWallet')}>
+              <span className="btn-shine"></span>
+              🪙 Coin Wallet
+            </button>
             <button className={`profile-button ${activeSection === 'Terms' ? 'active' : ''}`} onClick={() => setActiveSection('Terms')}>
               <span className="btn-shine"></span>
               Terms & Conditions
@@ -320,6 +341,61 @@ const Profile = () => {
             {activeSection === 'Returns' && isLoggedIn && (
               <div className="section-card">
                 <ReturnsPage embedded user={{ email: userInfo?.email, mobile: userInfo?.mobile }} />
+              </div>
+            )}
+
+            {activeSection === 'CoinWallet' && isLoggedIn && (
+              <div className="section-card">
+                <div className="profile-card">
+                  <div className="profile-card-header">
+                    <div style={{ fontSize: 40 }}>🪙</div>
+                    <div className="user-details">
+                      <h2>Coin Wallet</h2>
+                      <p className="user-subtitle">Your Attach coins balance</p>
+                    </div>
+                  </div>
+                  {loadingCoins ? (
+                    <div style={{ padding: '20px 0', color: '#9ca3af', fontSize: 14 }}>Loading balance...</div>
+                  ) : (
+                    <div style={{ marginTop: 16 }}>
+                      <div style={{
+                        background: 'linear-gradient(135deg, #1a1a00, #2a2200)',
+                        border: '1px solid #ca8a04',
+                        borderRadius: 12,
+                        padding: '24px 20px',
+                        textAlign: 'center'
+                      }}>
+                        <div style={{ fontSize: 13, color: '#9ca3af', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>
+                          Available Balance
+                        </div>
+                        <div style={{
+                          fontSize: 48,
+                          fontWeight: 800,
+                          color: coinBalance < 0 ? '#ef4444' : '#ca8a04',
+                          lineHeight: 1
+                        }}>
+                          {coinBalance ?? 0}
+                        </div>
+                        <div style={{ fontSize: 13, color: '#9ca3af', marginTop: 6 }}>
+                          coins = ₹{Math.max(0, coinBalance ?? 0)} discount
+                        </div>
+                      </div>
+                      <div style={{ marginTop: 16, padding: '12px 16px', background: '#111', borderRadius: 8, fontSize: 13, color: '#6b7280', lineHeight: 1.6 }}>
+                        {coinBalance < 0 ? (
+                          <span style={{ color: '#ef4444' }}>
+                            ⚠️ Your balance is negative due to a return. Earn more coins to bring it back to positive before redeeming.
+                          </span>
+                        ) : (
+                          <>
+                            <div>• 1 coin = ₹1 discount on your order</div>
+                            <div>• Earn coins on every delivered order</div>
+                            <div>• Redeem at checkout on your next order</div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 

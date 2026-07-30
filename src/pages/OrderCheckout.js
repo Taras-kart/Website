@@ -28,6 +28,11 @@ export default function OrderCheckout() {
   const [success, setSuccess] = useState(false);
   const [orderId, setOrderId] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('COD');
+  const [coinBalance, setCoinBalance] = useState(0)
+  const [coinsInput, setCoinsInput] = useState('')
+  const [coinsApplied, setCoinsApplied] = useState(0)
+  const [coinsValidating, setCoinsValidating] = useState(false)
+  const [coinsMsg, setCoinsMsg] = useState('')
 
   const payload = useMemo(() => {
     try {
@@ -94,7 +99,8 @@ export default function OrderCheckout() {
   const itemsCount = Array.isArray(payload?.items)
     ? payload.items.reduce((a, i) => a + Number(i.qty || 1), 0)
     : 0;
-  const payable = payload?.totals?.payable || 0;
+  const basePayable = payload?.totals?.payable || 0;
+  const payable = Math.max(0, basePayable - coinsApplied);
   const setF = (k, v) => setForm((s) => ({ ...s, [k]: v }));
   const isValidEmail = (e) => !e || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
   const isValidMobile = (m) => !m || /^[0-9]{10}$/.test(String(m).replace(/\D/g, ''));
@@ -117,10 +123,62 @@ export default function OrderCheckout() {
       ? sessionStorage.getItem('userEmail') || null
       : null;
 
+  // Fetch coin balance on mount
+  useEffect(() => {
+    const email = loginEmail
+    if (!email) return
+    fetch(`${API_BASE}/api/coins/wallet?email=${encodeURIComponent(email)}`)
+      .then(r => r.json())
+      .then(d => { if (d.ok) setCoinBalance(d.balance ?? 0) })
+      .catch(() => {})
+  }, [loginEmail])
+
   const showToast = (msg, ms = 1500) => {
     setToast(msg);
     setTimeout(() => setToast(''), ms);
   };
+
+  const handleApplyCoins = async () => {
+    const requested = parseInt(coinsInput, 10)
+    if (!requested || requested <= 0) {
+      setCoinsMsg('Enter a valid number of coins')
+      return
+    }
+    if (coinBalance <= 0) {
+      setCoinsMsg('No coins available to redeem')
+      return
+    }
+    if (!loginEmail) {
+      setCoinsMsg('Please log in to use coins')
+      return
+    }
+    setCoinsValidating(true)
+    setCoinsMsg('')
+    try {
+      const subtotal = basePayable
+      const res = await fetch(`${API_BASE}/api/coins/validate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: loginEmail,
+          coins_requested: requested,
+          order_subtotal: subtotal
+        })
+      })
+      const data = await res.json()
+      if (data.ok) {
+        setCoinsApplied(data.coinsApplied)
+        setCoinsMsg(`✓ ${data.coinsApplied} coins applied — ₹${data.coinsApplied} discount`)
+      } else {
+        setCoinsMsg(data.message || 'Cannot apply coins')
+        setCoinsApplied(0)
+      }
+    } catch {
+      setCoinsMsg('Failed to validate coins')
+    } finally {
+      setCoinsValidating(false)
+    }
+  }
 
   const createSale = async (statusForBackend) => {
     const shipping_address = {
@@ -149,11 +207,16 @@ export default function OrderCheckout() {
       customer_name: form.name || null,
       customer_mobile: form.mobile || null,
       shipping_address,
-      totals: payload.totals,
+      totals: {
+        ...payload.totals,
+        payable: Math.max(0, (payload.totals?.payable || 0) - coinsApplied)
+      },
       items: normalizedItems,
       payment_status: statusForBackend,
       login_email: loginEmail,
-      payment_method: paymentMethod
+      payment_method: paymentMethod,
+      coins_applied: coinsApplied,
+      user_email_for_coins: loginEmail
     };
 
     const resp = await fetch(`${API_BASE}/api/sales/web/place`, {
@@ -345,10 +408,58 @@ export default function OrderCheckout() {
                     <span>₹{fmt(payload?.totals?.giftWrap)}</span>
                   </div>
                 )}
+                {/* Coin Wallet */}
+                {coinBalance > 0 && (
+                  <div style={{ margin: '12px 0', padding: '12px', background: '#1a1a00', border: '1px solid #ca8a04', borderRadius: 8 }}>
+                    <div style={{ fontSize: 13, color: '#ca8a04', fontWeight: 600, marginBottom: 8 }}>
+                      🪙 Coin Wallet — {coinBalance} coins available
+                    </div>
+                    <div style={{ fontSize: 12, color: '#9ca3af', marginBottom: 8 }}>
+                      Max usable: {Math.floor(basePayable * 0.10)} coins (10% of order value)
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <input
+                        type="number"
+                        min="1"
+                        max={Math.min(coinBalance, Math.floor(basePayable * 0.10))}
+                        placeholder={`Max ${Math.min(coinBalance, Math.floor(basePayable * 0.10))}`}
+                        value={coinsInput}
+                        onChange={e => { setCoinsInput(e.target.value); setCoinsApplied(0); setCoinsMsg('') }}
+                        style={{
+                          flex: 1, background: '#111', border: '1px solid #374151',
+                          color: '#fff', padding: '7px 10px', borderRadius: 6, fontSize: 13
+                        }}
+                      />
+                      <button
+                        onClick={handleApplyCoins}
+                        disabled={coinsValidating || !coinsInput}
+                        style={{
+                          background: '#ca8a04', color: '#000', border: 'none',
+                          padding: '7px 14px', borderRadius: 6, fontWeight: 700,
+                          fontSize: 13, cursor: coinsValidating ? 'not-allowed' : 'pointer',
+                          opacity: coinsValidating ? 0.6 : 1
+                        }}
+                      >
+                        {coinsValidating ? '...' : 'Apply'}
+                      </button>
+                    </div>
+                    {coinsMsg && (
+                      <div style={{ fontSize: 12, marginTop: 6, color: coinsMsg.startsWith('✓') ? '#4ade80' : '#f87171' }}>
+                        {coinsMsg}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {coinsApplied > 0 && (
+                  <div>
+                    <span style={{ color: '#4ade80' }}>Coins Discount</span>
+                    <span style={{ color: '#4ade80' }}>-₹{fmt(coinsApplied)}</span>
+                  </div>
+                )}
                 <div className="sep" />
                 <div className="total">
                   <span>Total</span>
-                  <span>₹{fmt(payload?.totals?.payable)}</span>
+                  <span>₹{fmt(payable)}</span>
                 </div>
               </div>
               <button onClick={placeOrder} disabled={!canPlace} className="cta">
