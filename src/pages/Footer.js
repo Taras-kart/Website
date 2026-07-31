@@ -339,6 +339,8 @@ return (
           <a href={POLICY_LINKS.refund} target="_blank" rel="noreferrer">Cancellation & Refunds</a>
           <span>•</span>
           <a href={POLICY_LINKS.terms} target="_blank" rel="noreferrer">Terms & Conditions</a>
+          <span>•</span>
+          <a href='/privacy-policy'>Privacy Policy</a>
         </div>
         <div className="footer-bottom-right">© {new Date().getFullYear()} Attach</div>
       </div>

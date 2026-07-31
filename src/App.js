@@ -26,6 +26,7 @@ import NavbarFinal from './pages/Navbar'
 import Contactus from './pages/Contactus'
 import CategoryDisplay from './pages/CategoryDisplay'
 import B2BDashboard from './pages/B2BDashboard';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 function NavigationLoader() {
   const location = useLocation()
@@ -80,6 +81,7 @@ function AppShell() {
         <Route path="/order/:id/cancel" element={<OrderCancel />} />
         <Route path="/returns/:id/refund" element={<RefundRequest />} />
         <Route path="/customer-care" element={<Contactus />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       </Routes>
     </>
   )
