@@ -438,11 +438,12 @@ const CheckoutPage = () => {
             String(r.product_name || r.name || '').trim().toUpperCase() ===
               String(product.product_name || '').trim().toUpperCase()
         )
-        const mapped = same.map((r) => ({
+        let mapped = same.map((r) => ({
           id: r.id,
           product_id: r.product_id,
           color: r.color || r.colour || '',
           size: r.size || '',
+          pattern_code: r.pattern_code || '',
           image_url: r.image_url,
           ean_code: r.ean_code || '',
           original_price_b2c: r.original_price_b2c,
@@ -452,6 +453,17 @@ const CheckoutPage = () => {
           mrp: r.mrp,
           sale_price: r.sale_price
         }))
+
+        // Pattern-as-colour mode: only when ALL variants share a single colour
+        // but have 2+ distinct patterns (e.g. SARINA). Existing brands with
+        // distinct colours or a single pattern are completely unaffected.
+        const distinctColors = Array.from(new Set(mapped.map((v) => v.color).filter(Boolean)))
+        const distinctPatterns = Array.from(new Set(mapped.map((v) => v.pattern_code).filter(Boolean)))
+        const usePatternAsColor = distinctColors.length <= 1 && distinctPatterns.length >= 2
+        if (usePatternAsColor) {
+          mapped = mapped.map((v) => ({ ...v, color: v.pattern_code || v.color }))
+        }
+
         setVariants(mapped)
 
         const byColor = {}
@@ -463,7 +475,9 @@ const CheckoutPage = () => {
         Object.keys(byColor).forEach((k) => { byColor[k] = Array.from(new Set(byColor[k])) })
         setColorImages(byColor)
 
-        const initialColor = product.color || product.colour || mapped[0]?.color || null
+        const initialColor = usePatternAsColor
+          ? (mapped[0]?.color || null)
+          : (product.color || product.colour || mapped[0]?.color || null)
         setSelectedColor(initialColor)
 
         const sizesForInitial = Array.from(
