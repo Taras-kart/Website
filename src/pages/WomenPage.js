@@ -210,6 +210,10 @@ const CATEGORY_GROUPS = [
   { brand: 'ASWATI', parent: 'Slip', title: 'Princess', patterns: ['PRINCESS'] },
   { brand: 'ASWATI', parent: 'Slip', title: 'Queen Bra Slip', patterns: ['QUEEN BRA SLIP'] },
   { brand: 'ASWATI', parent: 'Slip', title: 'Saniya', patterns: ['SANIYA'] },
+
+  // ════════ SARINA ════════
+  { brand: 'SARINA', parent: null, title: 'COD Set', patterns: ['COD SET'] },
+
 ]
 
 const deriveCategory = (p) => {

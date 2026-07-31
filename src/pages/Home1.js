@@ -217,6 +217,11 @@ export default function Home1() {
                 </div>
               </Link>
 
+            <Link to="/category-display?brand=SARINA" className="fc-card">
+              <div className="fc-media">
+                <img src={getImage('/images/brands/sarina-brand.png')} alt="Sarina" loading="lazy" />
+              </div>
+            </Link>
 
             </div>
           </div>

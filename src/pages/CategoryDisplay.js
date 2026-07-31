@@ -170,6 +170,10 @@ const CATEGORY_GROUPS = [
   { brand: 'DAZZLE PRIME', parent: 'T-Shirts', title: 'Grace T-Shirt', patterns: ['GRACE T SHIRT', 'GRACE T-SHIRT'] },
   { brand: 'DAZZLE PRIME', parent: 'T-Shirts', title: 'Tangy T-Shirt Full Sleeves', patterns: ['TANGY T-SHIRT FULL SELVESS', 'TANGY T SHIRT FULL SELVESS'] }, // MUST BE ABOVE TANGY T-SHIRT
   { brand: 'DAZZLE PRIME', parent: 'T-Shirts', title: 'Tangy T-Shirt', patterns: ['TANGY T-SHIRT', 'TANGY T SHIRT'] },
+
+  // ════════ SARINA ════════
+  { brand: 'SARINA', parent: null, title: 'COD Set', patterns: ['COD SET'] },
+
 ]
 
 const deriveCategoryData = (p) => {
