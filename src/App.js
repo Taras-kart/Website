@@ -27,6 +27,7 @@ import Contactus from './pages/Contactus'
 import CategoryDisplay from './pages/CategoryDisplay'
 import B2BDashboard from './pages/B2BDashboard';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import B2BProductList from './pages/B2BProductList';
 
 function NavigationLoader() {
   const location = useLocation()
@@ -82,6 +83,7 @@ function AppShell() {
         <Route path="/returns/:id/refund" element={<RefundRequest />} />
         <Route path="/customer-care" element={<Contactus />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/b2b-products" element={<B2BProductList />} />
       </Routes>
     </>
   )

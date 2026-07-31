@@ -896,6 +896,31 @@ const CheckoutPage = () => {
   {userType === 'B2B' ? (
     <div style={{ width: '100%', marginTop: '10px' }}>
 
+      {/* B2B Markdown Info */}
+      {product?.markdown_pct && (
+        <div style={{
+          background: '#0a1a0a',
+          border: '1px solid #166534',
+          borderRadius: '8px',
+          padding: '12px 14px',
+          marginBottom: '14px',
+          fontSize: '13px',
+          color: '#4ade80'
+        }}>
+          <div style={{ fontWeight: 700, marginBottom: 6 }}>Wholesale Pricing</div>
+          <div>MRP: ₹{Number(pricing.mrp).toFixed(0)}</div>
+          <div>Markdown: -{product.markdown_pct}%</div>
+          {product?.stock_unit === 'BOX' && product?.pieces_per_box && (
+            <div style={{ marginTop: 4, color: '#86efac' }}>
+              📦 Sold in boxes · {product.pieces_per_box} pcs per box
+            </div>
+          )}
+          {product?.avb_sizes && product.avb_sizes.toUpperCase() !== 'NO' && (
+            <div style={{ color: '#86efac' }}>📏 Available sizes: {product.avb_sizes}</div>
+          )}
+        </div>
+      )}
+
       {/* ✅ BOX BRAND NOTICE (Now correctly restricted to B2B) */}
       {isBoxBrand(product?.brand) && (
         <div style={{

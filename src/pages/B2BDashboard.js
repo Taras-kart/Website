@@ -133,7 +133,7 @@ export default function B2BDashboard() {
                 {selectedDistributor.brands.map((brand, idx) => (
 <Link
   key={idx}
-  to={`/category-display?brand=${encodeURIComponent(BRAND_LINKS[brand] || brand)}`}
+  to={`/b2b-products?brand=${encodeURIComponent(BRAND_LINKS[brand] || brand)}`}
   className="brand-card"
   style={{ animationDelay: `${idx * 0.07}s` }}
 >
