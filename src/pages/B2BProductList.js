@@ -143,7 +143,6 @@ export default function B2BProductList() {
             <p style={styles.count}>{filtered.length} product{filtered.length !== 1 ? 's' : ''}</p>
             <div style={styles.grid}>
               {filtered.map(product => {
-                const salePrice = calcSalePrice(product.mrp, product.markdown_pct)
                 return (
                   <div
                     key={product.id}
