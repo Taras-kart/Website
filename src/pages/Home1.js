@@ -1,987 +1,204 @@
-// src/pages/Home1.js
-
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-
-// Swiper core and required modules
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Autoplay, Pagination } from 'swiper'
-
-// Swiper styles
+import { FaArrowRight } from 'react-icons/fa'
 import 'swiper/css'
 import 'swiper/css/pagination'
-
-// Local components and styles
 import './Home1.css'
-import Navbar from './Navbar'
-import Footer from './Footer'
+import './Home1Loading.css'
 import Divider from './Divider'
+import ProductSection from '../components/ProductSection'
+import { fetchProducts } from '../services/productsApi'
+import { fetchCategories } from '../services/categoriesApi'
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://taras-kart-backend.vercel.app'
+const API_BASE = process.env.REACT_APP_API_BASE_URL || process.env.REACT_APP_API_BASE || 'https://taras-kart-backend.vercel.app'
+const clean = value => String(value || '').trim()
+const upper = value => clean(value).toUpperCase()
+const number = value => Number(value || 0)
+const unique = values => [...new Set(values.map(clean).filter(Boolean))]
+const normalize = value => clean(value).toLowerCase().replace(/[^a-z0-9]+/g, '')
+const innerwearPattern = /INNER\s*WEAR|BRA|BRIEF|TRUNK|VEST|PANTY|SLIP|LINGERIE|CAMISOLE/i
+const menExcludedPattern = /BRA|PANTY|BRIEF|SLIP|CAMISOLE|CHUDIDAR|LEHENGA|KURTI|SAREE|LEGGING|JEGGING|PALAZZO|NIGHTWEAR/i
+const fallbackImages = {
+  WOMEN: '/images/updated/grid1.jpg',
+  MEN: '/images/men/mens13.jpeg',
+  KIDS: '/images/kids/kids-girls-frock.jpg'
+}
+
+const productImageCandidates = product => unique([
+  product?.shared_image_url,
+  product?.front_image_url,
+  product?.main_image_url,
+  product?.image_url,
+  ...(Array.isArray(product?.images) ? product.images : []),
+  ...(Array.isArray(product?.variants) ? product.variants.flatMap(variant => [variant?.shared_image_url, variant?.front_image_url, variant?.main_image_url, variant?.image_url]) : [])
+])
+const firstImage = product => productImageCandidates(product)[0] || ''
+const slugFor = value => clean(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+const shopPath = (gender, category) => `/shop/${clean(gender).toLowerCase()}/${clean(category?.slug || category?.categorySlug || category?.category_slug) || slugFor(category?.name || category?.category || 'all')}`
+const productText = product => `${product?.categoryPath || product?.category_path || ''} ${product?.category || product?.category_name || ''} ${product?.name || product?.product_name || ''}`
+const isInnerwear = product => innerwearPattern.test(productText(product))
+const isValidForGender = (item, gender) => {
+  const itemGender = upper(item?.rootName || item?.root_name || item?.gender || item?.categoryRoot || item?.category_root)
+  if (!itemGender || itemGender !== gender) return false
+  if (gender === 'MEN' && menExcludedPattern.test(clean(item?.name || item?.product_name || item?.category || item?.category_name))) return false
+  return true
+}
+const productPrice = (product, userType) => userType === 'B2B'
+  ? { original: number(product?.originalB2B || product?.original_price_b2b), final: number(product?.finalB2B || product?.final_price_b2b) }
+  : { original: number(product?.originalB2C || product?.original_price_b2c), final: number(product?.finalB2C || product?.final_price_b2c) }
+const groupHomepageProducts = rows => {
+  const groups = new Map()
+  ;(Array.isArray(rows) ? rows : []).forEach(product => {
+    const key = `${normalize(product?.brand || product?.brand_name)}|${normalize(product?.name || product?.product_name)}`
+    if (key === '|') return
+    if (!groups.has(key)) groups.set(key, { ...product, variants: [], images: [], colours: [], sizes: [], designKey: key })
+    const group = groups.get(key)
+    group.variants = [...group.variants, ...(Array.isArray(product?.variants) ? product.variants : [product])]
+    group.images = unique([...group.images, ...(Array.isArray(product?.images) ? product.images : []), product?.image_url, product?.front_image_url, product?.main_image_url])
+    group.colours = unique([...group.colours, product?.colour, product?.color, ...(Array.isArray(product?.colours) ? product.colours : [])])
+    group.sizes = unique([...group.sizes, product?.size, ...(Array.isArray(product?.sizes) ? product.sizes : [])])
+  })
+  return [...groups.values()]
+}
+
+function ResilientImage({ candidates = [], fallback, alt, ...props }) {
+  const sourceKey = unique([...candidates, fallback]).join('|')
+  const sources = useMemo(() => sourceKey.split('|').filter(Boolean), [sourceKey])
+  const [index, setIndex] = useState(0)
+  useEffect(() => setIndex(0), [sourceKey])
+  if (!sources.length) return null
+  return <img {...props} src={sources[Math.min(index, sources.length - 1)]} alt={alt} onError={() => setIndex(current => Math.min(current + 1, sources.length - 1))} />
+}
+
+function SectionHead({ eyebrow, title, link, linkText = 'View all' }) {
+  return <div className="home-section-head"><div><span>{eyebrow}</span><h2>{title}</h2></div>{link && <Link to={link}>{linkText} <FaArrowRight /></Link>}</div>
+}
 
 export default function Home1() {
   const [imageMap, setImageMap] = useState({})
+  const [products, setProducts] = useState([])
+  const [categories, setCategories] = useState([])
+  const [loading, setLoading] = useState(true)
+  const userType = upper(sessionStorage.getItem('userType') || localStorage.getItem('userType') || 'B2C')
 
   useEffect(() => {
-    const run = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/api/homepage-images`)
-        if (!res.ok) return
-        const data = await res.json()
+    let active = true
+    const load = async () => {
+      const [homepageResult, productResult, categoryResult] = await Promise.allSettled([
+        fetch(`${API_BASE}/api/homepage-images`, { cache: 'no-store' }).then(response => response.ok ? response.json() : []),
+        fetchProducts({ limit: 50000, hasImage: true }),
+        fetchCategories()
+      ])
+      if (!active) return
+      if (homepageResult.status === 'fulfilled' && Array.isArray(homepageResult.value)) {
         const map = {}
-        data.forEach(item => {
-          if (item.id && item.imageUrl) {
-            map[item.id] = item.imageUrl
-          }
+        homepageResult.value.forEach(item => {
+          if (item.id && item.imageUrl) map[item.id] = item.imageUrl
         })
         setImageMap(map)
-      } catch (e) { }
+      }
+      if (productResult.status === 'fulfilled') setProducts(groupHomepageProducts(productResult.value))
+      if (categoryResult.status === 'fulfilled') setCategories(Array.isArray(categoryResult.value) ? categoryResult.value : [])
+      setLoading(false)
     }
-    run()
+    load()
+    return () => { active = false }
   }, [])
 
-  const getImage = path => {
-    return imageMap[path] || path
+  const getImage = path => imageMap[path] || path
+  const productsByGender = useMemo(() => ({
+    WOMEN: products.filter(product => isValidForGender(product, 'WOMEN')),
+    MEN: products.filter(product => isValidForGender(product, 'MEN')),
+    KIDS: products.filter(product => isValidForGender(product, 'KIDS'))
+  }), [products])
+  const cleanProducts = useMemo(() => products.filter(product => {
+    const gender = upper(product?.gender || product?.categoryRoot || product?.category_root)
+    return Boolean(fallbackImages[gender]) && isValidForGender(product, gender) && !isInnerwear(product)
+  }), [products])
+  const discountedProducts = useMemo(() => [...cleanProducts].filter(product => {
+    const price = productPrice(product, userType)
+    return price.original > price.final && price.final > 0
+  }).sort((a, b) => {
+    const aPrice = productPrice(a, userType)
+    const bPrice = productPrice(b, userType)
+    return (bPrice.original - bPrice.final) / bPrice.original - (aPrice.original - aPrice.final) / aPrice.original
+  }), [cleanProducts, userType])
+  const under499 = useMemo(() => cleanProducts.filter(product => {
+    const price = productPrice(product, userType)
+    return price.final > 0 && price.final <= 499
+  }), [cleanProducts, userType])
+  const newArrivals = useMemo(() => [...cleanProducts].sort((a, b) => number(b.productId || b.id) - number(a.productId || a.id)), [cleanProducts])
+
+  const categoriesFor = gender => {
+    if (loading) return []
+    const source = categories.filter(category => isValidForGender(category, gender) && number(category.level) > 0 && number(category.productCount || category.product_count) > 0)
+    const distinct = new Map()
+    source.forEach(category => {
+      const key = upper(category.name)
+      const current = distinct.get(key)
+      if (!current || number(current.productCount || current.product_count) < number(category.productCount || category.product_count)) distinct.set(key, category)
+    })
+    return [...distinct.values()].sort((a, b) => number(a.sortOrder || a.sort_order) - number(b.sortOrder || b.sort_order)).slice(0, 8).map(category => {
+      const match = productsByGender[gender].find(product => Number(product.categoryId || product.category_id) === Number(category.id) || upper(product.categoryPath || product.category_path).split('>').map(value => value.trim()).includes(upper(category.name)))
+      return {
+        ...category,
+        imageCandidates: unique([firstImage(match), ...(category.imageCandidates || []), category.image, category.representativeImage, category.representative_image]),
+        path: shopPath(gender, category)
+      }
+    })
   }
 
-  const [coolTab, setCoolTab] = useState('plazzo')
+  const womenCategories = categoriesFor('WOMEN')
+  const menCategories = categoriesFor('MEN')
+  const kidsCategories = categoriesFor('KIDS')
+  const bestGenderImage = gender => firstImage(productsByGender[gender].find(product => !isInnerwear(product) && firstImage(product))) || fallbackImages[gender]
+  const genderCards = [
+    { gender: 'WOMEN', title: 'Women', path: '/women' },
+    { gender: 'MEN', title: 'Men', path: '/men' },
+    { gender: 'KIDS', title: 'Kids', path: '/kids' }
+  ].map(item => ({ ...item, image: bestGenderImage(item.gender) }))
+  const brandCards = useMemo(() => {
+    const map = new Map()
+    cleanProducts.forEach(product => {
+      const brand = clean(product.brand || product.brand_name)
+      if (!brand) return
+      const current = map.get(upper(brand))
+      if (!current) map.set(upper(brand), { name: brand, image: firstImage(product), gender: upper(product.gender || product.categoryRoot) })
+    })
+    return [...map.values()].filter(item => item.image).slice(0, 8)
+  }, [cleanProducts])
 
-  const coolImages = {
-    plazzo: [
-      '/images/updated/plazzo1.webp',
-      '/images/updated/plazzo2.webp',
-      '/images/updated/plazzo3.webp',
-      '/images/updated/plazzo4.webp'
-    ],
-    jeggings: [
-      '/images/updated/jeggings1.webp',
-      '/images/updated/jeggings2.webp',
-      '/images/updated/jeggings3.webp',
-      '/images/updated/jeggings4.webp'
-    ],
-    nightPants: [
-      '/images/updated/night-pants1.webp',
-      '/images/updated/night-pants4.webp',
-      '/images/updated/night-pants4.webp',
-      '/images/updated/night-pants4.webp'
-    ],
-    tshirts: [
-      '/images/updated/t-shirt1.webp',
-      '/images/updated/t-shirt2.webp',
-      '/images/updated/t-shirt3.webp',
-      '/images/updated/t-shirt4.webp'
-    ]
-  }
+  const CategoryGrid = ({ items, gender }) => items.length > 0 && <div className="home-category-grid">{items.map(item => <Link to={item.path} className="home-category-card" key={`${gender}-${item.id}`}><div className="home-category-media"><ResilientImage candidates={item.imageCandidates} fallback={fallbackImages[gender]} alt={item.name} loading="lazy" /></div><div className="home-category-info"><h3>{item.name}</h3><span>Explore collection <FaArrowRight /></span></div></Link>)}</div>
 
-  return (
-    <div className="home1-page-new-home">
-      <Navbar />
-      <div className="spacer-new-home">
-
-        {/* ── HERO BANNER ─────────────────────────────── */}
-        <section className="home1-hero-new-home">
-          <div className="home1-hero-frame-new-home">
-            <Swiper
-              modules={[Autoplay, Pagination]}
-              loop
-              slidesPerView={1}
-              autoplay={{ delay: 3500, disableOnInteraction: false }}
-              speed={900}
-              pagination={{ clickable: true }}
-              grabCursor={true}
-            >
-              <SwiperSlide>
-                <div className="main-hero-slide">
-                  <img src={getImage('/images/ATTACH-BANNER.png')} alt="Home Banner 1" loading="eager" />
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="main-hero-slide">
-                  <img src={getImage('/images/CUCUMBER-BANNER.png')} alt="Cucumber Banner" loading="lazy" />
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="main-hero-slide">
-                  <img src={getImage('/images/QUICK-DRY-BANNER.png')} alt="Quick Dry Banner" loading="lazy" />
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="main-hero-slide">
-                  <img src={getImage('/images/JOCKEY-BANNER.png')} alt="Jockey Banner" loading="lazy" />
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="main-hero-slide">
-                  <img src={getImage('/images/TWIN-BIRDS-BANNER.png')} alt="Twin Birds Banner" loading="lazy" />
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="main-hero-slide">
-                  <img src={getImage('/images/INDIAN-FLOWER-BANNER.png')} alt="Indian Flower Banner" loading="lazy" />
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="main-hero-slide">
-                  <img src={getImage('/images/DAZZEL-BANNER.png')} alt="Dazzel Banner" loading="lazy" />
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="main-hero-slide">
-                  <img src={getImage('/images/ASWATI-BANNER.png')} alt="Aswati Banner" loading="lazy" />
-                </div>
-              </SwiperSlide>
-            </Swiper>
-          </div>
-        </section>
-
-        <Divider label="Women" direction="ltr" />
-
-        {/* ── OUR BRANDS ──────────────────────────────── */}
-        <section className="fc-section section-animate">
-          <div className="fc-inner">
-            <div className="fc-head">
-              <h2 className="fc-title">Our Brands</h2>
-            </div>
-
-            <div className="fc-grid">
-              <Link to="/category-display?brand=Twin%20Birds" className="fc-card">
-                <div className="fc-media">
-                  <img src={getImage('/images/brands/twin-birds-brand.jpeg')} alt="Twin Birds" loading="lazy" />
-                </div>
-              </Link>
-
-              <Link to="/category-display?brand=Indian%20Flower" className="fc-card">
-                <div className="fc-media">
-                  <img src={getImage('/images/brands/indian-flower-brand.jpeg')} alt="Indian Flower" loading="lazy" />
-                </div>
-              </Link>
-
-              <Link to="/category-display?brand=Intimacy" className="fc-card">
-                <div className="fc-media">
-                  <img src={getImage('/images/brands/intimacy-brand.jpeg')} alt="Intimacy" loading="lazy" />
-                </div>
-              </Link>
-
-              <Link to="/category-display?brand=Naidu%20Hall" className="fc-card">
-                <div className="fc-media">
-                  <img src={getImage('/images/brands/naidu-hall-brand.avif')} alt="Naidu Hall" loading="lazy" />
-                </div>
-              </Link>
-
-              <Link to="/category-display?brand=Aswati" className="fc-card">
-                <div className="fc-media">
-                  <img src={getImage('/images/brands/aswathi-brand.jpeg')} alt="Aswati" loading="lazy" />
-                </div>
-              </Link>
-
-              <Link to="/category-display?brand=Cucumber" className="fc-card">
-                <div className="fc-media">
-                  <img src={getImage('/images/brands/cucumber-brand.jpg')} alt="Cucumber" loading="lazy" />
-                </div>
-              </Link>
-
-              <Link to="/category-display?brand=Quickdry" className="fc-card">
-                <div className="fc-media">
-                  <img src={getImage('/images/brands/quickdry-brand.jpg')} alt="Quickdry" loading="lazy" />
-                </div>
-              </Link>
-
-              <Link to="/category-display?brand=Jockey" className="fc-card">
-                <div className="fc-media">
-                  <img src={getImage('/images/brands/jockey-brand.jpg')} alt="Jockey" loading="lazy" />
-                </div>
-              </Link>
-
-<Link to="/category-display?brand=DAZZLE%20PRIME" className="fc-card">
-  <div className="fc-media">
-    <img src={getImage('/images/brands/dazzle-brand.jpg')} alt="Dazzle Prime" loading="lazy" />
+  return <div className="home1-page-new-home">
+    <section className="home1-hero-new-home"><div className="home1-hero-frame-new-home"><Swiper modules={[Autoplay, Pagination]} loop slidesPerView={1} autoplay={{ delay: 3500, disableOnInteraction: false }} speed={900} pagination={{ clickable: true }} grabCursor={true}>
+      <SwiperSlide><div className="main-hero-slide"><img src={getImage('/images/ATTACH-BANNER.png')} alt="Home Banner 1" loading="eager" /></div></SwiperSlide>
+      <SwiperSlide><div className="main-hero-slide"><img src={getImage('/images/CUCUMBER-BANNER.png')} alt="Cucumber Banner" loading="lazy" /></div></SwiperSlide>
+      <SwiperSlide><div className="main-hero-slide"><img src={getImage('/images/QUICK-DRY-BANNER.png')} alt="Quick Dry Banner" loading="lazy" /></div></SwiperSlide>
+      <SwiperSlide><div className="main-hero-slide"><img src={getImage('/images/JOCKEY-BANNER.png')} alt="Jockey Banner" loading="lazy" /></div></SwiperSlide>
+      <SwiperSlide><div className="main-hero-slide"><img src={getImage('/images/TWIN-BIRDS-BANNER.png')} alt="Twin Birds Banner" loading="lazy" /></div></SwiperSlide>
+      <SwiperSlide><div className="main-hero-slide"><img src={getImage('/images/INDIAN-FLOWER-BANNER.png')} alt="Indian Flower Banner" loading="lazy" /></div></SwiperSlide>
+      <SwiperSlide><div className="main-hero-slide"><img src={getImage('/images/DAZZEL-BANNER.png')} alt="Dazzel Banner" loading="lazy" /></div></SwiperSlide>
+      <SwiperSlide><div className="main-hero-slide"><img src={getImage('/images/ASWATI-BANNER.png')} alt="Aswati Banner" loading="lazy" /></div></SwiperSlide>
+    </Swiper></div></section>
+    <Divider label="Tara" direction="ltr" />
+    <section className="home-gender-section"><SectionHead eyebrow="Explore Tara" title="Shop your way" /><div className="home-gender-grid">{loading ? ['WOMEN', 'MEN', 'KIDS'].map(item => <div className="home-gender-card home-gender-loading" key={item} />) : genderCards.map(item => <Link to={item.path} key={item.gender} className="home-gender-card"><ResilientImage candidates={[item.image]} fallback={fallbackImages[item.gender]} alt={item.title} /><div><h2>{item.title}</h2><span>Shop now <FaArrowRight /></span></div></Link>)}</div></section>
+    <Divider label="Women" direction="rtl" />
+    {womenCategories.length > 0 && <section className="home-category-section"><SectionHead eyebrow="For her" title="Women shop by category" link="/women" /><CategoryGrid items={womenCategories} gender="WOMEN" /></section>}
+    <ProductSection eyebrow="Prices worth waiting for" title="Price drops" products={discountedProducts.slice(0, 14)} userType={userType} link="/shop/women/all" listingMode />
+    <Divider label="New Prices" direction="ltr" />
+    <ProductSection eyebrow="Trending now" title="Loved by women" products={productsByGender.WOMEN.filter(product => !isInnerwear(product)).slice(0, 14)} userType={userType} link="/shop/women/all" listingMode />
+    <section className="home-men-editorial"><div className="home-men-editorial-main"><ResilientImage candidates={[bestGenderImage('MEN')]} fallback={fallbackImages.MEN} alt="Shop for men" /><div><span>Modern essentials</span><h2>Shop for men</h2><p>Sharp everyday pieces, comfortable fits and dependable style.</p><Link to="/men">Explore men <FaArrowRight /></Link></div></div><div className="home-men-editorial-side">{menCategories.slice(0, 4).map(item => <Link to={item.path} key={item.id}><ResilientImage candidates={item.imageCandidates} fallback={fallbackImages.MEN} alt={item.name} /><strong>{item.name}</strong><i><FaArrowRight /></i></Link>)}</div></section>
+    <Divider label="Men" direction="rtl" />
+    {menCategories.length > 0 && <section className="home-category-section"><SectionHead eyebrow="For him" title="Men shop by category" link="/men" /><CategoryGrid items={menCategories} gender="MEN" /></section>}
+    <ProductSection eyebrow="Everyday rotation" title="Men's essentials" products={productsByGender.MEN.slice(0, 14)} userType={userType} link="/shop/men/all" listingMode />
+    {brandCards.length > 0 && <section className="home-brand-section"><SectionHead eyebrow="Names you know" title="Shop by brand" link="/brands" /><div className="home-brand-grid">{brandCards.map(brand => <Link to={`/brands?brand=${encodeURIComponent(brand.name)}`} key={brand.name}><ResilientImage candidates={[brand.image]} fallback={fallbackImages[brand.gender] || fallbackImages.WOMEN} alt={brand.name} /><div><strong>{brand.name}</strong><span>Discover brand <FaArrowRight /></span></div></Link>)}</div></section>}
+    <Divider label="Best Value" direction="ltr" />
+    <ProductSection eyebrow="Smart shopping" title="Under ₹499" products={under499.slice(0, 14)} userType={userType} link="/shop/women/all" listingMode />
+    <ProductSection eyebrow="Just landed" title="New arrivals" products={newArrivals.slice(0, 14)} userType={userType} link="/shop/women/all" listingMode />
+    {kidsCategories.length > 0 && <><Divider label="Kids" direction="rtl" /><section className="home-category-section"><SectionHead eyebrow="For little ones" title="Kids shop by category" link="/kids" /><CategoryGrid items={kidsCategories} gender="KIDS" /></section><ProductSection eyebrow="Play-ready picks" title="Kids favourites" products={productsByGender.KIDS.slice(0, 14)} userType={userType} link="/shop/kids/all" listingMode /></>}
+    <ProductSection eyebrow="Curated for you" title="More to explore" products={cleanProducts.slice(0, 14)} userType={userType} link="/shop/women/all" listingMode />
   </div>
-</Link>
-
-              <Link to="/category-display?brand=BodyCare" className="fc-card">
-                <div className="fc-media">
-                  <img src={getImage('/images/brands/body-care.jpg')} alt="Body Care" loading="lazy" />
-                </div>
-              </Link>
-
-
-              <Link to="/category-display?brand=Charak" className="fc-card">
-                <div className="fc-media">
-                  <img src={getImage('/images/brands/charak-brand.png')} alt="Charak" loading="lazy" />
-                </div>
-              </Link>
-
-              <Link to="/category-display?brand=Selvas" className="fc-card">
-                <div className="fc-media">
-                  <img src={getImage('/images/brands/selvas-brand.jpg')} alt="Selvas" loading="lazy" />
-                </div>
-              </Link>
-
-            <Link to="/category-display?brand=SARINA" className="fc-card">
-              <div className="fc-media">
-                <img src={getImage('/images/brands/sarina-brand.png')} alt="Sarina" loading="lazy" />
-              </div>
-            </Link>
-
-            </div>
-          </div>
-        </section>
-
-        <Divider label="Women" direction="ltr" />
-
-        {/* ── WOMEN CATEGORY GRID ─────────────────────── */}
-        <section className="home-part-grid section-animate">
-          <div className="home-part-inner">
-            <div className="home-part-card">
-              <img src={getImage('/images/updated/grid1.jpg')} alt="Women Tops" className="home-part-img" />
-            </div>
-
-            <div className="home-part-text">
-              <h3 className="home-part-title">Women Tops</h3>
-              <p className="home-part-sub">Fresh fits for everyday styling</p>
-              <Link to="/women" className="home-part-btn">Shop Now →</Link>
-            </div>
-
-            <div className="home-part-card">
-              <img src={getImage('/images/updated/grid2.jpg')} alt="Plazzo Pants" className="home-part-img" />
-            </div>
-
-            <div className="home-part-text">
-              <h3 className="home-part-title">Plazzo Pants</h3>
-              <p className="home-part-sub">Flowy comfort, clean look</p>
-              <Link to="/women" className="home-part-btn">Explore →</Link>
-            </div>
-
-            <div className="home-part-text">
-              <h3 className="home-part-title">Kurtis</h3>
-              <p className="home-part-sub">Classic prints and easy silhouettes</p>
-              <Link to="/women" className="home-part-btn">View Styles →</Link>
-            </div>
-
-            <div className="home-part-card">
-              <img src={getImage('/images/updated/grid3.jpg')} alt="Women Kurtis" className="home-part-img" />
-            </div>
-
-            <div className="home-part-text">
-              <h3 className="home-part-title">Leggings</h3>
-              <p className="home-part-sub">Stretch, support, all day comfort</p>
-              <Link to="/women" className="home-part-btn">Shop Leggings →</Link>
-            </div>
-
-            <div className="home-part-card">
-              <img src={getImage('/images/updated/grid4.jpg')} alt="Women Leggings" className="home-part-img" />
-            </div>
-          </div>
-        </section>
-
-        <Divider label="Women" direction="ltr" />
-
-        {/* ── STAY COOL IN STYLE ──────────────────────── */}
-        <section className="cool4-sec">
-          <div className="cool4-shell">
-            <h2 className="cool4-title">Stay Cool in Style</h2>
-
-            <div className="cool4-tabs" role="tablist" aria-label="Stay Cool in Style">
-              <button
-                type="button"
-                className={`cool4-tab ${coolTab === 'plazzo' ? 'is-active' : ''}`}
-                onClick={() => setCoolTab('plazzo')}
-                role="tab"
-                aria-selected={coolTab === 'plazzo'}
-              >
-                Plazzo
-              </button>
-              <button
-                type="button"
-                className={`cool4-tab ${coolTab === 'jeggings' ? 'is-active' : ''}`}
-                onClick={() => setCoolTab('jeggings')}
-                role="tab"
-                aria-selected={coolTab === 'jeggings'}
-              >
-                Jeggings
-              </button>
-              <button
-                type="button"
-                className={`cool4-tab ${coolTab === 'nightPants' ? 'is-active' : ''}`}
-                onClick={() => setCoolTab('nightPants')}
-                role="tab"
-                aria-selected={coolTab === 'nightPants'}
-              >
-                Night Pants
-              </button>
-              <button
-                type="button"
-                className={`cool4-tab ${coolTab === 'tshirts' ? 'is-active' : ''}`}
-                onClick={() => setCoolTab('tshirts')}
-                role="tab"
-                aria-selected={coolTab === 'tshirts'}
-              >
-                T-Shirts
-              </button>
-            </div>
-
-            <div className="cool4-grid" role="tabpanel">
-              {coolImages[coolTab].map((src, idx) => (
-                <Link to="/women" className="cool4-card" key={`${coolTab}-${idx}`}>
-                  <div className="cool4-media">
-                    <img src={getImage(src)} alt="" loading="lazy" decoding="async" />
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <Divider label="Women" direction="ltr" />
-
-        {/* ── WOMEN'S CATEGORIES (aurum2) ─────────────── */}
-        <section className="aurum2-sec">
-          <div className="aurum2-shell">
-            <div className="aurum2-head">
-              <div className="aurum2-kicker">Explore</div>
-              <h2 className="aurum2-title">Women's Categories</h2>
-              <p className="aurum2-sub">Handpicked picks to refresh your wardrobe, in one glance.</p>
-              <a className="aurum2-view" href="/women">View all</a>
-            </div>
-
-            <div className="aurum2-grid">
-              <a href="/women" className="aurum2-card">
-                <div className="aurum2-media">
-                  <img src={getImage('/images/women/new/category12.png')} alt="Twin Birds Leggings" loading="lazy" decoding="async" />
-                  <div className="aurum2-badge">Twin Birds</div>
-                </div>
-                <div className="aurum2-meta">
-                  <div className="aurum2-cat">Salwar Kameez</div>
-                  <div className="aurum2-cta">Shop</div>
-                </div>
-              </a>
-
-              <a href="/women" className="aurum2-card">
-                <div className="aurum2-media">
-                  <img src={getImage('/images/women/new/category9.png')} alt="Indian Flower Tops" loading="lazy" decoding="async" />
-                  <div className="aurum2-badge">Indian Flower</div>
-                </div>
-                <div className="aurum2-meta">
-                  <div className="aurum2-cat">Punjabi Suits</div>
-                  <div className="aurum2-cta">Shop</div>
-                </div>
-              </a>
-
-              <a href="/women" className="aurum2-card">
-                <div className="aurum2-media">
-                  <img src={getImage('/images/women/new/category10.png')} alt="Twin Birds Kurti Pant" loading="lazy" decoding="async" />
-                  <div className="aurum2-badge">Twin Birds</div>
-                </div>
-                <div className="aurum2-meta">
-                  <div className="aurum2-cat">Anarkali Suits</div>
-                  <div className="aurum2-cta">Shop</div>
-                </div>
-              </a>
-
-              <a href="/women" className="aurum2-card">
-                <div className="aurum2-media">
-                  <img src={getImage('/images/women/new/category11.png')} alt="Intimacy Inner Wear" loading="lazy" decoding="async" />
-                  <div className="aurum2-badge">Intimacy</div>
-                </div>
-                <div className="aurum2-meta">
-                  <div className="aurum2-cat">Half Saree</div>
-                  <div className="aurum2-cta">Shop</div>
-                </div>
-              </a>
-
-              <a href="/women" className="aurum2-card">
-                <div className="aurum2-media">
-                  <img src={getImage('/images/women/new/category13.png')} alt="Naidu Hall Inner Wear" loading="lazy" decoding="async" />
-                  <div className="aurum2-badge">Naidu Hall</div>
-                </div>
-                <div className="aurum2-meta">
-                  <div className="aurum2-cat">Gowns</div>
-                  <div className="aurum2-cta">Shop</div>
-                </div>
-              </a>
-
-              <a href="/women" className="aurum2-card">
-                <div className="aurum2-media">
-                  <img src={getImage('/images/women/new/category14.png')} alt="Aswati Inner Wear" loading="lazy" decoding="async" />
-                  <div className="aurum2-badge">Aswati</div>
-                </div>
-                <div className="aurum2-meta">
-                  <div className="aurum2-cat">Sharara Suits</div>
-                  <div className="aurum2-cta">Shop</div>
-                </div>
-              </a>
-
-              <a href="/women" className="aurum2-card">
-                <div className="aurum2-media">
-                  <img src={getImage('/images/women/new/category15.png')} alt="Twin Birds T-shirts" loading="lazy" decoding="async" />
-                  <div className="aurum2-badge">Twin Birds</div>
-                </div>
-                <div className="aurum2-meta">
-                  <div className="aurum2-cat">Lehenga Choli</div>
-                  <div className="aurum2-cta">Shop</div>
-                </div>
-              </a>
-
-              <a href="/women" className="aurum2-card">
-                <div className="aurum2-media">
-                  <img src={getImage('/images/women/new/category16.png')} alt="Indian Flower Lounge Wear" loading="lazy" decoding="async" />
-                  <div className="aurum2-badge">Indian Flower</div>
-                </div>
-                <div className="aurum2-meta">
-                  <div className="aurum2-cat">Palazzo Suits</div>
-                  <div className="aurum2-cta">Shop</div>
-                </div>
-              </a>
-            </div>
-          </div>
-        </section>
-
-        {/* ── TWIN BIRDS MARQUEE (wb3) ─────────────────── */}
-        <section className="wb3-sec">
-          <div className="wb3-head">
-            <h2>Women • Twin Birds</h2>
-            <Link to="/women?brand=Twin%20Birds" className="wb3-view">
-              View All
-            </Link>
-          </div>
-
-          <div className="wb3-belt">
-            <div className="wb3-track">
-              <Link to="/women" className="wb3-item">
-                <img src={getImage('/images/women/new/category9.png')} alt="Kurti Pants" />
-                <span className="wb3-tag">Kurti Pants</span>
-              </Link>
-              <Link to="/women" className="wb3-item">
-                <img src={getImage('/images/women/new/category10.png')} alt="Leggings" />
-                <span className="wb3-tag">Leggings</span>
-              </Link>
-              <Link to="/women" className="wb3-item">
-                <img src={getImage('/images/women/new/category11.png')} alt="Lounge Wear" />
-                <span className="wb3-tag">Lounge Wear</span>
-              </Link>
-              <Link to="/women" className="wb3-item">
-                <img src={getImage('/images/women/new/category12.png')} alt="Shapers" />
-                <span className="wb3-tag">Shapers</span>
-              </Link>
-              <Link to="/women" className="wb3-item">
-                <img src={getImage('/images/women/new/category13.png')} alt="Straight Pants" />
-                <span className="wb3-tag">Straight Pants</span>
-              </Link>
-              <Link to="/women" className="wb3-item">
-                <img src={getImage('/images/women/new/category14.png')} alt="T-Shirts" />
-                <span className="wb3-tag">T-Shirts</span>
-              </Link>
-            </div>
-
-            <div className="wb3-track wb3-track-rev">
-              <Link to="/women" className="wb3-item">
-                <img src={getImage('/images/women/new/category-1.png')} alt="Tops" />
-                <span className="wb3-tag">Tops</span>
-              </Link>
-              <Link to="/women" className="wb3-item">
-                <img src={getImage('/images/women/new/category-2.png')} alt="Kids" />
-                <span className="wb3-tag">Kids</span>
-              </Link>
-              <Link to="/women" className="wb3-item">
-                <img src={getImage('/images/women/new/category-3.png')} alt="Viscose Kurti Pant" />
-                <span className="wb3-tag">Viscose Kurti Pant</span>
-              </Link>
-              <Link to="/women" className="wb3-item">
-                <img src={getImage('/images/women/new/category-4.png')} alt="Viscose Leggings" />
-                <span className="wb3-tag">Viscose Leggings</span>
-              </Link>
-              <Link to="/women" className="wb3-item">
-                <img src={getImage('/images/women/new/category-5.png')} alt="Co-Ord Sets" />
-                <span className="wb3-tag">Co-Ord Sets</span>
-              </Link>
-              <Link to="/women" className="wb3-item">
-                <img src={getImage('/images/women/new/category-6.png')} alt="Saree Shaper" />
-                <span className="wb3-tag">Saree Shaper</span>
-              </Link>
-            </div>
-          </div>
-
-          <div className="wb3-actions">
-            <Link to="/women" className="wb3-pill">Cotton Kurti</Link>
-            <Link to="/women" className="wb3-pill">Flexi Kurti Pant</Link>
-            <Link to="/women" className="wb3-pill">Sleek Kurti Pant</Link>
-            <Link to="/women" className="wb3-pill">Viscose Kurti Pant</Link>
-          </div>
-        </section>
-
-        <Divider label="Women" direction="ltr" />
-
-        {/* ── POPULAR BRANDS (wb3x) ─────────────────────── */}
-        <section className="wb3x-sec">
-          <div className="wb3x-shell">
-            <div className="wb3x-head">
-              <h2 className="wb3x-title">Our Popular Brands</h2>
-            </div>
-
-            <div className="wb3x-body">
-              <div className="wb3x-left">
-                <div className="wb3x-leftTop">
-                  <div className="wb3x-kicker">Shop by brand</div>
-                  <div className="wb3x-note">Pick a brand and explore women's collections.</div>
-                </div>
-
-                <div className="wb3x-brandGrid">
-                  <Link to="/women?brand=Twin%20Birds" className="wb3x-brand">Twin Birds</Link>
-                  <Link to="/women?brand=Naidu%20Hall" className="wb3x-brand">Naidu Hall</Link>
-                  <Link to="/women?brand=Intimacy" className="wb3x-brand">Intimacy</Link>
-                  <Link to="/women?brand=Aswati" className="wb3x-brand">Aswati</Link>
-                  <Link to="/women?brand=Indian%20Flower" className="wb3x-brand">Indian Flower</Link>
-                  <Link to="/women?brand=Jockey" className="wb3x-brand">Jockey</Link>
-                  <Link to="/women?brand=Enamor" className="wb3x-brand">Enamor</Link>
-                  <Link to="/women?brand=Amante" className="wb3x-brand">Amante</Link>
-                  <Link to="/women?brand=Triumph" className="wb3x-brand">Triumph</Link>
-                  <Link to="/women?brand=Lovable" className="wb3x-brand">Lovable</Link>
-                  <Link to="/women?brand=Zivame" className="wb3x-brand">Zivame</Link>
-                  <Link to="/women?brand=Clovia" className="wb3x-brand">Clovia</Link>
-                  <Link to="/women?brand=PrettySecrets" className="wb3x-brand">PrettySecrets</Link>
-                  <Link to="/women?brand=Van%20Heusen" className="wb3x-brand">Van Heusen</Link>
-                  <Link to="/women?brand=Hanes" className="wb3x-brand">Hanes</Link>
-                  <Link to="/women?brand=Rupa" className="wb3x-brand">Rupa</Link>
-                  <Link to="/women?brand=Dixcy%20Scott" className="wb3x-brand">Dixcy Scott</Link>
-                  <Link to="/women?brand=Lux" className="wb3x-brand">Lux</Link>
-                  <Link to="/women?brand=Dollar" className="wb3x-brand">Dollar</Link>
-                  <Link to="/women?brand=VIP" className="wb3x-brand">VIP</Link>
-                </div>
-
-                <div className="wb3x-actions">
-                  <Link to="/women" className="wb3x-cta">Explore Women's Store</Link>
-                </div>
-              </div>
-
-              <div className="wb3x-right" aria-hidden="true">
-                <div className="wb3x-photo">
-                  <img src={getImage('/images/contact-side.jpg')} alt="" loading="lazy" decoding="async" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <Divider label="Women" direction="ltr" />
-
-        {/* ── SECONDARY BANNER (attach banners) ───────── */}
-        <section className="home1-hero-new-home-2">
-          <div className="home1-hero-frame-new-home-2">
-            <Swiper
-              className="home1-hero-swiper-new-home-2"
-              modules={[Autoplay]}
-              loop
-              slidesPerView={1}
-              autoplay={{ delay: 3500, disableOnInteraction: false }}
-              speed={900}
-            >
-              <SwiperSlide>
-                <div className="home1-hero-slide-new-home-2">
-                  <img src={getImage('/images/banners/attach-banner-1.png')} alt="Women Banner" loading="eager" />
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="home1-hero-slide-new-home-2">
-                  <img src={getImage('/images/banners/attach-banner-2.png')} alt="Women Banner" loading="lazy" decoding="async" />
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="home1-hero-slide-new-home-2">
-                  <img src={getImage('/images/banners/attach-banner-3.png')} alt="Women Banner" loading="lazy" decoding="async" />
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="home1-hero-slide-new-home-2">
-                  <img src={getImage('/images/banners/attach-banner-4.png')} alt="Women Banner" loading="lazy" decoding="async" />
-                </div>
-              </SwiperSlide>
-            </Swiper>
-          </div>
-        </section>
-
-        <Divider label="Women" direction="ltr" />
-
-        {/* ── THREE-UP EDITORIAL ──────────────────────── */}
-        <section className="three-clock-section">
-          <div className="three-clock-grid">
-            <div className="three-clock-card">
-              <img src={getImage('/images/updated/left.jpg')} alt="Women styling collection" className="three-clock-img" />
-              <div className="three-clock-overlay" />
-              <div className="three-clock-content">
-                <h3 className="three-clock-title">Everyday Essentials</h3>
-                <p className="three-clock-desc">
-                  Clean, comfortable picks for workdays and weekends, made to keep you looking sharp with zero effort.
-                </p>
-                <Link to="/women" className="three-clock-btn">Shop Women →</Link>
-              </div>
-            </div>
-
-            <div className="three-clock-card three-clock-center">
-              <img src={getImage('/images/updated/center.jpg')} alt="New arrivals highlight" className="three-clock-img" />
-              <div className="three-clock-overlay" />
-            </div>
-
-            <div className="three-clock-card">
-              <img src={getImage('/images/updated/right.jpg')} alt="Women seasonal edits" className="three-clock-img" />
-              <div className="three-clock-overlay" />
-              <div className="three-clock-content">
-                <h3 className="three-clock-title">Dress Up Edit</h3>
-                <p className="three-clock-desc">
-                  Polished styles for outings and occasions, with standout fits that instantly elevate your look.
-                </p>
-                <Link to="/women" className="three-clock-btn">Explore Looks →</Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── INDIAN FLOWER PICKS (wb4n) ───────────────── */}
-        <section className="wb4n-sec">
-          <div className="wb4n-shell">
-            <div className="wb4n-head">
-              <h2 className="wb4n-title">Indian Flower Picks</h2>
-              <Link to="/women" className="wb4n-view">View All</Link>
-            </div>
-
-            <div className="wb4n-grid">
-              <Link to="/women" className="wb4n-card wb4n-hero">
-                <img src={getImage('/images/women/new/zig-zag3.png')} alt="Kurti Pants" />
-                <div className="wb4n-overlay"></div>
-                <div className="wb4n-meta">
-                  <span className="wb4n-name">Kurti Pants</span>
-                  <span className="wb4n-sub">Effortless everyday comfort</span>
-                </div>
-                <span className="wb4n-cta">Shop</span>
-              </Link>
-
-              <Link to="/women" className="wb4n-card">
-                <img src={getImage('/images/women/new/zig-zag1.png')} alt="Tops" />
-                <div className="wb4n-overlay"></div>
-                <div className="wb4n-mini">Tops</div>
-              </Link>
-
-              <Link to="/women" className="wb4n-card">
-                <img src={getImage('/images/women/new/zig-zag2.png')} alt="Leggings" />
-                <div className="wb4n-overlay"></div>
-                <div className="wb4n-mini">Leggings</div>
-              </Link>
-
-              <Link to="/women" className="wb4n-card">
-                <img src={getImage('/images/women/new/zig-zag4.png')} alt="Lounge Wear" />
-                <div className="wb4n-overlay"></div>
-                <div className="wb4n-mini">Lounge Wear</div>
-              </Link>
-
-              <Link to="/women" className="wb4n-card">
-                <img src={getImage('/images/women/new/zig-zag5.png')} alt="Straight Pants" />
-                <div className="wb4n-overlay"></div>
-                <div className="wb4n-mini">Straight Pants</div>
-              </Link>
-            </div>
-
-            <div className="wb4n-chips">
-              <Link to="/women" className="wb4n-chip">T-Shirts</Link>
-              <Link to="/women" className="wb4n-chip">Casual Shirt</Link>
-              <Link to="/women" className="wb4n-chip">Viscose Leggings</Link>
-              <Link to="/women" className="wb4n-chip">Cotton Kurti</Link>
-            </div>
-          </div>
-        </section>
-
-        <Divider label="Women" direction="ltr" />
-
-        {/* ── INNERWEAR ESSENTIALS (iwx) ───────────────── */}
-        <section className="iwx-sec">
-          <div className="iwx-shell">
-            <div className="iwx-head">
-              <div>
-                <h2 className="iwx-title">Innerwear Essentials</h2>
-                <p className="iwx-sub">Comfort-first picks for everyday wear</p>
-              </div>
-              <Link to="/women" className="iwx-view">View All</Link>
-            </div>
-
-            <div className="iwx-grid">
-              <Link to="/women" className="iwx-card iwx-card-hero">
-                <img src={getImage('/images/updated/inner1.jpg')} alt="Saree Shaper" className="iwx-img" />
-                <div className="iwx-shade" />
-                <div className="iwx-meta">
-                  <span className="iwx-kicker">Shape & Support</span>
-                  <h3 className="iwx-name">Saree Shaper</h3>
-                  <span className="iwx-cta">Shop Now →</span>
-                </div>
-              </Link>
-
-              <Link to="/women" className="iwx-card">
-                <img src={getImage('/images/updated/inner2.jpg')} alt="Underwear" className="iwx-img" />
-                <div className="iwx-shade" />
-                <div className="iwx-meta">
-                  <span className="iwx-kicker">Everyday Basics</span>
-                  <h3 className="iwx-name">Underwear</h3>
-                  <span className="iwx-cta">Explore →</span>
-                </div>
-              </Link>
-
-              <Link to="/women" className="iwx-card">
-                <img src={getImage('/images/updated/inner3.jpg')} alt="Bras" className="iwx-img" />
-                <div className="iwx-shade" />
-                <div className="iwx-meta">
-                  <span className="iwx-kicker">Fit Matters</span>
-                  <h3 className="iwx-name">Bras</h3>
-                  <span className="iwx-cta">View Styles →</span>
-                </div>
-              </Link>
-
-              <Link to="/women" className="iwx-card iwx-card-wide">
-                <img src={getImage('/images/updated/inner5.jpg')} alt="Shorts" className="iwx-img" />
-                <div className="iwx-shade" />
-                <div className="iwx-meta">
-                  <span className="iwx-kicker">Soft & Easy</span>
-                  <h3 className="iwx-name">Shorts</h3>
-                  <span className="iwx-cta">Shop Comfort →</span>
-                </div>
-              </Link>
-            </div>
-
-            <div className="iwx-tags">
-              <Link to="/women" className="iwx-pill">Daily Wear</Link>
-              <Link to="/women" className="iwx-pill">Seamless</Link>
-              <Link to="/women" className="iwx-pill">Breathable Cotton</Link>
-              <Link to="/women" className="iwx-pill">Shapewear</Link>
-            </div>
-          </div>
-        </section>
-
-        <Divider label="Women" direction="ltr" />
-
-        {/* ── MEN'S ESSENTIALS CIRCLES (mb1x) ─────────── */}
-        <section className="mb1x-sec">
-          <div className="mb1x-shell">
-            <div className="mb1x-head">
-              <h2 className="mb1x-title">Men's Essentials</h2>
-              <Link to="/men" className="mb1x-view">View All</Link>
-            </div>
-
-            <div className="mb1x-circles">
-              <Link to="/men" className="mb1x-item">
-                <div className="mb1x-photo">
-                  <img src={getImage('/images/home/jockey3.webp')} alt="Briefs" />
-                </div>
-                <span className="mb1x-cap">Briefs</span>
-              </Link>
-              <Link to="/men" className="mb1x-item">
-                <div className="mb1x-photo">
-                  <img src={getImage('/images/home/jockey2.webp')} alt="T-Shirts" />
-                </div>
-                <span className="mb1x-cap">T-Shirts</span>
-              </Link>
-              <Link to="/men" className="mb1x-item">
-                <div className="mb1x-photo">
-                  <img src={getImage('/images/home/jockey4.webp')} alt="Vests" />
-                </div>
-                <span className="mb1x-cap">Vests</span>
-              </Link>
-              <Link to="/men" className="mb1x-item">
-                <div className="mb1x-photo">
-                  <img src={getImage('/images/home/jockey5.webp')} alt="Trunks" />
-                </div>
-                <span className="mb1x-cap">Trunks</span>
-              </Link>
-              <Link to="/men" className="mb1x-item">
-                <div className="mb1x-photo">
-                  <img src={getImage('/images/home/jockey6.webp')} alt="Knit Shirts" />
-                </div>
-                <span className="mb1x-cap">Knit Shirts</span>
-              </Link>
-              <Link to="/men" className="mb1x-item">
-                <div className="mb1x-photo">
-                  <img src={getImage('/images/home/jockey7.webp')} alt="Polos" />
-                </div>
-                <span className="mb1x-cap">Polos</span>
-              </Link>
-              <Link to="/men" className="mb1x-item">
-                <div className="mb1x-photo">
-                  <img src={getImage('/images/home/jockey8.webp')} alt="Boxers" />
-                </div>
-                <span className="mb1x-cap">Boxers</span>
-              </Link>
-              <Link to="/men" className="mb1x-item">
-                <div className="mb1x-photo">
-                  <img src={getImage('/images/home/jockey9.webp')} alt="Gym Vests" />
-                </div>
-                <span className="mb1x-cap">Gym Vests</span>
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        <Divider label="Women" direction="ltr" />
-
-        {/* ── MEN'S PICKS SCROLL ROW (mb3x) ───────────── */}
-        <section className="mb3x-sec">
-          <div className="mb3x-shell">
-            <div className="mb3x-head">
-              <h2 className="mb3x-title">Men's Picks</h2>
-              <Link to="/men" className="mb3x-view">View All</Link>
-            </div>
-
-            <div className="mb3x-row">
-              <Link to="/men/jackets" className="mb3x-card">
-                <div className="mb3x-media">
-                  <img src={getImage('/images/home/jockey7.webp')} alt="Jackets" />
-                </div>
-                <div className="mb3x-meta">
-                  <div className="mb3x-name">Jackets</div>
-                  <div className="mb3x-sub">Layer up in style</div>
-                </div>
-              </Link>
-              <Link to="/men/shirts" className="mb3x-card">
-                <div className="mb3x-media">
-                  <img src={getImage('/images/home/jockey6.webp')} alt="Shirts" />
-                </div>
-                <div className="mb3x-meta">
-                  <div className="mb3x-name">Shirts</div>
-                  <div className="mb3x-sub">Everyday essentials</div>
-                </div>
-              </Link>
-              <Link to="/men/polos" className="mb3x-card">
-                <div className="mb3x-media">
-                  <img src={getImage('/images/home/jockey2.webp')} alt="Polos" />
-                </div>
-                <div className="mb3x-meta">
-                  <div className="mb3x-name">Polos</div>
-                  <div className="mb3x-sub">Smart and casual</div>
-                </div>
-              </Link>
-              <Link to="/men/trousers" className="mb3x-card">
-                <div className="mb3x-media">
-                  <img src={getImage('/images/home/jockey3.webp')} alt="Trousers" />
-                </div>
-                <div className="mb3x-meta">
-                  <div className="mb3x-name">Trousers</div>
-                  <div className="mb3x-sub">Clean fits</div>
-                </div>
-              </Link>
-              <Link to="/men/denim" className="mb3x-card">
-                <div className="mb3x-media">
-                  <img src={getImage('/images/home/jockey4.webp')} alt="Denim" />
-                </div>
-                <div className="mb3x-meta">
-                  <div className="mb3x-name">Denim</div>
-                  <div className="mb3x-sub">Classic looks</div>
-                </div>
-              </Link>
-              <Link to="/men/ethnic" className="mb3x-card">
-                <div className="mb3x-media">
-                  <img src={getImage('/images/home/jockey5.webp')} alt="Ethnic" />
-                </div>
-                <div className="mb3x-meta">
-                  <div className="mb3x-name">Ethnic</div>
-                  <div className="mb3x-sub">Festive ready</div>
-                </div>
-              </Link>
-              <Link to="/men/footwear" className="mb3x-card">
-                <div className="mb3x-media">
-                  <img src={getImage('/images/home/jockey6.webp')} alt="Footwear" />
-                </div>
-                <div className="mb3x-meta">
-                  <div className="mb3x-name">Footwear</div>
-                  <div className="mb3x-sub">Finish the fit</div>
-                </div>
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* ── MEN'S DAILY ESSENTIALS (mb4x) ───────────── */}
-        <section className="mb4x-sec">
-          <div className="mb4x-shell">
-            <div className="mb4x-head">
-              <h2 className="mb4x-title">Men's Daily Essentials</h2>
-              <Link to="/men" className="mb4x-view">View All</Link>
-            </div>
-
-            <div className="mb4x-layout">
-              <Link to="/men/shirts" className="mb4x-hero">
-                <img src={getImage('/images/updated/men1.jpg')} alt="Shirts" />
-                <div className="mb4x-heroOverlay" />
-                <div className="mb4x-heroContent">
-                  <div className="mb4x-heroKicker">Featured</div>
-                  <div className="mb4x-heroTitle">Shirts</div>
-                  <div className="mb4x-heroSub">Sharp fits for work and weekends</div>
-                  <span className="mb4x-heroCta">Shop Now</span>
-                </div>
-              </Link>
-
-              <div className="mb4x-grid">
-                <Link to="/men/t-shirts" className="mb4x-card">
-                  <div className="mb4x-media">
-                    <img src={getImage('/images/updated/men2.jpg')} alt="T-Shirts" />
-                  </div>
-                  <div className="mb4x-meta">
-                    <div className="mb4x-name">T-Shirts</div>
-                    <div className="mb4x-sub">Everyday comfort</div>
-                  </div>
-                </Link>
-                <Link to="/men/trousers" className="mb4x-card">
-                  <div className="mb4x-media">
-                    <img src={getImage('/images/updated/men3.jpg')} alt="Trousers" />
-                  </div>
-                  <div className="mb4x-meta">
-                    <div className="mb4x-name">Trousers</div>
-                    <div className="mb4x-sub">Clean silhouettes</div>
-                  </div>
-                </Link>
-                <Link to="/men/denim" className="mb4x-card">
-                  <div className="mb4x-media">
-                    <img src={getImage('/images/updated/men4.jpg')} alt="Denim" />
-                  </div>
-                  <div className="mb4x-meta">
-                    <div className="mb4x-name">Denim</div>
-                    <div className="mb4x-sub">Classic staples</div>
-                  </div>
-                </Link>
-                <Link to="/men/jackets" className="mb4x-card">
-                  <div className="mb4x-media">
-                    <img src={getImage('/images/updated/men5.jpg')} alt="Jackets" />
-                  </div>
-                  <div className="mb4x-meta">
-                    <div className="mb4x-name">Jackets</div>
-                    <div className="mb4x-sub">Layer in style</div>
-                  </div>
-                </Link>
-                <Link to="/men/ethnic" className="mb4x-card">
-                  <div className="mb4x-media">
-                    <img src={getImage('/images/updated/men6.jpg')} alt="Ethnic" />
-                  </div>
-                  <div className="mb4x-meta">
-                    <div className="mb4x-name">Ethnic</div>
-                    <div className="mb4x-sub">Festive ready</div>
-                  </div>
-                </Link>
-                <Link to="/men/footwear" className="mb4x-card">
-                  <div className="mb4x-media">
-                    <img src={getImage('/images/updated/men7.jpg')} alt="Footwear" />
-                  </div>
-                  <div className="mb4x-meta">
-                    <div className="mb4x-name">Footwear</div>
-                    <div className="mb4x-sub">Finish your look</div>
-                  </div>
-                </Link>
-              </div>
-            </div>
-
-            <div className="mb4x-pills">
-              <Link to="/men/shirts/formal" className="mb4x-pill">Formal</Link>
-              <Link to="/men/t-shirts/slim-fit" className="mb4x-pill">Slim Fit</Link>
-              <Link to="/men/denim/straight" className="mb4x-pill">Straight Denim</Link>
-              <Link to="/men/jackets/winter" className="mb4x-pill">Winter Layer</Link>
-            </div>
-          </div>
-        </section>
-
-      </div>
-      <Footer />
-    </div>
-  )
 }

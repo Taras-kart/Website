@@ -1,437 +1,108 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import Navbar from './Navbar'
-import Footer from './Footer'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { FiArrowLeft, FiCheck, FiGift, FiMinus, FiPlus, FiShield, FiShoppingBag, FiTrash2 } from 'react-icons/fi'
+import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../CartContext'
-import { useWishlist } from '../WishlistContext'
+import { currentUserId, currentUserType, fetchCart, money, pricingFor, removeCartItem, updateCartQuantity } from '../services/checkoutApi'
 import './Cart.css'
-import { FaTimes, FaCheck, FaTag } from 'react-icons/fa'
-import Popup from './Popup'
-import { useNavigate } from 'react-router-dom'
 
-const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app'
-const API_BASE_RAW =
-  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
-  (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
-  DEFAULT_API_BASE
-const API_BASE = API_BASE_RAW.replace(/\/+$/, '')
-
-const Cart = () => {
+export default function Cart() {
   const navigate = useNavigate()
-  const { addToWishlist } = useWishlist()
   const { removeFromCart } = useCart()
-
-  const [cartItems, setCartItems] = useState([])
-  const [showPopup, setShowPopup] = useState(false)
-  const [selectedItem, setSelectedItem] = useState(null)
-  const [quantities, setQuantities] = useState({})
-  const [showCoupon, setShowCoupon] = useState(false)
-  const [couponInput, setCouponInput] = useState('')
-  const [couponDiscountPct, setCouponDiscountPct] = useState(0)
+  const [items, setItems] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [busy, setBusy] = useState('')
   const [giftWrap, setGiftWrap] = useState(false)
-  const [toast, setToast] = useState('')
-  const [showSuccess, setShowSuccess] = useState(false)
+  const [notice, setNotice] = useState('')
+  const userId = currentUserId()
+  const userType = currentUserType()
 
-  const userId =
-    (typeof window !== 'undefined' ? sessionStorage.getItem('userId') : '') ||
-    (typeof window !== 'undefined' ? localStorage.getItem('userId') : '') ||
-    ''
-
-  const [userType, setUserType] = useState(() => {
-    if (typeof window === 'undefined') return 'B2C'
-    return sessionStorage.getItem('userType') || localStorage.getItem('userType') || 'B2C'
-  })
-
-  useEffect(() => {
-    const syncUserType = () => {
-      if (typeof window === 'undefined') return
-      const storedType = sessionStorage.getItem('userType') || localStorage.getItem('userType') || 'B2C'
-      if (storedType !== userType) setUserType(storedType)
-    }
-    window.addEventListener('storage', syncUserType)
-    const interval = setInterval(syncUserType, 500)
-    return () => {
-      window.removeEventListener('storage', syncUserType)
-      clearInterval(interval)
-    }
-  }, [userType])
-
-  const fmt = (n) => Number(n || 0).toFixed(2)
-
-  const getItemPricing = (item) => {
-    if (userType === 'B2B') {
-      const mrp = Number(
-        item.original_price_b2b ??
-          item.mrp ??
-          item.original_price_b2c ??
-          item.final_price_b2b ??
-          item.final_price_b2c ??
-          0
-      )
-      const offer = Number(item.final_price_b2b ?? item.final_price_b2c ?? item.sale_price ?? mrp)
-      return { mrp, offer }
-    }
-    const mrp = Number(
-      item.original_price_b2c ??
-        item.mrp ??
-        item.original_price_b2b ??
-        item.final_price_b2c ??
-        item.final_price_b2b ??
-        0
-    )
-    const offer = Number(item.final_price_b2c ?? item.sale_price ?? mrp)
-    return { mrp, offer }
-  }
-
-  // ESLint error was here: fetchCartItems used in useEffect but not listed as dependency.
-  // Fix: wrap fetchCartItems with useCallback and include it in useEffect deps.
-  const fetchCartItems = useCallback(async () => {
-    if (!userId) {
-      setCartItems([])
-      setQuantities({})
-      return
-    }
+  const load = useCallback(async () => {
+    if (!userId) { setLoading(false); return }
     try {
-      const res = await fetch(`${API_BASE}/api/cart/${userId}`, { cache: 'no-store' })
-      if (!res.ok) {
-        setCartItems([])
-        setQuantities({})
-        return
-      }
-      const data = await res.json()
-      const arr = Array.isArray(data) ? data : []
-      setCartItems(arr)
-      const initialQuantities = arr.reduce((acc, item) => {
-        const key = item.id
-        if (key != null) acc[key] = Number(item.quantity || 1)
-        return acc
-      }, {})
-      setQuantities(initialQuantities)
-    } catch {
-      setCartItems([])
-      setQuantities({})
+      const rows = await fetchCart(userId)
+      setItems(Array.isArray(rows) ? rows : rows?.items || [])
+    } catch (reason) {
+      showNotice(reason.message || 'Unable to load your bag')
+    } finally {
+      setLoading(false)
     }
   }, [userId])
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') window.scrollTo(0, 0)
-    fetchCartItems()
-  }, [fetchCartItems])
+  useEffect(() => { load() }, [load])
 
-  const handleRemoveClick = (item) => {
-    setSelectedItem(item)
-    setShowPopup(true)
+  const totals = useMemo(() => items.reduce((sum, item) => {
+    const quantity = Number(item.quantity || 1)
+    const price = pricingFor(item, userType)
+    sum.bag += price.original * quantity
+    sum.payable += price.final * quantity
+    return sum
+  }, { bag: 0, payable: 0 }), [items, userType])
+  const discount = Math.max(0, totals.bag - totals.payable)
+  const gift = giftWrap ? 39 : 0
+
+  const changeQuantity = async (item, next) => {
+    const quantity = Math.max(1, Math.min(99, next))
+    const id = item.id || item.variant_id
+    setItems(rows => rows.map(row => (row.id || row.variant_id) === id ? { ...row, quantity } : row))
+    setBusy(`qty-${id}`)
+    try { await updateCartQuantity(userId, id, quantity) } catch { await load() } finally { setBusy('') }
   }
 
-  const applyCoupon = () => {
-    const code = couponInput.trim().toUpperCase()
-    if (code === 'GOLD10') {
-      setCouponDiscountPct(10)
-      setToast('GOLD10 applied')
-    } else if (code === 'FREESHIP') {
-      setCouponDiscountPct(0)
-      setToast('FREESHIP applied')
-    } else {
-      setCouponDiscountPct(0)
-      setToast('Invalid coupon')
-    }
-    setShowCoupon(false)
-    setTimeout(() => setToast(''), 1500)
+  const remove = async item => {
+    const id = item.id || item.variant_id
+    setBusy(`remove-${id}`)
+    try {
+      await removeCartItem(userId, id)
+      setItems(rows => rows.filter(row => (row.id || row.variant_id) !== id))
+      removeFromCart(id)
+      showNotice('Item removed from your bag')
+    } catch (reason) {
+      showNotice(reason.message || 'Unable to remove this item')
+    } finally { setBusy('') }
   }
 
-  const apiVariantId = (item) => Number(item.id || 0)
-
-  const handleConfirmRemove = async () => {
-    if (selectedItem && userId) {
-      const vid = apiVariantId(selectedItem)
-      if (vid > 0) {
-        await fetch(`${API_BASE}/api/cart/tarascart`, {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: String(userId), product_id: vid })
-        })
-      }
-      setCartItems((prev) => prev.filter((it) => it.id !== selectedItem.id))
-      removeFromCart(selectedItem.id)
-      setToast('Item removed')
-      setTimeout(() => setToast(''), 1600)
-    }
-    setShowPopup(false)
-  }
-
-  const handleQuantityChange = async (variantId, value) => {
-    const quantity = parseInt(value, 10)
-    setQuantities((prev) => ({ ...prev, [variantId]: quantity }))
-    if (!userId) return
-    await fetch(`${API_BASE}/api/cart/tarascart`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: String(userId), product_id: Number(variantId), quantity })
-    })
-    setToast('Quantity updated')
-    setTimeout(() => setToast(''), 1200)
-  }
-
-  const bagTotal = cartItems.reduce((total, item) => {
-    const key = item.id
-    const qty = quantities[key] || 1
-    const { mrp } = getItemPricing(item)
-    return total + mrp * qty
-  }, 0)
-
-  const discountTotal = cartItems.reduce((total, item) => {
-    const key = item.id
-    const qty = quantities[key] || 1
-    const { mrp, offer } = getItemPricing(item)
-    if (!mrp || offer >= mrp) return total
-    return total + (mrp - offer) * qty
-  }, 0)
-
-  const subTotalBeforeCoupon = bagTotal - discountTotal
-  const rawCouponDiscount = (subTotalBeforeCoupon * couponDiscountPct) / 100
-  const maxCouponDiscount = 0
-  const couponDiscount = maxCouponDiscount > 0 ? Math.min(rawCouponDiscount, maxCouponDiscount) : rawCouponDiscount
-  const subTotal = subTotalBeforeCoupon - couponDiscount
-  const convenience = 0
-  const youPay = subTotal + (giftWrap ? 39 : 0)
-  const totalSaving = discountTotal + couponDiscount
-
-  const proceedToCheckout = () => {
-    if (!cartItems.length) return
+  const checkout = () => {
     const payload = {
-      totals: {
-        bagTotal,
-        discountTotal,
-        couponPct: couponDiscountPct,
-        couponDiscount,
-        convenience,
-        giftWrap: giftWrap ? 39 : 0,
-        payable: youPay
-      },
-      items: cartItems.map((item) => {
-        const key = item.id
-        const qty = quantities[key] || 1
-        const { mrp, offer } = getItemPricing(item)
-        return {
-          variant_id: item.id ?? null,
-          product_id: item.product_id ?? null,
-          qty,
-          price: Number(offer),
-          mrp: Number(mrp),
-          size: item.selected_size || item.size || '',
-          colour: item.selected_color || item.color || '',
-          image_url: item.image_url || null
-        }
+      totals: { bagTotal: totals.bag, discountTotal: discount, couponPct: 0, couponDiscount: 0, convenience: 0, giftWrap: gift, payable: totals.payable + gift },
+      items: items.map(item => {
+        const price = pricingFor(item, userType)
+        return { variant_id: item.id || item.variant_id, product_id: item.product_id || null, qty: Number(item.quantity || 1), price: price.final, mrp: price.original, size: item.selected_size || item.size || '', colour: item.selected_color || item.color || '', image_url: item.image_url || '' }
       })
     }
     sessionStorage.setItem('tk_checkout_payload', JSON.stringify(payload))
     navigate('/order/checkout')
   }
 
-  return (
-    <div className="cart-wrap">
-      <Navbar />
-      <div className="cart-container">
-        {cartItems.length === 0 ? (
-          <div className="cart-empty">
-            <img src="/images/emptyWishlist.avif" alt="Empty Cart" />
-            <h2>Your Bag is empty</h2>
-            <p>Add items to your bag to view them here.</p>
-            <a className="btn-shop" href="/">
-              Start Shopping
-            </a>
-          </div>
-        ) : (
-          <>
-            <div className="progress-free">You unlocked Free Shipping</div>
+  function showNotice(message) {
+    setNotice(message)
+    window.setTimeout(() => setNotice(''), 1800)
+  }
 
-            <div className="cart-grid">
-              <div className="cart-left">
-                <div className="cart-head">
-                  <h2>My Bag</h2>
-                  <span>{cartItems.length} item(s)</span>
-                </div>
+  if (loading) return <main className="tara-cart-page"><CartHeader count="" /><div className="tara-cart-loading"><i /><i /><i /></div></main>
+  if (!userId) return <EmptyCart title="Sign in to view your bag" text="Your saved shopping bag will appear here after you sign in." />
+  if (!items.length) return <EmptyCart title="Your bag is empty" text="Discover something you love and add it to your bag." />
 
-                {cartItems.map((item) => {
-                  const key = item.id
-                  const qty = quantities[key] || 1
-                  const { mrp, offer } = getItemPricing(item)
-                  const discountPct = mrp > 0 && offer < mrp ? Math.round(((mrp - offer) / mrp) * 100) : 0
-
-                  return (
-                    <div className="cart-card" key={key}>
-                      <button className="card-remove" onClick={() => handleRemoveClick(item)}>
-                        <FaTimes />
-                      </button>
-
-                      <div className="card-media">
-                        <img src={item.image_url} alt={item.product_name} />
-                      </div>
-
-                      <div className="card-body">
-                        <div className="card-top">
-                          <h4 className="brand">{item.brand}</h4>
-                          <p className="name">{item.product_name}</p>
-                        </div>
-
-                        <div className="card-opts">
-                          <div className="opt">
-                            <span className="opt-label">Color</span>
-                            <span
-                              className="color-dot"
-                              style={{ backgroundColor: (item.selected_color || item.color || '').toLowerCase() }}
-                            />
-                          </div>
-                          <div className="opt">
-                            <span className="opt-label">Size</span>
-                            <span className="opt-value">{item.selected_size || item.size || '—'}</span>
-                          </div>
-                          <div className="opt">
-                            <span className="opt-label">Qty</span>
-                            <select value={qty} className="select" onChange={(e) => handleQuantityChange(key, e.target.value)}>
-                              {[...Array(10)].map((_, i) => (
-                                <option key={i + 1} value={i + 1}>
-                                  {i + 1}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                        </div>
-
-                        <div className="card-price">
-                          <div className="now">₹{fmt(offer * qty)}</div>
-                          <div className="was">
-                            <span className="mrp">₹{fmt(mrp * qty)}</span>
-                            {discountPct > 0 && <span className="off">{discountPct}% OFF</span>}
-                          </div>
-                        </div>
-
-                        <div className="card-actions">
-                          <button className="mini gold" onClick={() => setShowCoupon(true)}>
-                            <FaTag /> Apply Coupon
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-
-              <div className="cart-right">
-                <div className="summary">
-                  <h3>Price Summary</h3>
-                  <div className="sum-row">
-                    <span>Bag Total</span>
-                    <span>₹{fmt(bagTotal)}</span>
-                  </div>
-                  <div className="sum-row">
-                    <span>Discount on MRP</span>
-                    <span className="green">-₹{fmt(discountTotal)}</span>
-                  </div>
-                  <div className="sum-row">
-                    <span>Sub Total</span>
-                    <span>₹{fmt(subTotalBeforeCoupon)}</span>
-                  </div>
-                  {couponDiscountPct > 0 && (
-                    <div className="sum-row">
-                      <span>Coupon ({couponDiscountPct}%)</span>
-                      <span className="green">-₹{fmt(couponDiscount)}</span>
-                    </div>
-                  )}
-                  <div className="sum-row opt-row">
-                    <label className="chk">
-                      <input type="checkbox" checked={giftWrap} onChange={(e) => setGiftWrap(e.target.checked)} />
-                      <span>Gift Wrap</span>
-                    </label>
-                    <span>{giftWrap ? '₹39.00' : '₹0.00'}</span>
-                  </div>
-                  <div className="sum-row">
-                    <span>Convenience Charges</span>
-                    <span>₹0.00</span>
-                  </div>
-                  <div className="sum-row total">
-                    <span>You Pay</span>
-                    <span>₹{fmt(youPay)}</span>
-                  </div>
-                  <div className="save-note">
-                    <FaCheck />
-                    <span>You are saving ₹{fmt(totalSaving)} on this order</span>
-                  </div>
-                  <button className="btn-buy" onClick={proceedToCheckout}>
-                    Proceed to Buy
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="sticky-bar">
-              <div className="sb-left">
-                <strong>₹{fmt(youPay)}</strong>
-                <span>Payable</span>
-              </div>
-              <button className="sb-btn" onClick={proceedToCheckout}>
-                Checkout
-              </button>
-            </div>
-          </>
-        )}
-
-        {showPopup && selectedItem && (
-          <Popup
-            image={selectedItem.image_url}
-            message="Are you sure?"
-            subMessage="It took you so long to find this item, wishlist instead."
-            onConfirm={handleConfirmRemove}
-            onCancel={() => setShowPopup(false)}
-            onWishlist={() => {
-              addToWishlist(selectedItem)
-              setCartItems((prev) => prev.filter((i) => i.id !== selectedItem.id))
-              setShowPopup(false)
-              setToast('Moved to wishlist')
-              setTimeout(() => setToast(''), 1500)
-            }}
-          />
-        )}
-
-        {showCoupon && (
-          <div className="modal-wrap" onClick={() => setShowCoupon(false)}>
-            <div className="modal" onClick={(e) => e.stopPropagation()}>
-              <h4>Apply Coupon</h4>
-              <div className="preset">
-                <button onClick={() => setCouponInput('GOLD10')}>GOLD10</button>
-                <button onClick={() => setCouponInput('FREESHIP')}>FREESHIP</button>
-              </div>
-              <input value={couponInput} onChange={(e) => setCouponInput(e.target.value)} placeholder="Enter code" />
-              <div className="modal-actions">
-                <button className="btn ghost" onClick={() => setShowCoupon(false)}>
-                  Close
-                </button>
-                <button className="btn solid" onClick={applyCoupon}>
-                  Apply
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {showSuccess && (
-          <div className="modal-wrap" onClick={() => setShowSuccess(false)}>
-            <div className="modal success" onClick={(e) => e.stopPropagation()}>
-              <div className="success-head">Order Placed Successfully</div>
-              <p className="success-sub">Thank you for shopping with us.</p>
-              <div className="modal-actions">
-                <button className="btn solid" onClick={() => setShowSuccess(false)}>
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {!!toast && <div className="toast">{toast}</div>}
-      </div>
-      <Footer />
+  return <main className="tara-cart-page">
+    {notice && <div className="tara-cart-toast"><FiCheck />{notice}</div>}
+    <CartHeader count={`${items.length} ${items.length === 1 ? 'item' : 'items'}`} />
+    <div className="tara-cart-layout">
+      <section className="tara-cart-list">
+        {items.map(item => {
+          const id = item.id || item.variant_id
+          const price = pricingFor(item, userType)
+          const quantity = Number(item.quantity || 1)
+          return <article className="tara-cart-item" key={id}>
+            <img src={item.image_url || '/images/women/women20.jpeg'} alt={item.product_name || item.name || 'Product'} />
+            <div className="tara-cart-copy"><span>{item.brand || item.brand_name || 'Tara'}</span><h2>{item.product_name || item.name || 'Product'}</h2><p>{[item.selected_color || item.color, item.selected_size || item.size].filter(Boolean).join(' · ')}</p><div className="tara-cart-price"><strong>{money(price.final)}</strong>{price.original > price.final && <del>{money(price.original)}</del>}</div><div className="tara-cart-actions"><div className="tara-cart-quantity"><button onClick={() => changeQuantity(item, quantity - 1)}><FiMinus /></button><span>{busy === `qty-${id}` ? '…' : quantity}</span><button onClick={() => changeQuantity(item, quantity + 1)}><FiPlus /></button></div><button disabled={busy === `remove-${id}`} onClick={() => remove(item)}><FiTrash2 />Remove</button></div></div>
+            <strong className="tara-cart-line-total">{money(price.final * quantity)}</strong>
+          </article>
+        })}
+        <label className="tara-gift-wrap"><span><FiGift /><i><strong>Add gift wrapping</strong><small>Your order will arrive ready to gift</small></i></span><em>₹39</em><input type="checkbox" checked={giftWrap} onChange={event => setGiftWrap(event.target.checked)} /></label>
+      </section>
+      <aside className="tara-cart-summary"><span>Order summary</span><h2>{money(totals.payable + gift)}</h2><div><p><span>Bag total</span><strong>{money(totals.bag)}</strong></p><p className="is-saving"><span>Product discount</span><strong>-{money(discount)}</strong></p>{gift > 0 && <p><span>Gift wrapping</span><strong>{money(gift)}</strong></p>}<p className="tara-cart-total"><span>You pay</span><strong>{money(totals.payable + gift)}</strong></p></div><button onClick={checkout}>Continue to checkout</button><small><FiShield />Secure checkout and protected payment</small></aside>
     </div>
-  )
+  </main>
 }
 
-export default Cart
+function CartHeader({ count }) { return <header className="tara-cart-header"><div><span>Your selection</span><h1>Shopping bag</h1><p>{count}</p></div><Link to="/"><FiArrowLeft />Continue shopping</Link></header> }
+function EmptyCart({ title, text }) { return <main className="tara-cart-page"><CartHeader count="" /><div className="tara-cart-empty"><FiShoppingBag /><h2>{title}</h2><p>{text}</p><Link to="/">Explore collections</Link></div></main> }

@@ -1,509 +1,205 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { FaUser, FaHeart, FaShoppingBag, FaSearch, FaTimes, FaRegUser, FaRegHeart } from 'react-icons/fa'
-import { FiShoppingBag } from 'react-icons/fi'
+import { FiHeart, FiMenu, FiSearch, FiShoppingCart, FiUser, FiX } from 'react-icons/fi'
 import './Navbar.css'
 import { useWishlist } from '../WishlistContext'
 import { useCart } from '../CartContext'
 
 const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app'
-const API_BASE_RAW =
-  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
-  (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
-  DEFAULT_API_BASE
-const API_BASE = API_BASE_RAW.replace(/\/+$/, '')
+const API_BASE = ((typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) || DEFAULT_API_BASE).replace(/\/+$/, '')
+const CLOUD = (typeof process !== 'undefined' && process.env && process.env.REACT_APP_CLOUDINARY_CLOUD) || 'deymt9uyh'
+const RECENT_KEY = 'tara_recently_viewed_products'
+const FALLBACKS = { WOMEN: '/images/updated/grid1.jpg', MEN: '/images/men/mens13.jpeg', KIDS: '/images/women/new/category-2.png', DEFAULT: '/images/placeholder.jpg' }
 
-/* ─── Text helpers (logic unchanged) ────────────────────────── */
-const normalizeText = (str) =>
-  String(str || '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
+const clean = value => String(value || '').trim()
+const normalize = value => clean(value).toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim()
+const unique = values => [...new Set(values.map(clean).filter(Boolean))]
+const tokensOf = value => normalize(value).split(' ').filter(Boolean)
+const productText = product => normalize([product?.product_name, product?.name, product?.brand, product?.brand_name, product?.category_name, product?.category, product?.category_slug, product?.pattern_code, product?.fit_type, product?.fit, product?.color, product?.colour, product?.gender].filter(Boolean).join(' '))
+const matchesQuery = (product, query) => tokensOf(query).every(token => productText(product).includes(token))
 
-const normalizeSuggestionToken = (str) =>
-  String(str || '').toLowerCase().replace(/[^a-z0-9]/g, '').trim()
-
-const levenshteinDistance = (a, b) => {
-  const s = normalizeSuggestionToken(a)
-  const t = normalizeSuggestionToken(b)
-  if (!s.length) return t.length
-  if (!t.length) return s.length
-  const dp = Array.from({ length: s.length + 1 }, () => new Array(t.length + 1).fill(0))
-  for (let i = 0; i <= s.length; i += 1) dp[i][0] = i
-  for (let j = 0; j <= t.length; j += 1) dp[0][j] = j
-  for (let i = 1; i <= s.length; i += 1)
-    for (let j = 1; j <= t.length; j += 1) {
-      const cost = s[i - 1] === t[j - 1] ? 0 : 1
-      dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost)
-    }
-  return dp[s.length][t.length]
+const imageCandidates = product => {
+  const ean = clean(product?.ean_code)
+  return unique([product?.shared_image_url, product?.variant_image_url, product?.ean_image_url, product?.image_url, ...(Array.isArray(product?.images) ? product.images : []), ean ? `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto/products/${encodeURIComponent(ean)}` : ''])
 }
 
-const buildSuggestionTokens = (products) => {
-  const map = new Map()
-  products.forEach((p) => {
-    ;[p.product_name, p.brand, p.color].forEach((field) => {
-      const norm = normalizeText(field)
-      if (norm)
-        norm.split(' ').forEach((w) => {
-          const token = w.trim()
-          if (token.length >= 3 && !map.has(token)) map.set(token, true)
-        })
-    })
+const groupProducts = rows => {
+  const groups = new Map()
+  ;(Array.isArray(rows) ? rows : []).forEach(row => {
+    const productId = Number(row?.product_id || row?.id || 0)
+    if (!productId) return
+    if (!groups.has(productId)) groups.set(productId, { ...row, id: productId, product_id: productId, variants: [], images: [] })
+    const group = groups.get(productId)
+    group.variants.push(row)
+    group.images = unique([...group.images, ...imageCandidates(row)])
   })
-  return Array.from(map.keys())
+  return [...groups.values()]
 }
 
-const toTitleCase = (str) => (str ? str.charAt(0).toUpperCase() + str.slice(1) : '')
+const priceFor = (product, userType) => {
+  const offers = userType === 'B2B' ? [product?.final_price_b2b, product?.sale_price, product?.mrp, product?.original_price_b2b] : [product?.final_price_b2c, product?.sale_price, product?.mrp, product?.original_price_b2c]
+  const originals = userType === 'B2B' ? [product?.original_price_b2b, product?.mrp, product?.final_price_b2b] : [product?.original_price_b2c, product?.mrp, product?.final_price_b2c]
+  const offer = offers.map(Number).find(value => Number.isFinite(value) && value > 0) || 0
+  const original = originals.map(Number).find(value => Number.isFinite(value) && value > 0) || offer
+  const discount = original > offer && offer > 0 ? Math.round(((original - offer) / original) * 100) : 0
+  return { offer, original, discount }
+}
 
-const getSuggestions = (input, tokens) => {
-  const q = normalizeSuggestionToken(input)
-  if (!q || q.length < 2) return []
-  const scored = []
-  tokens.forEach((token) => {
-    const norm = normalizeSuggestionToken(token)
-    if (!norm) return
-    let score = 999
-    if (norm.startsWith(q)) score = 0
-    else if (norm.includes(q)) score = 1
-    else {
-      const d = levenshteinDistance(norm, q)
-      if (d <= 2) score = 2 + d
-      else return
+const money = value => Number(value || 0).toLocaleString('en-IN', { minimumFractionDigits: Number(value || 0) % 1 ? 2 : 0, maximumFractionDigits: 2 })
+
+function SearchImage({ product }) {
+  const fallback = FALLBACKS[clean(product?.gender).toUpperCase()] || FALLBACKS.DEFAULT
+  const sourceKey = unique([...(product?.images || []), fallback]).join('|')
+  const sources = useMemo(() => sourceKey.split('|').filter(Boolean), [sourceKey])
+  const [index, setIndex] = useState(0)
+  useEffect(() => setIndex(0), [sourceKey])
+  return <img src={sources[Math.min(index, sources.length - 1)]} alt={clean(product?.product_name || product?.name || 'Product')} onError={() => setIndex(current => Math.min(current + 1, sources.length - 1))} />
+}
+
+function SearchPopup({ open, onClose, userType }) {
+  const navigate = useNavigate()
+  const inputRef = useRef(null)
+  const abortRef = useRef(null)
+  const [query, setQuery] = useState('')
+  const [products, setProducts] = useState([])
+  const [suggestions, setSuggestions] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [initialLabel, setInitialLabel] = useState('Recently viewed')
+
+  useEffect(() => {
+    if (!open) return undefined
+    setQuery('')
+    setSuggestions([])
+    const timer = window.setTimeout(() => inputRef.current?.focus(), 80)
+    let recent = []
+    try { recent = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]') } catch { recent = [] }
+    if (Array.isArray(recent) && recent.length) {
+      setProducts(recent.slice(0, 4))
+      setInitialLabel('Recently viewed')
+    } else {
+      setInitialLabel('Popular right now')
+      fetch(`${API_BASE}/api/products?limit=24&hasImage=true`, { cache: 'no-store' })
+        .then(response => response.ok ? response.json() : [])
+        .then(data => setProducts(groupProducts(Array.isArray(data) ? data : data?.products || []).slice(0, 4)))
+        .catch(() => setProducts([]))
     }
-    scored.push({ token, score })
-  })
-  scored.sort((a, b) => a.score - b.score || a.token.length - b.token.length)
-  const unique = []
-  const used = new Set()
-  for (let i = 0; i < scored.length; i += 1) {
-    const key = scored[i].token.toLowerCase()
-    if (!used.has(key)) {
-      used.add(key)
-      unique.push(toTitleCase(scored[i].token))
-      if (unique.length >= 8) break
+    return () => window.clearTimeout(timer)
+  }, [open])
+
+  useEffect(() => {
+    if (!open) return undefined
+    const value = clean(query)
+    if (value.length < 2) {
+      setSuggestions([])
+      setLoading(false)
+      return undefined
     }
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+    const timer = window.setTimeout(async () => {
+      setLoading(true)
+      try {
+        const encoded = encodeURIComponent(value)
+        const [productResponse, suggestionResponse] = await Promise.all([
+          fetch(`${API_BASE}/api/products/search?q=${encoded}`, { signal: controller.signal, cache: 'no-store' }),
+          fetch(`${API_BASE}/api/products/suggest?q=${encoded}`, { signal: controller.signal, cache: 'no-store' })
+        ])
+        const productData = productResponse.ok ? await productResponse.json() : []
+        const suggestionData = suggestionResponse.ok ? await suggestionResponse.json() : []
+        setProducts(groupProducts(Array.isArray(productData) ? productData : productData?.products || []).filter(product => matchesQuery(product, value)).slice(0, 4))
+        setSuggestions(unique(Array.isArray(suggestionData) ? suggestionData : []).slice(0, 6))
+      } catch {
+        if (!controller.signal.aborted) { setProducts([]); setSuggestions([]) }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false)
+      }
+    }, 180)
+    return () => { window.clearTimeout(timer); controller.abort() }
+  }, [open, query])
+
+  useEffect(() => {
+    document.body.classList.toggle('tara-search-open', open)
+    return () => document.body.classList.remove('tara-search-open')
+  }, [open])
+
+  if (!open) return null
+
+  const openProduct = product => {
+    const selected = product?.variants?.[0] || product
+    const variantId = Number(selected?.variant_id || selected?.id || 0)
+    if (!variantId) return
+    try {
+      const current = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]')
+      const next = [product, ...(Array.isArray(current) ? current : []).filter(item => Number(item?.product_id || item?.id) !== Number(product?.product_id || product?.id))].slice(0, 8)
+      localStorage.setItem(RECENT_KEY, JSON.stringify(next))
+    } catch {}
+    onClose()
+    navigate(`/product/${variantId}`)
   }
-  return unique
-}
 
-/* ─── Search bar ─────────────────────────────────────────────── */
-const SearchBar = React.memo(function SearchBar({
-  wrapperClassName = '',
-  inputRef,
-  searchTerm,
-  setSearchTerm,
-  suggestions,
-  showSuggestions,
-  setShowSuggestions,
-  onSearch,
-  onPickSuggestion
-}) {
+  const viewAll = () => {
+    const value = clean(query)
+    if (!value) return
+    onClose()
+    navigate(`/search?q=${encodeURIComponent(value)}`)
+  }
+
   return (
-    <div className={`search-bar-final ${wrapperClassName}`}>
-      <FaSearch
-        className="search-icon-final"
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={onSearch}
-      />
-      <input
-        ref={inputRef}
-        type="text"
-        placeholder="Search products…"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') onSearch()
-          if (e.key === 'Escape') setShowSuggestions(false)
-        }}
-        onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true) }}
-        autoComplete="off"
-        spellCheck={false}
-      />
-      <div
-        className={`nav-suggestions${showSuggestions && suggestions.length > 0 ? ' open' : ''}`}
-        role="listbox"
-      >
-        {suggestions.map((s) => (
-          <button
-            key={s}
-            type="button"
-            className="nav-suggestion-item"
-            onMouseDown={(e) => { e.preventDefault(); onPickSuggestion(s) }}
-          >
-            <span className="nav-suggestion-dot" />
-            <span className="nav-suggestion-text">{s}</span>
-          </button>
-        ))}
-      </div>
+    <div className="tara-search-overlay" role="dialog" aria-modal="true" aria-label="Product search">
+      <button type="button" className="tara-search-overlay__backdrop" aria-label="Close search" onClick={onClose} />
+      <section className="tara-search-modal">
+        <div className="tara-search-modal__top">
+          <FiSearch />
+          <input ref={inputRef} value={query} onChange={event => setQuery(event.target.value)} onKeyDown={event => { if (event.key === 'Enter') viewAll(); if (event.key === 'Escape') onClose() }} placeholder="Search products, colours or patterns..." autoComplete="off" spellCheck={false} />
+          {query && <button type="button" className="tara-search-modal__clear" aria-label="Clear search" onClick={() => setQuery('')}><FiX /></button>}
+          <button type="button" className="tara-search-modal__close" aria-label="Close search" onClick={onClose}><FiX /></button>
+        </div>
+
+        {query.length >= 2 && suggestions.length > 0 && <div className="tara-search-modal__suggestions">{suggestions.map(suggestion => <button type="button" key={suggestion} onClick={() => setQuery(suggestion)}>{suggestion}</button>)}</div>}
+
+        <div className="tara-search-modal__content">
+          <h2>{query.length >= 2 ? 'Search results' : initialLabel}</h2>
+          {loading ? <div className="tara-search-modal__grid">{[1, 2, 3, 4].map(item => <div className="tara-search-card tara-search-card--loading" key={item} />)}</div> : products.length ? (
+            <div className="tara-search-modal__grid">{products.map(product => {
+              const price = priceFor(product, userType)
+              return <button type="button" className="tara-search-card" key={product.product_id || product.id} onClick={() => openProduct(product)}><div className="tara-search-card__image"><SearchImage product={product} /></div><span className="tara-search-card__brand">{clean(product.brand || product.brand_name)}</span><strong>{clean(product.product_name || product.name)}</strong>{price.offer > 0 && <div className="tara-search-card__price"><b>₹{money(price.offer)}</b>{price.original > price.offer && <del>₹{money(price.original)}</del>}{price.discount > 0 && <em>{price.discount}% OFF</em>}</div>}</button>
+            })}</div>
+          ) : <div className="tara-search-modal__empty"><FiSearch /><strong>No matching products</strong><span>Try another product, colour, brand or category.</span></div>}
+        </div>
+        {query.length >= 2 && products.length > 0 && <button type="button" className="tara-search-modal__view-all" onClick={viewAll}>View all products</button>}
+      </section>
     </div>
   )
-})
-
-/* ─── Main component ─────────────────────────────────────────── */
-const NavbarFinal = () => {
-  const { wishlistItems } = useWishlist()
-  const { cartItems }     = useCart()
-
-  const [userType, setUserType] = useState(() => {
-    if (typeof window === 'undefined') return 'B2C'
-    return sessionStorage.getItem('userType') || localStorage.getItem('userType') || 'B2C'
-  })
-
-  useEffect(() => {
-    const syncUserType = () => {
-      if (typeof window === 'undefined') return
-      const storedType = sessionStorage.getItem('userType') || localStorage.getItem('userType') || 'B2C'
-      if (storedType !== userType) setUserType(storedType)
-    }
-    window.addEventListener('storage', syncUserType)
-    const interval = setInterval(syncUserType, 500)
-    return () => {
-      window.removeEventListener('storage', syncUserType)
-      clearInterval(interval)
-    }
-  }, [userType])
-
-  const isB2B = String(userType).toUpperCase() === 'B2B'
-
-  // eslint-disable-next-line no-unused-vars
-  const homePath = isB2B ? '/b2b-dashboard' : '/'
-
-  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
-  const [searchTerm,      setSearchTerm]      = useState('')
-  const [showNav,         setShowNav]         = useState(true)
-  const [suggestions,     setSuggestions]     = useState([])
-  const [showSuggestions, setShowSuggestions] = useState(false)
-
-  const location           = useLocation()
-  const navigate           = useNavigate()
-  const mobileNavRef       = useRef(null)
-  const lastY              = useRef(0)
-  const ticking            = useRef(false)
-  const suggestionAbortRef = useRef(null)
-  const desktopInputRef    = useRef(null)
-  const mobileInputRef     = useRef(null)
-
-  const navLinks = useMemo(() => {
-    if (isB2B) {
-      return [
-        { name: 'Dashboard', path: '/b2b-dashboard' },
-        { name: 'Contact Us', path: '/customer-care' }
-      ]
-    }
-    return [
-      { name: 'Home',       path: '/' },
-      { name: 'Women',      path: '/women' },
-      { name: 'Men',        path: '/men' },
-      { name: 'Kids',       path: '/kids' },
-      { name: 'Contact Us', path: '/customer-care' }
-    ]
-  }, [isB2B])
-
-  const isActive = (p) => location.pathname === p
-
-  /* drawer + body lock */
-  useEffect(() => {
-    const handleOutsideClick = (e) => {
-      if (
-        mobileNavRef.current &&
-        !mobileNavRef.current.contains(e.target) &&
-        !e.target.closest('.nav-toggle-final')
-      ) setIsMobileNavOpen(false)
-    }
-    if (isMobileNavOpen) {
-      document.addEventListener('click', handleOutsideClick)
-      document.body.classList.add('drawer-open')
-    } else {
-      document.body.classList.remove('drawer-open')
-    }
-    return () => {
-      document.removeEventListener('click', handleOutsideClick)
-      document.body.classList.remove('drawer-open')
-    }
-  }, [isMobileNavOpen])
-
-  /* scroll hide */
-  useEffect(() => {
-    lastY.current = window.scrollY || 0
-    const threshold = 6
-    const onScroll = () => {
-      if (ticking.current) return
-      ticking.current = true
-      requestAnimationFrame(() => {
-        const y = window.scrollY || 0
-        const delta = y - lastY.current
-        if (y <= 0) setShowNav(true)
-        else if (Math.abs(delta) > threshold) { setShowNav(delta < 0); lastY.current = y }
-        ticking.current = false
-      })
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
-  /* clear suggestions on route change */
-  useEffect(() => {
-    setShowSuggestions(false)
-    setSuggestions([])
-  }, [location.pathname])
-
-  /* suggestion fetch */
-  useEffect(() => {
-    const term = searchTerm.trim()
-    if (term.length < 2) {
-      setSuggestions([])
-      setShowSuggestions(false)
-      if (suggestionAbortRef.current) { suggestionAbortRef.current.abort(); suggestionAbortRef.current = null }
-      return
-    }
-    if (suggestionAbortRef.current) suggestionAbortRef.current.abort()
-    const controller = new AbortController()
-    suggestionAbortRef.current = controller
-    const run = async () => {
-      try {
-        const res  = await fetch(`${API_BASE}/api/products/search?q=${encodeURIComponent(term)}`, { signal: controller.signal })
-        const data = await res.json()
-        const s    = getSuggestions(term, buildSuggestionTokens(Array.isArray(data) ? data : []))
-        setSuggestions(s)
-        setShowSuggestions(true)
-      } catch {
-        if (!controller.signal.aborted) { setSuggestions([]); setShowSuggestions(false) }
-      }
-    }
-    run()
-    return () => controller.abort()
-  }, [searchTerm])
-
-  /* close suggestions on outside click */
-  useEffect(() => {
-    const onDown = (e) => {
-      if (!e.target.closest('.search-bar-final') && !e.target.closest('.nav-suggestions'))
-        setShowSuggestions(false)
-    }
-    document.addEventListener('pointerdown', onDown, true)
-    return () => document.removeEventListener('pointerdown', onDown, true)
-  }, [])
-
-  const handleNavClick = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-    setIsMobileNavOpen(false)
-  }
-
-  const handleSearch = () => {
-    const v = searchTerm.trim()
-    if (v) {
-      navigate(`/search?q=${encodeURIComponent(v)}`)
-      setIsMobileNavOpen(false)
-      setShowSuggestions(false)
-    }
-  }
-
-  const handleSuggestionClick = (value) => {
-    setSearchTerm(value)
-    navigate(`/search?q=${encodeURIComponent(value)}`)
-    setIsMobileNavOpen(false)
-    setShowSuggestions(false)
-  }
-
-  return (
-    <nav className={`navbar-final${showNav ? '' : ' nav-hidden'}`}>
-
-      {/* ════════ DESKTOP ════════ */}
-      <div className="desktop-only-final">
-        <div className="nb-row nb-row--top">
-          <div className="nb-gif-wrap">
-            <img src="/loader-bg.gif" alt="" aria-hidden="true" className="nb-gif" />
-          </div>
-
-          <div className="nb-logo-center">
-            <Link to={homePath} onClick={handleNavClick}>
-              <img src="/logo1.png" alt="Taras Kart" className="nb-logo-img" />
-            </Link>
-          </div>
-
-          <div className="nb-icons-right">
-            <div className="icon-buttons-final">
-              <Link to="/profile" className={`icon-btn${isActive('/profile') ? ' icon-active-btn' : ''}`}>
-                <div className="icon-circle">
-                  {isActive('/profile') ? <FaUser className="icon icon-filled" /> : <FaRegUser className="icon icon-outline" />}
-                  {isActive('/profile') && <span className="inner-ring" />}
-                </div>
-                <span className={`icon-label${isActive('/profile') ? ' label-active' : ''}`}>Profile</span>
-              </Link>
-
-              {!isB2B && (
-                <>
-                  <Link to="/wishlist" className={`icon-btn${isActive('/wishlist') ? ' icon-active-btn' : ''}`}>
-                    <div className="icon-circle">
-                      {isActive('/wishlist') ? <FaHeart className="icon icon-filled" /> : <FaRegHeart className="icon icon-outline" />}
-                      {wishlistItems.length > 0 && <span className="red-dot1" />}
-                      {isActive('/wishlist') && <span className="inner-ring" />}
-                    </div>
-                    <span className={`icon-label${isActive('/wishlist') ? ' label-active' : ''}`}>Wishlist</span>
-                  </Link>
-
-                  <Link to="/cart" className={`icon-btn${isActive('/cart') ? ' icon-active-btn' : ''}`}>
-                    <div className="icon-circle">
-                      {isActive('/cart') ? <FaShoppingBag className="icon icon-filled" /> : <FiShoppingBag className="icon icon-outline-stroke" />}
-                      {cartItems.length > 0 && <span className="red-dot1" />}
-                      {isActive('/cart') && <span className="inner-ring" />}
-                    </div>
-                    <span className={`icon-label${isActive('/cart') ? ' label-active' : ''}`}>Kart</span>
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="nb-divider" aria-hidden="true" />
-
-        <div className="nb-row nb-row--bottom">
-          {/* SEARCH HIDDEN FOR B2B */}
-          <div className="nb-search-wrap">
-            {!isB2B && (
-              <SearchBar
-                wrapperClassName="search-desktop-light"
-                inputRef={desktopInputRef}
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                suggestions={suggestions}
-                showSuggestions={showSuggestions}
-                setShowSuggestions={setShowSuggestions}
-                onSearch={handleSearch}
-                onPickSuggestion={handleSuggestionClick}
-              />
-            )}
-          </div>
-
-          <div className="nb-links-center">
-            <div className="nav-links-final nav-links-desktop-final">
-              {navLinks.map(({ name, path }) => (
-                <Link
-                  key={name}
-                  to={path}
-                  onClick={handleNavClick}
-                  className={`nav-link-final${isActive(path) ? ' active-final' : ''}`}
-                >
-                  <span>{name}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div className="nb-search-wrap" aria-hidden="true" />
-        </div>
-      </div>
-
-      {/* ════════ MOBILE ════════ */}
-      <div className="mobile-only-final">
-        <div className="top-row-final">
-          <div className="nb-mob-gif-wrap">
-            <img src="/loader-bg.gif" alt="" aria-hidden="true" className="nb-mob-gif" />
-          </div>
-
-          <div className="nb-mob-logo-wrap">
-            <Link to={homePath} onClick={handleNavClick}>
-              <img src="/logo1.png" alt="Taras Kart" className="nb-mobile-logo" />
-            </Link>
-          </div>
-
-          <div className="nb-mob-toggle-wrap">
-            <button
-              type="button"
-              className="nav-toggle-final"
-              aria-label={isMobileNavOpen ? 'Close menu' : 'Open menu'}
-              aria-expanded={isMobileNavOpen}
-              onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
-            >
-              <div className={`dot-grid-final${isMobileNavOpen ? ' dots-open' : ''}`}>
-                {[...Array(9)].map((_, i) => <span key={i} />)}
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {/* SEARCH HIDDEN FOR B2B */}
-        {!isB2B && (
-          <div className="bottom-row-final">
-            <SearchBar
-              inputRef={mobileInputRef}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              suggestions={suggestions}
-              showSuggestions={showSuggestions}
-              setShowSuggestions={setShowSuggestions}
-              onSearch={handleSearch}
-              onPickSuggestion={handleSuggestionClick}
-            />
-          </div>
-        )}
-
-        {isMobileNavOpen && (
-          <div className="mobile-drawer-final slide-in" ref={mobileNavRef}>
-            <div className="nb-drawer-topbar">
-              <button
-                type="button"
-                className="close-btn-final"
-                aria-label="Close menu"
-                onClick={() => setIsMobileNavOpen(false)}
-              >
-                <FaTimes />
-              </button>
-            </div>
-
-            <nav className="nb-drawer-nav">
-              {navLinks.map(({ name, path }) => (
-                <Link
-                  key={name}
-                  to={path}
-                  onClick={handleNavClick}
-                  className={`nb-drawer-link${isActive(path) ? ' nb-drawer-link--active' : ''}`}
-                >
-                  <span className="nb-drawer-link-dot" aria-hidden="true" />
-                  <span>{name}</span>
-                </Link>
-              ))}
-            </nav>
-
-            <div className="nb-drawer-sep" aria-hidden="true" />
-
-            <div className="nb-drawer-footer">
-              <Link to="/profile" className="nb-drawer-footer-row" onClick={handleNavClick}>
-                <FaRegUser />
-                <span>Profile</span>
-              </Link>
-
-              {!isB2B && (
-                <>
-                  <Link to="/wishlist" className="nb-drawer-footer-row" onClick={handleNavClick}>
-                    <FaRegHeart />
-                    <span>
-                      Wishlist
-                      {wishlistItems.length > 0 && (
-                        <span className="nb-drawer-count">{wishlistItems.length}</span>
-                      )}
-                    </span>
-                  </Link>
-                  <Link to="/cart" className="nb-drawer-footer-row" onClick={handleNavClick}>
-                    <FiShoppingBag />
-                    <span>
-                      Cart
-                      {cartItems.length > 0 && (
-                        <span className="nb-drawer-count">{cartItems.length}</span>
-                      )}
-                    </span>
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-    </nav>
-  )
 }
 
-export default NavbarFinal
+export default function NavbarFinal() {
+  const { wishlistItems = [] } = useWishlist()
+  const { cartItems = [] } = useCart()
+  const location = useLocation()
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [userType, setUserType] = useState(() => typeof window === 'undefined' ? 'B2C' : sessionStorage.getItem('userType') || localStorage.getItem('userType') || 'B2C')
+  const isB2B = String(userType).toUpperCase() === 'B2B'
+  const homePath = isB2B ? '/b2b-dashboard' : '/'
+  const navLinks = useMemo(() => isB2B ? [{ name: 'Dashboard', path: '/b2b-dashboard' }, { name: 'Products', path: '/b2b-products' }, { name: 'Contact Us', path: '/customer-care' }] : [{ name: 'Women', path: '/women' }, { name: 'Men', path: '/men' }, { name: 'Kids', path: '/kids' }, { name: 'Brands', path: '/brands' }, { name: 'Contact Us', path: '/customer-care' }], [isB2B])
+
+  useEffect(() => {
+    const sync = () => setUserType(sessionStorage.getItem('userType') || localStorage.getItem('userType') || 'B2C')
+    window.addEventListener('storage', sync)
+    const interval = window.setInterval(sync, 500)
+    return () => { window.removeEventListener('storage', sync); window.clearInterval(interval) }
+  }, [])
+  useEffect(() => { setMobileOpen(false); setSearchOpen(false) }, [location.pathname, location.search])
+  useEffect(() => { document.body.classList.toggle('tara-menu-open', mobileOpen); return () => document.body.classList.remove('tara-menu-open') }, [mobileOpen])
+  useEffect(() => {
+    const close = event => { if (event.key === 'Escape') { setMobileOpen(false); setSearchOpen(false) } }
+    window.addEventListener('keydown', close)
+    return () => window.removeEventListener('keydown', close)
+  }, [])
+
+  const active = path => location.pathname === path
+  const closeNavigation = () => { setMobileOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }) }
+
+  return <header className="tara-navbar"><div className="tara-navbar__row"><Link to={homePath} className="tara-navbar__brand" onClick={closeNavigation} aria-label="Tara home"><img src="/logo1.png" alt="Tara" /></Link><nav className="tara-navbar__links" aria-label="Main navigation">{navLinks.map(link => <Link key={link.path} to={link.path} onClick={closeNavigation} className={active(link.path) ? 'is-active' : ''}>{link.name}</Link>)}</nav><div className="tara-navbar__actions">{!isB2B && <button type="button" className="tara-navbar__icon" aria-label="Search" onClick={() => setSearchOpen(true)}><FiSearch /></button>}{!isB2B && <Link to="/wishlist" className={active('/wishlist') ? 'tara-navbar__icon is-active' : 'tara-navbar__icon'} aria-label="Wishlist"><FiHeart />{wishlistItems.length > 0 && <span className="tara-navbar__count">{Math.min(wishlistItems.length, 99)}</span>}</Link>}{!isB2B && <Link to="/cart" className={active('/cart') ? 'tara-navbar__icon is-active' : 'tara-navbar__icon'} aria-label="Cart"><FiShoppingCart />{cartItems.length > 0 && <span className="tara-navbar__count">{Math.min(cartItems.length, 99)}</span>}</Link>}<Link to="/profile" className={active('/profile') ? 'tara-navbar__icon is-active' : 'tara-navbar__icon'} aria-label="Profile"><FiUser /></Link><button type="button" className="tara-navbar__icon tara-navbar__menu-button" aria-label={mobileOpen ? 'Close menu' : 'Open menu'} aria-expanded={mobileOpen} onClick={() => setMobileOpen(value => !value)}>{mobileOpen ? <FiX /> : <FiMenu />}</button></div></div>{mobileOpen && <div className="tara-mobile-menu"><nav aria-label="Mobile navigation"><Link to={homePath} onClick={closeNavigation} className={active(homePath) ? 'is-active' : ''}>Home</Link>{navLinks.map(link => <Link key={link.path} to={link.path} onClick={closeNavigation} className={active(link.path) ? 'is-active' : ''}>{link.name}</Link>)}</nav></div>}<SearchPopup open={searchOpen} onClose={() => setSearchOpen(false)} userType={String(userType).toUpperCase()} /></header>
+}

@@ -1,503 +1,78 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Navbar from './Navbar';
-import Footer from './Footer';
-import './OrderCheckout.css';
+import React, { useEffect, useMemo, useState } from 'react'
+import { FiCheck, FiChevronLeft, FiCreditCard, FiMapPin, FiPackage, FiShield } from 'react-icons/fi'
+import { useNavigate } from 'react-router-dom'
+import { currentUserEmail, fetchCoinWallet, money, placeWebOrder, validateCoins } from '../services/checkoutApi'
+import './OrderCheckout.css'
 
-const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app';
-const API_BASE_RAW =
-  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
-  (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
-  DEFAULT_API_BASE;
-const API_BASE = API_BASE_RAW.replace(/\/+$/, '');
+const emptyAddress = { name: '', email: '', mobile: '', address_line1: '', address_line2: '', city: '', state: '', pincode: '' }
 
 export default function OrderCheckout() {
-  const navigate = useNavigate();
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    mobile: '',
-    address_line1: '',
-    address_line2: '',
-    city: '',
-    state: '',
-    pincode: ''
-  });
-  const [placing, setPlacing] = useState(false);
-  const [toast, setToast] = useState('');
-  const [success, setSuccess] = useState(false);
-  const [orderId, setOrderId] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState('COD');
+  const navigate = useNavigate()
+  const [form, setForm] = useState(emptyAddress)
+  const [paymentMethod, setPaymentMethod] = useState('COD')
+  const [placing, setPlacing] = useState(false)
+  const [notice, setNotice] = useState('')
+  const [successId, setSuccessId] = useState('')
   const [coinBalance, setCoinBalance] = useState(0)
-  const [coinsInput, setCoinsInput] = useState('')
+  const [coinInput, setCoinInput] = useState('')
   const [coinsApplied, setCoinsApplied] = useState(0)
-  const [coinsValidating, setCoinsValidating] = useState(false)
-  const [coinsMsg, setCoinsMsg] = useState('')
-
-  const payload = useMemo(() => {
-    try {
-      const stored = JSON.parse(sessionStorage.getItem('tk_checkout_payload') || '{}');
-      if (!stored || !Array.isArray(stored.items) || stored.items.length === 0) {
-        return {};
-      }
-
-      const normalizedItems = (stored.items || []).map((it) => {
-        const mrp = Number(it.mrp ?? it.price ?? 0) || 0;
-        let price = Number(it.price ?? 0) || 0;
-        const qty = Number(it.qty ?? 1) || 1;
-        if ((!price || price <= 0) && mrp > 0) {
-          price = mrp;
-        }
-        return {
-          ...it,
-          mrp,
-          price,
-          qty
-        };
-      });
-
-      const rawTotals = stored.totals || {};
-      const bagTotal = Number(rawTotals.bagTotal ?? 0);
-      const discountTotal = Number(rawTotals.discountTotal ?? 0);
-      const couponPct = Number(rawTotals.couponPct ?? 0);
-      const couponDiscount = Number(rawTotals.couponDiscount ?? 0);
-      const convenience = Number(rawTotals.convenience ?? 0);
-      const giftWrap = Number(rawTotals.giftWrap ?? 0);
-      let payable = Number(rawTotals.payable ?? 0);
-      if (!payable || payable <= 0) {
-        payable = bagTotal - discountTotal - couponDiscount + convenience + giftWrap;
-      }
-
-      return {
-        ...stored,
-        items: normalizedItems,
-        totals: {
-          bagTotal,
-          discountTotal,
-          couponPct,
-          couponDiscount,
-          convenience,
-          giftWrap,
-          payable
-        }
-      };
-    } catch {
-      return {};
-    }
-  }, []);
+  const email = currentUserEmail()
+  const payload = useMemo(readCheckout, [])
+  const basePayable = Number(payload?.totals?.payable || 0)
+  const payable = Math.max(0, basePayable - coinsApplied)
+  const count = (payload.items || []).reduce((sum, item) => sum + Number(item.qty || 1), 0)
 
   useEffect(() => {
+    try { setForm({ ...emptyAddress, ...JSON.parse(localStorage.getItem('tk_checkout_address') || '{}'), email: JSON.parse(localStorage.getItem('tk_checkout_address') || '{}').email || email }) } catch { setForm(value => ({ ...value, email })) }
+    if (email) fetchCoinWallet(email).then(data => setCoinBalance(Number(data.balance || 0))).catch(() => {})
+  }, [email])
+
+  const setField = (key, value) => setForm(current => ({ ...current, [key]: value }))
+  const valid = Boolean(form.name && /^\d{10}$/.test(form.mobile) && form.address_line1 && form.city && form.state && /^\d{6}$/.test(form.pincode) && payload.items?.length)
+
+  const applyCoins = async () => {
+    const requested = Number(coinInput)
+    if (!requested) return setNotice('Enter the number of coins you want to use')
     try {
-      const saved = JSON.parse(localStorage.getItem('tk_checkout_address') || '{}');
-      if (saved && typeof saved === 'object') {
-        setForm((f) => ({ ...f, ...saved }));
-      }
-    } catch {}
-  }, []);
-
-  const fmt = (n) => Number(n || 0).toFixed(2);
-  const itemsCount = Array.isArray(payload?.items)
-    ? payload.items.reduce((a, i) => a + Number(i.qty || 1), 0)
-    : 0;
-  const basePayable = payload?.totals?.payable || 0;
-  const payable = Math.max(0, basePayable - coinsApplied);
-  const setF = (k, v) => setForm((s) => ({ ...s, [k]: v }));
-  const isValidEmail = (e) => !e || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
-  const isValidMobile = (m) => !m || /^[0-9]{10}$/.test(String(m).replace(/\D/g, ''));
-  const isValidPincode = (p) => !p || /^[0-9]{6}$/.test(String(p).replace(/\D/g, ''));
-  const requiredOk =
-    form.name &&
-    form.mobile &&
-    form.address_line1 &&
-    form.city &&
-    form.state &&
-    form.pincode;
-  const formatsOk =
-    isValidEmail(form.email) &&
-    isValidMobile(form.mobile) &&
-    isValidPincode(form.pincode);
-  const hasItems = Array.isArray(payload?.items) && payload.items.length > 0;
-  const canPlace = requiredOk && formatsOk && hasItems && !placing;
-  const loginEmail =
-    typeof window !== 'undefined'
-      ? sessionStorage.getItem('userEmail') || null
-      : null;
-
-  // Fetch coin balance on mount
-  useEffect(() => {
-    const email = loginEmail
-    if (!email) return
-    fetch(`${API_BASE}/api/coins/wallet?email=${encodeURIComponent(email)}`)
-      .then(r => r.json())
-      .then(d => { if (d.ok) setCoinBalance(d.balance ?? 0) })
-      .catch(() => {})
-  }, [loginEmail])
-
-  const showToast = (msg, ms = 1500) => {
-    setToast(msg);
-    setTimeout(() => setToast(''), ms);
-  };
-
-  const handleApplyCoins = async () => {
-    const requested = parseInt(coinsInput, 10)
-    if (!requested || requested <= 0) {
-      setCoinsMsg('Enter a valid number of coins')
-      return
-    }
-    if (coinBalance <= 0) {
-      setCoinsMsg('No coins available to redeem')
-      return
-    }
-    if (!loginEmail) {
-      setCoinsMsg('Please log in to use coins')
-      return
-    }
-    setCoinsValidating(true)
-    setCoinsMsg('')
-    try {
-      const subtotal = basePayable
-      const res = await fetch(`${API_BASE}/api/coins/validate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: loginEmail,
-          coins_requested: requested,
-          order_subtotal: subtotal
-        })
-      })
-      const data = await res.json()
-      if (data.ok) {
-        setCoinsApplied(data.coinsApplied)
-        setCoinsMsg(`✓ ${data.coinsApplied} coins applied — ₹${data.coinsApplied} discount`)
-      } else {
-        setCoinsMsg(data.message || 'Cannot apply coins')
-        setCoinsApplied(0)
-      }
-    } catch {
-      setCoinsMsg('Failed to validate coins')
-    } finally {
-      setCoinsValidating(false)
-    }
+      const result = await validateCoins(email, requested, basePayable)
+      if (!result.ok) throw new Error(result.message || 'Coins could not be applied')
+      setCoinsApplied(Number(result.coinsApplied || 0))
+      setNotice(`${result.coinsApplied} coins applied`)
+    } catch (reason) { setNotice(reason.message || 'Coins could not be applied') }
   }
 
-  const createSale = async (statusForBackend) => {
-    const shipping_address = {
-      line1: form.address_line1,
-      line2: form.address_line2,
-      city: String(form.city || '').trim(),
-      state: String(form.state || '').trim(),
-      pincode: String(form.pincode || '').trim()
-    };
-
-    const normalizedItems = Array.isArray(payload?.items)
-      ? payload.items.map((it) => ({
-          variant_id: Number(it.variant_id),
-          product_id: it.product_id != null ? Number(it.product_id) : null,
-          qty: Number(it.qty || 1) || 1,
-          price: Number(it.price || 0) || 0,
-          mrp: Number(it.mrp ?? it.price ?? 0) || 0,
-          size: it.size != null ? String(it.size) : null,
-          colour: it.colour != null ? String(it.colour) : null,
-          image_url: it.image_url != null ? String(it.image_url) : null
-        }))
-      : [];
-
-    const body = {
-      customer_email: form.email || null,
-      customer_name: form.name || null,
-      customer_mobile: form.mobile || null,
-      shipping_address,
-      totals: {
-        ...payload.totals,
-        payable: Math.max(0, (payload.totals?.payable || 0) - coinsApplied)
-      },
-      items: normalizedItems,
-      payment_status: statusForBackend,
-      login_email: loginEmail,
-      payment_method: paymentMethod,
-      coins_applied: coinsApplied,
-      user_email_for_coins: loginEmail
-    };
-
-    const resp = await fetch(`${API_BASE}/api/sales/web/place`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-
-    if (!resp.ok) {
-      let m = 'Failed';
-      try {
-        const d = await resp.json();
-        m = d?.message || m;
-      } catch {}
-      throw new Error(m);
-    }
-
-    const data = await resp.json();
-    const saleId = data?.id || null;
-    if (!saleId) throw new Error('No sale id');
-    return saleId;
-  };
-
-  const placeOrder = async () => {
-    if (!canPlace) {
-      showToast('Please complete the form correctly');
-      return;
-    }
-    if (paymentMethod === 'ONLINE' && payable <= 0) {
-      showToast('Invalid payable amount');
-      return;
-    }
-    setPlacing(true);
+  const place = async () => {
+    if (!valid) return setNotice('Complete all required delivery details')
+    setPlacing(true)
     try {
-      const statusForBackend = paymentMethod === 'COD' ? 'COD' : 'PENDING';
-      const saleId = await createSale(statusForBackend);
-      if (paymentMethod === 'ONLINE') {
-        navigate('/payment', { state: { saleId } });
-        return;
+      const body = {
+        customer_email: form.email || null,
+        customer_name: form.name,
+        customer_mobile: form.mobile,
+        shipping_address: { line1: form.address_line1, line2: form.address_line2, city: form.city.trim(), state: form.state.trim(), pincode: form.pincode },
+        totals: { ...payload.totals, payable },
+        items: payload.items.map(item => ({ variant_id: Number(item.variant_id), product_id: item.product_id == null ? null : Number(item.product_id), qty: Number(item.qty || 1), price: Number(item.price || item.mrp || 0), mrp: Number(item.mrp || item.price || 0), size: item.size || null, colour: item.colour || null, image_url: item.image_url || null })),
+        payment_status: paymentMethod === 'COD' ? 'COD' : 'PENDING',
+        login_email: email || null,
+        payment_method: paymentMethod,
+        coins_applied: coinsApplied,
+        user_email_for_coins: email || null
       }
-      setOrderId(saleId);
-      setSuccess(true);
-      sessionStorage.removeItem('tk_checkout_payload');
-      localStorage.setItem('tk_checkout_address', JSON.stringify(form));
-    } catch (e) {
-      showToast(String(e.message || 'Failed to place order'), 2000);
-    } finally {
-      setPlacing(false);
-    }
-  };
+      const result = await placeWebOrder(body)
+      const saleId = result.id
+      if (!saleId) throw new Error('Order reference was not returned')
+      localStorage.setItem('tk_checkout_address', JSON.stringify(form))
+      if (paymentMethod === 'ONLINE') return navigate('/payment', { state: { saleId } })
+      sessionStorage.removeItem('tk_checkout_payload')
+      setSuccessId(saleId)
+    } catch (reason) { setNotice(reason.message || 'Unable to place your order') } finally { setPlacing(false) }
+  }
 
-  return (
-    <div className="checkout-page dark">
-      <Navbar />
-      <div className="checkout-container">
-        <div className="checkout-head">
-          <h1>Checkout</h1>
-          <div className="chip">{itemsCount} item(s)</div>
-        </div>
-        <div className="checkout-grid">
-          <div className="checkout-form">
-            <div className="card">
-              <h3>Contact</h3>
-              <div className="row2">
-                <input
-                  placeholder="Full Name*"
-                  value={form.name}
-                  onChange={(e) => setF('name', e.target.value)}
-                  className={!form.name ? 'err' : ''}
-                />
-                <input
-                  placeholder="Email"
-                  value={form.email}
-                  onChange={(e) => setF('email', e.target.value)}
-                  className={form.email && !isValidEmail(form.email) ? 'err' : ''}
-                />
-              </div>
-              <input
-                placeholder="Mobile* (10 digits)"
-                value={form.mobile}
-                onChange={(e) => setF('mobile', e.target.value.replace(/\D/g, '').slice(0, 10))}
-                className={!isValidMobile(form.mobile) ? 'err' : ''}
-              />
-            </div>
-            <div className="card">
-              <h3>Shipping</h3>
-              <input
-                placeholder="Address Line 1*"
-                value={form.address_line1}
-                onChange={(e) => setF('address_line1', e.target.value)}
-                className={!form.address_line1 ? 'err' : ''}
-              />
-              <input
-                placeholder="Address Line 2"
-                value={form.address_line2}
-                onChange={(e) => setF('address_line2', e.target.value)}
-              />
-              <div className="row2">
-                <input
-                  placeholder="City*"
-                  value={form.city}
-                  onChange={(e) => setF('city', e.target.value)}
-                  className={!form.city ? 'err' : ''}
-                />
-                <input
-                  placeholder="State*"
-                  value={form.state}
-                  onChange={(e) => setF('state', e.target.value)}
-                  className={!form.state ? 'err' : ''}
-                />
-              </div>
-              <input
-                placeholder="Pincode* (6 digits)"
-                value={form.pincode}
-                onChange={(e) => setF('pincode', e.target.value.replace(/\D/g, '').slice(0, 6))}
-                className={!isValidPincode(form.pincode) ? 'err' : ''}
-              />
-              <div className="inline-actions">
-                <a className="link" href="/cart">
-                  Back to Cart
-                </a>
-                <button
-                  onClick={() => {
-                    localStorage.setItem('tk_checkout_address', JSON.stringify(form));
-                    showToast('Address saved', 1200);
-                  }}
-                  className="ghost"
-                >
-                  Save Address
-                </button>
-              </div>
-            </div>
-            <div className="card">
-              <h3>Payment</h3>
-              <div className="pay-grid">
-                <button
-                  type="button"
-                  className={`pay-option ${paymentMethod === 'COD' ? 'active' : ''}`}
-                  onClick={() => setPaymentMethod('COD')}
-                >
-                  <span className="pay-title">Cash on Delivery</span>
-                  <span className="pay-sub">Pay in cash when you receive</span>
-                </button>
-                <button
-                  type="button"
-                  className={`pay-option ${paymentMethod === 'ONLINE' ? 'active' : ''}`}
-                  onClick={() => setPaymentMethod('ONLINE')}
-                >
-                  <span className="pay-title">UPI / Card / Netbanking</span>
-                  <span className="pay-sub">Secure payment via Razorpay</span>
-                </button>
-              </div>
-              {paymentMethod === 'ONLINE' ? (
-                <div className="pay-note">
-                  Click Pay Now to open Razorpay and complete your payment.
-                </div>
-              ) : (
-                <div className="pay-note">
-                  No advance required. Please ensure phone number is reachable.
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="checkout-summary">
-            <div className="card gold">
-              <h3>Order Summary</h3>
-              <div className="summary">
-                <div>
-                  <span>Bag Total</span>
-                  <span>₹{fmt(payload?.totals?.bagTotal)}</span>
-                </div>
-                <div>
-                  <span>Discount</span>
-                  <span>-₹{fmt(payload?.totals?.discountTotal)}</span>
-                </div>
-                {!!payload?.totals?.couponPct && (
-                  <div>
-                    <span>Coupon</span>
-                    <span>-₹{fmt(payload?.totals?.couponDiscount)}</span>
-                  </div>
-                )}
-                <div>
-                  <span>Convenience</span>
-                  <span>₹{fmt(payload?.totals?.convenience)}</span>
-                </div>
-                {!!payload?.totals?.giftWrap && (
-                  <div>
-                    <span>Gift Wrap</span>
-                    <span>₹{fmt(payload?.totals?.giftWrap)}</span>
-                  </div>
-                )}
-                {/* Coin Wallet */}
-                {coinBalance > 0 && (
-                  <div style={{ margin: '12px 0', padding: '12px', background: '#1a1a00', border: '1px solid #ca8a04', borderRadius: 8 }}>
-                    <div style={{ fontSize: 13, color: '#ca8a04', fontWeight: 600, marginBottom: 8 }}>
-                      🪙 Coin Wallet — {coinBalance} coins available
-                    </div>
-                    <div style={{ fontSize: 12, color: '#9ca3af', marginBottom: 8 }}>
-                      Max usable: {Math.floor(basePayable * 0.10)} coins (10% of order value)
-                    </div>
-                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                      <input
-                        type="number"
-                        min="1"
-                        max={Math.min(coinBalance, Math.floor(basePayable * 0.10))}
-                        placeholder={`Max ${Math.min(coinBalance, Math.floor(basePayable * 0.10))}`}
-                        value={coinsInput}
-                        onChange={e => { setCoinsInput(e.target.value); setCoinsApplied(0); setCoinsMsg('') }}
-                        style={{
-                          flex: 1, background: '#111', border: '1px solid #374151',
-                          color: '#fff', padding: '7px 10px', borderRadius: 6, fontSize: 13
-                        }}
-                      />
-                      <button
-                        onClick={handleApplyCoins}
-                        disabled={coinsValidating || !coinsInput}
-                        style={{
-                          background: '#ca8a04', color: '#000', border: 'none',
-                          padding: '7px 14px', borderRadius: 6, fontWeight: 700,
-                          fontSize: 13, cursor: coinsValidating ? 'not-allowed' : 'pointer',
-                          opacity: coinsValidating ? 0.6 : 1
-                        }}
-                      >
-                        {coinsValidating ? '...' : 'Apply'}
-                      </button>
-                    </div>
-                    {coinsMsg && (
-                      <div style={{ fontSize: 12, marginTop: 6, color: coinsMsg.startsWith('✓') ? '#4ade80' : '#f87171' }}>
-                        {coinsMsg}
-                      </div>
-                    )}
-                  </div>
-                )}
-                {coinsApplied > 0 && (
-                  <div>
-                    <span style={{ color: '#4ade80' }}>Coins Discount</span>
-                    <span style={{ color: '#4ade80' }}>-₹{fmt(coinsApplied)}</span>
-                  </div>
-                )}
-                <div className="sep" />
-                <div className="total">
-                  <span>Total</span>
-                  <span>₹{fmt(payable)}</span>
-                </div>
-              </div>
-              <button onClick={placeOrder} disabled={!canPlace} className="cta">
-                {placing ? <span className="spinner" /> : null}
-                {placing ? 'Processing…' : paymentMethod === 'COD' ? 'Place Order (COD)' : 'Pay Now'}
-              </button>
-              <div className="note">Secure checkout • No extra fees</div>
-            </div>
-            <div className="card mini">
-              <h4>Need Help?</h4>
-              <p>
-                Questions about delivery or payment? Write to{' '}
-                <a href="mailto:taraskartonline@gmail.com">taraskartonline@gmail.com</a>
-              </p>
-            </div>
-          </div>
-        </div>
-        {success && (
-          <div className="modal" role="dialog" aria-modal="true">
-            <div className="modal-content">
-              <div className="success-icon">✓</div>
-              <h2>Order Placed</h2>
-              <p>Thank you for shopping with us.</p>
-              {orderId ? <div className="order-id">Order ID: #{orderId}</div> : null}
-              <div className="modal-actions">
-                <a className="btn ghost" href="/">
-                  Continue Shopping
-                </a>
-                <button className="btn solid" onClick={() => setSuccess(false)}>
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        {!!toast && <div className="toast show">{toast}</div>}
-      </div>
-      <Footer />
-    </div>
-  );
+  if (!payload.items?.length) return <main className="tara-checkout-page"><div className="tara-checkout-empty"><FiPackage /><h1>Your checkout has expired</h1><p>Return to your bag and start checkout again.</p><button onClick={() => navigate('/cart')}>Return to bag</button></div></main>
+  if (successId) return <main className="tara-checkout-page"><div className="tara-order-success"><FiCheck /><span>Order confirmed</span><h1>Thank you for shopping with Tara</h1><p>Your order reference is #{successId}. We will send delivery updates to your registered contact details.</p><div><button onClick={() => navigate('/')}>Continue shopping</button><button onClick={() => navigate('/profile', { state: { openSection: 'Orders' } })}>View orders</button></div></div></main>
+
+  return <main className="tara-checkout-page">{notice && <div className="tara-checkout-toast">{notice}</div>}<header className="tara-checkout-header"><button onClick={() => navigate('/cart')}><FiChevronLeft />Bag</button><div><span>Secure checkout</span><h1>Delivery and payment</h1></div><FiShield /></header><div className="tara-checkout-layout"><section className="tara-checkout-content"><div className="tara-checkout-card"><h2><FiMapPin />Delivery details</h2><div className="tara-form-grid"><Field label="Full name" value={form.name} onChange={value => setField('name', value)} required /><Field label="Email" value={form.email} onChange={value => setField('email', value)} type="email" /><Field label="Mobile number" value={form.mobile} onChange={value => setField('mobile', value.replace(/\D/g, '').slice(0, 10))} required /><Field label="Address line 1" value={form.address_line1} onChange={value => setField('address_line1', value)} required wide /><Field label="Address line 2" value={form.address_line2} onChange={value => setField('address_line2', value)} wide /><Field label="City" value={form.city} onChange={value => setField('city', value)} required /><Field label="State" value={form.state} onChange={value => setField('state', value)} required /><Field label="Pincode" value={form.pincode} onChange={value => setField('pincode', value.replace(/\D/g, '').slice(0, 6))} required /></div><button className="tara-save-address" onClick={() => { localStorage.setItem('tk_checkout_address', JSON.stringify(form)); setNotice('Address saved') }}>Save this address</button></div><div className="tara-checkout-card"><h2><FiCreditCard />Payment method</h2><div className="tara-payment-options"><button className={paymentMethod === 'COD' ? 'is-active' : ''} onClick={() => setPaymentMethod('COD')}><i /><span><strong>Cash on delivery</strong><small>Pay when your order arrives</small></span></button><button className={paymentMethod === 'ONLINE' ? 'is-active' : ''} onClick={() => setPaymentMethod('ONLINE')}><i /><span><strong>UPI, card or netbanking</strong><small>Secure payment through Razorpay</small></span></button></div></div></section><aside className="tara-checkout-summary"><span>{count} items</span><h2>Order summary</h2>{(payload.items || []).slice(0, 3).map((item, index) => <div className="tara-summary-item" key={`${item.variant_id}-${index}`}><img src={item.image_url || '/images/women/women20.jpeg'} alt=""/><p><strong>{item.size || 'Selected style'}</strong><small>{item.colour || ''} · Qty {item.qty || 1}</small></p><b>{money(Number(item.price || 0) * Number(item.qty || 1))}</b></div>)}<div className="tara-summary-lines"><p><span>Bag total</span><strong>{money(payload.totals?.bagTotal)}</strong></p><p className="is-saving"><span>Discount</span><strong>-{money(payload.totals?.discountTotal)}</strong></p>{payload.totals?.giftWrap > 0 && <p><span>Gift wrapping</span><strong>{money(payload.totals.giftWrap)}</strong></p>}{coinsApplied > 0 && <p className="is-saving"><span>Coins</span><strong>-{money(coinsApplied)}</strong></p>}<p className="tara-summary-total"><span>Total</span><strong>{money(payable)}</strong></p></div>{coinBalance > 0 && <div className="tara-coins"><span>Coin wallet</span><p>{coinBalance} coins available, use up to {Math.min(coinBalance, Math.floor(basePayable * .1))}</p><div><input type="number" value={coinInput} onChange={event => { setCoinInput(event.target.value); setCoinsApplied(0) }} placeholder="Coins" /><button onClick={applyCoins}>Apply</button></div></div>}<button className="tara-place-order" disabled={!valid || placing} onClick={place}>{placing ? 'Processing' : paymentMethod === 'COD' ? `Place order · ${money(payable)}` : `Continue to pay · ${money(payable)}`}</button><small className="tara-secure-note"><FiShield />Your personal and payment details are protected</small></aside></div></main>
 }
+
+function Field({ label, value, onChange, type = 'text', required = false, wide = false }) { return <label className={wide ? 'is-wide' : ''}><span>{label}{required ? ' *' : ''}</span><input type={type} value={value} onChange={event => onChange(event.target.value)} /></label> }
+function readCheckout() { try { const data=JSON.parse(sessionStorage.getItem('tk_checkout_payload')||'{}');return { ...data, items:Array.isArray(data.items)?data.items:[], totals:data.totals||{} } } catch { return { items:[], totals:{} } } }

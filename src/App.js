@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import './App.css'
-import B2CGuard from './components/B2CGuard';
+import B2CGuard from './components/B2CGuard'
 import MenPage from './pages/MenPage'
 import WomenPage from './pages/WomenPage'
 import Profile from './pages/Profile'
@@ -25,9 +25,11 @@ import RefundRequest from './pages/RefundRequest'
 import NavbarFinal from './pages/Navbar'
 import Contactus from './pages/Contactus'
 import CategoryDisplay from './pages/CategoryDisplay'
-import B2BDashboard from './pages/B2BDashboard';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import B2BProductList from './pages/B2BProductList';
+import B2BDashboard from './pages/B2BDashboard'
+import PrivacyPolicy from './pages/PrivacyPolicy'
+import B2BProductList from './pages/B2BProductList'
+import ProductDetailsPage from './pages/ProductDetailsPage'
+import { CategoryProductsPage } from './pages/GenderStorefront'
 
 function NavigationLoader() {
   const location = useLocation()
@@ -35,66 +37,17 @@ function NavigationLoader() {
 
   useEffect(() => {
     setLoading(true)
-    const t = setTimeout(() => setLoading(false), 2500)
-    return () => clearTimeout(t)
+    const timer = setTimeout(() => setLoading(false), 700)
+    return () => clearTimeout(timer)
   }, [location.pathname, location.search])
 
   return loading ? <TaraLoader /> : null
 }
 
 function AppShell() {
-  return (
-    <>
-      <NavigationLoader />
-      <ScrollToTop />
-      <NavbarFinal />
-      
-      <Routes>
-        {/* ════════ B2B EXCLUSIVE ROUTES ════════ */}
-        <Route path="/b2b-dashboard" element={<B2BDashboard />} />
-
-{/* ════════ B2C PROTECTED ROUTES (Marketing, Cart, Wishlist) ════════ */}
-        {/* B2B users will be bounced away from these pages */}
-        <Route element={<B2CGuard />}>
-          <Route path="/" element={<Home1 />} />
-          <Route path="/men" element={<MenPage />} />
-          <Route path="/women" element={<WomenPage />} />
-          <Route path="/kids" element={<KidsPage />} />
-          <Route path="/cart" element={<Cart />} />          
-          <Route path="/wishlist" element={<Wishlist />} />  
-        </Route>
-
-        {/* ════════ SHARED ROUTES (Accessible to both B2B and B2C) ════════ */}
-        <Route path="/category-display" element={<CategoryDisplay />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
-        <Route path="/wishlist" element={<Wishlist />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/brands" element={<Brands />} />
-        <Route path="/search" element={<SearchResults />} />
-        <Route path="/order/checkout" element={<OrderCheckout />} />
-        <Route path="/track/:id" element={<OrderTracking />} />
-        <Route path="/returns" element={<ReturnsPage />} />
-        <Route path="/order/:id" element={<OrderDetails />} />
-        <Route path="/payment" element={<PaymentPage />} />
-        <Route path="/track-order" element={<TrackOrder />} />
-        <Route path="/order/:id/tracking" element={<OrderTracking />} />
-        <Route path="/order/:id/cancel" element={<OrderCancel />} />
-        <Route path="/returns/:id/refund" element={<RefundRequest />} />
-        <Route path="/customer-care" element={<Contactus />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/b2b-products" element={<B2BProductList />} />
-      </Routes>
-    </>
-  )
+  return <><NavigationLoader /><ScrollToTop /><NavbarFinal /><Routes><Route path="/b2b-dashboard" element={<B2BDashboard />} /><Route element={<B2CGuard />}><Route path="/" element={<Home1 />} /><Route path="/men" element={<MenPage />} /><Route path="/women" element={<WomenPage />} /><Route path="/kids" element={<KidsPage />} /><Route path="/shop/:gender/:categorySlug" element={<CategoryProductsPage />} /><Route path="/product/:variantId" element={<ProductDetailsPage />} /></Route><Route path="/category-display" element={<CategoryDisplay />} /><Route path="/profile" element={<Profile />} /><Route path="/checkout" element={<CheckoutPage />} /><Route path="/wishlist" element={<Wishlist />} /><Route path="/cart" element={<Cart />} /><Route path="/brands" element={<Brands />} /><Route path="/search" element={<SearchResults />} /><Route path="/order/checkout" element={<OrderCheckout />} /><Route path="/track/:id" element={<OrderTracking />} /><Route path="/returns" element={<ReturnsPage />} /><Route path="/order/:id" element={<OrderDetails />} /><Route path="/payment" element={<PaymentPage />} /><Route path="/track-order" element={<TrackOrder />} /><Route path="/order/:id/tracking" element={<OrderTracking />} /><Route path="/order/:id/cancel" element={<OrderCancel />} /><Route path="/returns/:id/refund" element={<RefundRequest />} /><Route path="/customer-care" element={<Contactus />} /><Route path="/privacy-policy" element={<PrivacyPolicy />} /><Route path="/b2b-products" element={<B2BProductList />} /></Routes></>
 }
 
 export default function App() {
-  return (
-    <Router>
-      <div className="App">
-        <AppShell />
-      </div>
-    </Router>
-  )
+  return <Router><div className="App"><AppShell /></div></Router>
 }

@@ -1,0 +1,1 @@
+.home-gender-loading{background:linear-gradient(90deg,#eeeeec 25%,#f8f8f6 50%,#eeeeec 75%);background-size:200% 100%;animation:homeGenderLoading 1.2s linear infinite}.home-gender-loading:after{display:none}@keyframes homeGenderLoading{to{background-position:-200% 0}}

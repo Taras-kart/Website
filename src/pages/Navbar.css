@@ -1,652 +1,735 @@
-/* ═══════════════════════════════════════════════════════════════
-   Navbar.css — v5
-   GIF: direct pixel height, zero transform/scale/clip-path
-   Mobile layout: gif | logo | hamburger
-   Colors locked: #ffd277 · #000 · #fff
-   ═══════════════════════════════════════════════════════════════ */
-
 :root {
-  --gold:       #ffd277;
-  --gold-dim:   rgba(255, 210, 119, 0.50);
-  --gold-glow:  rgba(255, 210, 119, 0.14);
-  --nb-bg:      #000000;
-  --nb-top:     #ffffff;
-  --nb-bdr:     rgba(255, 255, 255, 0.07);
-  --nb-h-desk:   123px;
-  --nb-h-tablet: 116px;
-  --nb-h-mobile: 104px;
+  --tara-nav-height: 76px;
+  --tara-nav-text: #111111;
+  --tara-nav-line: #e8e8e8;
+  --tara-nav-accent: #d7a900;
 }
 
-html, body { overflow-x: hidden; }
-body.drawer-open { overflow: hidden; }
-
-body {
-  padding-top: var(--nb-h-desk);
-  background: #0a0a0a;
+body.tara-menu-open {
+  overflow: hidden;
 }
 
-/* ─── Navbar shell ───────────────────────────────────────────── */
-.navbar-final {
-  position: fixed;
-  top: 0; left: 0; right: 0;
+body.tara-search-open {
+  overflow: hidden;
+}
+
+.tara-navbar {
+  position: sticky;
+  top: 0;
   z-index: 1000;
-  font-family: "Noto Sans", sans-serif;
-  transform: translateY(0);
-  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
-  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.40);
+  width: 100%;
+  background: #ffffff;
+  border-top: 2px solid #40241f;
+  border-bottom: 1px solid var(--tara-nav-line);
+  color: var(--tara-nav-text);
 }
-.navbar-final.nav-hidden { transform: translateY(-100%); }
 
-/* ════════════════════════════════════════════════════════════════
-   DESKTOP
-   ════════════════════════════════════════════════════════════════ */
-.desktop-only-final { display: block; }
-.mobile-only-final  { display: none; }
-
-/* ─── Row base ───────────────────────────────────────────────── */
-.nb-row {
+.tara-navbar__row {
+  width: min(100%, 1920px);
+  min-height: var(--tara-nav-height);
+  margin: 0 auto;
+  padding: 0 clamp(28px, 4vw, 76px);
   display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto minmax(180px, 1fr);
   align-items: center;
-  gap: 16px;
-  padding: 0 clamp(16px, 3vw, 40px);
+  gap: 28px;
 }
 
-/* Row 1: GIF | Logo | Icons */
-.nb-row--top {
-  grid-template-columns: 1fr auto 1fr;
-  min-height: 70px;
-  background: var(--nb-top);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
-}
-
-/* ── GIF: no transform, no scale, no clip-path ──
-   Set the exact rendered pixel height you want.    */
-.nb-gif-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-.nb-gif {
-  display: block;
-  height: 72px;        /* real pixel size — change freely */
-  width: auto;
-  object-fit: contain;
-  /* NO transform, NO scale, NO clip-path — these were hiding it */
-}
-
-/* Logo centered */
-.nb-logo-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.nb-logo-center a { display: flex; align-items: center; }
-
-.nb-logo-img {
-  height: clamp(44px, 5.2vw, 66px);
-  width: auto;
-  object-fit: contain;
-  transition: opacity 0.18s ease;
-}
-.nb-logo-img:hover { opacity: 0.85; }
-
-/* Icons right */
-.nb-icons-right {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-/* Gold divider */
-.nb-divider {
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 210, 119, 0.30) 20%,
-    rgba(255, 210, 119, 0.55) 50%,
-    rgba(255, 210, 119, 0.30) 80%,
-    transparent 100%
-  );
-}
-
-/* Row 2: Search | Links | Spacer */
-.nb-row--bottom {
-  grid-template-columns: 1fr auto 1fr;
-  min-height: 52px;
-  background: var(--nb-bg);
-  border-bottom: 1px solid var(--nb-bdr);
-}
-
-.nb-search-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 24px;
-}
-
-.nb-links-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ════════════════════════════════════════════════════════════════
-   NAV LINKS
-   ════════════════════════════════════════════════════════════════ */
-.nav-links-final {
-  display: flex;
-  gap: clamp(2px, 1.6vw, 24px);
-  align-items: center;
-}
-.nav-links-desktop-final { justify-content: center; }
-
-.nav-link-final {
-  text-decoration: none;
-  font-weight: 600;
-  font-size: clamp(12px, 1.25vw, 14px);
-  letter-spacing: 0.3px;
-  color: rgba(255, 255, 255, 0.78);
-  white-space: nowrap;
-  padding: 7px clamp(8px, 1.1vw, 13px);
-  border-radius: 10px;
+.tara-navbar__brand {
+  justify-self: start;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  transition: color 0.16s ease, background 0.16s ease, transform 0.15s ease;
-}
-.nav-link-final:hover {
-  color: var(--gold);
-  background: rgba(255, 210, 119, 0.07);
-  transform: translateY(-1px);
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
 }
 
-.active-final {
-  color: var(--gold) !important;
-  padding: 7px clamp(10px, 1.3vw, 14px);
-  border-radius: 10px;
-  background: linear-gradient(90deg, #77530a, #ffd277, #77530a, #ffd277);
-  background-size: 250%;
-  background-position: left;
+.tara-navbar__brand img {
+  display: block;
+  width: auto;
+  height: 48px;
+  max-width: 260px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.tara-navbar__links {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: clamp(28px, 3vw, 52px);
+  height: var(--tara-nav-height);
+}
+
+.tara-navbar__links a {
   position: relative;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 16px rgba(255, 210, 119, 0.18);
-  transition: background-position 1s ease, transform 0.15s ease;
+  color: var(--tara-nav-text);
+  font-family: inherit;
+  font-size: clamp(15px, 1.05vw, 20px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  white-space: nowrap;
 }
-.active-final::before {
+
+.tara-navbar__links a::after {
   content: '';
   position: absolute;
-  inset: 2px;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.92);
-  z-index: 0;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  height: 2px;
+  background: var(--tara-nav-accent);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 180ms ease;
 }
-.active-final > * { position: relative; z-index: 1; }
-.active-final:hover { background-position: right; transform: translateY(-1px); }
 
-/* ════════════════════════════════════════════════════════════════
-   SEARCH BAR
-   ════════════════════════════════════════════════════════════════ */
-.search-bar-final {
+.tara-navbar__links a:hover::after,
+.tara-navbar__links a.is-active::after {
+  transform: scaleX(1);
+}
+
+.tara-navbar__actions {
+  justify-self: end;
   display: flex;
   align-items: center;
-  padding: 6px 12px;
-  border-radius: 12px;
-  border: 1.5px solid var(--gold-dim);
-  background: rgba(0, 0, 0, 0.40);
+  gap: clamp(12px, 1.3vw, 24px);
+}
+
+.tara-navbar__icon {
   position: relative;
-  box-sizing: border-box;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
-}
-.search-bar-final:focus-within {
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(255, 210, 119, 0.13), 0 6px 20px rgba(255, 210, 119, 0.09);
-  transform: translateY(-1px);
-}
-
-.search-desktop-light { background: #000; border-color: var(--gold-dim); }
-.search-desktop-light:focus-within {
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(255, 210, 119, 0.14);
-}
-
-.search-icon-final {
-  color: var(--gold);
-  opacity: 0.75;
-  margin-right: 8px;
-  font-size: 12px;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: opacity 0.14s ease, transform 0.14s ease;
-}
-.search-bar-final:hover .search-icon-final,
-.search-bar-final:focus-within .search-icon-final { opacity: 1; transform: scale(1.08); }
-
-.search-bar-final input {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
   background: transparent;
-  border: none;
-  outline: none;
-  color: var(--gold);
-  caret-color: var(--gold);
-  font-size: clamp(12px, 1.25vw, 14px);
-  font-weight: 500;
-  width: clamp(110px, 13vw, 190px);
-  transition: width 0.22s ease;
+  color: var(--tara-nav-text);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, transform 160ms ease;
 }
-.search-bar-final input::placeholder { color: rgba(255, 210, 119, 0.45); font-weight: 400; }
-.search-bar-final:focus-within input { width: clamp(140px, 17vw, 230px); }
 
-/* Suggestions */
-.nav-suggestions {
+.tara-navbar__icon svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 1.7;
+}
+
+.tara-navbar__icon:hover,
+.tara-navbar__icon.is-active {
+  background: #f5f3f1;
+  color: #40241f;
+}
+
+.tara-navbar__icon:active {
+  transform: scale(0.94);
+}
+
+.tara-navbar__count {
   position: absolute;
-  left: 0; right: 0;
-  top: calc(100% + 6px);
-  background: #0a0a0a;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 210, 119, 0.22);
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
-  max-height: 260px;
-  overflow-y: auto;
-  z-index: 1200;
-  opacity: 0;
-  transform: translateY(-6px);
-  pointer-events: none;
-  transition: opacity 0.15s ease, transform 0.15s ease;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 210, 119, 0.35) transparent;
+  top: 1px;
+  right: -1px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #ffffff;
+  border-radius: 999px;
+  background: #40241f;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
 }
-.nav-suggestions.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
-.nav-suggestions::-webkit-scrollbar { width: 5px; }
-.nav-suggestions::-webkit-scrollbar-thumb { background: rgba(255,210,119,0.35); border-radius: 999px; }
 
-.nav-suggestion-item {
+.tara-navbar__menu-button {
+  display: none;
+}
+
+.tara-search-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  padding: 18px clamp(28px, 4vw, 76px) 22px;
+  background: #ffffff;
+  border-top: 1px solid #f1f1f1;
+  border-bottom: 1px solid var(--tara-nav-line);
+  box-shadow: 0 14px 28px rgba(25, 18, 15, 0.08);
+}
+
+.tara-search-panel__form,
+.tara-search-panel__suggestions {
+  width: min(760px, 100%);
+  margin: 0 auto;
+}
+
+.tara-search-panel__form {
+  height: 52px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 0 18px;
+  border: 1px solid #d8d4d1;
+  border-radius: 3px;
+  background: #ffffff;
+}
+
+.tara-search-panel__form > svg {
+  width: 23px;
+  height: 23px;
+}
+
+.tara-search-panel__form input {
   width: 100%;
-  padding: 10px 14px;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #111111;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.tara-search-panel__form button {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: #555555;
+  cursor: pointer;
+}
+
+.tara-search-panel__suggestions {
+  padding-top: 8px;
+  display: grid;
+}
+
+.tara-search-panel__suggestions button {
+  width: 100%;
+  padding: 11px 14px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  border: 0;
+  border-radius: 2px;
+  background: #ffffff;
+  color: #222222;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
   cursor: pointer;
+}
+
+.tara-search-panel__suggestions button:hover {
+  background: #f7f5f3;
+}
+
+.tara-mobile-menu {
+  display: none;
+}
+
+.tara-search-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2200;
+  display: grid;
+  place-items: start center;
+  padding: 14px 8px;
+}
+
+.tara-search-overlay__backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: rgba(25, 25, 25, 0.48);
+  backdrop-filter: blur(5px);
+  cursor: default;
+}
+
+.tara-search-modal {
+  position: relative;
+  z-index: 1;
+  width: min(1344px, calc(100vw - 16px));
+  max-height: calc(100vh - 28px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.24);
+}
+
+.tara-search-modal__top {
+  min-height: 96px;
+  padding: 0 clamp(24px, 3vw, 42px);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid #eceef1;
+}
+
+.tara-search-modal__top > svg {
+  width: 27px;
+  height: 27px;
+  color: #687183;
+}
+
+.tara-search-modal__top input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #080a0e;
+  font: inherit;
+  font-size: clamp(20px, 2vw, 28px);
+  font-weight: 600;
+}
+
+.tara-search-modal__top input::placeholder {
+  color: #70798b;
+  opacity: 1;
+}
+
+.tara-search-modal__clear,
+.tara-search-modal__close {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #667083;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.tara-search-modal__clear:hover,
+.tara-search-modal__close:hover {
+  background: #f1f3f6;
+  color: #10141c;
+}
+
+.tara-search-modal__clear svg,
+.tara-search-modal__close svg {
+  width: 28px;
+  height: 28px;
+}
+
+.tara-search-modal__suggestions {
+  padding: 12px clamp(24px, 3vw, 48px) 0;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tara-search-modal__suggestions::-webkit-scrollbar {
+  display: none;
+}
+
+.tara-search-modal__suggestions button {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  border: 1px solid #dfe2e7;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #242a35;
+  font: inherit;
   font-size: 13px;
   font-weight: 600;
-  color: var(--gold);
-  background: transparent;
+  cursor: pointer;
+}
+
+.tara-search-modal__suggestions button:hover {
+  border-color: #40241f;
+  background: #faf8f6;
+}
+
+.tara-search-modal__content {
+  min-height: 330px;
+  padding: 30px clamp(24px, 3.5vw, 48px) 18px;
+  overflow-y: auto;
+}
+
+.tara-search-modal__content h2 {
+  margin: 0 0 26px;
+  color: #697284;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tara-search-modal__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.tara-search-card {
+  min-width: 0;
+  padding: 0;
+  display: block;
   border: 0;
+  background: transparent;
+  color: #151b28;
+  font: inherit;
   text-align: left;
-  transition: background 0.13s ease;
-}
-.nav-suggestion-item:hover { background: rgba(255, 210, 119, 0.08); }
-
-.nav-suggestion-dot {
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: var(--gold);
-  flex-shrink: 0;
-  opacity: 0.65;
+  cursor: pointer;
 }
 
-/* ════════════════════════════════════════════════════════════════
-   ICON BUTTONS  (desktop white top row)
-   ════════════════════════════════════════════════════════════════ */
-.icon-buttons-final {
+.tara-search-card__image {
+  width: 100%;
+  aspect-ratio: 0.76;
+  margin-bottom: 10px;
+  overflow: hidden;
+  border-radius: 17px;
+  background: #eef0f3;
+}
+
+.tara-search-card__image img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: top center;
+  transition: transform 220ms ease;
+}
+
+.tara-search-card:hover .tara-search-card__image img {
+  transform: scale(1.025);
+}
+
+.tara-search-card__brand {
+  display: block;
+  margin-bottom: 5px;
+  overflow: hidden;
+  color: #6d7585;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tara-search-card > strong {
+  display: -webkit-box;
+  min-height: 42px;
+  overflow: hidden;
+  color: #151b28;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-transform: uppercase;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.tara-search-card__price {
+  margin-top: 8px;
   display: flex;
-  gap: clamp(12px, 1.8vw, 22px);
-  align-items: center;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 9px;
 }
 
-.icon-btn {
+.tara-search-card__price b {
+  color: #151b28;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.tara-search-card__price del {
+  color: #9aa1ae;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.tara-search-card__price em {
+  color: #00a63e;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.tara-search-card--loading {
+  height: 420px;
+  border-radius: 17px;
+  background: linear-gradient(100deg, #eceef1 20%, #f7f8f9 40%, #eceef1 60%);
+  background-size: 200% 100%;
+  animation: tara-search-loading 1.2s linear infinite;
+}
+
+@keyframes tara-search-loading {
+  to { background-position-x: -200%; }
+}
+
+.tara-search-modal__empty {
+  min-height: 260px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
-  text-decoration: none;
-  color: #0f0f0f;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  background: none;
-  padding: 0;
-}
-
-.icon-circle {
-  position: relative;
-  width: clamp(34px, 3.6vw, 40px);
-  height: clamp(34px, 3.6vw, 40px);
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: rgba(0, 0, 0, 0.05);
-  box-shadow: inset 0 0 0 1.5px rgba(0, 0, 0, 0.13), 0 3px 10px rgba(0,0,0,0.07);
-  transition: transform 0.17s ease, box-shadow 0.20s ease, background 0.20s ease;
-}
-.icon-btn:hover .icon-circle {
-  transform: translateY(-2px);
-  box-shadow: inset 0 0 0 1.8px rgba(0,0,0,0.20), 0 8px 22px rgba(0,0,0,0.13);
-  background: rgba(0, 0, 0, 0.08);
-}
-.icon-active-btn .icon-circle {
-  box-shadow: inset 0 0 0 2px rgba(255,210,119,0.80), 0 6px 20px rgba(255,210,119,0.18);
-  background: rgba(255, 210, 119, 0.08);
-}
-.icon-active-btn:hover .icon-circle {
-  box-shadow: inset 0 0 0 2px rgba(255,210,119,0.95), 0 10px 26px rgba(255,210,119,0.22);
-}
-
-.inner-ring {
-  position: absolute;
-  inset: 6px;
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 1.5px rgba(255, 210, 119, 0.65);
-  pointer-events: none;
-}
-
-.icon {
-  font-size: clamp(14px, 1.7vw, 17px);
-  display: flex; align-items: center; justify-content: center;
-}
-.icon-outline, .icon-outline-stroke { color: rgba(0, 0, 0, 0.72); }
-.icon-filled { color: var(--gold); filter: drop-shadow(0 0 7px rgba(255,210,119,0.38)); }
-
-.icon-label {
-  font-size: clamp(10px, 0.9vw, 11px);
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  color: rgba(0, 0, 0, 0.58);
+  justify-content: center;
+  gap: 8px;
+  color: #737b8b;
   text-align: center;
-  transition: color 0.16s ease;
-}
-.label-active { color: #7a5500; }
-
-.red-dot1 {
-  position: absolute;
-  top: 5px; right: 5px;
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #ffe199, #ffd277 60%, #b8860b);
-  box-shadow: 0 0 0 1.5px rgba(255,255,255,0.90), 0 0 8px rgba(255,210,119,0.55);
-  pointer-events: none;
 }
 
-/* ════════════════════════════════════════════════════════════════
-   MOBILE  ≤ 1024px
-   ════════════════════════════════════════════════════════════════ */
-@media (max-width: 1024px) {
-  body { padding-top: var(--nb-h-tablet); }
+.tara-search-modal__empty svg {
+  width: 34px;
+  height: 34px;
+  margin-bottom: 5px;
+}
 
-  .desktop-only-final { display: none; }
-  .mobile-only-final  { display: flex; flex-direction: column; }
+.tara-search-modal__empty strong {
+  color: #202632;
+  font-size: 19px;
+  font-weight: 700;
+}
 
-/* ── Top row: GIF | Logo | Hamburger ── */
-  .top-row-final {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    padding: 0 14px;
-    background: #ffffff; /* Split Theme: Top row is White */
-    border-bottom: 1px solid rgba(0, 0, 0, 0.07); /* Light grey border */
-    min-height: 62px;
-  }
+.tara-search-modal__empty span {
+  font-size: 14px;
+  font-weight: 400;
+}
 
-  /* ── Search row ── */
-  .bottom-row-final {
-    display: flex;
-    justify-content: center;
-    padding: 8px 14px 10px;
-    background: #000000; /* Split Theme: Bottom row is Black */
-    border-bottom: 1px solid var(--nb-bdr); /* Dark theme border */
-    min-height: 48px;
-    box-sizing: border-box;
-  }
+.tara-search-modal__view-all {
+  flex: 0 0 auto;
+  min-height: 68px;
+  border: 0;
+  border-top: 1px solid #eceef1;
+  background: #fafbfc;
+  color: #080a0e;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
 
-  /* Hamburger Hover (Adapted for white background) */
-  .nav-toggle-final:hover { 
-    background: rgba(0, 0, 0, 0.05); 
-  }
+.tara-search-modal__view-all:hover {
+  background: #f1f3f5;
+}
 
-  /* Hamburger Dots (Adapted for white background) */
-  .dot-grid-final span {
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    background: #7a5500; /* Dark gold/brown for high contrast on white */
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-  }
-  /* Left: GIF — left-aligned in its 1fr cell */
-  .nb-mob-gif-wrap {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
+@media (max-width: 1180px) {
+  .tara-navbar__row {
+    grid-template-columns: minmax(150px, 0.8fr) auto minmax(170px, 0.8fr);
+    gap: 18px;
+    padding-inline: 24px;
   }
 
-  /* GIF: direct pixel size, NO transform, NO scale, NO clip-path */
-  .nb-mob-gif {
-    display: block;
-    height: 52px;      /* tune freely */
-    width: auto;
-    object-fit: contain;
+  .tara-navbar__brand img {
+    height: 50px;
+    max-width: 210px;
   }
 
-  /* Center: Logo — auto-width column */
-  .nb-mob-logo-wrap {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .nb-mob-logo-wrap a { display: flex; align-items: center; }
-
-  .nb-mobile-logo {
-    display: block;
-    height: 40px;
-    width: auto;
-    object-fit: contain;
+  .tara-navbar__links {
+    gap: 24px;
   }
 
-  /* Right: Hamburger — right-aligned in its 1fr cell */
-  .nb-mob-toggle-wrap {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-  }
-
-.nav-toggle-final {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px; height: 40px;
-    border-radius: 10px;
-    border: none;
-    background: none;
-    cursor: pointer;
-    padding: 0;
-    transition: background 0.15s ease;
-  }
-
-  .dot-grid-final {
-    display: grid;
-    grid-template-columns: repeat(3, 5px);
-    gap: 4px;
-    transition: transform 0.22s ease, opacity 0.22s ease;
-  }
-  .dot-grid-final.dots-open { transform: rotate(45deg) scale(1.05); opacity: 0.80; }
-
-  /* Mobile search bar - Dark theme */
-  .bottom-row-final .search-bar-final {
-    background: #000000;
-    border-color: var(--gold-dim);
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
-  }
-  .bottom-row-final .search-bar-final:focus-within {
-    border-color: var(--gold);
-    box-shadow: 0 0 0 3px rgba(255, 210, 119, 0.15), 0 6px 20px rgba(0, 0, 0, 0.15);
-  }
-  .bottom-row-final .search-bar-final input {
-    color: var(--gold); 
-  }
-  .bottom-row-final .search-bar-final input::placeholder {
-    color: rgba(255, 210, 119, 0.45);
-  }
-
-  /* ════ DRAWER ════ */
-  .mobile-drawer-final {
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
-    width: 72vw;
-    max-width: 310px;
-    height: 100vh;
-    background: #0a0a0a;          /* fully dark — no white box anywhere */
-    display: flex;
-    flex-direction: column;
-    border-right: 1px solid rgba(255, 210, 119, 0.10);
-    box-shadow: 20px 0 60px rgba(0, 0, 0, 0.60);
-    overflow-y: auto;
-    z-index: 10005;
-  }
-
-  /* Close button row — dark bg, no logo */
-  .nb-drawer-topbar {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    padding: 14px 14px 8px;
-    /* inherits drawer's #0a0a0a — no background set here */
-  }
-
-  .close-btn-final {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 34px; height: 34px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.65);
-    font-size: 14px;
-    cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease, transform 0.18s ease;
-  }
-  .close-btn-final:hover {
-    background: rgba(255, 210, 119, 0.10);
-    color: var(--gold);
-    transform: rotate(90deg);
-  }
-
-  /* Drawer nav links */
-  .nb-drawer-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 6px 12px 16px;
-  }
-
-  .nb-drawer-link {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 13px 14px;
-    border-radius: 10px;
-    text-decoration: none;
+  .tara-navbar__links a {
     font-size: 15px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.70);
-    letter-spacing: 0.2px;
-    transition: color 0.15s ease, background 0.15s ease;
-  }
-  .nb-drawer-link:hover {
-    color: var(--gold);
-    background: rgba(255, 210, 119, 0.07);
-  }
-  .nb-drawer-link--active {
-    color: var(--gold) !important;
-    background: rgba(255, 210, 119, 0.08) !important;
-  }
-  .nb-drawer-link--active .nb-drawer-link-dot {
-    background: var(--gold);
-    box-shadow: 0 0 0 3px rgba(255, 210, 119, 0.20);
   }
 
-  .nb-drawer-link-dot {
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.18);
-    flex-shrink: 0;
-    transition: background 0.15s ease;
+  .tara-navbar__actions {
+    gap: 8px;
   }
-  .nb-drawer-link:hover .nb-drawer-link-dot { background: rgba(255, 210, 119, 0.55); }
+}
 
-  /* Separator */
-  .nb-drawer-sep {
-    height: 1px;
-    margin: 0 14px;
-    background: rgba(255, 210, 119, 0.10);
+@media (max-width: 900px) {
+  :root {
+    --tara-nav-height: 68px;
   }
 
-  /* Footer */
-  .nb-drawer-footer {
-    padding: 14px 12px 32px;
-    display: flex;
-    flex-direction: column;
+  .tara-navbar__row {
+    min-height: var(--tara-nav-height);
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    padding: 0 16px;
+  }
+
+  .tara-navbar__brand img {
+    height: 42px;
+    max-width: 180px;
+  }
+
+  .tara-navbar__links {
+    display: none;
+  }
+
+  .tara-navbar__actions {
     gap: 2px;
   }
 
-  .nb-drawer-footer-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 11px 14px;
-    border-radius: 10px;
-    text-decoration: none;
-    font-size: 13px;
+  .tara-navbar__icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .tara-navbar__icon svg {
+    width: 23px;
+    height: 23px;
+  }
+
+  .tara-navbar__menu-button {
+    display: inline-grid;
+  }
+
+  .tara-search-panel {
+    padding: 12px 14px 16px;
+  }
+
+  .tara-search-panel__form {
+    height: 48px;
+  }
+
+  .tara-mobile-menu {
+    position: fixed;
+    inset: calc(var(--tara-nav-height) + 2px) 0 0;
+    display: block;
+    padding: 20px 18px 36px;
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.99);
+  }
+
+  .tara-mobile-menu nav {
+    display: grid;
+  }
+
+  .tara-mobile-menu a {
+    position: relative;
+    padding: 18px 6px;
+    border-bottom: 1px solid #ece9e7;
+    color: #141414;
+    font-size: 20px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.45);
-    transition: color 0.15s ease, background 0.15s ease;
-  }
-  .nb-drawer-footer-row:hover {
-    color: var(--gold);
-    background: rgba(255, 210, 119, 0.07);
-  }
-  .nb-drawer-footer-row svg { font-size: 14px; flex-shrink: 0; }
-
-  .nb-drawer-count {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 18px; height: 18px;
-    border-radius: 999px;
-    background: rgba(255, 210, 119, 0.16);
-    border: 1px solid rgba(255, 210, 119, 0.32);
-    color: var(--gold);
-    font-size: 10px;
-    font-weight: 800;
-    padding: 0 5px;
-    margin-left: 6px;
+    line-height: 1.2;
+    text-decoration: none;
   }
 
-  /* Slide-in */
-  .slide-in { animation: nbSlideIn 0.24s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .tara-mobile-menu a::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    bottom: 11px;
+    width: 34px;
+    height: 2px;
+    background: var(--tara-nav-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
 
-  @keyframes nbSlideIn {
-    from { transform: translateX(-16px); opacity: 0; }
-    to   { transform: translateX(0);     opacity: 1; }
+  .tara-mobile-menu a.is-active::after {
+    transform: scaleX(1);
+  }
+
+  .tara-search-overlay {
+    padding: 8px;
+  }
+
+  .tara-search-modal {
+    width: calc(100vw - 16px);
+    max-height: calc(100vh - 16px);
+    border-radius: 18px;
+  }
+
+  .tara-search-modal__top {
+    min-height: 72px;
+    padding: 0 16px;
+    gap: 8px;
+  }
+
+  .tara-search-modal__top > svg {
+    display: none;
+  }
+
+  .tara-search-modal__top input {
+    font-size: 18px;
+  }
+
+  .tara-search-modal__clear,
+  .tara-search-modal__close {
+    width: 36px;
+    height: 36px;
+  }
+
+  .tara-search-modal__content {
+    padding: 22px 16px 16px;
+  }
+
+  .tara-search-modal__content h2 {
+    margin-bottom: 18px;
+    font-size: 14px;
+  }
+
+  .tara-search-modal__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 10px;
+  }
+
+  .tara-search-card__image {
+    border-radius: 12px;
+  }
+
+  .tara-search-card > strong {
+    min-height: 35px;
+    font-size: 13px;
+  }
+
+  .tara-search-card__brand,
+  .tara-search-card__price del,
+  .tara-search-card__price em {
+    font-size: 11px;
+  }
+
+  .tara-search-card__price b {
+    font-size: 14px;
+  }
+
+  .tara-search-card--loading {
+    height: 320px;
   }
 }
 
-/* ── Tablet ── */
-@media (max-width: 768px) {
-  .mobile-drawer-final { width: 80vw; }
-}
+@media (max-width: 560px) {
+  .tara-navbar__brand img {
+    height: 38px;
+    max-width: 138px;
+  }
 
-/* ── Small mobile ── */
-@media (max-width: 480px) {
-  body { padding-top: var(--nb-h-mobile); }
+  .tara-navbar__icon {
+    width: 35px;
+    height: 35px;
+  }
 
-  .top-row-final { padding: 0 10px; min-height: 54px; }
+  .tara-navbar__icon svg {
+    width: 21px;
+    height: 21px;
+  }
 
-  .nb-mob-gif   { height: 42px; }
-  .nb-mobile-logo { height: 34px; }
-
-  .bottom-row-final { padding: 7px 10px 9px; min-height: 44px; }
-
-  .mobile-drawer-final { width: 88vw; max-width: none; border-right: none; }
+  .tara-navbar__count {
+    top: 0;
+    right: -2px;
+  }
 }

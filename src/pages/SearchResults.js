@@ -153,7 +153,11 @@ const textMatchesProduct = (tokens, product) => {
     normalizeText(product.product_name),
     normalizeText(product.brand),
     normalizeText(product.category),
+    normalizeText(product.category_name),
     normalizeText(product.category_slug),
+    normalizeText(product.pattern_code),
+    normalizeText(product.fit_type),
+    normalizeText(product.fit),
     normalizeText(product.gender),
     normalizeText(product.color)
   ]
@@ -211,6 +215,11 @@ const groupProductsByProductId = (products) => {
         product_name: String(p.product_name || '').trim(),
         gender: String(p.gender || '').trim(),
         color: String(p.color || p.colour || '').trim(),
+        category: String(p.category_name || p.category || '').trim(),
+        category_name: String(p.category_name || p.category || '').trim(),
+        category_slug: String(p.category_slug || '').trim(),
+        pattern_code: String(p.pattern_code || '').trim(),
+        fit_type: String(p.fit_type || p.fit || '').trim(),
         price_fields: {
           original_price_b2c: p.original_price_b2c,
           final_price_b2c: p.final_price_b2c,
@@ -415,10 +424,8 @@ const SearchResults = () => {
   const handleProductClick = useCallback(
     (group) => {
       const product = group.rep || group
-      if (product) {
-        sessionStorage.setItem('selectedProduct', JSON.stringify(product))
-        navigate('/checkout')
-      }
+      const variantId = toInt(product?.variant_id) || toInt(product?.id)
+      if (variantId) navigate(`/product/${variantId}`)
     },
     [navigate]
   )

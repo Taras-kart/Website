@@ -1,331 +1,81 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { useSearchParams, useNavigate, useLocation } from 'react-router-dom'
-import Navbar from './Navbar'
-import Footer from './Footer'
+import React, { useEffect, useState } from 'react'
+import { FiCheck, FiCreditCard, FiLock, FiRefreshCw, FiSmartphone } from 'react-icons/fi'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { API_BASE } from '../services/api'
 import './PaymentPage.css'
 
-const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app'
-const API_BASE_RAW =
-  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
-  (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
-  DEFAULT_API_BASE
-const API_BASE = API_BASE_RAW.replace(/\/+$/, '')
-
-async function postWithFallback(paths, payload) {
-  let lastErr = null
-  for (const url of paths) {
+async function post(paths, payload) {
+  let failure
+  for (const path of paths) {
     try {
-      const r = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-      if (r.ok) return await r.json()
-      lastErr = new Error((await r.json().catch(() => ({})))?.message || `HTTP ${r.status}`)
-    } catch (e) {
-      lastErr = e
-    }
+      const response = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+      const data = await response.json().catch(() => ({}))
+      if (response.ok) return data
+      failure = new Error(data.message || `Request failed (${response.status})`)
+    } catch (reason) { failure = reason }
   }
-  throw lastErr || new Error('Request failed')
+  throw failure || new Error('Payment request failed')
 }
 
 export default function PaymentPage() {
-  const [searchParams] = useSearchParams()
   const location = useLocation()
   const navigate = useNavigate()
-
-  const saleIdFromState = location.state?.saleId || null
-  const saleIdFromQuery = searchParams.get('sale_id') || null
-  const saleId = saleIdFromState || saleIdFromQuery
-
+  const [params] = useSearchParams()
+  const saleId = location.state?.saleId || params.get('sale_id')
+  const [method, setMethod] = useState('ONLINE_UPI')
   const [loading, setLoading] = useState(false)
-  const [razorpayOpen, setRazorpayOpen] = useState(false)
-  const [initializing, setInitializing] = useState(true)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
-  const [successType, setSuccessType] = useState('')
-  const [orderInfo, setOrderInfo] = useState(null)
-  const [activeMethod, setActiveMethod] = useState('ONLINE_UPI')
+  const [orderId, setOrderId] = useState('')
 
-  const createOrderPaths = useMemo(
-    () => [
-      `${API_BASE}/api/razorpay/payments/create-order`
-    ],
-    []
-  )
+  useEffect(() => { if (!saleId) setError('The order reference is missing. Return to checkout and try again.') }, [saleId])
 
-  const verifyPaths = useMemo(
-    () => [
-      `${API_BASE}/api/razorpay/payments/verify`
-    ],
-    []
-  )
+  const loadRazorpay = () => new Promise((resolve, reject) => {
+    if (window.Razorpay) return resolve()
+    const script = document.createElement('script')
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+    script.onload = resolve
+    script.onerror = () => reject(new Error('The secure payment window could not be loaded'))
+    document.body.appendChild(script)
+  })
 
-  const codPaths = useMemo(
-    () => [
-      `${API_BASE}/api/sales/web/set-payment-status`,
-      `${API_BASE}/sales/web/set-payment-status`
-    ],
-    []
-  )
-
-  const loadRazorpay = () =>
-    new Promise((resolve, reject) => {
-      if (window.Razorpay) return resolve(true)
-      const script = document.createElement('script')
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js'
-      script.onload = () => resolve(true)
-      script.onerror = () => reject(new Error('Razorpay SDK failed to load'))
-      document.body.appendChild(script)
-    })
-
-  const paymentLabel = useMemo(() => {
-    if (activeMethod === 'ONLINE_UPI') return 'UPI'
-    if (activeMethod === 'ONLINE_CARD') return 'Card'
-    if (activeMethod === 'ONLINE_NETBANKING') return 'Netbanking'
-    if (activeMethod === 'COD') return 'Cash on Delivery'
-    return 'Payment'
-  }, [activeMethod])
-
-  useEffect(() => {
-    if (!saleId) {
-      setError('Invalid or missing sale reference')
-      setInitializing(false)
-      return
-    }
-    setInitializing(false)
-  }, [saleId])
-
-  const goToOrders = () => {
-    navigate('/profile', { state: { openSection: 'Orders' } })
-  }
-
-  const startOnlinePayment = async () => {
+  const pay = async () => {
     setError('')
     setLoading(true)
     try {
-      const info = await postWithFallback(createOrderPaths, { sale_id: saleId })
-      setOrderInfo(info)
+      const info = await post([`${API_BASE}/api/razorpay/payments/create-order`], { sale_id: saleId })
+      setOrderId(info.order_id || '')
       await loadRazorpay()
-
-      const methodConfig =
-        activeMethod === 'ONLINE_UPI'
-          ? { method: { upi: 1, card: 0, netbanking: 0, wallet: 0 } }
-          : activeMethod === 'ONLINE_CARD'
-          ? { method: { upi: 0, card: 1, netbanking: 0, wallet: 0 } }
-          : { method: { upi: 0, card: 0, netbanking: 1, wallet: 0 } }
-
-      const rz = new window.Razorpay({
+      const allowed = method === 'ONLINE_UPI' ? { upi: 1, card: 0, netbanking: 0, wallet: 0 } : method === 'ONLINE_CARD' ? { upi: 0, card: 1, netbanking: 0, wallet: 0 } : { upi: 0, card: 0, netbanking: 1, wallet: 0 }
+      const instance = new window.Razorpay({
         key: info.key_id,
         amount: info.amount,
         currency: info.currency,
         order_id: info.order_id,
-        name: 'Attach.co.in',
-        description: 'Secure Payment',
-        prefill: { name: '', email: '', contact: '' },
-        theme: { color: '#ffd700' },
-        ...methodConfig,
-        handler: async function (response) {
+        name: "Tara's Kart",
+        description: 'Order payment',
+        prefill: { name: sessionStorage.getItem('userName') || '', email: sessionStorage.getItem('userEmail') || '', contact: '' },
+        theme: { color: '#56362d' },
+        method: allowed,
+        handler: async response => {
           try {
-            const res = await postWithFallback(verifyPaths, {
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature
-            })
-
-            if (res.ok) {
-              try {
-                if (saleId) {
-                  await postWithFallback(codPaths, {
-                    sale_id: saleId,
-                    status: 'PAID'
-                  })
-                }
-              } catch (err2) {
-                console.error('Failed to set sale as PAID', err2)
-              }
-              setRazorpayOpen(false)
-              setSuccessType('ONLINE')
-              setSuccess(true)
-            } else {
-              setRazorpayOpen(false)
-              setError('Payment verification failed')
-            }
-          } catch (e) {
-            setRazorpayOpen(false)
-            setError(e.message || 'Verification error')
-          }
+            const result = await post([`${API_BASE}/api/razorpay/payments/verify`], { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature })
+            if (!result.ok) throw new Error('Payment verification failed')
+            await post([`${API_BASE}/api/sales/web/set-payment-status`, `${API_BASE}/sales/web/set-payment-status`], { sale_id: saleId, status: 'PAID' }).catch(() => {})
+            sessionStorage.removeItem('tk_checkout_payload')
+            setSuccess(true)
+          } catch (reason) { setError(reason.message || 'Payment verification failed') }
+          setLoading(false)
         },
-        modal: {
-          ondismiss: function () {
-            setRazorpayOpen(false)
-            setError('Payment was cancelled before completion')
-          }
-        }
+        modal: { ondismiss: () => { setLoading(false); setError('Payment was cancelled before completion') } }
       })
-
-      rz.open()
-      setRazorpayOpen(true)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
+      instance.open()
+    } catch (reason) { setError(reason.message || 'Unable to start payment'); setLoading(false) }
   }
 
-  const confirmCOD = async () => {
-    setError('')
-    setLoading(true)
-    try {
-      if (!saleId) throw new Error('Missing sale reference')
-      await postWithFallback(codPaths, { sale_id: saleId, status: 'COD' })
-      setSuccessType('COD')
-      setSuccess(true)
-    } catch (e) {
-      setError(e.message || 'Unable to set COD')
-    } finally {
-      setLoading(false)
-    }
-  }
+  if (success) return <main className="tara-payment-page"><div className="tara-payment-success"><FiCheck /><span>Payment successful</span><h1>Your order is confirmed</h1><p>Thank you for shopping with Tara. Your payment reference is {orderId || saleId}.</p><div><button onClick={() => navigate('/')}>Continue shopping</button><button onClick={() => navigate('/profile', { state: { openSection: 'Orders' } })}>View orders</button></div></div></main>
 
-  if (initializing) {
-    return (
-      <div className="payment-page dark">
-        <Navbar />
-        <div className="payment-container">
-          <div className="loader">Preparing secure checkout…</div>
-        </div>
-        <Footer />
-      </div>
-    )
-  }
-
-  return (
-    <div className="payment-page dark">
-      <Navbar />
-      <div className="payment-container">
-        {!success && !error && (
-          <>
-            <h1 className="title">Choose Payment Method</h1>
-            <div className="method-grid">
-              <button
-                className={`method-card ${activeMethod === 'ONLINE_UPI' ? 'active' : ''}`}
-                onClick={() => setActiveMethod('ONLINE_UPI')}
-              >
-                <div className="method-title">UPI</div>
-                <div className="method-sub">Pay via UPI apps</div>
-              </button>
-              <button
-                className={`method-card ${activeMethod === 'ONLINE_CARD' ? 'active' : ''}`}
-                onClick={() => setActiveMethod('ONLINE_CARD')}
-              >
-                <div className="method-title">Card</div>
-                <div className="method-sub">Debit / Credit Cards</div>
-              </button>
-              <button
-                className={`method-card ${activeMethod === 'ONLINE_NETBANKING' ? 'active' : ''}`}
-                onClick={() => setActiveMethod('ONLINE_NETBANKING')}
-              >
-                <div className="method-title">Netbanking</div>
-                <div className="method-sub">Pay via your bank</div>
-              </button>
-              <button
-                className={`method-card ${activeMethod === 'COD' ? 'active' : ''}`}
-                onClick={() => setActiveMethod('COD')}
-              >
-                <div className="method-title">Cash on Delivery</div>
-                <div className="method-sub">Pay when you receive</div>
-              </button>
-            </div>
-
-            <div className="pay-panel">
-              <div className="panel-head">
-                <div className="panel-title">{paymentLabel}</div>
-                <div className="panel-sub">Sale Reference: {saleId?.slice(0, 8)}…</div>
-              </div>
-
-              {activeMethod !== 'COD' ? (
-                <div className="panel-body">
-                  <p className="panel-text">
-                    You will complete your payment securely with Razorpay. Your details are encrypted and never stored by us.
-                  </p>
-                  <div className="panel-actions">
-                    <button disabled={loading || razorpayOpen} className="btn solid" onClick={startOnlinePayment}>
-                      {loading ? 'Opening Secure Gateway…' : razorpayOpen ? 'Processing Payment…' : 'Pay Securely'}
-                    </button>
-                    <button className="btn ghost" onClick={() => navigate('/cart')}>
-                      Back to Cart
-                    </button>
-                  </div>
-                  <div className="trust-note">PCI DSS compliant • 256-bit encryption • Instant confirmation</div>
-                </div>
-              ) : (
-                <div className="panel-body">
-                  <p className="panel-text">
-                    Choose Cash on Delivery to pay in cash to our delivery partner. Keep the exact amount ready and ensure your phone is reachable.
-                  </p>
-                  <div className="panel-actions">
-                    <button disabled={loading} className="btn solid" onClick={confirmCOD}>
-                      {loading ? 'Confirming…' : 'Confirm COD'}
-                    </button>
-                    <button className="btn ghost" onClick={() => navigate('/cart')}>
-                      Back to Cart
-                    </button>
-                  </div>
-                  <div className="trust-note">No advance required • Pay only at delivery</div>
-                </div>
-              )}
-            </div>
-          </>
-        )}
-
-        {error && (
-          <div className="error">
-            <h2>We couldn’t complete your request</h2>
-            <p>{error}</p>
-            <div className="actions">
-              <button className="btn solid" onClick={() => setError('')}>
-                Try Again
-              </button>
-              <button className="btn ghost" onClick={() => navigate('/checkout')}>
-                Back to Checkout
-              </button>
-            </div>
-          </div>
-        )}
-
-        {success && successType === 'ONLINE' && (
-          <div className="success">
-            <h2>Payment Successful</h2>
-            <p>Thank you. Your payment has been received and your order is confirmed.</p>
-            {orderInfo?.order_id && <div className="order-id">Razorpay Order ID: {orderInfo.order_id}</div>}
-            <div className="actions">
-              <button className="btn solid" onClick={() => navigate('/')}>
-                Continue Shopping
-              </button>
-              <button className="btn ghost" onClick={goToOrders}>
-                View Orders
-              </button>
-            </div>
-          </div>
-        )}
-
-        {success && successType === 'COD' && (
-          <div className="success">
-            <h2>Cash on Delivery Selected</h2>
-            <p>Your order has been placed with Cash on Delivery. You will receive delivery updates by SMS or email.</p>
-            <div className="actions">
-              <button className="btn solid" onClick={() => navigate('/')}>
-                Continue Shopping
-              </button>
-              <button className="btn ghost" onClick={goToOrders}>
-                View Orders
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-      <Footer />
-    </div>
-  )
+  return <main className="tara-payment-page"><header><FiLock /><span>Secure payment</span><h1>Choose how you want to pay</h1><p>Your transaction is completed inside Razorpay’s protected payment window.</p></header><section className="tara-payment-shell"><div className="tara-payment-methods"><Method icon={<FiSmartphone />} title="UPI" text="Google Pay, PhonePe, Paytm and other UPI apps" active={method === 'ONLINE_UPI'} onClick={() => setMethod('ONLINE_UPI')} /><Method icon={<FiCreditCard />} title="Credit or debit card" text="Visa, Mastercard, RuPay and supported cards" active={method === 'ONLINE_CARD'} onClick={() => setMethod('ONLINE_CARD')} /><Method icon={<FiRefreshCw />} title="Netbanking" text="Pay directly through your supported bank" active={method === 'ONLINE_NETBANKING'} onClick={() => setMethod('ONLINE_NETBANKING')} /></div><aside><span>Order reference</span><strong>#{String(saleId || '').slice(0, 12)}</strong><p><FiLock />Razorpay secured checkout</p>{error && <div className="tara-payment-error">{error}</div>}<button disabled={!saleId || loading} onClick={pay}>{loading ? 'Opening secure payment' : 'Proceed securely'}</button><button className="tara-payment-back" onClick={() => navigate('/checkout')}>Return to checkout</button><small>We never store your card, UPI PIN or bank credentials.</small></aside></section></main>
 }
+
+function Method({ icon, title, text, active, onClick }) { return <button className={active ? 'is-active' : ''} onClick={onClick}><i>{icon}</i><span><strong>{title}</strong><small>{text}</small></span><em /></button> }

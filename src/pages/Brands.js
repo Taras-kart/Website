@@ -1,52 +1,19 @@
-// D:\shopping\src\pages\Brands.js
-import React from 'react';
-import Navbar from './Navbar';
-import Footer from './Footer';
-import './Brands.css';
+import React, { useEffect, useMemo, useState } from 'react'
+import { FiArrowRight, FiSearch } from 'react-icons/fi'
+import { useNavigate } from 'react-router-dom'
+import { fetchProducts } from '../services/productsApi'
+import './Brands.css'
 
-const Brands = () => {
-  const brands = Array.from({ length: 20 }, (_, i) => `/images/brands/brand${i + 1}.jpeg`);
-
-  return (
-    <div className="brands-page">
-      <Navbar />
-      <section className="brands-section">
-  <h2 className="brands-title">Men's Top Brands</h2>
-  <div className="brands-container">
-    <div className="brands-box">
-      {brands.map((src, index) => (
-        <div key={index} className={`brand-item`}>
-          <div className="brand-image-wrapper">
-            <img src={src} alt={`Brand ${index + 1}`} />
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-</section>
-
-
-
-      {/* Women's Top Brands Section */}
-      <section className="womens-brands-section">
-  <h2 className="womens-brands-title">Women's Top Brands..</h2>
-  <div className="womens-brands-container">
-    <div className="womens-brands-box">
-      {brands.map((src, index) => (
-        <div key={index} className={`womens-brand-item womens-item-${index + 1}`}>
-          <img src={src} alt={`Brand ${index + 1}`} />
-        </div>
-      ))}
-    </div>
-  </div>
-</section>
-
-
-
-
-      <Footer />
-    </div>
-  );
-};
-
-export default Brands;
+export default function Brands(){
+  const navigate=useNavigate()
+  const [products,setProducts]=useState([])
+  const [query,setQuery]=useState('')
+  const [loading,setLoading]=useState(true)
+  useEffect(()=>{let active=true;fetchProducts().then(rows=>{if(active)setProducts(rows)}).finally(()=>{if(active)setLoading(false)});return()=>{active=false}},[])
+  const brands=useMemo(()=>{
+    const map=new Map()
+    products.forEach(product=>{const name=String(product.brand||'Tara').trim();const key=name.toLowerCase();if(!map.has(key))map.set(key,{name,count:0,image:product.images?.[0]});map.get(key).count+=1})
+    return [...map.values()].filter(item=>item.name.toLowerCase().includes(query.toLowerCase())).sort((a,b)=>a.name.localeCompare(b.name))
+  },[products,query])
+  return <main className="tara-brands"><section className="tara-brands-hero"><span>Our labels</span><h1>Brands at Tara</h1><p>Discover trusted names and shop their complete collections with live prices and availability.</p><label><FiSearch/><input value={query} onChange={event=>setQuery(event.target.value)} placeholder="Search brands" /></label></section><section className="tara-brand-grid">{loading?Array.from({length:8},(_,index)=><div className="tara-brand-skeleton" key={index}/>):brands.map(brand=><button key={brand.name} className="tara-brand-card" onClick={()=>navigate(`/category-display?brand=${encodeURIComponent(brand.name)}`)}><img src={brand.image} alt=""/><span><small>{brand.count} styles</small><strong>{brand.name}</strong><i>Explore collection <FiArrowRight/></i></span></button>)}</section>{!loading&&!brands.length&&<div className="tara-brand-empty">No brands match “{query}”.</div>}</main>
+}
