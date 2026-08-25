@@ -10,7 +10,8 @@ import './AccountPages.css'
 
 export default function Profile() {
   const location=useLocation();const navigate=useNavigate();const[section,setSection]=useState(location.state?.openSection||'Profile');const[user,setUser]=useState(sessionUser());const[profile,setProfile]=useState(null);const[coins,setCoins]=useState(0);const[mobile,setMobile]=useState(user.mobile||'');const[message,setMessage]=useState('');const[showLogin,setShowLogin]=useState(false)
-  useEffect(()=>{if(!user.email)return;fetchUser(user.email).then(data=>{setProfile(data);setMobile(data.mobile||'')}).catch(()=>setProfile(user));fetchWallet(user.email).then(data=>setCoins(Number(data.balance||0))).catch(()=>{})},[user.email])
+  const userEmail=user.email||''
+  useEffect(()=>{if(!userEmail)return;fetchUser(userEmail).then(data=>{setProfile(data);setMobile(data.mobile||'')}).catch(()=>setProfile(current=>current||sessionUser()));fetchWallet(userEmail).then(data=>setCoins(Number(data.balance||0))).catch(()=>{})},[userEmail])
   const loggedIn=Boolean(user.id||user.email)
   const saveMobile=async()=>{if(!/^[6-9]\d{9}$/.test(mobile))return setMessage('Enter a valid 10 digit mobile number');try{await updateMobile({email:user.email,mobile});sessionStorage.setItem('userMobile',mobile);localStorage.setItem('userMobile',mobile);setMessage('Mobile number saved')}catch(reason){setMessage(reason.message||'Unable to save mobile number')}}
   const logout=()=>{clearUser();navigate('/');window.location.reload()}
