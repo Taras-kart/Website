@@ -183,8 +183,8 @@ export default function Home1() {
       <SwiperSlide><div className="main-hero-slide"><img src={getImage('/images/DAZZEL-BANNER.png')} alt="Dazzel Banner" loading="lazy" /></div></SwiperSlide>
       <SwiperSlide><div className="main-hero-slide"><img src={getImage('/images/ASWATI-BANNER.png')} alt="Aswati Banner" loading="lazy" /></div></SwiperSlide>
     </Swiper></div></section>
-    <Divider label="Tara" direction="ltr" />
-    <section className="home-gender-section"><SectionHead eyebrow="Explore Tara" title="Shop your way" /><div className="home-gender-grid">{loading ? ['WOMEN', 'MEN', 'KIDS'].map(item => <div className="home-gender-card home-gender-loading" key={item} />) : genderCards.map(item => <Link to={item.path} key={item.gender} className="home-gender-card"><ResilientImage candidates={[item.image]} fallback={fallbackImages[item.gender]} alt={item.title} /><div><h2>{item.title}</h2><span>Shop now <FaArrowRight /></span></div></Link>)}</div></section>
+    <Divider label="Attach" direction="ltr" />
+    <section className="home-gender-section"><SectionHead eyebrow="Explore Attach" title="Shop your way" /><div className="home-gender-grid">{loading ? ['WOMEN', 'MEN', 'KIDS'].map(item => <div className="home-gender-card home-gender-loading" key={item} />) : genderCards.map(item => <Link to={item.path} key={item.gender} className="home-gender-card"><ResilientImage candidates={[item.image]} fallback={fallbackImages[item.gender]} alt={item.title} /><div><h2>{item.title}</h2><span>Shop now <FaArrowRight /></span></div></Link>)}</div></section>
     <Divider label="Women" direction="rtl" />
     {womenCategories.length > 0 && <section className="home-category-section"><SectionHead eyebrow="For her" title="Women shop by category" link="/women" /><CategoryGrid items={womenCategories} gender="WOMEN" /></section>}
     <ProductSection eyebrow="Prices worth waiting for" title="Price drops" products={discountedProducts.slice(0, 14)} userType={userType} link="/shop/women/all" listingMode />
