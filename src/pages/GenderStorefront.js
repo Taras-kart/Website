@@ -102,7 +102,7 @@ function HeroCarousel({ gender }) {
   const [slide, setSlide] = useState(0)
   useEffect(() => { const timer = window.setInterval(() => setSlide(value => (value + 1) % meta.heroes.length), 4500); return () => window.clearInterval(timer) }, [meta.heroes.length])
   const slides = [...meta.heroes, ...meta.heroes]
-  return <section className="tgs-hero"><div className="tgs-hero-track" style={{ '--tgs-slide': slide }}>{slides.map((image, index) => <div className="tgs-hero-slide" key={`${gender}-${image}-${index}`}><img src={image} alt={`${meta.title} collection ${(index % meta.heroes.length) + 1}`} /><div className="tgs-hero-copy"><small>TARA'S COLLECTION</small><h1>{meta.title.toUpperCase()}</h1><p>Everyday style, selected for you.</p></div></div>)}</div><div className="tgs-dots">{meta.heroes.map((image, index) => <button type="button" key={image} className={index === slide ? 'is-active' : ''} onClick={() => setSlide(index)} aria-label={`Show slide ${index + 1}`} />)}</div></section>
+  return <section className="tgs-hero"><div className="tgs-hero-track" style={{ '--tgs-slide': slide }}>{slides.map((image, index) => <div className="tgs-hero-slide" key={`${gender}-${image}-${index}`}><img src={image} alt={`${meta.title} collection ${(index % meta.heroes.length) + 1}`} /><div className="tgs-hero-copy"><small>Attach COLLECTION</small><h1>{meta.title.toUpperCase()}</h1><p>Everyday style, selected for you.</p></div></div>)}</div><div className="tgs-dots">{meta.heroes.map((image, index) => <button type="button" key={image} className={index === slide ? 'is-active' : ''} onClick={() => setSlide(index)} aria-label={`Show slide ${index + 1}`} />)}</div></section>
 }
 
 function useStorefrontData(gender) {
