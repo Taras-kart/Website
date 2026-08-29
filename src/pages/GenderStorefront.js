@@ -38,9 +38,8 @@ const priceFor = (product, userType) => {
   return { mrp, price, discount: mrp > price && price > 0 ? Math.round(((mrp - price) / mrp) * 100) : 0 }
 }
 const designKeyFor = row => {
-  const brand = normalize(row?.brand || row?.brand_name)
-  const name = normalize(row?.product_name || row?.name)
-  return [brand, name].filter(Boolean).join('|') || `product-${positiveId(row?.product_id || row?.id)}`
+  const productId = positiveId(row?.product_id || row?.id)
+  return productId ? `product-${productId}` : [normalize(row?.brand || row?.brand_name), normalize(row?.product_name || row?.name), normalize(row?.pattern_code || row?.design_code || row?.style_code)].filter(Boolean).join('|')
 }
 const groupProducts = rows => {
   const groups = new Map()
@@ -102,7 +101,7 @@ function HeroCarousel({ gender }) {
   const [slide, setSlide] = useState(0)
   useEffect(() => { const timer = window.setInterval(() => setSlide(value => (value + 1) % meta.heroes.length), 4500); return () => window.clearInterval(timer) }, [meta.heroes.length])
   const slides = [...meta.heroes, ...meta.heroes]
-  return <section className="tgs-hero"><div className="tgs-hero-track" style={{ '--tgs-slide': slide }}>{slides.map((image, index) => <div className="tgs-hero-slide" key={`${gender}-${image}-${index}`}><img src={image} alt={`${meta.title} collection ${(index % meta.heroes.length) + 1}`} /><div className="tgs-hero-copy"><small>Attach COLLECTION</small><h1>{meta.title.toUpperCase()}</h1><p>Everyday style, selected for you.</p></div></div>)}</div><div className="tgs-dots">{meta.heroes.map((image, index) => <button type="button" key={image} className={index === slide ? 'is-active' : ''} onClick={() => setSlide(index)} aria-label={`Show slide ${index + 1}`} />)}</div></section>
+  return <section className="tgs-hero"><div className="tgs-hero-track" style={{ '--tgs-slide': slide }}>{slides.map((image, index) => <div className="tgs-hero-slide" key={`${gender}-${image}-${index}`}><img src={image} alt={`${meta.title} collection ${(index % meta.heroes.length) + 1}`} /><div className="tgs-hero-copy"><small>TARA'S COLLECTION</small><h1>{meta.title.toUpperCase()}</h1><p>Everyday style, selected for you.</p></div></div>)}</div><div className="tgs-dots">{meta.heroes.map((image, index) => <button type="button" key={image} className={index === slide ? 'is-active' : ''} onClick={() => setSlide(index)} aria-label={`Show slide ${index + 1}`} />)}</div></section>
 }
 
 function useStorefrontData(gender) {
@@ -145,7 +144,7 @@ export function GenderLandingPage({ gender }) {
   const openCategory = category => navigate(`/shop/${meta.path}/${category.slug}`)
   const addWish = product => { addToWishlist(product); window.dispatchEvent(new Event('wishlist-updated')) }
   const categoryProducts = category => products.filter(product => Number(product?.category_id) === Number(category.id)).slice(0, 10)
-  return <><main className="tgs-page"><HeroCarousel gender={gender} />{loading ? <div className="tgs-state"><span className="tgs-spinner" /><p>Loading collections...</p></div> : error ? <div className="tgs-state"><h2>{error}</h2><button type="button" onClick={() => window.location.reload()}>Try again</button></div> : <><section className="tgs-section tgs-categories"><SectionTitle>SHOP BY CATEGORY</SectionTitle><div className="tgs-category-grid">{categories.slice(0, 8).map(category => <button type="button" className="tgs-category" key={category.id} onClick={() => openCategory(category)}><img src={category.representative_image || meta.fallback} alt={category.name} onError={event => { event.currentTarget.src = meta.fallback }} /><span><strong>{category.name}</strong><i><FiChevronRight /></i></span></button>)}</div></section><ProductRail title="NEW DROPS" products={[...products].sort((a, b) => number(b.id) - number(a.id)).slice(0, 14)} gender={gender} userType={userType} onOpen={openProduct} onWish={addWish} />{categories.slice(0, 5).map(category => <ProductRail key={category.id} title={category.name.toUpperCase()} products={categoryProducts(category)} gender={gender} userType={userType} onOpen={openProduct} onWish={addWish} />)}<AllProductsSection products={products} categories={categories} gender={gender} userType={userType} onOpen={openProduct} onWish={addWish} /></>}</main><Footer /></>
+  return <><main className="tgs-page"><HeroCarousel gender={gender} />{loading ? <div className="tgs-state"><span className="tgs-spinner" /><p>Loading collections...</p></div> : error ? <div className="tgs-state"><h2>{error}</h2><button type="button" onClick={() => window.location.reload()}>Try again</button></div> : <><section className="tgs-section tgs-categories"><SectionTitle>SHOP BY CATEGORY</SectionTitle><div className="tgs-category-grid">{categories.map(category => <button type="button" className="tgs-category" key={category.id} onClick={() => openCategory(category)}><img src={category.representative_image || meta.fallback} alt={category.name} onError={event => { event.currentTarget.src = meta.fallback }} /><span><strong>{category.name}</strong><i><FiChevronRight /></i></span></button>)}</div></section><ProductRail title="NEW DROPS" products={[...products].sort((a, b) => number(b.id) - number(a.id)).slice(0, 14)} gender={gender} userType={userType} onOpen={openProduct} onWish={addWish} />{categories.filter(category => categoryProducts(category).length > 0).map(category => <ProductRail key={category.id} title={category.name.toUpperCase()} products={categoryProducts(category)} gender={gender} userType={userType} onOpen={openProduct} onWish={addWish} />)}<AllProductsSection products={products} categories={categories} gender={gender} userType={userType} onOpen={openProduct} onWish={addWish} /></>}</main><Footer /></>
 }
 
 export function CategoryProductsPage() {

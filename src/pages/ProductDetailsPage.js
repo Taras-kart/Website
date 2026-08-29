@@ -87,7 +87,18 @@ export default function ProductDetailsPage() {
   }, [variants])
   const selectedColour = clean(selected?.color || selected?.colour) || 'Default'
   const sizes = useMemo(() => unique(variants.filter(item => (clean(item?.color || item?.colour) || 'Default') === selectedColour).map(item => item?.size)), [variants, selectedColour])
-  const galleryImages = useMemo(() => unique([...imageCandidates(selected), ...variants.filter(item => (clean(item?.color || item?.colour) || 'Default') === selectedColour).flatMap(imageCandidates), fallbackFor(selected?.gender)]), [selected, selectedColour, variants])
+  const galleryImages = useMemo(() => {
+    const databaseImages = unique([
+      ...imageCandidates(selected),
+      ...variants
+        .filter(item => (clean(item?.color || item?.colour) || 'Default') === selectedColour)
+        .flatMap(imageCandidates)
+    ])
+
+    return databaseImages.length > 0
+      ? databaseImages
+      : [fallbackFor(selected?.gender)]
+  }, [selected, selectedColour, variants])
   const mainImage = activeImage && galleryImages.includes(activeImage) ? activeImage : galleryImages[0]
   const pricing = pricingFor(selected, userType)
   const productName = clean(selected?.product_name || selected?.name || 'Product')

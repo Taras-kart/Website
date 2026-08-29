@@ -11,14 +11,7 @@ export function normalizeProduct(row, index = 0) {
   const variants = Array.isArray(row?.variants) && row.variants.length ? row.variants : [row]
   const primary = variants.find(item => item?.is_active !== false) || variants[0] || row
   const ean = clean(primary?.ean_code || primary?.barcode || row?.ean_code || row?.barcode)
-  const images = unique([
-    row?.shared_image_url,
-    row?.front_image_url,
-    row?.main_image_url,
-    row?.image_url,
-    ...(Array.isArray(row?.images) ? row.images.map(imageValue) : []),
-    ...variants.flatMap(variant => [variant?.shared_image_url, variant?.front_image_url, variant?.main_image_url, variant?.image_url])
-  ])
+  const images = unique([row?.shared_image_url, row?.front_image_url, row?.main_image_url, row?.image_url, ...(Array.isArray(row?.images) ? row.images.map(imageValue) : []), primary?.shared_image_url, primary?.front_image_url, primary?.main_image_url, primary?.image_url])
   const originalB2C = number(primary?.original_price_b2c || row?.original_price_b2c || primary?.mrp || row?.mrp)
   const finalB2C = number(primary?.final_price_b2c || row?.final_price_b2c || primary?.sale_price || row?.sale_price || originalB2C)
   const originalB2B = number(primary?.original_price_b2b || row?.original_price_b2b || primary?.mrp || row?.mrp)
@@ -58,7 +51,7 @@ export function normalizeProduct(row, index = 0) {
 export function groupProducts(rows = []) {
   const groups = new Map()
   rows.map(normalizeProduct).forEach(product => {
-    const key = `${normalize(product.brand)}|${normalize(product.name)}`
+    const key = clean(product.productId || product.id) || product.designKey
     if (!groups.has(key)) groups.set(key, { ...product, designKey: key, variants: [], images: [], colours: [], sizes: [], available: 0, productIds: [] })
     const group = groups.get(key)
     group.productIds = unique([...group.productIds, product.productId])
