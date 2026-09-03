@@ -1,13 +1,11 @@
-/* ============================================================
-   MEN PAGE — POLISHED UI (Synced with WomenPage.css)
-   ============================================================ */
 
-/* ── Keyframes ───────────────────────────────────────────── */
+
+
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.20); } 50% { box-shadow: 0 0 0 7px rgba(255, 215, 0, 0.36); } }
 
-/* ── Page shell ──────────────────────────────────────────── */
+
 .men-page {
   position: relative;
   font-family: "Noto Sans", sans-serif;
@@ -19,14 +17,14 @@
 
 .women-top-spacer { height: 160px; }
 
-/* ── Page header ─────────────────────────────────────────── */
+
 .women-page-header { max-width: 1280px; margin: 0 auto; padding: 0 16px 4px; animation: fadeInUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
 .women-page-header-inner { display: flex; align-items: baseline; gap: 10px; padding: 16px 0 10px; border-bottom: 1px solid rgba(17, 17, 17, 0.07); }
 .women-page-eyebrow { margin: 0; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(17, 17, 17, 0.42); }
 .women-page-title { margin: 0; font-size: 22px; font-weight: 700; color: #111; line-height: 1.2; }
 .women-page-title-cat { font-weight: 500; color: rgba(17, 17, 17, 0.52); font-size: 18px; }
 
-/* ── Main Layout ────────────────────────────────────────── */
+
 .women-shell { max-width: 1280px; margin: 0 auto; padding: 18px 16px 92px; display: grid; grid-template-columns: 340px 1fr; gap: 20px; align-items: start; }
 .women-sidebar { 
   position: sticky; top: 160px; align-self: start; border-radius: 22px;
@@ -37,15 +35,15 @@
 }
 .women-sidebar-accent-bar { display: block; height: 3px; background: linear-gradient(90deg, transparent, #ffd700, transparent); }
 
-/* ── Results Bar ────────────────────────────────────────── */
+
 .women-results-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; min-height: 34px; }
 .women-results-num { font-size: 15px; font-weight: 700; color: #111; }
 
-/* ── State Cards ────────────────────────────────────────── */
+
 .women-state-card { display: flex; align-items: center; gap: 10px; padding: 16px 18px; border-radius: 18px; background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(17, 17, 17, 0.10); }
 .women-spinner { width: 18px; height: 18px; border: 2.5px solid rgba(17, 17, 17, 0.12); border-top-color: #ffd700; border-radius: 50%; animation: spin 0.72s linear infinite; }
 
-/* ── Filter components (Shared) ────────────────────────── */
+
 .women-filters { padding: 16px; display: grid; gap: 14px; }
 .women-filters-title { font-size: 11px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; color: rgba(17, 17, 17, 0.70); }
 .women-ghost-btn, .women-primary-btn { border: 1px solid rgba(17, 17, 17, 0.16); background: rgba(255, 255, 255, 0.85); border-radius: 10px; padding: 0 11px; font-weight: 600; font-size: 11px; cursor: pointer; }
@@ -54,13 +52,13 @@
 .women-select-wrap { position: relative; border-radius: 14px; border: 1px solid rgba(17, 17, 17, 0.12); background: #fff; overflow: hidden; }
 .women-select { width: 100%; border: 0; outline: none; background: transparent; padding: 11px 13px; font-size: 13px; cursor: pointer; }
 
-/* ── Mobile UI ───────────────────────────────────────────── */
+
 .women-mobile-bar {
   position: fixed; left: 0; right: 0; bottom: 0; height: 64px; background: rgba(255, 255, 255, 0.90);
   border-top: 1px solid rgba(17, 17, 17, 0.09); display: none; align-items: center; z-index: 999; backdrop-filter: blur(16px);
 }
 
-/* ── Responsive overrides ────────────────────────────────── */
+
 @media (max-width: 900px) {
   .women-sidebar { display: none; }
   .women-mobile-bar { display: flex; }

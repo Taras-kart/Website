@@ -16,7 +16,7 @@ function matches(product, query) {
   return words.every(word => haystack.includes(word))
 }
 
-export default function CollectionPage({ gender = '', title, eyebrow = 'Tara collections', description = '', fixedBrand = '', fixedCategory = '', searchMode = false }) {
+export default function CollectionPage({ gender = '', title, eyebrow = 'Attach collections', description = '', fixedBrand = '', fixedCategory = '', searchMode = false }) {
   const location = useLocation()
   const navigate = useNavigate()
   const params = useMemo(() => new URLSearchParams(location.search), [location.search])
@@ -40,6 +40,19 @@ export default function CollectionPage({ gender = '', title, eyebrow = 'Tara col
     fetchProducts().then(rows => { if (active) setProducts(rows) }).catch(reason => { if (active) setError(reason.message || 'Unable to load products') }).finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [])
+
+  useEffect(() => {
+    if (loading || typeof window === 'undefined') return undefined
+    let saved
+    try { saved = JSON.parse(sessionStorage.getItem('attach:return-position') || 'null') } catch { saved = null }
+    if (!saved || saved.url !== `${location.pathname}${location.search}` || Date.now() - Number(saved.time || 0) > 1800000) return undefined
+    const previousRestoration = window.history.scrollRestoration
+    window.history.scrollRestoration = 'manual'
+    const restore = () => window.scrollTo({ top: Number(saved.y || 0), behavior: 'auto' })
+    const timers = [0, 100, 300, 700, 1200, 1800].map(delay => window.setTimeout(restore, delay))
+    const clearTimer = window.setTimeout(() => sessionStorage.removeItem('attach:return-position'), 2200)
+    return () => { timers.forEach(window.clearTimeout); window.clearTimeout(clearTimer); window.history.scrollRestoration = previousRestoration }
+  }, [loading, location.pathname, location.search])
 
   const scoped = useMemo(() => products.filter(product => !gender || lower(product.gender) === lower(gender)), [products, gender])
   const brands = useMemo(() => unique(scoped.map(product => product.brand)), [scoped])
@@ -70,7 +83,7 @@ export default function CollectionPage({ gender = '', title, eyebrow = 'Tara col
 
   return <main className="tara-collection">
     <section className="tara-collection-hero">
-      <div><span>{eyebrow}</span><h1>{heading}</h1><p>{description || 'Explore thoughtfully selected styles, live availability and prices from Tara.'}</p></div>
+      <div><span>{eyebrow}</span><h1>{heading}</h1><p>{description || 'Explore thoughtfully selected styles, live availability and prices from Attach.'}</p></div>
       <div className="tara-collection-stat"><strong>{loading ? '—' : visible.length}</strong><span>styles available</span></div>
     </section>
     {searchMode && <form className="tara-collection-search" onSubmit={event => { event.preventDefault(); update({ q: draftSearch }) }}><FiSearch /><input value={draftSearch} onChange={event => setDraftSearch(event.target.value)} placeholder="Search by style, brand or category" /><button>Search</button></form>}

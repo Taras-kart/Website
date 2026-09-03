@@ -1,9 +1,6 @@
-/* ============================================================
-   WOMEN PAGE — POLISHED UI
-   Font: Noto Sans (existing) | Palette: #111 / #ffd700 / white
-   ============================================================ */
 
-/* ── Keyframes ───────────────────────────────────────────── */
+
+
 
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(20px); }
@@ -34,7 +31,7 @@
   100% { background-position:  200% center; }
 }
 
-/* ── Page shell ──────────────────────────────────────────── */
+
 
 .women-page {
   position: relative;
@@ -50,7 +47,7 @@
   height: 160px;
 }
 
-/* ── Page header ─────────────────────────────────────────── */
+
 
 .women-page-header {
   max-width: 1280px;
@@ -91,7 +88,7 @@
   font-size: 18px;
 }
 
-/* ── Main grid ───────────────────────────────────────────── */
+
 
 .women-shell {
   max-width: 1280px;
@@ -103,7 +100,7 @@
   align-items: start;
 }
 
-/* ── Sidebar ─────────────────────────────────────────────── */
+
 
 .women-sidebar {
   position: sticky;
@@ -120,7 +117,7 @@
   animation: fadeInUp 0.50s 0.05s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Thin gold accent bar at very top of sidebar */
+
 .women-sidebar-top {
   height: 3px;
   overflow: hidden;
@@ -140,7 +137,7 @@
 .women-page-main  { width: 100%; }
 .women-page-content { width: 100%; padding: 0; }
 
-/* ── Results bar ─────────────────────────────────────────── */
+
 
 .women-results-bar {
   display: flex;
@@ -234,7 +231,7 @@
   color: #111;
 }
 
-/* ── State cards (loading / error) ───────────────────────── */
+
 
 .women-state-card {
   display: flex;
@@ -261,7 +258,7 @@
   flex-shrink: 0;
 }
 
-/* Loading spinner */
+
 .women-spinner {
   display: inline-block;
   width: 18px;
@@ -273,7 +270,7 @@
   animation: spin 0.72s linear infinite;
 }
 
-/* ── Filter panel ────────────────────────────────────────── */
+
 
 .women-filters {
   padding: 16px;
@@ -310,7 +307,7 @@
   justify-content: flex-end;
 }
 
-/* ── Filter buttons ──────────────────────────────────────── */
+
 
 .women-ghost-btn {
   border: 1px solid rgba(17, 17, 17, 0.16);
@@ -352,7 +349,7 @@
   background: #1a1a1a;
 }
 
-/* ── Filter card ─────────────────────────────────────────── */
+
 
 .women-filter-card {
   display: grid;
@@ -368,7 +365,7 @@
     0 8px 24px rgba(0, 0, 0, 0.04);
 }
 
-/* ── Fields & selects ────────────────────────────────────── */
+
 
 .women-field {
   display: grid;
@@ -436,7 +433,7 @@
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
-/* ── Filter actions row ──────────────────────────────────── */
+
 
 .women-filter-actions-row {
   display: flex;
@@ -475,7 +472,7 @@
   box-shadow: none;
 }
 
-/* ── Count chip ──────────────────────────────────────────── */
+
 
 .women-chip {
   display: inline-flex;
@@ -504,7 +501,7 @@
   color: rgba(17, 17, 17, 0.80);
 }
 
-/* ── Empty state ─────────────────────────────────────────── */
+
 
 .women-empty-wrap {
   padding: 6px 0 40px;
@@ -606,7 +603,7 @@
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
 }
 
-/* ── Mobile bottom bar ───────────────────────────────────── */
+
 
 .women-mobile-bar {
   position: fixed;
@@ -672,7 +669,7 @@
   flex-shrink: 0;
 }
 
-/* ── Bottom sheet ────────────────────────────────────────── */
+
 
 .women-sheet-wrap {
   position: fixed;
@@ -705,7 +702,7 @@
   animation: slideUpSheet 0.30s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Drag handle pill */
+
 .women-sheet-handle {
   display: block;
   width: 40px;
@@ -765,7 +762,7 @@
   gap: 12px;
 }
 
-/* ── Responsive ──────────────────────────────────────────── */
+
 
 @media (max-width: 1100px) {
   .women-shell {

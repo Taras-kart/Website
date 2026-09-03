@@ -1,9 +1,6 @@
-/* ═══════════════════════════════════════════════════════════════
-   CategoryDisplay.css — v3
-   Palette: #111 · #ffd700 · #ffffff
-   ═══════════════════════════════════════════════════════════════ */
 
-/* ─── Page ───────────────────────────────────────────────────── */
+
+
 .category-page {
   min-height: 100vh;
   font-family: "Noto Sans", sans-serif;
@@ -15,14 +12,14 @@
 
 .category-top-spacer { height: 130px; }
 
-/* ─── Wrapper ────────────────────────────────────────────────── */
+
 .category-wrap {
   max-width: 1300px;
   margin: 0 auto;
   padding: 18px 20px 72px;
 }
 
-/* ─── State / empty ──────────────────────────────────────────── */
+
 .category-state {
   padding: 28px 24px;
   border-radius: 18px;
@@ -99,26 +96,21 @@
   background: rgba(255, 215, 0, 0.06);
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   GRID
-   --cols is set inline by JS (1–8).
-   .category-grid--few is applied when --cols ≤ 3 to prevent
-   1–3 portrait cards from stretching grotesquely across 1300px.
-   ═══════════════════════════════════════════════════════════════ */
+
 .category-grid {
   display: grid;
   grid-template-columns: repeat(var(--cols, 7), minmax(0, 1fr));
   gap: 12px;
 }
 
-/* ── Few-card constraint ─────────────────────────────────────── */
-/* Each card is capped at 210px wide; grid is centred             */
+
+
 .category-grid--few {
   grid-template-columns: repeat(var(--cols, 3), minmax(0, 210px));
-  justify-content: center;   /* centre the narrow grid on wide screens */
+  justify-content: center;   
 }
 
-/* ─── Card ───────────────────────────────────────────────────── */
+
 .category-card {
   border: none;
   border-radius: 18px;
@@ -127,10 +119,10 @@
   cursor: pointer;
   padding: 0;
   position: relative;
-  display: block;             /* reset button defaults */
+  display: block;             
   width: 100%;
 
-  /* Staggered entrance */
+  
   animation: catReveal 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
   animation-delay: calc(var(--i, 0) * 48ms);
 
@@ -155,7 +147,7 @@
   transform: translateY(-3px) scale(1.006);
 }
 
-/* Folder tint */
+
 .category-card--folder::before {
   content: '';
   position: absolute;
@@ -166,7 +158,7 @@
   pointer-events: none;
 }
 
-/* Skeleton */
+
 .category-card--skeleton {
   animation: none;
   pointer-events: none;
@@ -174,7 +166,7 @@
   background: transparent;
 }
 
-/* ─── Media ──────────────────────────────────────────────────── */
+
 .category-media {
   position: relative;
   width: 100%;
@@ -198,7 +190,7 @@
   transform: scale(1.14);
 }
 
-/* ─── Overlay ────────────────────────────────────────────────── */
+
 .category-overlay {
   position: absolute;
   inset: 0;
@@ -217,7 +209,7 @@
   opacity: 0.85;
 }
 
-/* ─── Folder pip ─────────────────────────────────────────────── */
+
 .category-folder-pip {
   position: absolute;
   top: 9px;
@@ -244,7 +236,7 @@
   border-color: #ffd700;
 }
 
-/* ─── Name label ─────────────────────────────────────────────── */
+
 .category-label {
   position: absolute;
   bottom: 0;
@@ -281,7 +273,7 @@
   border-bottom-color: rgba(255, 215, 0, 0.95);
 }
 
-/* ─── Skeleton shimmer ───────────────────────────────────────── */
+
 .category-skeleton-fill {
   width: 100%;
   height: 100%;
@@ -298,7 +290,7 @@
   animation: catShimmer 1.7s ease-in-out infinite;
 }
 
-/* ─── Keyframes ──────────────────────────────────────────────── */
+
 @keyframes catReveal {
   from { opacity: 0; transform: translateY(20px) scale(0.96); }
   to   { opacity: 1; transform: translateY(0)    scale(1);    }
@@ -309,18 +301,16 @@
   100% { background-position: -220% center; }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   RESPONSIVE
-   ═══════════════════════════════════════════════════════════════ */
 
-/* Large desktop — no more than 8 wide (JS already enforces this) */
+
+
 @media (max-width: 1200px) {
   .category-grid:not(.category-grid--few) {
     grid-template-columns: repeat(min(var(--cols, 6), 6), minmax(0, 1fr));
   }
 }
 
-/* Tablet landscape */
+
 @media (max-width: 1000px) {
   .category-grid:not(.category-grid--few) {
     grid-template-columns: repeat(min(var(--cols, 5), 5), minmax(0, 1fr));
@@ -328,36 +318,36 @@
   }
 }
 
-/* Tablet portrait */
+
 @media (max-width: 760px) {
   .category-top-spacer { height: 100px; }
 
   .category-wrap { padding: 14px 14px 64px; }
 
-  /* Normal grid → 4 columns on tablet */
+  
   .category-grid:not(.category-grid--few) {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 10px;
   }
 
-  /* Few-card grid → tighter cap on tablet so cards don't get too tall */
+  
   .category-grid--few {
     grid-template-columns: repeat(var(--cols, 3), minmax(0, 160px));
     gap: 10px;
   }
 }
 
-/* Mobile */
+
 @media (max-width: 560px) {
   .category-top-spacer { height: 125px; }
 
   .category-wrap { padding: 12px 10px 60px; }
 
-  /* Always 3 columns on mobile, regardless of card count */
+  
   .category-grid,
   .category-grid--few {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    justify-content: initial;   /* reset centering — fill the row */
+    justify-content: initial;   
     gap: 9px;
   }
 
@@ -376,7 +366,7 @@
   }
 }
 
-/* Small mobile — 2 columns */
+
 @media (max-width: 360px) {
   .category-grid,
   .category-grid--few {

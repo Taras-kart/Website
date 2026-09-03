@@ -1,8 +1,4 @@
-/* ═══════════════════════════════════════════════════════════════
-   CheckoutPage.css
-   Palette vars preserved exactly. Color-swatch UI is the only
-   structural addition. Everything else is polished spacing only.
-   ═══════════════════════════════════════════════════════════════ */
+
 
 :root {
   --ink:    #0f172a;
@@ -20,7 +16,7 @@
   --glass:  rgba(255, 255, 255, 0.7);
 }
 
-/* ─── Page wrapper ───────────────────────────────────────────── */
+
 .co-wrap {
   margin-top: 60px;
   background:
@@ -36,7 +32,7 @@
 
 .co-spacer { height: 96px; }
 
-/* ─── Decorative stars ───────────────────────────────────────── */
+
 .co-stars {
   position: absolute;
   inset: 0;
@@ -63,7 +59,7 @@
   50%       { transform: scale(1.18); opacity: 0.35; }
 }
 
-/* ─── Two-column layout ──────────────────────────────────────── */
+
 .co-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -75,7 +71,7 @@
   z-index: 1;
 }
 
-/* ─── Left (image panel) ─────────────────────────────────────── */
+
 .co-left  { width: 100%; }
 
 .co-media {
@@ -130,7 +126,7 @@
 
 .co-zoomed-img { position: absolute; }
 
-/* ─── Right (details panel) ──────────────────────────────────── */
+
 .co-right {
   width: 100%;
   background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.82));
@@ -142,7 +138,7 @@
   align-self: start;
 }
 
-/* ─── Product title + trust pills ────────────────────────────── */
+
 .co-top {
   margin-bottom: 10px;
 }
@@ -174,7 +170,7 @@
   letter-spacing: 0.02em;
 }
 
-/* ─── Pricing ────────────────────────────────────────────────── */
+
 .co-price-row {
   display: flex;
   align-items: baseline;
@@ -210,7 +206,7 @@
 .co-mrp-strike { color: var(--muted-2); text-decoration: line-through; font-size: 0.9rem; }
 .co-tax        { color: var(--muted); font-size: 0.82rem; }
 
-/* ─── Sections ───────────────────────────────────────────────── */
+
 .co-section {
   margin-top: 18px;
   padding-top: 16px;
@@ -251,14 +247,8 @@
   font-size: 0.9rem;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   COLOR SWATCHES
-   Each swatch = coloured dot + text label on same row.
-   Active state gets a gold ring around the entire pill.
-   ═══════════════════════════════════════════════════════════════ */
-/* ═══════════════════════════════════════════════════════════════
-   COLOR SWATCHES — dot only, tooltip on hover
-   ═══════════════════════════════════════════════════════════════ */
+
+
 .co-colors {
   display: flex;
   flex-wrap: wrap;
@@ -281,21 +271,21 @@
     box-shadow   0.16s ease;
 }
 
-/* Ring appears on hover */
+
 .co-swatch:hover {
   transform: translateY(-2px) scale(1.08);
   border-color: rgba(244, 194, 79, 0.55);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
 }
 
-/* Active: gold ring + lifted */
+
 .co-swatch.active {
   border-color: var(--gold);
   box-shadow: 0 0 0 3px var(--ring), 0 4px 12px rgba(244, 194, 79, 0.22);
   transform: translateY(-2px) scale(1.08);
 }
 
-/* The filled circle */
+
 .co-swatch-dot {
   display: block;
   width: 100%;
@@ -303,11 +293,11 @@
   border-radius: 50%;
   background-size: cover;
   background-position: center;
-  /* subtle inner shadow so white/cream dots are visible */
+  
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
 }
 
-/* Tooltip — appears above swatch on hover */
+
 .co-swatch-tooltip {
   position: absolute;
   bottom: calc(100% + 8px);
@@ -330,7 +320,7 @@
   z-index: 10;
 }
 
-/* Tooltip arrow */
+
 .co-swatch-tooltip::after {
   content: '';
   position: absolute;
@@ -346,7 +336,7 @@
   transform: translateX(-50%) translateY(0);
 }
 
-/* ─── Size buttons ───────────────────────────────────────────── */
+
 .co-sizes {
   display: flex;
   gap: 8px;
@@ -384,7 +374,7 @@
   box-shadow: 0 4px 12px rgba(244, 194, 79, 0.30);
 }
 
-/* ─── Action buttons ─────────────────────────────────────────── */
+
 .co-actions {
   display: flex;
   gap: 12px;
@@ -447,7 +437,7 @@
   box-shadow: none;
 }
 
-/* ─── Delivery / pincode ─────────────────────────────────────── */
+
 .co-sub {
   color: var(--muted);
   font-size: 0.88rem;
@@ -499,7 +489,7 @@
 .co-pin-msg.warn    { color: #b45309; }
 .co-pin-msg.error   { color: #b91c1c; }
 
-/* ─── Loader ─────────────────────────────────────────────────── */
+
 .co-loader {
   display: grid;
   place-items: center;
@@ -522,7 +512,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* ─── Toast popup ────────────────────────────────────────────── */
+
 .co-popup {
   position: fixed;
   bottom: 28px;
@@ -547,9 +537,7 @@
   to   { opacity: 1; transform: translateX(-50%) translateY(0);    }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   RESPONSIVE
-   ═══════════════════════════════════════════════════════════════ */
+
 @media (max-width: 1024px) {
   .co-container {
     grid-template-columns: 1fr;
@@ -573,7 +561,7 @@
 
   .co-actions .btn { flex: 1; }
 
-  /* Swatches slightly smaller on tablet */
+  
   .co-swatch { padding: 5px 10px 5px 7px; }
   .co-swatch-dot { width: 16px; height: 16px; }
   .co-swatch-name { font-size: 11px; }

@@ -1,4 +1,4 @@
-const API_BASE = String(import.meta.env?.VITE_API_BASE || process.env.REACT_APP_API_BASE || 'https://taras-kart-backend.vercel.app').replace(/\/+$/, '')
+const API_BASE = String(process.env.REACT_APP_API_BASE || 'https://taras-kart-backend.vercel.app').replace(/\/+$/, '')
 
 const getToken = () => sessionStorage.getItem('tk_id_token') || localStorage.getItem('tk_id_token') || sessionStorage.getItem('userToken') || localStorage.getItem('userToken') || ''
 

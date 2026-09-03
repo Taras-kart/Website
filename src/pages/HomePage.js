@@ -65,7 +65,7 @@ export default function HomePage() {
   return <div className="tara-home-old">
     <main>
       <section className="tara-home-slideshow">
-        {heroSlides.length > 0 && <Swiper modules={[Autoplay, Pagination]} loop={heroSlides.length > 1} slidesPerView={1} autoplay={heroSlides.length > 1 ? { delay: 3500, disableOnInteraction: false } : false} speed={850} pagination={heroSlides.length > 1 ? { clickable: true } : false}>{heroSlides.map((item, index) => <SwiperSlide key={`${imageUrl(item)}-${index}`}><Link to={text(item?.link_url || item?.link || item?.target_url) || '/women'}><img src={imageUrl(item)} alt={text(item?.alt_text || item?.title) || `Tara banner ${index + 1}`} loading={index === 0 ? 'eager' : 'lazy'} /></Link></SwiperSlide>)}</Swiper>}
+        {heroSlides.length > 0 && <Swiper modules={[Autoplay, Pagination]} loop={heroSlides.length > 1} slidesPerView={1} autoplay={heroSlides.length > 1 ? { delay: 3500, disableOnInteraction: false } : false} speed={850} pagination={heroSlides.length > 1 ? { clickable: true } : false}>{heroSlides.map((item, index) => <SwiperSlide key={`${imageUrl(item)}-${index}`}><Link to={text(item?.link_url || item?.link || item?.target_url) || '/women'}><img src={imageUrl(item)} alt={text(item?.alt_text || item?.title) || `Attach banner ${index + 1}`} loading={index === 0 ? 'eager' : 'lazy'} /></Link></SwiperSlide>)}</Swiper>}
         {!loading && heroSlides.length === 0 && <div className="tara-home-image-empty">Add hero slideshow images from homepage image management.</div>}
         {loading && <div className="tara-home-hero-loading" />}
       </section>

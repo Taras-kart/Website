@@ -2,9 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { FiChevronLeft, FiChevronRight, FiHeart, FiHelpCircle, FiMinus, FiPackage, FiPlus, FiShare2, FiShoppingBag } from 'react-icons/fi'
 import Footer from './Footer'
+import ProductSection from '../components/ProductSection'
 import './ProductDetailsPage.css'
 import { useCart } from '../CartContext'
 import { useWishlist } from '../WishlistContext'
+import { groupProducts } from '../services/productsApi'
 
 const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app'
 const API_BASE = ((typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) || DEFAULT_API_BASE).replace(/\/+$/, '')
@@ -12,10 +14,12 @@ const CLOUD = (typeof process !== 'undefined' && process.env && process.env.REAC
 const clean = value => String(value || '').trim()
 const unique = values => [...new Set(values.map(clean).filter(Boolean))]
 const positiveId = value => { const number = Number(value); return Number.isInteger(number) && number > 0 ? number : null }
-const fallbackFor = gender => clean(gender).toUpperCase() === 'MEN' ? '/images/men/mens13.jpeg' : clean(gender).toUpperCase() === 'KIDS' ? '/images/kids/kids-girls-frock.jpg' : '/images/women/women20.jpeg'
+const fallbackFor = gender => clean(gender).toUpperCase() === 'MEN' ? '/images/defaults/attach-men.svg' : clean(gender).toUpperCase() === 'KIDS' ? '/images/defaults/attach-kids.svg' : '/images/defaults/attach-women.svg'
 const imageCandidates = product => {
   const ean = clean(product?.ean_code)
-  return unique([product?.shared_image_url, product?.variant_image_url, product?.ean_image_url, product?.image_url, ...(Array.isArray(product?.images) ? product.images : []), ean ? `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto/products/${encodeURIComponent(ean)}` : ''])
+  const sharedImages = unique([product?.shared_image_url, product?.front_image_url, product?.back_image_url, product?.main_image_url, ...(Array.isArray(product?.images) ? product.images : [])])
+  const images = sharedImages.length ? sharedImages : unique([product?.variant_image_url, product?.ean_image_url, product?.image_url])
+  return images.length ? images : unique([ean ? `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto/products/${encodeURIComponent(ean)}` : ''])
 }
 const pricingFor = (product, type) => {
   const b2b = clean(type).toUpperCase() === 'B2B'
@@ -45,6 +49,7 @@ export default function ProductDetailsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [similarProducts, setSimilarProducts] = useState([])
   const userType = typeof window === 'undefined' ? 'B2C' : sessionStorage.getItem('userType') || localStorage.getItem('userType') || 'B2C'
 
   useEffect(() => {
@@ -62,9 +67,28 @@ export default function ProductDetailsPage() {
         const query = encodeURIComponent(clean(product?.product_name || product?.name))
         const variantsResponse = await fetch(`${API_BASE}/api/products?limit=5000&hasImage=true&q=${query}`, { signal: controller.signal, cache: 'no-store' })
         const data = variantsResponse.ok ? await variantsResponse.json() : []
-        const rows = (Array.isArray(data) ? data : data?.products || []).filter(row => Number(row?.product_id) === Number(product?.product_id))
+        const productPattern = clean(product?.pattern_code || product?.design_code || product?.style_code)
+        const productBrand = clean(product?.brand || product?.brand_name).toLowerCase()
+        const productName = clean(product?.product_name || product?.name).toLowerCase()
+        const productCategory = clean(product?.category_name || product?.category).toLowerCase()
+        const productColour = clean(product?.color || product?.colour).toLowerCase()
+        const rows = (Array.isArray(data) ? data : data?.products || []).filter(row => {
+          const rowPattern = clean(row?.pattern_code || row?.design_code || row?.style_code)
+          if (productPattern) return rowPattern.toLowerCase() === productPattern.toLowerCase()
+          return clean(row?.brand || row?.brand_name).toLowerCase() === productBrand && clean(row?.product_name || row?.name).toLowerCase() === productName && clean(row?.category_name || row?.category).toLowerCase() === productCategory && clean(row?.color || row?.colour).toLowerCase() === productColour
+        })
         setVariants(rows.length ? rows : [product])
         setSelectedVariantId(id)
+        const gender = clean(product?.gender || product?.category_root)
+        const similarResponse = await fetch(`${API_BASE}/api/products?gender=${encodeURIComponent(gender)}&limit=5000`, { signal: controller.signal, cache: 'no-store' })
+        const similarPayload = similarResponse.ok ? await similarResponse.json() : []
+        const grouped = groupProducts(Array.isArray(similarPayload) ? similarPayload : similarPayload?.products || [])
+        const currentProductId = positiveId(product?.product_id || product?.id)
+        const categoryId = positiveId(product?.category_id)
+        const categoryName = clean(product?.category_name || product?.category).toLowerCase()
+        const withoutCurrent = grouped.filter(item => !item.productIds?.some(productId => Number(productId) === Number(currentProductId)) && Number(item.productId || item.product_id || item.id) !== Number(currentProductId))
+        const sameCategory = withoutCurrent.filter(item => categoryId ? Number(item.categoryId || item.category_id) === Number(categoryId) : clean(item.category || item.category_name).toLowerCase() === categoryName)
+        setSimilarProducts((sameCategory.length ? sameCategory : withoutCurrent).slice(0, 10))
       } catch (requestError) {
         if (!controller.signal.aborted) setError(requestError?.message || 'Unable to load this product')
       } finally {
@@ -88,17 +112,12 @@ export default function ProductDetailsPage() {
   const selectedColour = clean(selected?.color || selected?.colour) || 'Default'
   const sizes = useMemo(() => unique(variants.filter(item => (clean(item?.color || item?.colour) || 'Default') === selectedColour).map(item => item?.size)), [variants, selectedColour])
   const galleryImages = useMemo(() => {
-    const databaseImages = unique([
-      ...imageCandidates(selected),
-      ...variants
-        .filter(item => (clean(item?.color || item?.colour) || 'Default') === selectedColour)
-        .flatMap(imageCandidates)
-    ])
+    const databaseImages = unique(imageCandidates(selected))
 
     return databaseImages.length > 0
       ? databaseImages
       : [fallbackFor(selected?.gender)]
-  }, [selected, selectedColour, variants])
+  }, [selected])
   const mainImage = activeImage && galleryImages.includes(activeImage) ? activeImage : galleryImages[0]
   const pricing = pricingFor(selected, userType)
   const productName = clean(selected?.product_name || selected?.name || 'Product')
@@ -142,5 +161,5 @@ export default function ProductDetailsPage() {
   if (loading) return <main className="tkpd-state"><span className="tkpd-spinner" /><p>Loading product...</p></main>
   if (error || !selected) return <main className="tkpd-state"><h1>{error || 'Product not found'}</h1><p>The product may have been removed or the link is no longer available.</p><button type="button" onClick={() => navigate('/')}>Continue shopping</button></main>
 
-  return <><main className="tkpd-page"><div className="tkpd-shell"><button type="button" className="tkpd-back" onClick={() => navigate(-1)}><FiChevronLeft /> Back</button><div className="tkpd-layout"><section className="tkpd-gallery"><div className="tkpd-thumbs">{galleryImages.slice(0, 6).map((image, index) => <button type="button" key={`${image}-${index}`} className={image === mainImage ? 'tkpd-thumb tkpd-thumb-active' : 'tkpd-thumb'} onClick={() => setActiveImage(image)}><img src={image} alt={`${productName} view ${index + 1}`} /></button>)}</div><div className="tkpd-main"><SafeImage sources={unique([mainImage, ...galleryImages])} alt={productName} className="tkpd-main-img" /><div className="tkpd-floating"><button type="button" onClick={shareProduct} aria-label="Share product"><FiShare2 /></button><button type="button" onClick={addWish} aria-label="Add to wishlist"><FiHeart /></button></div></div></section><section className="tkpd-info"><h1>{productName}</h1><p className="tkpd-brand">{clean(selected?.brand || selected?.brand_name)}</p><span className="tkpd-gender">{clean(selected?.gender)}</span><p className="tkpd-path">{[selected?.gender, selected?.category_name, selected?.fit_type || selected?.fit].map(clean).filter(Boolean).join(' › ')}</p><div className="tkpd-price-row"><strong>₹{money(pricing.price)}</strong>{pricing.mrp > pricing.price && <del>₹{money(pricing.mrp)}</del>}{pricing.discount > 0 && <span>{pricing.discount}% OFF</span>}</div><p className="tkpd-name-line">{productName}</p>{colourGroups.length > 0 && <div className="tkpd-option"><div className="tkpd-option-heading"><strong>COLOR</strong><span>{selectedColour}</span></div><div className="tkpd-colour-strip"><button type="button" className="tkpd-strip-arrow"><FiChevronLeft /></button><div className="tkpd-colour-scroll">{colourGroups.map(group => <button type="button" key={group.colour} className={group.colour === selectedColour ? 'tkpd-colour-card tkpd-colour-active' : 'tkpd-colour-card'} onClick={() => chooseColour(group.colour)}><span><SafeImage sources={unique([...group.images, fallbackFor(selected?.gender)])} alt={group.colour} /></span><small>{group.colour}</small></button>)}</div><button type="button" className="tkpd-strip-arrow"><FiChevronRight /></button></div></div>}{sizes.length > 0 && <div className="tkpd-option tkpd-size-option"><div className="tkpd-option-heading"><strong>SIZE</strong></div><div className="tkpd-size-list">{sizes.map(size => <button type="button" key={size} className={size === clean(selected?.size) ? 'tkpd-size tkpd-size-active' : 'tkpd-size'} onClick={() => chooseSize(size)}>{size}</button>)}</div></div>}{stock > 0 && stock <= 5 && <p className="tkpd-stock">Hurry up! Last {stock} {stock === 1 ? 'stock' : 'stocks'} left</p>}<div className="tkpd-quantity"><button type="button" onClick={() => setQuantity(value => Math.max(1, value - 1))}><FiMinus /></button><span>{quantity}</span><button type="button" onClick={() => setQuantity(value => Math.min(20, value + 1))}><FiPlus /></button></div><div className="tkpd-actions"><button type="button" className="tkpd-cart" onClick={() => addBag('/cart')}><FiShoppingBag /> ADD TO CART</button><button type="button" className="tkpd-buy" onClick={() => addBag('/order/checkout')}>BUY NOW</button></div><div className="tkpd-service"><p><FiPackage /><span>Estimated Delivery: 4 TO 6 DAYS</span></p><p><FiHelpCircle /><span>Ask a Question</span></p></div></section></div></div>{message && <div className="tkpd-toast">{message}</div>}</main><Footer /></>
+  return <><main className="tkpd-page"><div className="tkpd-shell"><button type="button" className="tkpd-back" onClick={() => navigate(-1)}><FiChevronLeft /> Back</button><div className="tkpd-layout"><section className="tkpd-gallery"><div className="tkpd-thumbs">{galleryImages.slice(0, 6).map((image, index) => <button type="button" key={image} className={image === mainImage ? 'tkpd-thumb tkpd-thumb-active' : 'tkpd-thumb'} onClick={() => setActiveImage(image)}><img src={image} alt={`${productName} view ${index + 1}`} /></button>)}</div><div className="tkpd-main"><SafeImage sources={unique([mainImage, ...galleryImages])} alt={productName} className="tkpd-main-img" /><div className="tkpd-floating"><button type="button" onClick={shareProduct} aria-label="Share product"><FiShare2 /></button><button type="button" onClick={addWish} aria-label="Add to wishlist"><FiHeart /></button></div></div></section><section className="tkpd-info"><h1>{productName}</h1><p className="tkpd-brand">{clean(selected?.brand || selected?.brand_name)}</p><span className="tkpd-gender">{clean(selected?.gender)}</span><p className="tkpd-path">{[selected?.gender, selected?.category_name, selected?.fit_type || selected?.fit].map(clean).filter(Boolean).join(' › ')}</p><div className="tkpd-price-row"><strong>₹{money(pricing.price)}</strong>{pricing.mrp > pricing.price && <del>₹{money(pricing.mrp)}</del>}{pricing.discount > 0 && <span>{pricing.discount}% OFF</span>}</div><p className="tkpd-name-line">{productName}</p>{colourGroups.length > 0 && <div className="tkpd-option"><div className="tkpd-option-heading"><strong>COLOR</strong><span>{selectedColour}</span></div><div className="tkpd-colour-strip"><button type="button" className="tkpd-strip-arrow"><FiChevronLeft /></button><div className="tkpd-colour-scroll">{colourGroups.map(group => <button type="button" key={group.colour} className={group.colour === selectedColour ? 'tkpd-colour-card tkpd-colour-active' : 'tkpd-colour-card'} onClick={() => chooseColour(group.colour)}><span><SafeImage sources={unique([...group.images, fallbackFor(selected?.gender)])} alt={group.colour} /></span><small>{group.colour}</small></button>)}</div><button type="button" className="tkpd-strip-arrow"><FiChevronRight /></button></div></div>}{sizes.length > 0 && <div className="tkpd-option tkpd-size-option"><div className="tkpd-option-heading"><strong>SIZE</strong></div><div className="tkpd-size-list">{sizes.map(size => <button type="button" key={size} className={size === clean(selected?.size) ? 'tkpd-size tkpd-size-active' : 'tkpd-size'} onClick={() => chooseSize(size)}>{size}</button>)}</div></div>}{stock > 0 && stock <= 5 && <p className="tkpd-stock">Hurry up! Last {stock} {stock === 1 ? 'stock' : 'stocks'} left</p>}<div className="tkpd-quantity"><button type="button" onClick={() => setQuantity(value => Math.max(1, value - 1))}><FiMinus /></button><span>{quantity}</span><button type="button" onClick={() => setQuantity(value => Math.min(20, value + 1))}><FiPlus /></button></div><div className="tkpd-actions"><button type="button" className="tkpd-cart" onClick={() => addBag('/cart')}><FiShoppingBag /> ADD TO CART</button><button type="button" className="tkpd-buy" onClick={() => addBag('/order/checkout')}>BUY NOW</button></div><div className="tkpd-service"><p><FiPackage /><span>Estimated Delivery: 4 TO 6 DAYS</span></p><p><FiHelpCircle /><span>Ask a Question</span></p></div></section></div></div><ProductSection eyebrow="You may also like" title="Similar products" products={similarProducts} userType={userType} />{message && <div className="tkpd-toast">{message}</div>}</main><Footer /></>
 }

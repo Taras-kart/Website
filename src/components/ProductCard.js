@@ -10,7 +10,7 @@ const slugFor = value => clean(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').
 
 function ProductImage({ product }) {
   const gender = clean(product?.gender || product?.categoryRoot || product?.category_root).toUpperCase()
-  const fallback = gender === 'MEN' ? '/images/men/mens13.jpeg' : gender === 'KIDS' ? '/images/kids/kids-girls-frock.jpg' : '/images/updated/grid1.jpg'
+  const fallback = gender === 'MEN' ? '/images/defaults/attach-men.svg' : gender === 'KIDS' ? '/images/defaults/attach-kids.svg' : '/images/defaults/attach-women.svg'
   const sources = useMemo(() => unique([
     product?.shared_image_url,
     product?.front_image_url,
@@ -37,6 +37,7 @@ export default function ProductCard({ product, userType = 'B2C', liked = false, 
       navigate(`/shop/${gender}/${categorySlug || 'all'}`)
       return
     }
+    sessionStorage.setItem('attach:return-position', JSON.stringify({ url: `${window.location.pathname}${window.location.search}`, y: window.scrollY, time: Date.now() }))
     sessionStorage.setItem('selectedProduct', JSON.stringify(product))
     const variantId = product?.variantId || product?.variant_id || product?.variants?.find(variant => Number(variant?.id || variant?.variant_id) > 0)?.id || product?.productId || product?.product_id || product?.id
     navigate(`/product/${encodeURIComponent(variantId)}`)

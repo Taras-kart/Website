@@ -21,9 +21,9 @@ const normalize = value => clean(value).toLowerCase().replace(/[^a-z0-9]+/g, '')
 const innerwearPattern = /INNER\s*WEAR|BRA|BRIEF|TRUNK|VEST|PANTY|SLIP|LINGERIE|CAMISOLE/i
 const menExcludedPattern = /BRA|PANTY|BRIEF|SLIP|CAMISOLE|CHUDIDAR|LEHENGA|KURTI|SAREE|LEGGING|JEGGING|PALAZZO|NIGHTWEAR/i
 const fallbackImages = {
-  WOMEN: '/images/updated/grid1.jpg',
-  MEN: '/images/men/mens13.jpeg',
-  KIDS: '/images/kids/kids-girls-frock.jpg'
+  WOMEN: '/images/defaults/attach-women.svg',
+  MEN: '/images/defaults/attach-men.svg',
+  KIDS: '/images/defaults/attach-kids.svg'
 }
 
 const firstImage = product => clean(product?.images?.[0] || product?.shared_image_url || product?.image_url || product?.front_image_url || product?.main_image_url)
@@ -174,8 +174,8 @@ export default function Home1() {
       <SwiperSlide><div className="main-hero-slide"><img src={getImage('/images/DAZZEL-BANNER.png')} alt="Dazzel Banner" loading="lazy" /></div></SwiperSlide>
       <SwiperSlide><div className="main-hero-slide"><img src={getImage('/images/ASWATI-BANNER.png')} alt="Aswati Banner" loading="lazy" /></div></SwiperSlide>
     </Swiper></div></section>
-    <Divider label="Tara" direction="ltr" />
-    <section className="home-gender-section"><SectionHead eyebrow="Explore Tara" title="Shop your way" /><div className="home-gender-grid">{loading ? ['WOMEN', 'MEN', 'KIDS'].map(item => <div className="home-gender-card home-gender-loading" key={item} />) : genderCards.map(item => <Link to={item.path} key={item.gender} className="home-gender-card"><ResilientImage candidates={[item.image]} fallback={fallbackImages[item.gender]} alt={item.title} /><div><h2>{item.title}</h2><span>Shop now <FaArrowRight /></span></div></Link>)}</div></section>
+    <Divider label="Attach" direction="ltr" />
+    <section className="home-gender-section"><SectionHead eyebrow="Explore Attach" title="Shop your way" /><div className="home-gender-grid">{loading ? ['WOMEN', 'MEN', 'KIDS'].map(item => <div className="home-gender-card home-gender-loading" key={item} />) : genderCards.map(item => <Link to={item.path} key={item.gender} className="home-gender-card"><ResilientImage candidates={[item.image]} fallback={fallbackImages[item.gender]} alt={item.title} /><div><h2>{item.title}</h2><span>Shop now <FaArrowRight /></span></div></Link>)}</div></section>
     <Divider label="Women" direction="rtl" />
     {womenCategories.length > 0 && <section className="home-category-section"><SectionHead eyebrow="For her" title="Women shop by category" link="/women" /><CategoryGrid items={womenCategories} gender="WOMEN" /></section>}
     <ProductSection eyebrow="Prices worth waiting for" title="Price drops" products={discountedProducts.slice(0, 14)} userType={userType} link="/women" />

@@ -1,8 +1,6 @@
-// D:\shopping\src\pages\SearchResults.js
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { FaHeart, FaRegHeart } from 'react-icons/fa'
-import Navbar from './Navbar'
 import Footer from './Footer'
 import FilterSidebar from './FilterSidebar'
 import './SearchResults.css'
@@ -11,21 +9,19 @@ import { useWishlist } from '../WishlistContext'
 
 const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app'
 const API_BASE_RAW =
-  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
   (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
   DEFAULT_API_BASE
 const API_BASE = API_BASE_RAW.replace(/\/+$/, '')
 
 const BRANCH_ID_RAW =
-  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_BRANCH_ID) ||
   (typeof process !== 'undefined' && process.env && process.env.REACT_APP_BRANCH_ID) ||
   ''
 const BRANCH_ID = BRANCH_ID_RAW ? String(BRANCH_ID_RAW).trim() : ''
 
 const DEFAULT_IMG_BY_GENDER = {
-  WOMEN: '/images/women/women20.jpeg',
-  MEN: '/images/men/mens13.jpeg',
-  KIDS: '/images/kids/kids-girls-frock.jpg',
+  WOMEN: '/images/defaults/attach-women.svg',
+  MEN: '/images/defaults/attach-men.svg',
+  KIDS: '/images/defaults/attach-kids.svg',
   _: '/images/placeholder.jpg'
 }
 
@@ -206,10 +202,15 @@ const groupProductsByProductId = (products) => {
     if (!p) continue
     const pid = toInt(p.product_id)
     if (!pid) continue
+    const normalizeKey = value => String(value || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '')
+    const base = [normalizeKey(p.brand || p.brand_name), normalizeKey(p.product_name || p.name), normalizeKey(p.category_name || p.category)]
+    const design = normalizeKey(p.design_code || p.pattern_code || p.style_code || p.mark_code || p.model_code)
+    const colour = normalizeKey(p.color || p.colour) || 'default'
+    const familyKey = `${base.join('|')}|${design ? `design:${design}` : `legacy:${colour}`}`
 
-    if (!byPid.has(pid)) {
-      byPid.set(pid, {
-        key: String(pid),
+    if (!byPid.has(familyKey)) {
+      byPid.set(familyKey, {
+        key: familyKey,
         product_id_locked: pid,
         brand: String(p.brand || '').trim(),
         product_name: String(p.product_name || '').trim(),
@@ -232,7 +233,7 @@ const groupProductsByProductId = (products) => {
         variants: []
       })
     }
-    byPid.get(pid).variants.push(p)
+    byPid.get(familyKey).variants.push(p)
   }
 
   const out = []
@@ -490,8 +491,6 @@ const SearchResults = () => {
 
   return (
     <div className="sr-page">
-      <Navbar />
-
       <div className="sr-topbar">
         <div className="sr-topbar-inner">
           <FilterSidebar

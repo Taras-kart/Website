@@ -1,4 +1,4 @@
-/* src/components/LoginPopup.css */
+
 .popup-overlay-login {
   position: fixed;
   inset: 0;
@@ -222,7 +222,7 @@
   }
 }
 
-/* B2C / B2B Toggle Switch */
+
 .login-type-toggle {
   display: flex;
   align-items: center;

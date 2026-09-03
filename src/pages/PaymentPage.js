@@ -52,7 +52,7 @@ export default function PaymentPage() {
         amount: info.amount,
         currency: info.currency,
         order_id: info.order_id,
-        name: "Tara's Kart",
+        name: "Attach's Kart",
         description: 'Order payment',
         prefill: { name: sessionStorage.getItem('userName') || '', email: sessionStorage.getItem('userEmail') || '', contact: '' },
         theme: { color: '#56362d' },
@@ -73,7 +73,7 @@ export default function PaymentPage() {
     } catch (reason) { setError(reason.message || 'Unable to start payment'); setLoading(false) }
   }
 
-  if (success) return <main className="tara-payment-page"><div className="tara-payment-success"><FiCheck /><span>Payment successful</span><h1>Your order is confirmed</h1><p>Thank you for shopping with Tara. Your payment reference is {orderId || saleId}.</p><div><button onClick={() => navigate('/')}>Continue shopping</button><button onClick={() => navigate('/profile', { state: { openSection: 'Orders' } })}>View orders</button></div></div></main>
+  if (success) return <main className="tara-payment-page"><div className="tara-payment-success"><FiCheck /><span>Payment successful</span><h1>Your order is confirmed</h1><p>Thank you for shopping with Attach. Your payment reference is {orderId || saleId}.</p><div><button onClick={() => navigate('/')}>Continue shopping</button><button onClick={() => navigate('/profile', { state: { openSection: 'Orders' } })}>View orders</button></div></div></main>
 
   return <main className="tara-payment-page"><header><FiLock /><span>Secure payment</span><h1>Choose how you want to pay</h1><p>Your transaction is completed inside Razorpay’s protected payment window.</p></header><section className="tara-payment-shell"><div className="tara-payment-methods"><Method icon={<FiSmartphone />} title="UPI" text="Google Pay, PhonePe, Paytm and other UPI apps" active={method === 'ONLINE_UPI'} onClick={() => setMethod('ONLINE_UPI')} /><Method icon={<FiCreditCard />} title="Credit or debit card" text="Visa, Mastercard, RuPay and supported cards" active={method === 'ONLINE_CARD'} onClick={() => setMethod('ONLINE_CARD')} /><Method icon={<FiRefreshCw />} title="Netbanking" text="Pay directly through your supported bank" active={method === 'ONLINE_NETBANKING'} onClick={() => setMethod('ONLINE_NETBANKING')} /></div><aside><span>Order reference</span><strong>#{String(saleId || '').slice(0, 12)}</strong><p><FiLock />Razorpay secured checkout</p>{error && <div className="tara-payment-error">{error}</div>}<button disabled={!saleId || loading} onClick={pay}>{loading ? 'Opening secure payment' : 'Proceed securely'}</button><button className="tara-payment-back" onClick={() => navigate('/checkout')}>Return to checkout</button><small>We never store your card, UPI PIN or bank credentials.</small></aside></section></main>
 }

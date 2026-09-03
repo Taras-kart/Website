@@ -1,4 +1,3 @@
-// D:\shopping\src\pages\TandC.js
 import React from 'react';
 import './TandC.css';
 import { FiPhoneCall, FiTruck, FiFileText, FiRotateCcw } from 'react-icons/fi';
@@ -169,7 +168,7 @@ const TandC = () => {
           <section id="ip" className="tc-block">
             <h2><span className="tc-index">8.</span> Intellectual Property</h2>
             <p>
-              All site content is the property of Taras Kart. You may not copy, reproduce, or distribute content without
+              All site content is the property of Attach. You may not copy, reproduce, or distribute content without
               prior written permission.
             </p>
           </section>
@@ -184,7 +183,7 @@ const TandC = () => {
 
           <section id="contact" className="tc-block">
             <h2><span className="tc-index">10.</span> Contact Us</h2>
-            <p>Taras Kart</p>
+            <p>Attach</p>
             <p>
               Email:{' '}
               <a className="tc-link" href="mailto:taraskartonline@gmail.com">
