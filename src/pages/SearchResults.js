@@ -2,9 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { FaHeart, FaRegHeart } from 'react-icons/fa'
 import Footer from './Footer'
-import FilterSidebar from './FilterSidebar'
 import './SearchResults.css'
-import './WomenDisplayPage.css'
 import { useWishlist } from '../WishlistContext'
 
 const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app'
@@ -19,9 +17,9 @@ const BRANCH_ID_RAW =
 const BRANCH_ID = BRANCH_ID_RAW ? String(BRANCH_ID_RAW).trim() : ''
 
 const DEFAULT_IMG_BY_GENDER = {
-  WOMEN: '/images/defaults/attach-women.svg',
-  MEN: '/images/defaults/attach-men.svg',
-  KIDS: '/images/defaults/attach-kids.svg',
+  WOMEN: '/images/defaults/attach-women.png',
+  MEN: '/images/defaults/attach-men.png',
+  KIDS: '/images/defaults/attach-kids.png',
   _: '/images/placeholder.jpg'
 }
 
@@ -268,7 +266,11 @@ const SearchResults = () => {
   const { wishlistItems, addToWishlist } = useWishlist()
 
   const [baseResults, setBaseResults] = useState([])
-  const [results, setResults] = useState([])
+  const [selectedGender, setSelectedGender] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('')
+  const [selectedBrand, setSelectedBrand] = useState('')
+  const [sortOrder, setSortOrder] = useState('relevance')
+  const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [searchInput, setSearchInput] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
@@ -306,6 +308,30 @@ const SearchResults = () => {
     [userType]
   )
 
+  const results = useMemo(() => {
+    const filtered = baseResults.filter(item =>
+      (!selectedGender || item.gender === selectedGender) &&
+      (!selectedCategory || item.category_name === selectedCategory) &&
+      (!selectedBrand || item.brand === selectedBrand)
+    )
+    if (sortOrder === 'low') filtered.sort((a, b) => getPriceFields(a).offer - getPriceFields(b).offer)
+    if (sortOrder === 'high') filtered.sort((a, b) => getPriceFields(b).offer - getPriceFields(a).offer)
+    return filtered
+  }, [baseResults, selectedGender, selectedCategory, selectedBrand, sortOrder, getPriceFields])
+
+  const filterOptions = useMemo(() => ({
+    genders: uniq(baseResults.map(item => item.gender)).sort(),
+    categories: uniq(baseResults.map(item => item.category_name)).sort(),
+    brands: uniq(baseResults.map(item => item.brand)).sort()
+  }), [baseResults])
+
+  useEffect(() => {
+    setSelectedGender('')
+    setSelectedCategory('')
+    setSelectedBrand('')
+    setSortOrder('relevance')
+  }, [query])
+
   const offerPrice = useCallback((item) => getPriceFields(item).offer, [getPriceFields])
   const originalPrice = useCallback((item) => getPriceFields(item).mrp, [getPriceFields])
 
@@ -323,7 +349,7 @@ const SearchResults = () => {
   const getImg = useCallback((group) => {
     const img = group.images?.[0]
     if (img) return img
-    const g = group.gender || group.rep?.gender
+    const g = String(group.gender || group.rep?.gender || '').toUpperCase()
     return DEFAULT_IMG_BY_GENDER[g] || DEFAULT_IMG_BY_GENDER._
   }, [])
 
@@ -350,6 +376,7 @@ const SearchResults = () => {
 
     const run = async () => {
       setLoading(true)
+      setError('')
       try {
         const baseSearchTerm = queryText || query
         const params = new URLSearchParams()
@@ -359,19 +386,20 @@ const SearchResults = () => {
 
         const url = `${API_BASE}/api/products/search?${params.toString()}`
         const res = await fetch(url)
+        if (!res.ok) throw new Error('Unable to load products')
         const data = await res.json()
-        const arr = Array.isArray(data) ? data : []
+        const arr = Array.isArray(data) ? data : data?.products || []
 
         if (!cancelled) {
           const refinedRows = applyQueryFilters(arr, queryText, priceMin, priceMax)
           const grouped = groupProductsByProductId(refinedRows)
           setBaseResults(grouped)
-          setResults(grouped)
+
         }
       } catch {
         if (!cancelled) {
           setBaseResults([])
-          setResults([])
+          setError('Unable to load products. Please try again.')
         }
       } finally {
         if (!cancelled) setLoading(false)
@@ -490,25 +518,18 @@ const SearchResults = () => {
   )
 
   return (
-    <div className="sr-page">
-      <div className="sr-topbar">
-        <div className="sr-topbar-inner">
-          <FilterSidebar
-            source={baseResults}
-            onFilterChange={(filtered) => {
-              setResults(filtered)
-            }}
-          />
-        </div>
-      </div>
-
-      <main className="sr-main">
-        <div className="sr-search-wrap">
-          <form className="sr-search-bar" onSubmit={handleSearchSubmit}>
-            <div className="sr-search-row">
+    <div className="asr-page">
+      <main className="asr-main">
+        <div className="asr-search-wrap">
+          <form className="asr-search-bar" onSubmit={handleSearchSubmit}>
+            <div className="asr-search-row">
               <input
-                type="text"
-                className="sr-search-input"
+                type="search"
+                aria-label="Search products"
+                autoComplete="off"
+                onBlur={() => setShowSuggestions(false)}
+                onKeyDown={event => { if (event.key === "Escape") setShowSuggestions(false) }}
+                className="asr-search-input"
                 placeholder="Search for products"
                 value={searchInput}
                 onChange={(e) => {
@@ -522,22 +543,22 @@ const SearchResults = () => {
                 }}
               />
 
-              <button type="submit" className="sr-search-btn">
+              <button type="submit" className="asr-search-btn">
                 Search
               </button>
 
               {showSuggestions && suggestions.length > 0 && (
-                <div className="sr-suggestions">
+                <div className="asr-suggestions">
                   {suggestions.map((s) => (
                     <div
                       key={s}
-                      className="sr-suggestion-item"
+                      className="asr-suggestion-item"
                       onMouseDown={(e) => {
                         e.preventDefault()
                         handleSuggestionClick(s)
                       }}
                     >
-                      <span className="sr-suggestion-dot" />
+                      <span className="asr-suggestion-dot" />
                       <span>{s}</span>
                     </div>
                   ))}
@@ -545,95 +566,107 @@ const SearchResults = () => {
               )}
             </div>
 
-            <p className="sr-search-note">Start typing to see smarter suggestions.</p>
+
           </form>
         </div>
 
-        {loading ? (
-          <div className="sr-status-wrap">
-            <p className="sr-status">Loading...</p>
+        <div className="asr-filters">
+          <label><span>Gender</span><select value={selectedGender} onChange={event => setSelectedGender(event.target.value)}><option value="">All genders</option>{filterOptions.genders.map(value => <option key={value} value={value}>{GENDER_LABELS[value] || value}</option>)}</select></label>
+          <label><span>Category</span><select value={selectedCategory} onChange={event => setSelectedCategory(event.target.value)}><option value="">All categories</option>{filterOptions.categories.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
+          <label><span>Brand</span><select value={selectedBrand} onChange={event => setSelectedBrand(event.target.value)}><option value="">All brands</option>{filterOptions.brands.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
+          <label><span>Sort by</span><select value={sortOrder} onChange={event => setSortOrder(event.target.value)}><option value="relevance">Relevance</option><option value="low">Price: Low to High</option><option value="high">Price: High to Low</option></select></label>
+          <button type="button" className="asr-clear" onClick={() => { setSelectedGender(''); setSelectedCategory(''); setSelectedBrand(''); setSortOrder('relevance') }}>Clear filters</button>
+        </div>
+
+        {error ? <div className="asr-status-wrap" role="alert"><p>{error}</p><button type="button" onClick={() => window.location.reload()}>Try again</button></div> : loading ? (
+          <div className="asr-status-wrap">
+            <p className="asr-status">Loading...</p>
           </div>
         ) : results.length === 0 ? (
-          <div className="sr-status-wrap">
-            <p className="sr-status">No products found.</p>
+          <div className="asr-status-wrap">
+            <p className="asr-status">No products found.</p>
           </div>
         ) : (
-          <section className="sr-grid-wrap">
-            <div className="sr-header">
+          <section className="asr-grid-wrap">
+            <div className="asr-header">
               <div>
-                <h2 className="sr-title">
-                  Results for <span className="sr-highlight">{query}</span>
+                <h2 className="asr-title">
+                  Results for <span className="asr-highlight">{query}</span>
                 </h2>
-                {filterSummary ? <p className="sr-subtitle">{filterSummary}</p> : null}
+                {filterSummary ? <p className="asr-subtitle">{filterSummary}</p> : null}
               </div>
-              <span className="sr-count">{results.length} items</span>
+              <span className="asr-count">{results.length} items</span>
             </div>
 
-            <div className="womens-section4-grid">
+            <div className="asr-grid">
               {results.map((group) => {
                 const discount = discountPctValue(group)
-                const hasVariants = group.variants && group.variants.length > 1
+                const sizeCount = uniq((group.variants || []).map(item => item.size)).length
+                const hasVariants = sizeCount > 1
                 const isOutOfStock = group.is_out_of_stock
 
                 return (
                   <article
                     key={group.key}
-                    className={`womens-section4-card${isOutOfStock ? ' out-of-stock' : ''}`}
-                    onClick={() => handleProductClick(group)}
+                    className="asr-card"
+
                   >
-                    <div className="womens-section4-img">
+                    <div className="asr-image">
+                      <button type="button" className="asr-open" onClick={() => handleProductClick(group)} aria-label={`View ${group.product_name}`} />
                       {discount > 0 && (
-                        <div className="discount-ribbon">
+                        <div className="asr-discount">
                           <span>{discount}% OFF</span>
                         </div>
                       )}
 
-                      {hasVariants && <div className="variant-pill">{group.variants.length} sizes</div>}
+                      {hasVariants && <div className="asr-sizes">{sizeCount} sizes</div>}
 
                       <img
                         src={getImg(group)}
                         alt={group.product_name}
-                        className="fade-image"
+                        className="asr-photo"
+                        loading="lazy"
+                        decoding="async"
                         onError={(e) => {
-                          const g = group.gender || group.rep?.gender
+                          const g = String(group.gender || group.rep?.gender || '').toUpperCase()
                           const fallback = DEFAULT_IMG_BY_GENDER[g] || DEFAULT_IMG_BY_GENDER._
-                          if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback
+                          if (!e.currentTarget.dataset.fallback) { e.currentTarget.dataset.fallback = 'true'; e.currentTarget.src = fallback }
                         }}
                       />
 
                       {isOutOfStock && (
-                        <div className="out-of-stock-overlay">
+                        <div className="asr-stock-overlay">
                           <span>Out of Stock</span>
                         </div>
                       )}
 
-                      <div className="love-icon" onClick={(e) => handleWishlist(e, group)} role="button" tabIndex={0}>
+                      <button type="button" className="asr-wishlist" onClick={(e) => handleWishlist(e, group)} aria-label={`Save ${group.product_name} to wishlist`}>
                         {isInWishlist(group) ? (
-                          <FaHeart style={{ color: 'gold', fontSize: '20px' }} />
+                          <FaHeart  />
                         ) : (
-                          <FaRegHeart style={{ color: 'gold', fontSize: '20px' }} />
+                          <FaRegHeart  />
                         )}
-                      </div>
+                      </button>
 
-                      {group.gender && <div className="sr-pill">{GENDER_LABELS[group.gender] || group.gender}</div>}
+                      {group.gender && <div className="asr-pill">{GENDER_LABELS[group.gender] || group.gender}</div>}
                     </div>
 
-                    <div className="womens-section4-body">
-                      <div className="brand-row">
-                        <h4 className="brand-name">{group.brand}</h4>
-                        <span className="brand-chip">New in</span>
+                    <div className="asr-card-body">
+                      <div className="asr-brand-row">
+                        <h4 className="asr-brand">{group.brand}</h4>
+                        
                       </div>
 
-                      <h5 className="product-name">{group.product_name}</h5>
+                      <h5 className="asr-name"><button type="button" onClick={() => handleProductClick(group)}>{group.product_name}</button></h5>
 
-                      <div className="card-price-row">
-                        <span className="card-offer-price">₹{offerPrice(group).toFixed(2)}</span>
-                        <span className="card-original-price">₹{originalPrice(group).toFixed(2)}</span>
+                      <div className="asr-prices">
+                        <span className="asr-price">₹{offerPrice(group).toFixed(2)}</span>
+                        {originalPrice(group) > offerPrice(group) && <del className="asr-original">₹{originalPrice(group).toFixed(2)}</del>}
                       </div>
 
-                      <div className="womens-section4-meta">
-                        <span className="price-type">{userType === 'B2B' ? 'Best B2B margin' : 'Inclusive of all taxes'}</span>
-                        {discount > 0 && <span className="saving-text">You save {discount}%</span>}
+                      <div className="asr-meta">
+                        <span className="asr-price-type">{userType === 'B2B' ? 'Best B2B margin' : 'Inclusive of all taxes'}</span>
+                        {discount > 0 && <span className="asr-saving">You save {discount}%</span>}
                       </div>
                     </div>
                   </article>
