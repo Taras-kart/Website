@@ -3,6 +3,7 @@ import { FaHeart, FaRegHeart } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import { formatPrice, getPrice } from '../services/productsApi'
 import './ProductCard.css'
+import useProductWishlist from '../hooks/useProductWishlist'
 
 const clean = value => String(value || '').trim()
 const unique = values => [...new Set(values.map(clean).filter(Boolean))]
@@ -28,6 +29,8 @@ function ProductImage({ product }) {
 
 export default function ProductCard({ product, userType = 'B2C', liked = false, onWishlist, listingMode = false }) {
   const navigate = useNavigate()
+  const { save, saved, pending, message } = useProductWishlist(product)
+  const isLiked = liked || saved
   const price = getPrice(product, userType)
   const discount = price.original > price.final ? Math.round(((price.original - price.final) / price.original) * 100) : 0
   const openProduct = () => {
@@ -39,8 +42,10 @@ export default function ProductCard({ product, userType = 'B2C', liked = false, 
     }
     sessionStorage.setItem('attach:return-position', JSON.stringify({ url: `${window.location.pathname}${window.location.search}`, y: window.scrollY, time: Date.now() }))
     sessionStorage.setItem('selectedProduct', JSON.stringify(product))
-    const variantId = product?.variantId || product?.variant_id || product?.variants?.find(variant => Number(variant?.id || variant?.variant_id) > 0)?.id || product?.productId || product?.product_id || product?.id
+    const variant = product?.variants?.find(item => Number(item?.variant_id || item?.id) > 0)
+    const variantId = Number(product?.variantId || product?.variant_id || variant?.variant_id || variant?.id || product?.productId || product?.product_id || product?.id)
+    if (!Number.isInteger(variantId) || variantId <= 0) return
     navigate(`/product/${encodeURIComponent(variantId)}`)
   }
-  return <article className="tara-product-card" onClick={openProduct}><div className="tara-product-media">{discount > 0 && <span className="tara-product-sale">{discount}% OFF</span>}<button className={`tara-product-heart ${liked ? 'is-liked' : ''}`} onClick={event => { event.stopPropagation(); onWishlist?.(product) }} aria-label={liked ? 'Remove from wishlist' : 'Add to wishlist'}>{liked ? <FaHeart /> : <FaRegHeart />}</button><ProductImage product={product} /></div><div className="tara-product-copy"><span>{product.brand}</span><h3>{product.name}</h3><div className="tara-product-price"><strong>{formatPrice(price.final)}</strong>{price.original > price.final && <del>{formatPrice(price.original)}</del>}</div><p>{String(userType).toUpperCase() === 'B2B' ? 'Wholesale price' : 'Inclusive of taxes'}</p></div></article>
+  return <article className="tara-product-card" onClick={openProduct}><div className="tara-product-media">{discount > 0 && <span className="tara-product-sale">{discount}% OFF</span>}<button className={`tara-product-heart ${isLiked ? 'is-liked' : ''}`} onClick={event => { event.stopPropagation(); onWishlist ? onWishlist(product) : save() }} disabled={pending} aria-pressed={isLiked} aria-label={isLiked ? 'Saved to wishlist' : 'Add to wishlist'}>{isLiked ? <FaHeart /> : <FaRegHeart />}</button><ProductImage product={product} /></div><div className="tara-product-copy"><span>{product.brand}</span><h3>{product.name}</h3><div className="tara-product-price"><strong>{formatPrice(price.final)}</strong>{price.original > price.final && <del>{formatPrice(price.original)}</del>}</div><p>{String(userType).toUpperCase() === 'B2B' ? 'Wholesale price' : 'Inclusive of taxes'}</p>{message && <small role="status">{message}</small>}</div></article>
 }

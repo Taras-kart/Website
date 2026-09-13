@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { FiChevronDown, FiChevronLeft, FiChevronRight, FiHeart, FiSliders, FiX } from 'react-icons/fi'
 import Footer from './Footer'
+import useProductWishlist from '../hooks/useProductWishlist'
 import './GenderStorefront.css'
 import { useWishlist } from '../WishlistContext'
 
@@ -102,9 +103,10 @@ function SectionTitle({ children, controls, compact }) {
 }
 
 function ProductCard({ product, gender, userType, onOpen, onWish }) {
+  const { save, saved, pending, message } = useProductWishlist(product)
   const pricing = priceFor(product, userType)
   const name = clean(product?.product_name || product?.name || 'Product')
-  return <article className="tgs-product"><button type="button" className="tgs-product-image" onClick={() => onOpen(product)}><SafeImage product={product} gender={gender} alt={name} />{pricing.discount > 0 && <span className="tgs-sale">SALE</span>}</button><button type="button" className="tgs-heart" onClick={event => { event.stopPropagation(); onWish(product) }} aria-label="Add to wishlist"><FiHeart /></button><button type="button" className="tgs-product-copy" onClick={() => onOpen(product)}><small>{clean(product?.brand || product?.brand_name)}</small><strong>{name}</strong><span className="tgs-card-price">₹{money(pricing.price)}{pricing.mrp > pricing.price && <del>₹{money(pricing.mrp)}</del>}{pricing.discount > 0 && <em>{pricing.discount}% OFF</em>}</span></button></article>
+  return <article className="tgs-product"><button type="button" className="tgs-product-image" onClick={() => onOpen(product)}><SafeImage product={product} gender={gender} alt={name} />{pricing.discount > 0 && <span className="tgs-sale">SALE</span>}</button><button type="button" className="tgs-heart" onClick={event => { event.stopPropagation(); save() }} disabled={pending} aria-pressed={saved} aria-label={saved ? "Saved to wishlist" : "Add to wishlist"}><FiHeart fill={saved ? "currentColor" : "none"} /></button><button type="button" className="tgs-product-copy" onClick={() => onOpen(product)}><small>{clean(product?.brand || product?.brand_name)}</small><strong>{name}</strong><span className="tgs-card-price">₹{money(pricing.price)}{pricing.mrp > pricing.price && <del>₹{money(pricing.mrp)}</del>}{pricing.discount > 0 && <em>{pricing.discount}% OFF</em>}</span></button>{message && <small role="status">{message}</small>}</article>
 }
 
 function ProductRail({ title, products, gender, userType, onOpen, onWish }) {

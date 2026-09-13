@@ -22,7 +22,7 @@ export default function Wishlist() {
 
   const open = item => {
     sessionStorage.setItem('selectedProduct', JSON.stringify(item))
-    navigate(`/product/${encodeURIComponent(item.design_code || item.style_code || item.product_id || item.id)}`)
+    navigate(`/product/${encodeURIComponent(item.variant_id || item.variantId || item.product_id || item.id)}`)
   }
   const remove = async (event, item) => {
     event.stopPropagation()

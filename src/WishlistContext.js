@@ -6,13 +6,14 @@ export const WishlistProvider = ({ children }) => {
   const [wishlistItems, setWishlistItems] = useState([]);
 
   const addToWishlist = (item) => {
-    if (!wishlistItems.find(i => i.id === item.id)) {
-      setWishlistItems([...wishlistItems, item]);
-    }
+    setWishlistItems(rows => {
+      const id = String(item.product_id || item.productId || item.id)
+      return rows.some(row => String(row.product_id || row.productId || row.id) === id) ? rows : [...rows, item]
+    })
   };
 
   const removeFromWishlist = (productId) => {
-    setWishlistItems(wishlistItems.filter(item => item.id !== productId));
+    setWishlistItems(rows => rows.filter(item => String(item.product_id || item.productId || item.id) !== String(productId)))
   };
 
   return (

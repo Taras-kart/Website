@@ -25,6 +25,10 @@ export default function CollectionPage({ gender = '', title, eyebrow = 'Attach c
   const [error, setError] = useState('')
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [draftSearch, setDraftSearch] = useState(params.get('q') || '')
+  const selectedGender = gender || params.get('gender') || ''
+  const categoryId = params.get('categoryId') || ''
+  const saleOnly = params.get('sale') === 'true'
+  const excludeInnerwear = params.get('excludeInnerwear') === 'true'
   const brand = fixedBrand || params.get('brand') || ''
   const category = fixedCategory || params.get('category') || ''
   const sort = params.get('sort') || 'featured'
@@ -37,7 +41,7 @@ export default function CollectionPage({ gender = '', title, eyebrow = 'Attach c
     let active = true
     setLoading(true)
     setError('')
-    fetchProducts().then(rows => { if (active) setProducts(rows) }).catch(reason => { if (active) setError(reason.message || 'Unable to load products') }).finally(() => { if (active) setLoading(false) })
+    Promise.all(['WOMEN', 'MEN', 'KIDS'].map(gender => fetchProducts({ gender, limit: 50000 }))).then(groups => groups.flat()).then(rows => { if (active) setProducts(rows) }).catch(reason => { if (active) setError(reason.message || 'Unable to load products') }).finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [])
 
@@ -54,12 +58,15 @@ export default function CollectionPage({ gender = '', title, eyebrow = 'Attach c
     return () => { timers.forEach(window.clearTimeout); window.clearTimeout(clearTimer); window.history.scrollRestoration = previousRestoration }
   }, [loading, location.pathname, location.search])
 
-  const scoped = useMemo(() => products.filter(product => !gender || lower(product.gender) === lower(gender)), [products, gender])
+  const scoped = useMemo(() => products.filter(product => !selectedGender || lower(product.gender) === lower(selectedGender)), [products, selectedGender])
   const brands = useMemo(() => unique(scoped.map(product => product.brand)), [scoped])
   const categories = useMemo(() => unique(scoped.filter(product => !brand || lower(product.brand) === lower(brand)).map(product => product.category)), [scoped, brand])
   const visible = useMemo(() => {
     const rows = scoped.filter(product => {
       const price = getPrice(product, userType).final
+      if (categoryId && String(product.categoryId || product.category_id) !== categoryId) return false
+      if (saleOnly && getPrice(product, userType).original <= price) return false
+      if (excludeInnerwear && /bra|panty|brief|innerwear|camisole|slip/i.test(product.category || '')) return false
       return (!brand || lower(product.brand) === lower(brand)) && (!category || lower(product.category) === lower(category)) && (!min || price >= min) && (!max || price <= max) && matches(product, query)
     })
     return [...rows].sort((a, b) => {
@@ -67,10 +74,11 @@ export default function CollectionPage({ gender = '', title, eyebrow = 'Attach c
       const bPrice = getPrice(b, userType).final
       if (sort === 'price-low') return aPrice - bPrice
       if (sort === 'price-high') return bPrice - aPrice
+      if (sort === 'new') return Number(b.productId || b.id) - Number(a.productId || a.id)
       if (sort === 'name') return a.name.localeCompare(b.name)
       return Number(b.available > 0) - Number(a.available > 0)
     })
-  }, [scoped, brand, category, min, max, query, sort, userType])
+  }, [scoped, brand, category, min, max, query, sort, userType, categoryId, saleOnly, excludeInnerwear])
 
   const update = changes => {
     const next = new URLSearchParams(location.search)
@@ -90,13 +98,13 @@ export default function CollectionPage({ gender = '', title, eyebrow = 'Attach c
     <div className="tara-collection-toolbar">
       <button className="tara-filter-trigger" onClick={() => setFiltersOpen(true)}><FiFilter /> Filters {activeCount > 0 && <b>{activeCount}</b>}</button>
       <p>{loading ? 'Loading collection' : `${visible.length} products`}</p>
-      <label className="tara-sort">Sort by <select value={sort} onChange={event => update({ sort: event.target.value })}><option value="featured">Featured</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="name">Name</option></select><FiChevronDown /></label>
+      <label className="tara-sort">Sort by <select value={sort} onChange={event => update({ sort: event.target.value })}><option value="featured">Featured</option><option value="new">Newest</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="name">Name</option></select><FiChevronDown /></label>
     </div>
     <div className="tara-collection-layout">
       <aside className={`tara-filter-panel ${filtersOpen ? 'is-open' : ''}`}>
         <div className="tara-filter-head"><h2>Filters</h2><button onClick={() => setFiltersOpen(false)}><FiX /></button></div>
         <FilterGroup title="Brand" values={brands} selected={brand} onChange={value => update({ brand: value, category: '' })} />
-        <FilterGroup title="Category" values={categories} selected={category} onChange={value => update({ category: value })} />
+        <FilterGroup title="Category" values={categories} selected={category} onChange={value => update({ category: value, categoryId: '' })} />
         <div className="tara-filter-group"><h3>Price</h3><div className="tara-price-fields"><label>Min<input type="number" min="0" value={min || ''} onChange={event => update({ min: event.target.value })} /></label><label>Max<input type="number" min="0" value={max || ''} onChange={event => update({ max: event.target.value })} /></label></div></div>
         <button className="tara-filter-clear" onClick={clear}>Clear all filters</button>
       </aside>

@@ -25,7 +25,7 @@ export async function addProductToCart(product, variant, quantity = 1) {
     ...variant,
     id: variantId,
     variant_id: variantId,
-    product_id: variant?.product_id || product?.productId || product?.id,
+    product_id: variant?.product_id || product?.productId || product?.product_id || product?.id,
     image_url: variant?.image_url || product?.images?.[0] || '',
     selectedColor: variant?.color || variant?.colour || '',
     selectedSize: variant?.size || '',
@@ -36,7 +36,7 @@ export async function addProductToCart(product, variant, quantity = 1) {
 export async function addProductToWishlist(product, variant) {
   const userId = getUserId()
   if (!userId) throw new Error('Please sign in to save products')
-  const productId = Number(variant?.product_id || product?.productId || product?.id || 0)
+  const productId = Number(variant?.product_id || product?.productId || product?.product_id || product?.id || 0)
   if (!productId) throw new Error('Product information is unavailable')
   const item = {
     ...product,

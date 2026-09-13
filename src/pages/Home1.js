@@ -136,7 +136,7 @@ export default function Home1() {
       return {
         ...category,
         imageCandidates: unique([...(category.imageCandidates || []), category.image, category.representativeImage, category.representative_image, firstImage(match)]),
-        path: `/${gender.toLowerCase()}?category=${encodeURIComponent(category.name)}`
+        path: category.slug ? `/shop/${gender.toLowerCase()}/${encodeURIComponent(category.slug)}` : `/category-display?gender=${gender}&categoryId=${category.id}`
       }
     })
   }
@@ -178,18 +178,18 @@ export default function Home1() {
     <section className="home-gender-section"><SectionHead eyebrow="Explore Attach" title="Shop your way" /><div className="home-gender-grid">{loading ? ['WOMEN', 'MEN', 'KIDS'].map(item => <div className="home-gender-card home-gender-loading" key={item} />) : genderCards.map(item => <Link to={item.path} key={item.gender} className="home-gender-card"><ResilientImage candidates={[item.image]} fallback={fallbackImages[item.gender]} alt={item.title} /><div><h2>{item.title}</h2><span>Shop now <FaArrowRight /></span></div></Link>)}</div></section>
     <Divider label="Women" direction="rtl" />
     {womenCategories.length > 0 && <section className="home-category-section"><SectionHead eyebrow="For her" title="Women shop by category" link="/women" /><CategoryGrid items={womenCategories} gender="WOMEN" /></section>}
-    <ProductSection eyebrow="Prices worth waiting for" title="Price drops" products={discountedProducts.slice(0, 14)} userType={userType} link="/women" />
+    <ProductSection eyebrow="Prices worth waiting for" title="Price drops" products={discountedProducts.slice(0, 14)} userType={userType} link="/category-display?sale=true" />
     <Divider label="New Prices" direction="ltr" />
     <ProductSection eyebrow="Trending now" title="Loved by women" products={productsByGender.WOMEN.filter(product => !isInnerwear(product)).slice(0, 14)} userType={userType} link="/women" />
     <section className="home-men-editorial"><div className="home-men-editorial-main"><ResilientImage candidates={[bestGenderImage('MEN')]} fallback={fallbackImages.MEN} alt="Shop for men" /><div><span>Modern essentials</span><h2>Shop for men</h2><p>Sharp everyday pieces, comfortable fits and dependable style.</p><Link to="/men">Explore men <FaArrowRight /></Link></div></div><div className="home-men-editorial-side">{menCategories.slice(0, 4).map(item => <Link to={item.path} key={item.id}><ResilientImage candidates={item.imageCandidates} fallback={fallbackImages.MEN} alt={item.name} /><strong>{item.name}</strong><i><FaArrowRight /></i></Link>)}</div></section>
     <Divider label="Men" direction="rtl" />
     {menCategories.length > 0 && <section className="home-category-section"><SectionHead eyebrow="For him" title="Men shop by category" link="/men" /><CategoryGrid items={menCategories} gender="MEN" /></section>}
-    <ProductSection eyebrow="Everyday rotation" title="Men's essentials" products={productsByGender.MEN.slice(0, 14)} userType={userType} link="/men" />
-    {brandCards.length > 0 && <section className="home-brand-section"><SectionHead eyebrow="Names you know" title="Shop by brand" link="/brands" /><div className="home-brand-grid">{brandCards.map(brand => <Link to={`/brands?brand=${encodeURIComponent(brand.name)}`} key={brand.name}><ResilientImage candidates={[brand.image]} fallback={fallbackImages[brand.gender] || fallbackImages.WOMEN} alt={brand.name} /><div><strong>{brand.name}</strong><span>Discover brand <FaArrowRight /></span></div></Link>)}</div></section>}
+    <ProductSection eyebrow="Everyday rotation" title="Men's essentials" products={productsByGender.MEN.slice(0, 14)} userType={userType} link="/category-display?gender=MEN" />
+    {brandCards.length > 0 && <section className="home-brand-section"><SectionHead eyebrow="Names you know" title="Shop by brand" link="/brands" /><div className="home-brand-grid">{brandCards.map(brand => <Link to={`/category-display?brand=${encodeURIComponent(brand.name)}`} key={brand.name}><ResilientImage candidates={[brand.image]} fallback={fallbackImages[brand.gender] || fallbackImages.WOMEN} alt={brand.name} /><div><strong>{brand.name}</strong><span>Discover brand <FaArrowRight /></span></div></Link>)}</div></section>}
     <Divider label="Best Value" direction="ltr" />
-    <ProductSection eyebrow="Smart shopping" title="Under ₹499" products={under499.slice(0, 14)} userType={userType} link="/women" />
-    <ProductSection eyebrow="Just landed" title="New arrivals" products={newArrivals.slice(0, 14)} userType={userType} link="/women" />
-    {kidsCategories.length > 0 && <><Divider label="Kids" direction="rtl" /><section className="home-category-section"><SectionHead eyebrow="For little ones" title="Kids shop by category" link="/kids" /><CategoryGrid items={kidsCategories} gender="KIDS" /></section><ProductSection eyebrow="Play-ready picks" title="Kids favourites" products={productsByGender.KIDS.slice(0, 14)} userType={userType} link="/kids" /></>}
-    <ProductSection eyebrow="Curated for you" title="More to explore" products={cleanProducts.slice(0, 14)} userType={userType} link="/women" />
+    <ProductSection eyebrow="Smart shopping" title="Under ₹499" products={under499.slice(0, 14)} userType={userType} link="/category-display?max=499" />
+    <ProductSection eyebrow="Just landed" title="New arrivals" products={newArrivals.slice(0, 14)} userType={userType} link="/category-display?sort=new" />
+    {kidsCategories.length > 0 && <><Divider label="Kids" direction="rtl" /><section className="home-category-section"><SectionHead eyebrow="For little ones" title="Kids shop by category" link="/kids" /><CategoryGrid items={kidsCategories} gender="KIDS" /></section><ProductSection eyebrow="Play-ready picks" title="Kids favourites" products={productsByGender.KIDS.slice(0, 14)} userType={userType} link="/category-display?gender=KIDS" /></>}
+    <ProductSection eyebrow="Curated for you" title="More to explore" products={cleanProducts.slice(0, 14)} userType={userType} link="/category-display" />
   </div>
 }
