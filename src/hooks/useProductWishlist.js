@@ -18,7 +18,6 @@ export default function useProductWishlist(product) {
     try {
       const item = await addProductToWishlist(product, variant)
       addToWishlist(item)
-      setMessage('Saved to wishlist')
     } catch (error) {
       setMessage(error.message || 'Unable to save this product')
     } finally {
