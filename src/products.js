@@ -9,9 +9,9 @@ export function normalizeProduct(row,index=0){
   const ean=text(first.ean_code||first.barcode||row.ean_code||row.barcode)
   const images=[row.front_image_url,row.main_image_url,row.image_url,...(Array.isArray(row.images)?row.images.map(imageValue):[]),first.front_image_url,first.image_url].filter(Boolean)
   const originalB2C=num(first.original_price_b2c||row.original_price_b2c||first.mrp||row.mrp)
-  const finalB2C=num(first.final_price_b2c||row.final_price_b2c||first.sale_price||row.sale_price||originalB2C)
+  const finalB2C=num(first.final_price_b2c??row.final_price_b2c??first.sale_price??row.sale_price??originalB2C)
   const originalB2B=num(first.original_price_b2b||row.original_price_b2b||first.mrp||row.mrp)
-  const finalB2B=num(first.final_price_b2b||row.final_price_b2b||first.sale_price||row.sale_price||originalB2B)
+  const finalB2B=num(first.final_price_b2b??row.final_price_b2b??first.sale_price??row.sale_price??originalB2B)
   return {...row,id:row.product_id||row.id||index+1,productId:row.product_id||row.id,variantId:first.variant_id||first.id||row.variant_id,name:text(row.product_name||row.name||row.title||'Product'),brand:text(row.brand_name||row.brand||'Tara'),gender:text(row.gender).toUpperCase(),category:text(row.category_name||row.category||row.category_slug),design:text(row.design_code||row.style_code||row.product_id||row.id),ean,images:images.length?images:[ean?`https://res.cloudinary.com/${cloud}/image/upload/f_auto,q_auto/products/${ean}`:'/images/women/women20.jpeg'],variants,originalB2C,finalB2C,originalB2B,finalB2B,available:num(first.available_qty??first.on_hand??row.available_qty??row.on_hand),color:text(first.colour||first.color||row.colour||row.color),size:text(first.size||row.size)}
 }
 

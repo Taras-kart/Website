@@ -2,124 +2,67 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { FiChevronDown, FiFilter, FiSearch, FiX } from 'react-icons/fi'
 import { useLocation, useNavigate } from 'react-router-dom'
 import ProductCard from './ProductCard'
-import { fetchProducts, getPrice } from '../services/productsApi'
+import { fetchFacets, fetchProductPage } from '../services/productsApi'
 import './CollectionPage.css'
 
-const clean = value => String(value || '').trim()
-const lower = value => clean(value).toLowerCase()
-const unique = values => [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b))
-
-function matches(product, query) {
-  if (!query) return true
-  const words = lower(query).split(/\s+/).filter(Boolean)
-  const haystack = lower([product.name, product.brand, product.category, product.gender, product.designKey].join(' '))
-  return words.every(word => haystack.includes(word))
-}
-
-export default function CollectionPage({ gender = '', title, eyebrow = 'Attach collections', description = '', fixedBrand = '', fixedCategory = '', searchMode = false }) {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const params = useMemo(() => new URLSearchParams(location.search), [location.search])
-  const [products, setProducts] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [filtersOpen, setFiltersOpen] = useState(false)
-  const [draftSearch, setDraftSearch] = useState(params.get('q') || '')
-  const selectedGender = gender || params.get('gender') || ''
-  const categoryId = params.get('categoryId') || ''
-  const saleOnly = params.get('sale') === 'true'
-  const excludeInnerwear = params.get('excludeInnerwear') === 'true'
-  const brand = fixedBrand || params.get('brand') || ''
-  const category = fixedCategory || params.get('category') || ''
-  const sort = params.get('sort') || 'featured'
-  const min = Number(params.get('min') || 0)
-  const max = Number(params.get('max') || 0)
-  const query = params.get('q') || ''
-  const userType = (sessionStorage.getItem('userType') || localStorage.getItem('userType') || 'B2C').toUpperCase()
-
-  useEffect(() => {
-    let active = true
-    setLoading(true)
-    setError('')
-    Promise.all(['WOMEN', 'MEN', 'KIDS'].map(gender => fetchProducts({ gender, limit: 50000 }))).then(groups => groups.flat()).then(rows => { if (active) setProducts(rows) }).catch(reason => { if (active) setError(reason.message || 'Unable to load products') }).finally(() => { if (active) setLoading(false) })
-    return () => { active = false }
-  }, [])
-
-  useEffect(() => {
-    if (loading || typeof window === 'undefined') return undefined
-    let saved
-    try { saved = JSON.parse(sessionStorage.getItem('attach:return-position') || 'null') } catch { saved = null }
-    if (!saved || saved.url !== `${location.pathname}${location.search}` || Date.now() - Number(saved.time || 0) > 1800000) return undefined
-    const previousRestoration = window.history.scrollRestoration
-    window.history.scrollRestoration = 'manual'
-    const restore = () => window.scrollTo({ top: Number(saved.y || 0), behavior: 'auto' })
-    const timers = [0, 100, 300, 700, 1200, 1800].map(delay => window.setTimeout(restore, delay))
-    const clearTimer = window.setTimeout(() => sessionStorage.removeItem('attach:return-position'), 2200)
-    return () => { timers.forEach(window.clearTimeout); window.clearTimeout(clearTimer); window.history.scrollRestoration = previousRestoration }
-  }, [loading, location.pathname, location.search])
-
-  const scoped = useMemo(() => products.filter(product => !selectedGender || lower(product.gender) === lower(selectedGender)), [products, selectedGender])
-  const brands = useMemo(() => unique(scoped.map(product => product.brand)), [scoped])
-  const categories = useMemo(() => unique(scoped.filter(product => !brand || lower(product.brand) === lower(brand)).map(product => product.category)), [scoped, brand])
-  const visible = useMemo(() => {
-    const rows = scoped.filter(product => {
-      const price = getPrice(product, userType).final
-      if (categoryId && String(product.categoryId || product.category_id) !== categoryId) return false
-      if (saleOnly && getPrice(product, userType).original <= price) return false
-      if (excludeInnerwear && /bra|panty|brief|innerwear|camisole|slip/i.test(product.category || '')) return false
-      return (!brand || lower(product.brand) === lower(brand)) && (!category || lower(product.category) === lower(category)) && (!min || price >= min) && (!max || price <= max) && matches(product, query)
-    })
-    return [...rows].sort((a, b) => {
-      const aPrice = getPrice(a, userType).final
-      const bPrice = getPrice(b, userType).final
-      if (sort === 'price-low') return aPrice - bPrice
-      if (sort === 'price-high') return bPrice - aPrice
-      if (sort === 'new') return Number(b.productId || b.id) - Number(a.productId || a.id)
-      if (sort === 'name') return a.name.localeCompare(b.name)
-      return Number(b.available > 0) - Number(a.available > 0)
-    })
-  }, [scoped, brand, category, min, max, query, sort, userType, categoryId, saleOnly, excludeInnerwear])
-
-  const update = changes => {
-    const next = new URLSearchParams(location.search)
-    Object.entries(changes).forEach(([key, value]) => value ? next.set(key, value) : next.delete(key))
-    navigate(`${location.pathname}${next.toString() ? `?${next}` : ''}`, { replace: false })
+export default function CollectionPage({gender='',title,eyebrow='Attach collections',description='',initialCategorySlug='',searchMode=false}) {
+  const location=useLocation(),navigate=useNavigate()
+  const params=useMemo(()=>new URLSearchParams(location.search),[location.search])
+  const [data,setData]=useState({products:[],total:0,hasMore:false})
+  const [facets,setFacets]=useState({brands:[],categories:[]})
+  const [loading,setLoading]=useState(true),[error,setError]=useState(''),[filtersOpen,setFiltersOpen]=useState(false)
+  const [draftSearch,setDraftSearch]=useState(params.get('q')||'')
+  const selectedGender=params.get('gender')||gender,brand=params.get('brand')||'',categoryId=params.get('categoryId')||'',sort=params.get('sort')||'featured'
+  const currentPage=Math.max(1,Number(params.get('page'))||1),limit=24
+  const query=params.get('q')||'',min=params.get('min')||'',max=params.get('max')||''
+  const userType=(sessionStorage.getItem('userType')||localStorage.getItem('userType')||'B2C').toUpperCase()
+  useEffect(()=>setDraftSearch(query),[query])
+  useEffect(()=>{
+    const controller=new AbortController()
+    setLoading(true);setError('')
+    const request={...Object.fromEntries(params),gender:selectedGender,categoryId,categorySlug:categoryId?'':initialCategorySlug,offset:(currentPage-1)*limit,limit}
+    fetchProductPage(request,{signal:controller.signal}).then(result=>{if(!controller.signal.aborted)setData(result)}).catch(reason=>{if(!controller.signal.aborted)setError(reason.message)}).finally(()=>{if(!controller.signal.aborted)setLoading(false)})
+    return()=>controller.abort()
+  },[params,selectedGender,categoryId,initialCategorySlug,currentPage])
+  useEffect(()=>{
+    let active=true
+    fetchFacets({gender:selectedGender,brand}).then(result=>{if(active)setFacets(result)}).catch(()=>{})
+    return()=>{active=false}
+  },[selectedGender,brand])
+  const categories=facets.categories.filter(category=>Number(category.level)>0)
+  const selectedCategory=categories.find(category=>String(category.id)===categoryId||(!categoryId&&category.slug===initialCategorySlug))
+  const categoryPath=category=>{
+    const names=[],visited=new Set();let current=category
+    while(current&&!visited.has(current.id)){visited.add(current.id);names.unshift(current.name);const parent=current.parent_id;current=facets.categories.find(row=>Number(row.id)===Number(parent))}
+    return names.join(' / ')
   }
-  const clear = () => navigate(location.pathname)
-  const heading = title || (query ? `Results for “${query}”` : category || brand || `${gender || 'All'} collection`)
-  const activeCount = [brand, category, min, max].filter(Boolean).length
-
+  const update=changes=>{
+    const next=new URLSearchParams(location.search)
+    if(gender&&!next.has('gender'))next.set('gender',gender)
+    if(initialCategorySlug&&!categoryId&&selectedCategory&&!Object.hasOwn(changes,'categoryId'))next.set('categoryId',selectedCategory.id)
+    if(!Object.hasOwn(changes,'page'))next.delete('page')
+    Object.entries(changes).forEach(([key,value])=>value?next.set(key,value):next.delete(key))
+    navigate(`${initialCategorySlug?'/category-display':location.pathname}?${next}`)
+  }
+  const clear=()=>navigate(`/category-display${gender?`?gender=${gender}`:''}`)
+  const activeCount=[brand,selectedCategory,min,max,query,params.get('inStock')].filter(Boolean).length
+  const heading=title||selectedCategory?.name||brand||(query?`Results for ${query}`:'All products')
   return <main className="tara-collection">
-    <section className="tara-collection-hero">
-      <div><span>{eyebrow}</span><h1>{heading}</h1><p>{description || 'Explore thoughtfully selected styles, live availability and prices from Attach.'}</p></div>
-      <div className="tara-collection-stat"><strong>{loading ? '—' : visible.length}</strong><span>styles available</span></div>
-    </section>
-    {searchMode && <form className="tara-collection-search" onSubmit={event => { event.preventDefault(); update({ q: draftSearch }) }}><FiSearch /><input value={draftSearch} onChange={event => setDraftSearch(event.target.value)} placeholder="Search by style, brand or category" /><button>Search</button></form>}
-    <div className="tara-collection-toolbar">
-      <button className="tara-filter-trigger" onClick={() => setFiltersOpen(true)}><FiFilter /> Filters {activeCount > 0 && <b>{activeCount}</b>}</button>
-      <p>{loading ? 'Loading collection' : `${visible.length} products`}</p>
-      <label className="tara-sort">Sort by <select value={sort} onChange={event => update({ sort: event.target.value })}><option value="featured">Featured</option><option value="new">Newest</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="name">Name</option></select><FiChevronDown /></label>
-    </div>
-    <div className="tara-collection-layout">
-      <aside className={`tara-filter-panel ${filtersOpen ? 'is-open' : ''}`}>
-        <div className="tara-filter-head"><h2>Filters</h2><button onClick={() => setFiltersOpen(false)}><FiX /></button></div>
-        <FilterGroup title="Brand" values={brands} selected={brand} onChange={value => update({ brand: value, category: '' })} />
-        <FilterGroup title="Category" values={categories} selected={category} onChange={value => update({ category: value, categoryId: '' })} />
-        <div className="tara-filter-group"><h3>Price</h3><div className="tara-price-fields"><label>Min<input type="number" min="0" value={min || ''} onChange={event => update({ min: event.target.value })} /></label><label>Max<input type="number" min="0" value={max || ''} onChange={event => update({ max: event.target.value })} /></label></div></div>
-        <button className="tara-filter-clear" onClick={clear}>Clear all filters</button>
-      </aside>
-      {filtersOpen && <button className="tara-filter-backdrop" onClick={() => setFiltersOpen(false)} aria-label="Close filters" />}
-      <section className="tara-collection-results">
-        {error && <div className="tara-collection-message"><h2>We could not load this collection</h2><p>{error}</p><button onClick={() => window.location.reload()}>Try again</button></div>}
-        {loading && <div className="tara-product-grid">{Array.from({ length: 8 }, (_, index) => <div className="tara-product-skeleton" key={index}><i /><span /><small /></div>)}</div>}
-        {!loading && !error && visible.length > 0 && <div className="tara-product-grid">{visible.map(product => <ProductCard key={product.designKey || product.id} product={product} userType={userType} />)}</div>}
-        {!loading && !error && visible.length === 0 && <div className="tara-collection-message"><h2>No matching styles yet</h2><p>Change a filter or clear the current selection.</p><button onClick={clear}>View all products</button></div>}
-      </section>
-    </div>
+    <section className="tara-collection-hero"><div><span>{eyebrow}</span><h1>{heading}</h1><p>{selectedCategory?categoryPath(selectedCategory):description||'Find your next favourite style.'}</p></div><div className="tara-collection-stat"><strong>{loading?'...':data.total}</strong><span>styles</span></div></section>
+    {searchMode&&<form className="tara-collection-search" onSubmit={event=>{event.preventDefault();update({q:draftSearch})}}><FiSearch/><input aria-label="Search products" value={draftSearch} onChange={event=>setDraftSearch(event.target.value)} placeholder="Search by style, brand or category"/><button>Search</button></form>}
+    <div className="tara-collection-toolbar"><button className="tara-filter-trigger" onClick={()=>setFiltersOpen(true)}><FiFilter/> Filters {activeCount>0&&<b>{activeCount}</b>}</button><p>{loading?'Loading styles':`${data.total} styles`}</p><label className="tara-sort">Sort by<select value={sort} onChange={event=>update({sort:event.target.value})}><option value="featured">Featured</option><option value="new">Newest</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="name">Name</option></select><FiChevronDown/></label></div>
+    <div className="tara-filter-chips">{brand&&<button onClick={()=>update({brand:'',categoryId:''})}>{brand} <FiX/></button>}{selectedCategory&&<button onClick={()=>update({categoryId:''})}>{categoryPath(selectedCategory)} <FiX/></button>}{query&&<button onClick={()=>update({q:''})}>Search: {query} <FiX/></button>}</div>
+    <div className="tara-collection-layout"><aside className={`tara-filter-panel ${filtersOpen?'is-open':''}`}><div className="tara-filter-head"><h2>Filters</h2><button aria-label="Close filters" onClick={()=>setFiltersOpen(false)}><FiX/></button></div>
+      {!gender&&<div className="tara-filter-group"><h3>Department</h3><select aria-label="Department" value={selectedGender} onChange={event=>update({gender:event.target.value,categoryId:''})}><option value="">All departments</option>{['WOMEN','MEN','KIDS'].map(value=><option key={value}>{value}</option>)}</select></div>}
+      <div className="tara-filter-group"><h3>Brand</h3><div className="tara-filter-options"><label><input type="radio" name="brand" checked={!brand} onChange={()=>update({brand:'',categoryId:''})}/>All brands</label>{facets.brands.filter(row=>row.count>0||row.name===brand).map(row=><label key={row.name}><input type="radio" name="brand" checked={brand===row.name} onChange={()=>update({brand:row.name,categoryId:''})}/><span>{row.name}</span></label>)}</div></div>
+      <div className="tara-filter-group"><h3>Category and subcategory</h3><select aria-label="Category and subcategory" value={selectedCategory?.id||''} onChange={event=>update({categoryId:event.target.value})}><option value="">All categories</option>{categories.map(row=><option key={row.id} value={row.id}>{categoryPath(row)}</option>)}</select></div>
+      <div className="tara-filter-group"><h3>Price</h3><div className="tara-price-fields"><label>Min<input type="number" min="0" value={min} onChange={event=>update({min:event.target.value})}/></label><label>Max<input type="number" min="0" value={max} onChange={event=>update({max:event.target.value})}/></label></div></div>
+      <div className="tara-filter-group"><label><input type="checkbox" checked={params.get('inStock')==='true'} onChange={event=>update({inStock:event.target.checked?'true':''})}/> In stock only</label></div><button className="tara-filter-clear" onClick={clear}>Clear all filters</button>
+    </aside>{filtersOpen&&<button className="tara-filter-backdrop" onClick={()=>setFiltersOpen(false)} aria-label="Close filters"/>}<section className="tara-collection-results" aria-busy={loading}>
+      {error&&<div className="tara-collection-message" role="alert"><h2>Unable to load products</h2><p>{error}</p><button onClick={()=>window.location.reload()}>Try again</button></div>}
+      {loading&&<div className="tara-product-grid">{Array.from({length:8},(_,index)=><div className="tara-product-skeleton" key={index}><i/><span/><small/></div>)}</div>}
+      {!loading&&!error&&data.products.length>0&&<><div className="tara-product-grid">{data.products.map(product=><ProductCard key={product.designKey||product.id} product={product} userType={userType}/>)}</div><div className="tara-pagination"><button disabled={currentPage===1} onClick={()=>update({page:currentPage-1})}>Previous</button><span>Page {currentPage} of {Math.max(1,Math.ceil(data.total/limit))}</span><button disabled={!data.hasMore} onClick={()=>update({page:currentPage+1})}>Next</button></div></>}
+      {!loading&&!error&&!data.products.length&&<div className="tara-collection-message"><h2>No matching styles</h2><p>Try changing a filter.</p><button onClick={clear}>View all products</button></div>}
+    </section></div>
   </main>
-}
-
-function FilterGroup({ title, values, selected, onChange }) {
-  if (!values.length) return null
-  return <div className="tara-filter-group"><h3>{title}</h3><div className="tara-filter-options"><label><input type="radio" checked={!selected} onChange={() => onChange('')} /><span>All {title.toLowerCase()}s</span></label>{values.map(value => <label key={value}><input type="radio" checked={lower(selected) === lower(value)} onChange={() => onChange(value)} /><span>{value}</span></label>)}</div></div>
 }

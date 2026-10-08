@@ -1,4 +1,4 @@
-const BASE=(import.meta.env.VITE_API_BASE||'https://taras-kart-backend.vercel.app').replace(/\/+$/,'')
+const BASE=(process.env.REACT_APP_API_BASE||'https://taras-kart-backend.vercel.app').replace(/\/+$/,'')
 const token=()=>localStorage.getItem('tk_id_token')||localStorage.getItem('userToken')||sessionStorage.getItem('tk_id_token')||''
 
 export async function request(path,options={}){

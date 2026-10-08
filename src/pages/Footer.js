@@ -7,6 +7,7 @@ import {
   FaPhoneAlt
 } from 'react-icons/fa'
 import './Footer.css'
+import BrandMark from '../components/BrandMark'
 
 export default function Footer() {
   return (
@@ -14,11 +15,7 @@ export default function Footer() {
       <div className="footer-main">
         <div className="footer-brand">
           <Link to="/" className="footer-logo-link" aria-label="Attach home">
-            <img
-              src="/logo1.png"
-              className="footer-logo"
-              alt="Attach"
-            />
+            <BrandMark className="footer-logo" />
           </Link>
 
           <p>

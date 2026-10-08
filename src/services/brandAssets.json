@@ -1,0 +1,60 @@
+{
+  "Twin Birds": {
+    "image": "/images/brands/twin-birds.png",
+    "source": "https://twinbirds.co.in/cdn/shop/files/TwinBirds_Logo_1.png?v=1752821946"
+  },
+  "Charak": {
+    "image": "/images/brands/charak.png",
+    "source": "https://gocharak.com/wp-content/uploads/2021/09/cropped-charak-logo_new-test_512.png"
+  },
+  "Intimacy": {
+    "image": "/images/brands/intimacy.png",
+    "source": "https://vnhnaiduhall.com/cdn/shop/files/Intimacy_a5676074-e8ec-44be-a268-07547c7a446e.png?v=1782468442&width=400"
+  },
+  "Jockey": {
+    "image": "/images/brands/jockey.png",
+    "source": "https://www.jockey.in/cdn/shop/files/JOCKEY_150TH_LOGO_2.webp?v=1775798814&width=200"
+  },
+  "Gokul": {
+    "image": "/images/brands/gokul.jpg",
+    "source": "https://yt3.googleusercontent.com/hJlHL3ht5zbTI3BIMT-BJKKKKXPd6M5-g9NxuS1lY16CNwuP2GMv1EsFBPH1hWmmxwyDpWKnNw=s900-c-k-c0x00ffffff-no-rj",
+    "page": "https://www.youtube.com/@BLUEBULLHOSERIES"
+  },
+  "Pomex": {
+    "image": "/images/brands/pomex.svg",
+    "source": "https://poomex.in/content/uploads/2024/03/Poomex_logo_163x60.svg"
+  },
+  "Milton": {
+    "image": "/images/brands/milton.png",
+    "source": "https://www.miltongarments.com/wp-content/uploads/2025/03/logo-228x68.png"
+  },
+  "Quick Dry": {
+    "image": "/images/brands/quick-dry.jpg",
+    "source": "https://www.quickdry.in/wp-content/uploads/2026/01/QD.jpg"
+  },
+  "Selvas": {
+    "image": "/images/brands/selvas.png",
+    "source": "https://www.selvas.in/cdn/shop/files/Selvas_Kids_box_Logo_689b9f23-4142-4056-99b8-2bb12ead46a7.png?crop=center&height=341&v=1730872888&width=732"
+  },
+  "Cucumber": {
+    "image": "/images/brands/cucumber.png",
+    "source": "https://cucumbers.co.in/images/logo.png"
+  },
+  "Dazzle Prime": {
+    "image": "/images/brands/dazzle-prime.png",
+    "source": "https://cdn.shopify.com/s/files/1/0661/5937/8547/files/transparent_logo.png?v=1757670848"
+  },
+  "Techno Sport": {
+    "image": "/images/brands/techno-sport.svg",
+    "source": "https://ik.imagekit.io/technosport/techno-web-img/icons/technosport_logo_primary.svg"
+  },
+  "Dixcy Scott": {
+    "image": "/images/brands/dixcy-scott.png",
+    "source": "https://modenik.in/wp-content/uploads/2022/07/Dixcy-Logo.png"
+  },
+  "Aswati": {
+    "image": "/images/brands/aswati.jpg",
+    "source": "https://yt3.googleusercontent.com/rvRHT6B6W7rmE9XIrxyZTyFoo1rOqxpr16QwBt_MqNqiTQGEd3dytrqhxvMOyHR_SZwfOIwweMc=s900-c-k-c0x00ffffff-no-rj",
+    "page": "https://www.youtube.com/@aswatiofficial3375"
+  }
+}

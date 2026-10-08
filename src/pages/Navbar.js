@@ -4,9 +4,10 @@ import { FiHeart, FiMenu, FiSearch, FiShoppingCart, FiUser, FiX } from 'react-ic
 import './Navbar.css'
 import { useWishlist } from '../WishlistContext'
 import { useCart } from '../CartContext'
+import BrandMark from '../components/BrandMark'
+import { apiRequest } from '../services/api'
+import { displayBrand } from '../services/brands'
 
-const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app'
-const API_BASE = ((typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) || DEFAULT_API_BASE).replace(/\/+$/, '')
 const CLOUD = (typeof process !== 'undefined' && process.env && process.env.REACT_APP_CLOUDINARY_CLOUD) || 'deymt9uyh'
 const RECENT_KEY = 'tara_recently_viewed_products'
 const FALLBACKS = { WOMEN: '/images/defaults/attach-women.svg', MEN: '/images/defaults/attach-men.svg', KIDS: '/images/defaults/attach-kids.svg', DEFAULT: '/images/placeholder.jpg' }
@@ -14,9 +15,6 @@ const FALLBACKS = { WOMEN: '/images/defaults/attach-women.svg', MEN: '/images/de
 const clean = value => String(value || '').trim()
 const normalize = value => clean(value).toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim()
 const unique = values => [...new Set(values.map(clean).filter(Boolean))]
-const tokensOf = value => normalize(value).split(' ').filter(Boolean)
-const productText = product => normalize([product?.product_name, product?.name, product?.brand, product?.brand_name, product?.category_name, product?.category, product?.category_slug, product?.pattern_code, product?.fit_type, product?.fit, product?.color, product?.colour, product?.gender].filter(Boolean).join(' '))
-const matchesQuery = (product, query) => tokensOf(query).every(token => productText(product).includes(token))
 
 const imageCandidates = product => {
   const ean = clean(product?.ean_code)
@@ -30,8 +28,7 @@ const groupProducts = rows => {
     if (!productId) return
     const base = [normalize(row?.brand || row?.brand_name), normalize(row?.product_name || row?.name), normalize(row?.category_name || row?.category)]
     const design = normalize(row?.design_code || row?.pattern_code || row?.style_code || row?.mark_code || row?.model_code)
-    const colour = normalize(row?.color || row?.colour) || 'default'
-    const key = `${base.join('|')}|${design ? `design:${design}` : `legacy:${colour}`}`
+    const key = row.style_key || [...base, design, normalize(row?.gender), String(row?.category_id || ''), normalize(row?.fit_type), String(row?.pack_size || 1)].join('|')
     if (!groups.has(key)) groups.set(key, { ...row, id: productId, product_id: productId, variants: [], images: [] })
     const group = groups.get(key)
     group.variants.push(row)
@@ -43,9 +40,9 @@ const groupProducts = rows => {
 const priceFor = (product, userType) => {
   const offers = userType === 'B2B' ? [product?.final_price_b2b, product?.sale_price, product?.mrp, product?.original_price_b2b] : [product?.final_price_b2c, product?.sale_price, product?.mrp, product?.original_price_b2c]
   const originals = userType === 'B2B' ? [product?.original_price_b2b, product?.mrp, product?.final_price_b2b] : [product?.original_price_b2c, product?.mrp, product?.final_price_b2c]
-  const offer = offers.map(Number).find(value => Number.isFinite(value) && value > 0) || 0
+  const offer = offers.filter(value => value != null && value !== '').map(Number).find(value => Number.isFinite(value) && value >= 0) ?? 0
   const original = originals.map(Number).find(value => Number.isFinite(value) && value > 0) || offer
-  const discount = original > offer && offer > 0 ? Math.round(((original - offer) / original) * 100) : 0
+  const discount = original > offer && original > 0 ? Math.round(((original - offer) / original) * 100) : 0
   return { offer, original, discount }
 }
 
@@ -82,8 +79,7 @@ function SearchPopup({ open, onClose, userType }) {
       setInitialLabel('Recently viewed')
     } else {
       setInitialLabel('Popular right now')
-      fetch(`${API_BASE}/api/products?limit=24&hasImage=true`, { cache: 'no-store' })
-        .then(response => response.ok ? response.json() : [])
+      apiRequest('/api/products/catalogue?limit=4')
         .then(data => setProducts(groupProducts(Array.isArray(data) ? data : data?.products || []).slice(0, 4)))
         .catch(() => setProducts([]))
     }
@@ -105,14 +101,10 @@ function SearchPopup({ open, onClose, userType }) {
       setLoading(true)
       try {
         const encoded = encodeURIComponent(value)
-        const [productResponse, suggestionResponse] = await Promise.all([
-          fetch(`${API_BASE}/api/products/search?q=${encoded}`, { signal: controller.signal, cache: 'no-store' }),
-          fetch(`${API_BASE}/api/products/suggest?q=${encoded}`, { signal: controller.signal, cache: 'no-store' })
-        ])
-        const productData = productResponse.ok ? await productResponse.json() : []
-        const suggestionData = suggestionResponse.ok ? await suggestionResponse.json() : []
-        setProducts(groupProducts(Array.isArray(productData) ? productData : productData?.products || []).filter(product => matchesQuery(product, value)).slice(0, 4))
-        setSuggestions(unique(Array.isArray(suggestionData) ? suggestionData : []).slice(0, 6))
+        const productData = await apiRequest(`/api/products/catalogue?q=${encoded}&limit=4`, { signal: controller.signal })
+        const found = groupProducts(productData.products || [])
+        setProducts(found)
+        setSuggestions(unique(found.map(product => product.product_name || product.name)).slice(0, 6))
       } catch {
         if (!controller.signal.aborted) { setProducts([]); setSuggestions([]) }
       } finally {
@@ -167,7 +159,7 @@ function SearchPopup({ open, onClose, userType }) {
           {loading ? <div className="tara-search-modal__grid">{[1, 2, 3, 4].map(item => <div className="tara-search-card tara-search-card--loading" key={item} />)}</div> : products.length ? (
             <div className="tara-search-modal__grid">{products.map(product => {
               const price = priceFor(product, userType)
-              return <button type="button" className="tara-search-card" key={product.product_id || product.id} onClick={() => openProduct(product)}><div className="tara-search-card__image"><SearchImage product={product} /></div><span className="tara-search-card__brand">{clean(product.brand || product.brand_name)}</span><strong>{clean(product.product_name || product.name)}</strong>{price.offer > 0 && <div className="tara-search-card__price"><b>₹{money(price.offer)}</b>{price.original > price.offer && <del>₹{money(price.original)}</del>}{price.discount > 0 && <em>{price.discount}% OFF</em>}</div>}</button>
+              return <button type="button" className="tara-search-card" key={product.product_id || product.id} onClick={() => openProduct(product)}><div className="tara-search-card__image"><SearchImage product={product} /></div><span className="tara-search-card__brand">{displayBrand(product.brand || product.brand_name)}</span><strong>{clean(product.product_name || product.name)}</strong>{price.offer >= 0 && <div className="tara-search-card__price"><b>₹{money(price.offer)}</b>{price.original > price.offer && <del>₹{money(price.original)}</del>}{price.discount > 0 && <em>{price.discount}% OFF</em>}</div>}</button>
             })}</div>
           ) : <div className="tara-search-modal__empty"><FiSearch /><strong>No matching products</strong><span>Try another product, colour, brand or category.</span></div>}
         </div>
@@ -205,5 +197,5 @@ export default function NavbarFinal() {
   const active = path => location.pathname === path
   const closeNavigation = () => { setMobileOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }) }
 
-  return <header className="tara-navbar"><div className="tara-navbar__row"><Link to={homePath} className="tara-navbar__brand" onClick={closeNavigation} aria-label="Attach home"><img src="/logo1.png" alt="Attach" /></Link><nav className="tara-navbar__links" aria-label="Main navigation">{navLinks.map(link => <Link key={link.path} to={link.path} onClick={closeNavigation} className={active(link.path) ? 'is-active' : ''}>{link.name}</Link>)}</nav><div className="tara-navbar__actions">{!isB2B && <button type="button" className="tara-navbar__icon" aria-label="Search" onClick={() => setSearchOpen(true)}><FiSearch /></button>}{!isB2B && <Link to="/wishlist" className={active('/wishlist') ? 'tara-navbar__icon is-active' : 'tara-navbar__icon'} aria-label="Wishlist"><FiHeart />{wishlistItems.length > 0 && <span className="tara-navbar__count">{Math.min(wishlistItems.length, 99)}</span>}</Link>}{!isB2B && <Link to="/cart" className={active('/cart') ? 'tara-navbar__icon is-active' : 'tara-navbar__icon'} aria-label="Cart"><FiShoppingCart />{cartItems.length > 0 && <span className="tara-navbar__count">{Math.min(cartItems.length, 99)}</span>}</Link>}<Link to="/profile" className={active('/profile') ? 'tara-navbar__icon is-active' : 'tara-navbar__icon'} aria-label="Profile"><FiUser /></Link><button type="button" className="tara-navbar__icon tara-navbar__menu-button" aria-label={mobileOpen ? 'Close menu' : 'Open menu'} aria-expanded={mobileOpen} onClick={() => setMobileOpen(value => !value)}>{mobileOpen ? <FiX /> : <FiMenu />}</button></div></div>{mobileOpen && <div className="tara-mobile-menu"><nav aria-label="Mobile navigation"><Link to={homePath} onClick={closeNavigation} className={active(homePath) ? 'is-active' : ''}>Home</Link>{navLinks.map(link => <Link key={link.path} to={link.path} onClick={closeNavigation} className={active(link.path) ? 'is-active' : ''}>{link.name}</Link>)}</nav></div>}<SearchPopup open={searchOpen} onClose={() => setSearchOpen(false)} userType={String(userType).toUpperCase()} /></header>
+  return <header className="tara-navbar"><div className="tara-navbar__row"><Link to={homePath} className="tara-navbar__brand" onClick={closeNavigation} aria-label="Attach home"><BrandMark /></Link><nav className="tara-navbar__links" aria-label="Main navigation">{navLinks.map(link => <Link key={link.path} to={link.path} onClick={closeNavigation} className={active(link.path) ? 'is-active' : ''}>{link.name}</Link>)}</nav><div className="tara-navbar__actions">{!isB2B && <button type="button" className="tara-navbar__icon" aria-label="Search" onClick={() => setSearchOpen(true)}><FiSearch /></button>}{!isB2B && <Link to="/wishlist" className={active('/wishlist') ? 'tara-navbar__icon is-active' : 'tara-navbar__icon'} aria-label="Wishlist"><FiHeart />{wishlistItems.length > 0 && <span className="tara-navbar__count">{Math.min(wishlistItems.length, 99)}</span>}</Link>}{!isB2B && <Link to="/cart" className={active('/cart') ? 'tara-navbar__icon is-active' : 'tara-navbar__icon'} aria-label="Cart"><FiShoppingCart />{cartItems.length > 0 && <span className="tara-navbar__count">{Math.min(cartItems.length, 99)}</span>}</Link>}<Link to="/profile" className={active('/profile') ? 'tara-navbar__icon is-active' : 'tara-navbar__icon'} aria-label="Profile"><FiUser /></Link><button type="button" className="tara-navbar__icon tara-navbar__menu-button" aria-label={mobileOpen ? 'Close menu' : 'Open menu'} aria-expanded={mobileOpen} onClick={() => setMobileOpen(value => !value)}>{mobileOpen ? <FiX /> : <FiMenu />}</button></div></div>{mobileOpen && <div className="tara-mobile-menu"><nav aria-label="Mobile navigation"><Link to={homePath} onClick={closeNavigation} className={active(homePath) ? 'is-active' : ''}>Home</Link>{navLinks.map(link => <Link key={link.path} to={link.path} onClick={closeNavigation} className={active(link.path) ? 'is-active' : ''}>{link.name}</Link>)}</nav></div>}<SearchPopup open={searchOpen} onClose={() => setSearchOpen(false)} userType={String(userType).toUpperCase()} /></header>
 }

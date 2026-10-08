@@ -36,8 +36,8 @@ const isValidForGender = (item, gender) => {
   return true
 }
 const productPrice = (product, userType) => userType === 'B2B'
-  ? { original: number(product?.originalB2B || product?.original_price_b2b), final: number(product?.finalB2B || product?.final_price_b2b) }
-  : { original: number(product?.originalB2C || product?.original_price_b2c), final: number(product?.finalB2C || product?.final_price_b2c) }
+  ? { original: number(product?.originalB2B || product?.original_price_b2b), final: number(product?.finalB2B ?? product?.final_price_b2b) }
+  : { original: number(product?.originalB2C || product?.original_price_b2c), final: number(product?.finalB2C ?? product?.final_price_b2c) }
 const groupHomepageProducts = rows => {
   const groups = new Map()
   ;(Array.isArray(rows) ? rows : []).forEach(product => {
@@ -79,7 +79,7 @@ export default function Home1() {
     const load = async () => {
       const [homepageResult, productResult, categoryResult] = await Promise.allSettled([
         fetch(`${API_BASE}/api/homepage-images`, { cache: 'no-store' }).then(response => response.ok ? response.json() : []),
-        fetchProducts({ limit: 50000, hasImage: true }),
+        fetchProducts({ limit: 36 }),
         fetchCategories()
       ])
       if (!active) return

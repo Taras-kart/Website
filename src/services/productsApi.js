@@ -1,4 +1,5 @@
 import { apiRequest } from './api'
+import { displayBrand } from './brands'
 
 const cloud = process.env.REACT_APP_CLOUDINARY_CLOUD || 'deymt9uyh'
 const clean = value => String(value || '').trim()
@@ -17,13 +18,7 @@ const explicitImages = row => unique([
   ...(Array.isArray(row?.images) ? row.images.map(imageValue) : [])
 ])
 const designCode = row => clean(row?.design_code || row?.pattern_code || row?.style_code || row?.mark_code || row?.model_code)
-const productGroupKey = product => {
-  const base = [normalize(product.brand), normalize(product.name), normalize(product.category), normalize(product.categoryPath)].filter(Boolean).join('|')
-  const design = designCode(product)
-  if (design) return `${base}|design:${normalize(design)}`
-  const colour = normalize(product.color || product.colour || product.colours?.[0]) || 'default'
-  return `${base}|legacy:${colour}`
-}
+export const productGroupKey = product => product.style_key || [normalize(product.rawBrand || product.brand_name || product.brand), normalize(product.name || product.product_name), normalize(product.gender), String(product.categoryId || product.category_id || product.category || ''), normalize(designCode(product)), normalize(product.fit || product.fit_type), String(product.pack_size || 1)].join('|')
 
 export function normalizeProduct(row, index = 0) {
   const variants = Array.isArray(row?.variants) && row.variants.length ? row.variants : [row]
@@ -31,10 +26,11 @@ export function normalizeProduct(row, index = 0) {
   const ean = clean(primary?.ean_code || primary?.barcode || row?.ean_code || row?.barcode)
   const images = unique([...explicitImages(row), ...explicitImages(primary)])
   const originalB2C = number(primary?.original_price_b2c || row?.original_price_b2c || primary?.mrp || row?.mrp)
-  const finalB2C = number(primary?.final_price_b2c || row?.final_price_b2c || primary?.sale_price || row?.sale_price || originalB2C)
+  const finalB2C = number(primary?.final_price_b2c ?? row?.final_price_b2c ?? primary?.sale_price ?? row?.sale_price ?? originalB2C)
   const originalB2B = number(primary?.original_price_b2b || row?.original_price_b2b || primary?.mrp || row?.mrp)
-  const finalB2B = number(primary?.final_price_b2b || row?.final_price_b2b || primary?.sale_price || row?.sale_price || originalB2B)
-  const brand = clean(row?.brand_name || row?.brand || 'Attach')
+  const finalB2B = number(primary?.final_price_b2b ?? row?.final_price_b2b ?? primary?.sale_price ?? row?.sale_price ?? originalB2B)
+  const rawBrand = clean(row?.brand_name || row?.brand)
+  const brand = displayBrand(rawBrand)
   const name = clean(row?.product_name || row?.name || row?.title || 'Product')
   const design = clean(row?.design_code || row?.pattern_code || row?.style_code || row?.mark_code)
   const fit = clean(row?.fit_type || row?.fit)
@@ -46,6 +42,7 @@ export function normalizeProduct(row, index = 0) {
     variantId: primary?.variant_id || primary?.id || row?.variant_id,
     name,
     brand,
+    rawBrand,
     gender: clean(row?.gender || row?.category_root).toUpperCase(),
     categoryId: number(row?.category_id),
     category: clean(row?.category_name || row?.category || row?.category_slug),
@@ -57,13 +54,13 @@ export function normalizeProduct(row, index = 0) {
     databaseImages: images,
     images: images.length ? images : [ean ? `https://res.cloudinary.com/${cloud}/image/upload/f_auto,q_auto/products/${encodeURIComponent(ean)}` : ''],
     variants,
-    colours: unique(variants.flatMap(variant => [variant?.colour, variant?.color])),
-    sizes: unique(variants.map(variant => variant?.size)),
+    colours: unique([...(row?.colours || []), ...variants.flatMap(variant => [variant?.colour, variant?.color])]),
+    sizes: unique([...(row?.sizes || []), ...variants.map(variant => variant?.size)]),
     originalB2C,
     finalB2C,
     originalB2B,
     finalB2B,
-    available: number(primary?.available_qty ?? primary?.on_hand ?? row?.available_qty ?? row?.on_hand)
+    available: number(row?.style_available ?? primary?.available_qty ?? primary?.on_hand ?? row?.available_qty ?? row?.on_hand)
   }
 }
 
@@ -90,7 +87,7 @@ export async function fetchProducts(params = {}) {
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') query.set(key, String(value))
   })
-  const data = await apiRequest(`/api/products?${query.toString()}`)
+  const data = await apiRequest(`/api/products/catalogue?${query.toString()}`)
   return groupProducts(Array.isArray(data) ? data : data?.products || [])
 }
 
@@ -99,3 +96,14 @@ export const getPrice = (product, type = 'B2C') => String(type).toUpperCase() ==
   : { original: product.originalB2C, final: product.finalB2C }
 
 export const formatPrice = value => `₹${Number(value || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`
+
+export async function fetchProductPage(params = {}, options = {}) {
+  const query = new URLSearchParams()
+  Object.entries(params).forEach(([key,value]) => { if (value !== undefined && value !== null && value !== '') query.set(key,String(value)) })
+  const data = await apiRequest(`/api/products/catalogue?${query}`, options)
+  return {...data,products:groupProducts(data.products || [])}
+}
+export const fetchFacets = (params = {}, options = {}) => {
+  const query = new URLSearchParams(Object.entries(params).filter(([,v])=>v !== undefined && v !== null && v !== ''))
+  return apiRequest(`/api/products/facets?${query}`, options)
+}

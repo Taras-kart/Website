@@ -48,7 +48,8 @@ export function packSizeFor(item) {
 export function pricingFor(item, userType = currentUserType()) {
   const b2b = String(userType).toUpperCase() === 'B2B';
   const original = Number(b2b ? item.original_price_b2b ?? item.mrp ?? item.original_price_b2c : item.original_price_b2c ?? item.mrp ?? item.original_price_b2b) || 0;
-  const final = Number(b2b ? item.final_price_b2b ?? item.final_price_b2c ?? item.sale_price ?? original : item.final_price_b2c ?? item.sale_price ?? original) || original;
+  const resolvedFinal = Number(b2b ? item.final_price_b2b ?? item.final_price_b2c ?? item.sale_price ?? original : item.final_price_b2c ?? item.sale_price ?? original);
+  const final = Number.isFinite(resolvedFinal)?resolvedFinal:original;
   return {
     original,
     final

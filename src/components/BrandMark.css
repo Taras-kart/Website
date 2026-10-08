@@ -1,0 +1,4 @@
+.attach-brand-mark{display:inline-flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:30px;font-weight:700;letter-spacing:3px;color:inherit;white-space:nowrap;max-width:100%}
+@media(max-width:600px){.attach-brand-mark{font-size:23px;letter-spacing:2px}}
+
+.footer-logo-link .attach-brand-mark{color:#211e1a}

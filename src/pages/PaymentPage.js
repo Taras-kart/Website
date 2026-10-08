@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { FiCheck, FiCreditCard, FiLock, FiRefreshCw, FiSmartphone } from 'react-icons/fi'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { API_BASE } from '../services/api'
+import { API_BASE, getToken } from '../services/api'
 import './PaymentPage.css'
 
 async function post(paths, payload) {
   let failure
   for (const path of paths) {
     try {
-      const response = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+      const response = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` }, body: JSON.stringify(payload) })
       const data = await response.json().catch(() => ({}))
       if (response.ok) return data
       failure = new Error(data.message || `Request failed (${response.status})`)
@@ -61,7 +61,6 @@ export default function PaymentPage() {
           try {
             const result = await post([`${API_BASE}/api/razorpay/payments/verify`], { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature })
             if (!result.ok) throw new Error('Payment verification failed')
-            await post([`${API_BASE}/api/sales/web/set-payment-status`, `${API_BASE}/sales/web/set-payment-status`], { sale_id: saleId, status: 'PAID' }).catch(() => {})
             sessionStorage.removeItem('tk_checkout_payload')
             setSuccess(true)
           } catch (reason) { setError(reason.message || 'Payment verification failed') }

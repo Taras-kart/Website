@@ -1,13 +1,14 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import { FiChevronDown, FiChevronLeft, FiChevronRight, FiHeart, FiSliders, FiX } from 'react-icons/fi'
+import { FiChevronLeft, FiChevronRight, FiHeart } from 'react-icons/fi'
 import Footer from './Footer'
 import useProductWishlist from '../hooks/useProductWishlist'
 import './GenderStorefront.css'
 import { useWishlist } from '../WishlistContext'
+import CollectionPage from '../components/CollectionPage'
+import { apiRequest } from '../services/api'
+import { displayBrand } from '../services/brands'
 
-const DEFAULT_API_BASE = 'https://taras-kart-backend.vercel.app'
-const API_BASE = ((typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) || DEFAULT_API_BASE).replace(/\/+$/, '')
 const CLOUD = (typeof process !== 'undefined' && process.env && process.env.REACT_APP_CLOUDINARY_CLOUD) || 'deymt9uyh'
 const GENDER_META = {
   MEN: { path: 'men', title: 'Men', fallback: '/images/defaults/attach-men.svg', heroes: ['/images/mens-bg1.jpg', '/images/mens-part1.jpg', '/images/mens-part2.jpg'] },
@@ -40,13 +41,7 @@ const priceFor = (product, userType) => {
   const price = number(b2b ? product?.final_price_b2b || product?.sale_price : product?.final_price_b2c || product?.sale_price) || mrp
   return { mrp, price, discount: mrp > price && price > 0 ? Math.round(((mrp - price) / mrp) * 100) : 0 }
 }
-const designKeyFor = row => {
-  const base = [normalize(row?.brand || row?.brand_name), normalize(row?.product_name || row?.name), normalize(row?.category_name || row?.category), normalize(row?.category_path)].filter(Boolean).join('|')
-  const design = clean(row?.design_code || row?.pattern_code || row?.style_code || row?.mark_code || row?.model_code)
-  if (design) return `${base}|design:${normalize(design)}`
-  const colour = normalize(row?.color || row?.colour) || 'default'
-  return `${base}|legacy:${colour}`
-}
+const designKeyFor = row => row.style_key || [normalize(row.brand||row.brand_name),normalize(row.product_name||row.name),normalize(row.gender),row.category_id,normalize(row.pattern_code),normalize(row.fit||row.fit_type),row.pack_size||1].join('|')
 const groupProducts = rows => {
   const groups = new Map()
   ;(Array.isArray(rows) ? rows : []).forEach(row => {
@@ -106,7 +101,7 @@ function ProductCard({ product, gender, userType, onOpen, onWish }) {
   const { save, saved, pending, message } = useProductWishlist(product)
   const pricing = priceFor(product, userType)
   const name = clean(product?.product_name || product?.name || 'Product')
-  return <article className="tgs-product"><button type="button" className="tgs-product-image" onClick={() => onOpen(product)}><SafeImage product={product} gender={gender} alt={name} />{pricing.discount > 0 && <span className="tgs-sale">SALE</span>}</button><button type="button" className="tgs-heart" onClick={event => { event.stopPropagation(); save() }} disabled={pending} aria-pressed={saved} aria-label={saved ? "Saved to wishlist" : "Add to wishlist"}><FiHeart fill={saved ? "currentColor" : "none"} /></button><button type="button" className="tgs-product-copy" onClick={() => onOpen(product)}><small>{clean(product?.brand || product?.brand_name)}</small><strong>{name}</strong><span className="tgs-card-price">₹{money(pricing.price)}{pricing.mrp > pricing.price && <del>₹{money(pricing.mrp)}</del>}{pricing.discount > 0 && <em>{pricing.discount}% OFF</em>}</span></button>{message && <small role="status">{message}</small>}</article>
+  return <article className="tgs-product"><button type="button" className="tgs-product-image" onClick={() => onOpen(product)}><SafeImage product={product} gender={gender} alt={name} />{pricing.discount > 0 && <span className="tgs-sale">SALE</span>}</button><button type="button" className="tgs-heart" onClick={event => { event.stopPropagation(); save() }} disabled={pending} aria-pressed={saved} aria-label={saved ? "Saved to wishlist" : "Add to wishlist"}><FiHeart fill={saved ? "currentColor" : "none"} /></button><button type="button" className="tgs-product-copy" onClick={() => onOpen(product)}><small>{displayBrand(product?.brand || product?.brand_name)}</small><strong>{name}</strong><span className="tgs-card-price">₹{money(pricing.price)}{pricing.mrp > pricing.price && <del>₹{money(pricing.mrp)}</del>}{pricing.discount > 0 && <em>{pricing.discount}% OFF</em>}</span></button>{message && <small role="status">{message}</small>}</article>
 }
 
 function ProductRail({ title, products, gender, userType, onOpen, onWish }) {
@@ -114,20 +109,6 @@ function ProductRail({ title, products, gender, userType, onOpen, onWish }) {
   const scroll = direction => rail.current?.scrollBy({ left: direction * Math.max(320, rail.current.clientWidth * .78), behavior: 'smooth' })
   if (!products.length) return null
   return <section className="tgs-section"><SectionTitle controls={<div className="tgs-round-controls"><button type="button" onClick={() => scroll(-1)}><FiChevronLeft /></button><button type="button" onClick={() => scroll(1)}><FiChevronRight /></button></div>}>{title}</SectionTitle><div className="tgs-product-rail" ref={rail}>{products.map(product => <ProductCard key={product.design_key || product.product_id} product={product} gender={gender} userType={userType} onOpen={onOpen} onWish={onWish} />)}</div></section>
-}
-
-function AllProductsSection({ products, categories, gender, userType, onOpen, onWish }) {
-  const storageKey = `attach:all-products:${gender}`
-  const savedState = () => {
-    if (typeof window === 'undefined') return { categoryId: 'all', visible: 20 }
-    try { return JSON.parse(sessionStorage.getItem(storageKey) || 'null') || { categoryId: 'all', visible: 20 } } catch { return { categoryId: 'all', visible: 20 } }
-  }
-  const [categoryId, setCategoryId] = useState(() => savedState().categoryId || 'all')
-  const [visible, setVisible] = useState(() => number(savedState().visible) || 20)
-  const selectedProducts = useMemo(() => categoryId === 'all' ? products : products.filter(product => Number(product.category_id) === Number(categoryId)), [products, categoryId])
-  useEffect(() => { sessionStorage.setItem(storageKey, JSON.stringify({ categoryId, visible })) }, [storageKey, categoryId, visible])
-  const selectCategory = value => { setCategoryId(value); setVisible(20) }
-  return <section className="tgs-section tgs-all-products"><SectionTitle>ALL PRODUCTS</SectionTitle><div className="tgs-category-pills"><button type="button" className={categoryId === 'all' ? 'is-active' : ''} onClick={() => selectCategory('all')}>ALL</button>{categories.map(category => <button type="button" key={category.id} className={Number(categoryId) === Number(category.id) ? 'is-active' : ''} onClick={() => selectCategory(category.id)}>{category.name}</button>)}</div><div className="tgs-all-grid">{selectedProducts.slice(0, visible).map(product => <ProductCard key={product.design_key || product.product_id} product={product} gender={gender} userType={userType} onOpen={onOpen} onWish={onWish} />)}</div>{visible < selectedProducts.length && <div className="tgs-load-more"><button type="button" onClick={() => setVisible(current => current + 20)}>VIEW MORE</button></div>}</section>
 }
 
 function HeroCarousel({ gender }) {
@@ -149,15 +130,11 @@ function useStorefrontData(gender) {
       setLoading(true)
       setError('')
       try {
-        const [productResponse, categoryResponse] = await Promise.all([fetch(`${API_BASE}/api/products?gender=${gender}&limit=50000`, { signal: controller.signal, cache: 'no-store' }), fetch(`${API_BASE}/api/categories?active=true&withCounts=true`, { signal: controller.signal, cache: 'no-store' })])
-        if (!productResponse.ok) throw new Error('Unable to load products')
-        const productPayload = await productResponse.json()
-        const categoryPayload = categoryResponse.ok ? await categoryResponse.json() : { categories: [] }
+        const [productPayload, categoryPayload] = await Promise.all([apiRequest(`/api/products/catalogue?gender=${gender}&limit=36`, {signal:controller.signal}),apiRequest(`/api/products/facets?gender=${gender}`,{signal:controller.signal})]);
         const productRows = Array.isArray(productPayload) ? productPayload : productPayload?.products || []
         const groupedProducts = groupProducts(productRows.filter(product => belongsToGender(product, gender)))
-        const populatedCategoryIds = new Set(groupedProducts.map(product => Number(product?.category_id)).filter(Boolean))
         setProducts(groupedProducts)
-        setCategories(categoriesFrom(categoryPayload, gender).filter(category => populatedCategoryIds.has(Number(category.id))))
+        setCategories(categoriesFrom(categoryPayload, gender).filter(category => Number(category.level) === 1))
       } catch (requestError) {
         if (!controller.signal.aborted) setError(requestError?.message || 'Unable to load products')
       } finally {
@@ -182,48 +159,10 @@ export function GenderLandingPage({ gender }) {
   const openCategory = category => navigate(`/shop/${meta.path}/${category.slug}`)
   const addWish = product => { addToWishlist(product); window.dispatchEvent(new Event('wishlist-updated')) }
   const categoryProducts = category => products.filter(product => Number(product?.category_id) === Number(category.id)).slice(0, 10)
-  return <><main className="tgs-page"><HeroCarousel gender={gender} />{loading ? <div className="tgs-state"><span className="tgs-spinner" /><p>Loading collections...</p></div> : error ? <div className="tgs-state"><h2>{error}</h2><button type="button" onClick={() => window.location.reload()}>Try again</button></div> : <><section className="tgs-section tgs-categories"><SectionTitle>SHOP BY CATEGORY</SectionTitle><div className="tgs-category-grid">{categories.map(category => <button type="button" className="tgs-category" key={category.id} onClick={() => openCategory(category)}><img src={category.representative_image || categoryProducts(category)[0]?.images?.[0] || meta.fallback} alt={category.name} onError={event => { event.currentTarget.src = meta.fallback }} /><span><strong>{category.name}</strong><i><FiChevronRight /></i></span></button>)}</div></section><ProductRail title="NEW DROPS" products={[...products].sort((a, b) => number(b.id) - number(a.id)).slice(0, 14)} gender={gender} userType={userType} onOpen={openProduct} onWish={addWish} />{categories.filter(category => categoryProducts(category).length > 0).map(category => <ProductRail key={category.id} title={category.name.toUpperCase()} products={categoryProducts(category)} gender={gender} userType={userType} onOpen={openProduct} onWish={addWish} />)}<AllProductsSection products={products} categories={categories} gender={gender} userType={userType} onOpen={openProduct} onWish={addWish} /></>}</main><Footer /></>
+  return <><main className="tgs-page"><HeroCarousel gender={gender} />{loading ? <div className="tgs-state"><span className="tgs-spinner" /><p>Loading collections...</p></div> : error ? <div className="tgs-state"><h2>{error}</h2><button type="button" onClick={() => window.location.reload()}>Try again</button></div> : <><section className="tgs-section tgs-categories"><SectionTitle>SHOP BY CATEGORY</SectionTitle><div className="tgs-category-grid">{categories.map(category => <button type="button" className="tgs-category" key={category.id} onClick={() => openCategory(category)}><img src={category.representative_image || categoryProducts(category)[0]?.images?.[0] || meta.fallback} alt={category.name} onError={event => { event.currentTarget.src = meta.fallback }} /><span><strong>{category.name}</strong><i><FiChevronRight /></i></span></button>)}</div></section><ProductRail title="NEW DROPS" products={[...products].sort((a, b) => number(b.id) - number(a.id)).slice(0, 14)} gender={gender} userType={userType} onOpen={openProduct} onWish={addWish} />{categories.filter(category => categoryProducts(category).length > 0).map(category => <ProductRail key={category.id} title={category.name.toUpperCase()} products={categoryProducts(category)} gender={gender} userType={userType} onOpen={openProduct} onWish={addWish} />)}<section className="tgs-section"><button className="tgs-browse-all" onClick={()=>navigate(`/category-display?gender=${gender}`)}>View all {meta.title.toLowerCase()} products</button></section></>}</main><Footer /></>
 }
 
 export function CategoryProductsPage() {
-  const { gender: genderPath, categorySlug } = useParams()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const { addToWishlist } = useWishlist()
-  const gender = clean(genderPath).toUpperCase()
-  const safeGender = GENDER_META[gender] ? gender : 'WOMEN'
-  const meta = GENDER_META[safeGender]
-  const { products, categories, loading, error } = useStorefrontData(safeGender)
-  const listingStorageKey = `attach:listing:${location.pathname}`
-  const savedListing = () => {
-    if (typeof window === 'undefined') return {}
-    try { return JSON.parse(sessionStorage.getItem(listingStorageKey) || 'null') || {} } catch { return {} }
-  }
-  const initialListing = useRef(savedListing())
-  const [sort, setSort] = useState(() => initialListing.current.sort || 'popular')
-  const [brands, setBrands] = useState(() => Array.isArray(initialListing.current.brands) ? initialListing.current.brands : [])
-  const [categoryIds, setCategoryIds] = useState(() => Array.isArray(initialListing.current.categoryIds) ? initialListing.current.categoryIds.map(Number) : [])
-  const [mobileFilters, setMobileFilters] = useState(false)
-  const category = categories.find(item => clean(item.slug) === clean(categorySlug))
-  useEffect(() => {
-    if (category?.id && !Object.keys(initialListing.current).length) setCategoryIds([Number(category.id)])
-  }, [category?.id, listingStorageKey])
-  useEffect(() => { sessionStorage.setItem(listingStorageKey, JSON.stringify({ sort, brands, categoryIds })) }, [listingStorageKey, sort, brands, categoryIds])
-  const availableBrands = useMemo(() => unique(products.filter(product => !categoryIds.length || categoryIds.includes(Number(product.category_id))).map(product => product.brand || product.brand_name)).sort(), [products, categoryIds])
-  const filtered = useMemo(() => {
-    let result = products.filter(product => !categoryIds.length || categoryIds.includes(Number(product.category_id)))
-    if (brands.length) result = result.filter(product => brands.includes(clean(product.brand || product.brand_name)))
-    if (sort === 'low') result = [...result].sort((a, b) => priceFor(a, 'B2C').price - priceFor(b, 'B2C').price)
-    else if (sort === 'high') result = [...result].sort((a, b) => priceFor(b, 'B2C').price - priceFor(a, 'B2C').price)
-    else if (sort === 'new') result = [...result].sort((a, b) => number(b.id) - number(a.id))
-    return result
-  }, [products, categoryIds, brands, sort])
-  useRestorePosition(!loading && !error)
-  const openProduct = product => { const id = positiveId(product?.variants?.[0]?.id || product?.id); if (id) { rememberPosition(location); navigate(`/product/${id}`) } }
-  const toggleBrand = brand => setBrands(current => current.includes(brand) ? current.filter(item => item !== brand) : [...current, brand])
-  const toggleCategory = categoryId => setCategoryIds(current => current.includes(Number(categoryId)) ? current.filter(id => id !== Number(categoryId)) : [...current, Number(categoryId)])
-  const clearFilters = () => { setCategoryIds([]); setBrands([]) }
-  const selectedCount = categoryIds.length + brands.length
-  const sidebar = <aside className="tgs-filter"><div className="tgs-filter-head"><strong>FILTERS {selectedCount ? `(${selectedCount})` : ''}</strong><button type="button" onClick={clearFilters}>Clear All</button></div><div className="tgs-filter-block"><h3>GENDER</h3><div className="tgs-filter-choice is-active is-locked"><i />{meta.title}</div></div><div className="tgs-filter-block"><h3>CATEGORY</h3>{categories.map(item => <button type="button" key={item.id} className={categoryIds.includes(Number(item.id)) ? 'is-active' : ''} onClick={() => toggleCategory(item.id)}><i />{item.name}</button>)}</div>{availableBrands.length > 0 && <div className="tgs-filter-block"><h3>BRAND</h3>{availableBrands.map(brand => <button type="button" key={brand} className={brands.includes(brand) ? 'is-active' : ''} onClick={() => toggleBrand(brand)}><i />{brand}</button>)}</div>}</aside>
-  return <><main className="tgs-page tgs-listing"><header className="tgs-listing-head"><div><p>{meta.title.toUpperCase()}</p><h1>{categoryIds.length === 1 ? categories.find(item => Number(item.id) === categoryIds[0])?.name || category?.name : `${meta.title} Collection`}</h1></div><label>Sort by:<select value={sort} onChange={event => setSort(event.target.value)}><option value="popular">Popularity</option><option value="new">Newest</option><option value="low">Price: Low to High</option><option value="high">Price: High to Low</option></select><FiChevronDown /></label><button type="button" className="tgs-mobile-filter" onClick={() => setMobileFilters(true)}><FiSliders /> Filters</button></header>{loading ? <div className="tgs-state"><span className="tgs-spinner" /></div> : error ? <div className="tgs-state"><h2>{error}</h2></div> : <div className="tgs-listing-layout">{sidebar}<section className="tgs-grid">{filtered.map(product => <ProductCard key={product.design_key || product.product_id} product={product} gender={safeGender} userType="B2C" onOpen={openProduct} onWish={addToWishlist} />)}</section></div>}{mobileFilters && <div className="tgs-filter-modal"><button type="button" className="tgs-filter-backdrop" onClick={() => setMobileFilters(false)} /><div className="tgs-filter-drawer"><button type="button" className="tgs-filter-close" onClick={() => setMobileFilters(false)}><FiX /></button>{sidebar}</div></div>}</main><Footer /></>
+  const {gender,categorySlug}=useParams()
+  return <><CollectionPage gender={clean(gender).toUpperCase()} initialCategorySlug={categorySlug} /><Footer /></>
 }
