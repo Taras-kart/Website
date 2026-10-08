@@ -3,6 +3,7 @@ import { FaHeart, FaRegHeart } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import { formatPrice, getPrice } from '../services/productsApi'
 import './ProductCard.css'
+import { imageSources } from '../services/productImages'
 import useProductWishlist from '../hooks/useProductWishlist'
 
 const clean = value => String(value || '').trim()
@@ -13,11 +14,12 @@ function ProductImage({ product }) {
   const gender = clean(product?.gender || product?.categoryRoot || product?.category_root).toUpperCase()
   const fallback = gender === 'MEN' ? '/images/defaults/attach-men.svg' : gender === 'KIDS' ? '/images/defaults/attach-kids.svg' : '/images/defaults/attach-women.svg'
   const sources = useMemo(() => unique([
+    ...imageSources(product),
     product?.shared_image_url,
     product?.front_image_url,
     product?.main_image_url,
     product?.image_url,
-    ...(Array.isArray(product?.images) ? product.images : []),
+    
     ...(Array.isArray(product?.variants) ? product.variants.flatMap(variant => [variant?.shared_image_url, variant?.front_image_url, variant?.main_image_url, variant?.image_url]) : []),
     fallback
   ]), [product, fallback])

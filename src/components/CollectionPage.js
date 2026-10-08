@@ -1,68 +1,54 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { FiChevronDown, FiFilter, FiSearch, FiX } from 'react-icons/fi'
-import { useLocation, useNavigate } from 'react-router-dom'
+import React,{useEffect,useMemo,useRef,useState} from 'react'
+import {FiFilter,FiSearch,FiX} from 'react-icons/fi'
+import {useLocation,useNavigate} from 'react-router-dom'
 import ProductCard from './ProductCard'
-import { fetchFacets, fetchProductPage } from '../services/productsApi'
+import {fetchFacets,fetchProductPage} from '../services/productsApi'
 import './CollectionPage.css'
-
-export default function CollectionPage({gender='',title,eyebrow='Attach collections',description='',initialCategorySlug='',searchMode=false}) {
-  const location=useLocation(),navigate=useNavigate()
+const list=value=>String(value||'').split(',').filter(Boolean)
+const FilterOption=({checked,onChange,children})=><label className="tc-option"><input type="checkbox" checked={checked} onChange={onChange}/><span>{children}</span></label>
+export default function CollectionPage({gender='',title,initialCategorySlug='',searchMode=false}){
+  const location=useLocation(),navigate=useNavigate(),panel=useRef(null),trigger=useRef(null)
   const params=useMemo(()=>new URLSearchParams(location.search),[location.search])
-  const [data,setData]=useState({products:[],total:0,hasMore:false})
-  const [facets,setFacets]=useState({brands:[],categories:[]})
-  const [loading,setLoading]=useState(true),[error,setError]=useState(''),[filtersOpen,setFiltersOpen]=useState(false)
-  const [draftSearch,setDraftSearch]=useState(params.get('q')||'')
-  const selectedGender=params.get('gender')||gender,brand=params.get('brand')||'',categoryId=params.get('categoryId')||'',sort=params.get('sort')||'featured'
-  const currentPage=Math.max(1,Number(params.get('page'))||1),limit=24
-  const query=params.get('q')||'',min=params.get('min')||'',max=params.get('max')||''
+  const selectedGender=params.get('gender')||gender,brand=params.get('brand')||'',categoryId=params.get('categoryId')||'',sort=params.get('sort')||'featured',query=params.get('q')||''
+  const brands=list(brand),departments=list(selectedGender),categoryIds=list(categoryId),page=Math.max(1,Number(params.get('page'))||1),limit=24
+  const [data,setData]=useState({products:[],total:0,hasMore:false}),[facets,setFacets]=useState({brands:[],categories:[]}),[loading,setLoading]=useState(true),[error,setError]=useState(''),[open,setOpen]=useState(false)
+  const [draftSearch,setDraftSearch]=useState(query),[brandSearch,setBrandSearch]=useState(''),[categorySearch,setCategorySearch]=useState(''),[price,setPrice]=useState({min:params.get('min')||'',max:params.get('max')||''}),[priceError,setPriceError]=useState('')
   const userType=(sessionStorage.getItem('userType')||localStorage.getItem('userType')||'B2C').toUpperCase()
   useEffect(()=>setDraftSearch(query),[query])
+  useEffect(()=>{setPrice({min:params.get('min')||'',max:params.get('max')||''});setPriceError('')},[params])
+  useEffect(()=>{const controller=new AbortController();setLoading(true);setError('');fetchProductPage({...Object.fromEntries(params),gender:selectedGender,categoryId,categorySlug:categoryId?'':initialCategorySlug,offset:(page-1)*limit,limit},{signal:controller.signal}).then(result=>{if(!controller.signal.aborted)setData(result)}).catch(e=>{if(!controller.signal.aborted)setError(e.message)}).finally(()=>{if(!controller.signal.aborted)setLoading(false)});return()=>controller.abort()},[params,selectedGender,categoryId,initialCategorySlug,page])
+  useEffect(()=>{const controller=new AbortController();fetchFacets({gender:selectedGender,images:'false'},{signal:controller.signal}).then(result=>{if(!controller.signal.aborted)setFacets(result)}).catch(()=>{});return()=>controller.abort()},[selectedGender])
   useEffect(()=>{
-    const controller=new AbortController()
-    setLoading(true);setError('')
-    const request={...Object.fromEntries(params),gender:selectedGender,categoryId,categorySlug:categoryId?'':initialCategorySlug,offset:(currentPage-1)*limit,limit}
-    fetchProductPage(request,{signal:controller.signal}).then(result=>{if(!controller.signal.aborted)setData(result)}).catch(reason=>{if(!controller.signal.aborted)setError(reason.message)}).finally(()=>{if(!controller.signal.aborted)setLoading(false)})
-    return()=>controller.abort()
-  },[params,selectedGender,categoryId,initialCategorySlug,currentPage])
-  useEffect(()=>{
-    let active=true
-    fetchFacets({gender:selectedGender,brand}).then(result=>{if(active)setFacets(result)}).catch(()=>{})
-    return()=>{active=false}
-  },[selectedGender,brand])
-  const categories=facets.categories.filter(category=>Number(category.level)>0)
-  const selectedCategory=categories.find(category=>String(category.id)===categoryId||(!categoryId&&category.slug===initialCategorySlug))
-  const categoryPath=category=>{
-    const names=[],visited=new Set();let current=category
-    while(current&&!visited.has(current.id)){visited.add(current.id);names.unshift(current.name);const parent=current.parent_id;current=facets.categories.find(row=>Number(row.id)===Number(parent))}
-    return names.join(' / ')
-  }
-  const update=changes=>{
-    const next=new URLSearchParams(location.search)
-    if(gender&&!next.has('gender'))next.set('gender',gender)
-    if(initialCategorySlug&&!categoryId&&selectedCategory&&!Object.hasOwn(changes,'categoryId'))next.set('categoryId',selectedCategory.id)
-    if(!Object.hasOwn(changes,'page'))next.delete('page')
-    Object.entries(changes).forEach(([key,value])=>value?next.set(key,value):next.delete(key))
-    navigate(`${initialCategorySlug?'/category-display':location.pathname}?${next}`)
-  }
+    if(!open)return undefined
+    const previous=document.body.style.overflow,returnFocus=trigger.current;document.body.style.overflow='hidden';panel.current?.querySelector('button')?.focus()
+    const key=event=>{if(event.key==='Escape')setOpen(false);if(event.key==='Tab'){const nodes=[...panel.current.querySelectorAll('button,input,summary,[tabindex="0"]')].filter(node=>!node.disabled&&node.getClientRects().length);const first=nodes[0],last=nodes[nodes.length-1];if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus()}}}
+    document.addEventListener('keydown',key);return()=>{document.body.style.overflow=previous;document.removeEventListener('keydown',key);returnFocus?.focus()}
+  },[open])
+  const categories=facets.categories.filter(c=>Number(c.level)>0)
+  const routeCategory=categories.find(c=>c.slug===initialCategorySlug)
+  const chosenCategories=categoryIds.length?categoryIds:routeCategory?[String(routeCategory.id)]:[]
+  const pathFor=category=>{let row=category;const names=[],seen=new Set();while(row&&!seen.has(String(row.id))){seen.add(String(row.id));names.unshift(row.name);const parentId=String(row.parent_id);row=facets.categories.find(c=>String(c.id)===parentId)}return names.join(' / ')}
+  const update=changes=>{const next=new URLSearchParams(location.search);if(gender&&!next.has('gender'))next.set('gender',gender);if(routeCategory&&!categoryId&&!Object.hasOwn(changes,'categoryId'))next.set('categoryId',routeCategory.id);if(!Object.hasOwn(changes,'page'))next.delete('page');Object.entries(changes).forEach(([key,value])=>value?next.set(key,String(value)):next.delete(key));navigate(`${initialCategorySlug?'/category-display':location.pathname}?${next}`)}
+  const toggle=(key,value,current)=>update({[key]:current.includes(value)?current.filter(v=>v!==value).join(','):[...current,value].join(','),...(key==='gender'?{categoryId:''}:{})})
   const clear=()=>navigate(`/category-display${gender?`?gender=${gender}`:''}`)
-  const activeCount=[brand,selectedCategory,min,max,query,params.get('inStock')].filter(Boolean).length
-  const heading=title||selectedCategory?.name||brand||(query?`Results for ${query}`:'All products')
-  return <main className="tara-collection">
-    <section className="tara-collection-hero"><div><span>{eyebrow}</span><h1>{heading}</h1><p>{selectedCategory?categoryPath(selectedCategory):description||'Find your next favourite style.'}</p></div><div className="tara-collection-stat"><strong>{loading?'...':data.total}</strong><span>styles</span></div></section>
-    {searchMode&&<form className="tara-collection-search" onSubmit={event=>{event.preventDefault();update({q:draftSearch})}}><FiSearch/><input aria-label="Search products" value={draftSearch} onChange={event=>setDraftSearch(event.target.value)} placeholder="Search by style, brand or category"/><button>Search</button></form>}
-    <div className="tara-collection-toolbar"><button className="tara-filter-trigger" onClick={()=>setFiltersOpen(true)}><FiFilter/> Filters {activeCount>0&&<b>{activeCount}</b>}</button><p>{loading?'Loading styles':`${data.total} styles`}</p><label className="tara-sort">Sort by<select value={sort} onChange={event=>update({sort:event.target.value})}><option value="featured">Featured</option><option value="new">Newest</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="name">Name</option></select><FiChevronDown/></label></div>
-    <div className="tara-filter-chips">{brand&&<button onClick={()=>update({brand:'',categoryId:''})}>{brand} <FiX/></button>}{selectedCategory&&<button onClick={()=>update({categoryId:''})}>{categoryPath(selectedCategory)} <FiX/></button>}{query&&<button onClick={()=>update({q:''})}>Search: {query} <FiX/></button>}</div>
-    <div className="tara-collection-layout"><aside className={`tara-filter-panel ${filtersOpen?'is-open':''}`}><div className="tara-filter-head"><h2>Filters</h2><button aria-label="Close filters" onClick={()=>setFiltersOpen(false)}><FiX/></button></div>
-      {!gender&&<div className="tara-filter-group"><h3>Department</h3><select aria-label="Department" value={selectedGender} onChange={event=>update({gender:event.target.value,categoryId:''})}><option value="">All departments</option>{['WOMEN','MEN','KIDS'].map(value=><option key={value}>{value}</option>)}</select></div>}
-      <div className="tara-filter-group"><h3>Brand</h3><div className="tara-filter-options"><label><input type="radio" name="brand" checked={!brand} onChange={()=>update({brand:'',categoryId:''})}/>All brands</label>{facets.brands.filter(row=>row.count>0||row.name===brand).map(row=><label key={row.name}><input type="radio" name="brand" checked={brand===row.name} onChange={()=>update({brand:row.name,categoryId:''})}/><span>{row.name}</span></label>)}</div></div>
-      <div className="tara-filter-group"><h3>Category and subcategory</h3><select aria-label="Category and subcategory" value={selectedCategory?.id||''} onChange={event=>update({categoryId:event.target.value})}><option value="">All categories</option>{categories.map(row=><option key={row.id} value={row.id}>{categoryPath(row)}</option>)}</select></div>
-      <div className="tara-filter-group"><h3>Price</h3><div className="tara-price-fields"><label>Min<input type="number" min="0" value={min} onChange={event=>update({min:event.target.value})}/></label><label>Max<input type="number" min="0" value={max} onChange={event=>update({max:event.target.value})}/></label></div></div>
-      <div className="tara-filter-group"><label><input type="checkbox" checked={params.get('inStock')==='true'} onChange={event=>update({inStock:event.target.checked?'true':''})}/> In stock only</label></div><button className="tara-filter-clear" onClick={clear}>Clear all filters</button>
-    </aside>{filtersOpen&&<button className="tara-filter-backdrop" onClick={()=>setFiltersOpen(false)} aria-label="Close filters"/>}<section className="tara-collection-results" aria-busy={loading}>
-      {error&&<div className="tara-collection-message" role="alert"><h2>Unable to load products</h2><p>{error}</p><button onClick={()=>window.location.reload()}>Try again</button></div>}
-      {loading&&<div className="tara-product-grid">{Array.from({length:8},(_,index)=><div className="tara-product-skeleton" key={index}><i/><span/><small/></div>)}</div>}
-      {!loading&&!error&&data.products.length>0&&<><div className="tara-product-grid">{data.products.map(product=><ProductCard key={product.designKey||product.id} product={product} userType={userType}/>)}</div><div className="tara-pagination"><button disabled={currentPage===1} onClick={()=>update({page:currentPage-1})}>Previous</button><span>Page {currentPage} of {Math.max(1,Math.ceil(data.total/limit))}</span><button disabled={!data.hasMore} onClick={()=>update({page:currentPage+1})}>Next</button></div></>}
-      {!loading&&!error&&!data.products.length&&<div className="tara-collection-message"><h2>No matching styles</h2><p>Try changing a filter.</p><button onClick={clear}>View all products</button></div>}
-    </section></div>
+  const applyPrice=event=>{event.preventDefault();if((price.min!==''&&Number(price.min)<0)||(price.max!==''&&Number(price.max)<0)||(price.min!==''&&price.max!==''&&Number(price.min)>Number(price.max)))return setPriceError('Enter a maximum price greater than or equal to the minimum.');setPriceError('');update(price)}
+  const heading=chosenCategories.length===1?(categories.find(c=>String(c.id)===chosenCategories[0])?.name||title||'Products'):brands.length===1?brands[0]:query?`Search: ${query}`:title||'All products'
+  const chips=[...(!gender?departments.map(value=>({key:'gender',value,label:value==='KIDS'?'Kids':value==='MEN'?'Men':'Women',values:departments})):[]),...brands.map(value=>({key:'brand',value,label:value,values:brands})),...chosenCategories.map(value=>({key:'categoryId',value,label:categories.find(c=>String(c.id)===value)?.name||'Selected category',values:chosenCategories})),...(query?[{key:'q',value:query,label:`Search: ${query}`,values:[query]}]:[])]
+  return <main className="tara-collection tc-compact">
+    <header className="tc-toolbar"><h1>{heading}</h1><div className="tc-tools"><button ref={trigger} className="tc-filter-trigger" aria-expanded={open} onClick={()=>setOpen(true)}><FiFilter/>Filters</button><label className="tc-sort"><span>Sort</span><select aria-label="Sort products" value={sort} onChange={e=>update({sort:e.target.value})}><option value="featured">Recommended</option><option value="new">Newest</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="name">Name</option></select></label></div></header>
+    {searchMode&&<form className="tc-search" onSubmit={e=>{e.preventDefault();update({q:draftSearch})}}><FiSearch/><input aria-label="Search products" value={draftSearch} onChange={e=>setDraftSearch(e.target.value)} placeholder="Search products"/><button>Search</button></form>}
+    {(chips.length>0||params.get('min')||params.get('max')||params.get('inStock'))&&<div className="tc-chips">{chips.map(chip=><button key={`${chip.key}-${chip.value}`} aria-label={`Remove ${chip.label}`} onClick={()=>toggle(chip.key,chip.value,chip.values)}>{chip.label}<FiX/></button>)}{(params.get('min')||params.get('max'))&&<button onClick={()=>update({min:'',max:''})}>₹{params.get('min')||'0'} – {params.get('max')?`₹${params.get('max')}`:'Any'}<FiX/></button>}{params.get('inStock')==='true'&&<button onClick={()=>update({inStock:''})}>In stock<FiX/></button>}<button className="tc-clear-chip" onClick={clear}>Clear all</button></div>}
+    <div className="tc-layout">{open&&<button className="tc-backdrop" aria-label="Close filters" onClick={()=>setOpen(false)}/>}
+      <aside ref={panel} className={`tc-filters ${open?'is-open':''}`} role={open?'dialog':undefined} aria-modal={open?'true':undefined} aria-label="Product filters">
+        <div className="tc-filter-head"><h2>Filters</h2><button className="tc-reset" onClick={clear}>Reset</button><button className="tc-close" aria-label="Close filters" onClick={()=>setOpen(false)}><FiX/></button></div>
+        <div className="tc-filter-body">{!gender&&<details open><summary>Department</summary><div className="tc-options">{['WOMEN','MEN','KIDS'].map(value=><FilterOption key={value} checked={departments.includes(value)} onChange={()=>toggle('gender',value,departments)}>{value==='WOMEN'?'Women':value==='MEN'?'Men':'Kids'}</FilterOption>)}</div></details>}
+        <details open><summary>Brand</summary><input className="tc-option-search" aria-label="Find a brand" placeholder="Find a brand" value={brandSearch} onChange={e=>setBrandSearch(e.target.value)}/><div className="tc-options tc-scroll">{facets.brands.filter(row=>(row.count>0||brands.includes(row.name))&&row.name.toLowerCase().includes(brandSearch.toLowerCase())).map(row=><FilterOption key={row.name} checked={brands.includes(row.name)} onChange={()=>toggle('brand',row.name,brands)}>{row.name}</FilterOption>)}</div></details>
+        <details open><summary>Category</summary><input className="tc-option-search" aria-label="Find a category" placeholder="Find a category" value={categorySearch} onChange={e=>setCategorySearch(e.target.value)}/><div className="tc-options tc-scroll">{categories.filter(row=>pathFor(row).toLowerCase().includes(categorySearch.toLowerCase())).map(row=><div key={row.id} style={{paddingLeft:Math.min(3,Math.max(0,Number(row.level)-1))*12}}><FilterOption checked={chosenCategories.includes(String(row.id))} onChange={()=>toggle('categoryId',String(row.id),chosenCategories)}><span title={pathFor(row)}>{row.name}</span>{Number(row.level)>1&&<small>{facets.categories.find(c=>String(c.id)===String(row.parent_id))?.name}</small>}</FilterOption></div>)}</div></details>
+        <details open><summary>Price</summary><form onSubmit={applyPrice}><div className="tc-price"><label>Min ₹<input aria-label="Minimum price" type="number" min="0" step="any" placeholder="0" value={price.min} onChange={e=>setPrice({...price,min:e.target.value})}/></label><label>Max ₹<input aria-label="Maximum price" type="number" min="0" step="any" placeholder="Any" value={price.max} onChange={e=>setPrice({...price,max:e.target.value})}/></label></div>{priceError&&<p role="alert" className="tc-price-error">{priceError}</p>}<button className="tc-price-apply">Apply price</button></form></details>
+        <div className="tc-stock"><FilterOption checked={params.get('inStock')==='true'} onChange={()=>update({inStock:params.get('inStock')==='true'?'':'true'})}>In stock only</FilterOption></div></div>
+        <div className="tc-drawer-footer"><button onClick={clear}>Clear all</button><button className="tc-show" onClick={()=>setOpen(false)}>Show products</button></div>
+      </aside>
+      <section className="tc-results" aria-busy={loading}><span className="tc-sr-only" role="status">{loading?'Loading products':'Products updated'}</span>{error?<div className="tc-empty" role="alert"><h2>Unable to load products</h2><p>{error}</p><button onClick={()=>window.location.reload()}>Try again</button></div>:loading?<div className="tara-product-grid">{Array.from({length:8},(_,i)=><div className="tara-product-skeleton" key={i}><i/><span/></div>)}</div>:data.products.length?<><div className="tara-product-grid">{data.products.map(product=><ProductCard key={product.designKey||product.id} product={product} userType={userType}/>)}</div>{(data.hasMore||page>1)&&<div className="tara-pagination"><button disabled={page===1} onClick={()=>update({page:page-1})}>Previous</button><span>Page {page}</span><button disabled={!data.hasMore} onClick={()=>update({page:page+1})}>Next</button></div>}</>:<div className="tc-empty"><h2>No matching products</h2><p>Try removing a filter or widening your price range.</p><button onClick={clear}>Clear filters</button></div>}</section>
+    </div>
   </main>
 }

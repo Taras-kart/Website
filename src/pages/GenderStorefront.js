@@ -8,6 +8,8 @@ import { useWishlist } from '../WishlistContext'
 import CollectionPage from '../components/CollectionPage'
 import { apiRequest } from '../services/api'
 import { displayBrand } from '../services/brands'
+import CatalogImage from '../components/CatalogImage'
+import { imageSources } from '../services/productImages'
 
 const CLOUD = (typeof process !== 'undefined' && process.env && process.env.REACT_APP_CLOUDINARY_CLOUD) || 'deymt9uyh'
 const GENDER_META = {
@@ -32,7 +34,7 @@ const belongsToGender = (item, gender) => {
 const explicitImages = product => unique([product?.shared_image_url, product?.front_image_url, product?.back_image_url, product?.main_image_url, product?.variant_image_url, product?.ean_image_url, product?.image_url, ...(Array.isArray(product?.images) ? product.images : [])])
 const imageCandidates = (product, gender) => {
   const ean = clean(product?.ean_code)
-  const images = explicitImages(product)
+  const images = imageSources(product)
   return unique([...images, images.length ? '' : ean ? `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto/products/${encodeURIComponent(ean)}` : '', fallbackFor(gender)])
 }
 const priceFor = (product, userType) => {
@@ -159,7 +161,7 @@ export function GenderLandingPage({ gender }) {
   const openCategory = category => navigate(`/shop/${meta.path}/${category.slug}`)
   const addWish = product => { addToWishlist(product); window.dispatchEvent(new Event('wishlist-updated')) }
   const categoryProducts = category => products.filter(product => Number(product?.category_id) === Number(category.id)).slice(0, 10)
-  return <><main className="tgs-page"><HeroCarousel gender={gender} />{loading ? <div className="tgs-state"><span className="tgs-spinner" /><p>Loading collections...</p></div> : error ? <div className="tgs-state"><h2>{error}</h2><button type="button" onClick={() => window.location.reload()}>Try again</button></div> : <><section className="tgs-section tgs-categories"><SectionTitle>SHOP BY CATEGORY</SectionTitle><div className="tgs-category-grid">{categories.map(category => <button type="button" className="tgs-category" key={category.id} onClick={() => openCategory(category)}><img src={category.representative_image || categoryProducts(category)[0]?.images?.[0] || meta.fallback} alt={category.name} onError={event => { event.currentTarget.src = meta.fallback }} /><span><strong>{category.name}</strong><i><FiChevronRight /></i></span></button>)}</div></section><ProductRail title="NEW DROPS" products={[...products].sort((a, b) => number(b.id) - number(a.id)).slice(0, 14)} gender={gender} userType={userType} onOpen={openProduct} onWish={addWish} />{categories.filter(category => categoryProducts(category).length > 0).map(category => <ProductRail key={category.id} title={category.name.toUpperCase()} products={categoryProducts(category)} gender={gender} userType={userType} onOpen={openProduct} onWish={addWish} />)}<section className="tgs-section"><button className="tgs-browse-all" onClick={()=>navigate(`/category-display?gender=${gender}`)}>View all {meta.title.toLowerCase()} products</button></section></>}</main><Footer /></>
+  return <><main className="tgs-page"><HeroCarousel gender={gender} />{loading ? <div className="tgs-state"><span className="tgs-spinner" /><p>Loading collections...</p></div> : error ? <div className="tgs-state"><h2>{error}</h2><button type="button" onClick={() => window.location.reload()}>Try again</button></div> : <><section className="tgs-section tgs-categories"><SectionTitle>SHOP BY CATEGORY</SectionTitle><div className="tgs-category-grid">{categories.map(category => <button type="button" className="tgs-category" key={category.id} onClick={() => openCategory(category)}><CatalogImage record={category} alt={category.name} /><span><strong>{category.name}</strong><i><FiChevronRight /></i></span></button>)}</div></section><ProductRail title="NEW DROPS" products={[...products].sort((a, b) => number(b.id) - number(a.id)).slice(0, 14)} gender={gender} userType={userType} onOpen={openProduct} onWish={addWish} />{categories.filter(category => categoryProducts(category).length > 0).map(category => <ProductRail key={category.id} title={category.name.toUpperCase()} products={categoryProducts(category)} gender={gender} userType={userType} onOpen={openProduct} onWish={addWish} />)}<section className="tgs-section"><button className="tgs-browse-all" onClick={()=>navigate(`/category-display?gender=${gender}`)}>View all {meta.title.toLowerCase()} products</button></section></>}</main><Footer /></>
 }
 
 export function CategoryProductsPage() {
