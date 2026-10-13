@@ -1,0 +1,9 @@
+.tara-subcategory-page .tsc-eyebrow{display:block;color:#8d7250;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;margin-bottom:7px}
+.tara-subcategory-page .tsc-description{color:#76716a;font-size:13px;line-height:1.5;margin:9px 0 0}
+.tara-subcategory-page .tsc-back{border:0;background:transparent;display:inline-flex;align-items:center;gap:7px;padding:5px 0;margin-bottom:18px;font:600 12px Arial,sans-serif;cursor:pointer;color:#665b49}
+.tara-subcategory-page .tsc-back:hover{text-decoration:underline}
+.tara-subcategory-page .tb-category-copy small{text-transform:none;letter-spacing:0;font-size:12px}
+.tara-subcategory-page .tsc-message{padding:70px 16px;text-align:center;color:#6b665e}
+.tara-subcategory-page .tsc-message h2{color:#28231d}
+.tara-subcategory-page .tsc-message button,.tara-subcategory-page .tsc-message a{display:inline-block;border:1px solid #c8ad77;border-radius:7px;padding:10px 18px;background:#fffaf0;color:inherit;cursor:pointer;text-decoration:none}
+@media(max-width:650px){.tara-subcategory-page .tsc-description{font-size:12px}.tara-subcategory-page .tb-title{align-items:flex-start}.tara-subcategory-page .tb-title>button{width:100%;justify-content:space-between}}

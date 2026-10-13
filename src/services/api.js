@@ -3,7 +3,7 @@ const getToken=()=>sessionStorage.getItem('userToken')||localStorage.getItem('us
 const cache=new Map(),pending=new Map()
 export async function apiRequest(path,options={}){
   const url=`${API_BASE}${path.startsWith('/')?path:`/${path}`}`,method=(options.method||'GET').toUpperCase()
-  const publicRead=method==='GET'&&/^\/api\/(products\/(catalogue|facets|\d+\/family)|categories\?|homepage-images)/.test(path)
+  const publicRead=method==='GET'&&/^\/api\/(products\/(catalogue|facets|subcategories|\d+\/family)|categories\?|homepage-images)/.test(path)
   const saved=cache.get(url)
   if(publicRead&&saved&&saved.expiry>Date.now())return saved.value
   if(publicRead&&!options.signal&&pending.has(url))return pending.get(url)
