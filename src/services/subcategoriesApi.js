@@ -16,5 +16,15 @@ export const subtypeTitle = (subtype, categoryName = '') => {
 export async function fetchSubcategories({ brand, categoryId, gender }, options = {}) {
   const query = new URLSearchParams({ brand, categoryId: String(categoryId) })
   if (gender) query.set('gender', gender)
-  return apiRequest(`/api/products/subcategories?${query}`, options)
+  try {
+    return await apiRequest(`/api/products/subcategories?${query}`, options)
+  } catch (error) {
+    // Older backend deployments do not expose /subcategories. Keep brand/category
+    // navigation usable until the new backend is deployed.
+    if (error.status !== 404) throw error
+    const fallbackQuery = new URLSearchParams({ brand, categoryId: String(categoryId), limit: '1' })
+    if (gender) fallbackQuery.set('gender', gender)
+    const catalogue = await apiRequest(`/api/products/catalogue?${fallbackQuery}`, options)
+    return { subcategories: [], total: Number(catalogue?.total || 0), fallback: true }
+  }
 }
