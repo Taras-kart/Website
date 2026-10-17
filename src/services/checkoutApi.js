@@ -29,12 +29,12 @@ export const removeWishlistItem = (userId, product) => apiRequest('/api/wishlist
   }
 });
 export const fetchCoinWallet = email => apiRequest(`/api/coins/wallet?email=${encodeURIComponent(email)}`);
-export const validateCoins = (email, requested, subtotal) => apiRequest('/api/coins/validate', {
+export const validateCoins = (email, requested, items) => apiRequest('/api/coins/validate', {
   method: 'POST',
   body: {
     email,
     coins_requested: requested,
-    order_subtotal: subtotal
+    items: items.map(item => ({ variant_id: Number(item.variant_id), qty: Number(item.qty || 1) }))
   }
 });
 export const placeWebOrder = body => apiRequest('/api/sales/web/place', {
