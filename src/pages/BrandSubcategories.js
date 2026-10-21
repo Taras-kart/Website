@@ -31,6 +31,13 @@ export default function BrandSubcategories() {
   const categories=facets.categories||[]
   const selected=categories.find(c=>String(c.id)===String(categoryId))
   const children=categories.filter(c=>String(c.parent_id)===String(categoryId))
+  useEffect(()=>{
+    if(!loading&&!error&&selected) {
+      const q=new URLSearchParams({brand,categoryId:String(selected.id)});
+      navigate(`/category-display?${q}`,{replace:true});
+    }
+  // Legacy deep links redirect to the catalogue for any valid category.
+  },[loading,error,selected?.id,brand,navigate]);
   const collection=(id)=>{
     const q=new URLSearchParams({brand,categoryId:String(id)})
     navigate(`/category-display?${q}`)
@@ -56,7 +63,7 @@ export default function BrandSubcategories() {
       <div className="tb-title"><div><small className="tsc-eyebrow">Choose a subcategory</small>
         <h1>{selected?.name||'Shop subcategories'}</h1>
         <p className="tsc-description">Select an admin-managed subcategory to browse matching {selected?.name?.toLowerCase()||'products'} from {brand}.</p></div>
-        {selected&&<button type="button" onClick={()=>collection(selected.id)}>View all {selected.name}<FiArrowRight/></button>}
+
       </div>
     </header>
     {error?<section className="tsc-message" role="alert"><h2>Unable to load subcategories</h2><p>{error}</p><button onClick={()=>window.location.reload()}>Try again</button></section>
@@ -68,11 +75,6 @@ export default function BrandSubcategories() {
         <div className="tb-category-copy"><small>{child.product_count||0} styles</small><h2>{child.name}</h2><FiArrowRight/></div>
       </button>)}
     </section>
-    :<section className="tara-category-directory" aria-label="Category products">
-      <button type="button" onClick={()=>collection(selected.id)}>
-        <div className="tb-category-image"><CatalogImage record={selected} alt={selected.name}/></div>
-        <div className="tb-category-copy"><small>{selected.product_count||0} styles</small><h2>View all {selected.name}</h2><FiArrowRight/></div>
-      </button>
-    </section>}
+    :<section className="tsc-message"><p>Opening {selected.name} products…</p><Link to={`/category-display?${new URLSearchParams({brand,categoryId:String(selected.id)})}`}>Open catalog</Link></section>}
   </main>
 }
