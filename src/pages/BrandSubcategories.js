@@ -30,14 +30,15 @@ export default function BrandSubcategories() {
 
   const categories=facets.categories||[]
   const selected=categories.find(c=>String(c.id)===String(categoryId))
+  const selectedId=selected?.id
   const children=categories.filter(c=>String(c.parent_id)===String(categoryId))
   useEffect(()=>{
-    if(!loading&&!error&&selected) {
-      const q=new URLSearchParams({brand,categoryId:String(selected.id)});
+    if(!loading&&!error&&selectedId != null) {
+      const q=new URLSearchParams({brand,categoryId:String(selectedId)});
       navigate(`/category-display?${q}`,{replace:true});
     }
   // Legacy deep links redirect to the catalogue for any valid category.
-  },[loading,error,selected?.id,brand,navigate]);
+  },[loading,error,selectedId,brand,navigate]);
   const collection=(id)=>{
     const q=new URLSearchParams({brand,categoryId:String(id)})
     navigate(`/category-display?${q}`)
