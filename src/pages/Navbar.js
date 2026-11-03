@@ -178,7 +178,7 @@ export default function NavbarFinal() {
   const [userType, setUserType] = useState(() => typeof window === 'undefined' ? 'B2C' : sessionStorage.getItem('userType') || localStorage.getItem('userType') || 'B2C')
   const isB2B = String(userType).toUpperCase() === 'B2B'
   const homePath = isB2B ? '/b2b-dashboard' : '/'
-  const navLinks = useMemo(() => isB2B ? [{ name: 'Dashboard', path: '/b2b-dashboard' }, { name: 'Products', path: '/b2b-products' }, { name: 'Contact Us', path: '/customer-care' }] : [{ name: 'Women', path: '/women' }, { name: 'Men', path: '/men' }, { name: 'Kids', path: '/kids' }, { name: 'Brands', path: '/brands' }, { name: 'Shop Reels', path: '/reels' }, { name: 'Contact Us', path: '/customer-care' }], [isB2B])
+  const navLinks = useMemo(() => isB2B ? [{ name: 'Dashboard', path: '/b2b-dashboard' }, { name: 'Products', path: '/b2b-products' }, { name: 'Contact Us', path: '/customer-care' }] : [{ name: 'Women', path: '/women' }, { name: 'Men', path: '/men' }, { name: 'Kids', path: '/kids' }, { name: 'Brands', path: '/brands' }, { name: 'Contact Us', path: '/customer-care' }], [isB2B])
 
   useEffect(() => {
     const sync = () => setUserType(sessionStorage.getItem('userType') || localStorage.getItem('userType') || 'B2C')
